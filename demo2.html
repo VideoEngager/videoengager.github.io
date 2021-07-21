@@ -5,9 +5,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript" 	src="https://code.jquery.com/jquery-3.5.0.js"></script>		
-
-
-
+       
+    
+		
 		<script>
 		if(!window._genesys)window._genesys = {};
         if(!window._gt)window._gt = [];
@@ -139,31 +139,31 @@ window._genesys.widgets = {
                         displayTitle: "How would you like to get in touch?",
                         icon: "agent"
                   },
-
+                 
             ]
       }
-
-
-
+	   
+            
+        
 };
-
+		
     (function(o){var f = function(){var d = o.location;o.aTags = o.aTags || [];
     for(var i=0;i<o.aTags.length;i++){var oTag = o.aTags[i];var fs = d.getElementsByTagName(oTag.type)[0], e;
     if(d.getElementById(oTag.id)) return; e = d.createElement(oTag.type); e.id = oTag.id;if(oTag.type == "script"){e.src = oTag.path;}
     else{e.type = 'text/css';e.rel = 'stylesheet';e.href = oTag.path;}if(fs){fs.parentNode.insertBefore(e, fs);}else{d.head.appendChild(e);}
     }},ol = window.onload;if(o.onload){typeof window.onload != "function"?window.onload=f:window.onload=function(){ol();f();}}else f();})({
-
+ 
     location: document, 
     onload: false, 
     aTags: [
-
+ 
         {
 			type: "script",
 			id: "videoengager-widgets-script",
-			path: "ve2.js"
+			path: "videoengager/js/videoengager.widget.js"
         },
 
-
+        
 		{
             type:"link", 
             id:"genesys-widgets-styles", 
@@ -208,9 +208,9 @@ document.addEventListener('VideoEngagerReady', function (e) {
               display: none;
         }
       </style>
-
+        		
     </head>
     <body >
 	 <link id="genesys-widgets-styles" href="widgets.min.css" type="text/css" rel="stylesheet"/>
     </body>
-</html> 
+</html>

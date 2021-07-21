@@ -27,7 +27,6 @@ var VideoEngager = function () {
 		var autoSubmit = (formData.autoSubmit) ? formData.autoSubmit : false;
 		var email = (formData.email) ? formData.email : '';
 		var message = (formData.message) ? formData.message : '';
-		var custom = (formData.custom) ? formData.custom : '';
 		var subject = (formData.subject) ? formData.subject : '';
 		var form = formData;
 		var oVideoEngager;
@@ -41,7 +40,7 @@ var VideoEngager = function () {
 					var url = oMessage.text;
 					oMessage.html = true;
 					oMessage.text = 'Please press button to start video:<br><br><button type="button" class="cx-btn cx-btn-primary i18n" onclick="startVideoEngager(\'' + url + '\');">Start video</button>';
-
+					
 					return oMessage;
 				}
 			}}
@@ -51,7 +50,7 @@ var VideoEngager = function () {
 				console.log('failed to regsiter preprocessor');
 			});
 		};
-
+			
 
 		window._genesys.cxwidget = window._genesys.widgets;
 		if (!window._genesys.widgets.extensions) {
@@ -64,31 +63,31 @@ var VideoEngager = function () {
 			oVideoEngager.registerCommand("VideoEngagerStartVideo", function(e){
 				console.log('VideoEngagerStartVideo registered' );
 			});
-
+		
 			oVideoEngager.publish("ready");
 			//oVideoEngager.republish("ready");
 			oVideoEngager.subscribe("Callback.opened", function(){
 				console.log('custom Callback.opened');
 			});
-
+			
 			oVideoEngager.subscribe("WebChat.opened", function(){
 				console.log('custom WebChat.opened');
 			});					
-
+			
 			oVideoEngager.subscribe("SendMessage.opened", function(){
 				console.log('custom SendMessage.opened');
 
 			});	
-
+			
 			var videoEngagerChat = function () {
 				var channelType = (startWithVideo) ? 'Video' : 'Audio'; 
 				var buttonHtml = 'videoengager/html/button' + channelType + '.html';
 				if (firstName && lastName) {
 					buttonHtml = 'videoengager/html/buttonBlank' + channelType + '.html';
 				}
-
+				
 				var startVideoChat = function() {
-
+				
 					var getGuid = function () {
 						function s4() {
 							return Math.floor((1 + Math.random()) * 0x10000)
@@ -145,27 +144,18 @@ var VideoEngager = function () {
 						skip_private: true,
 						"inichat": "false"
 					};
-
+			
 					var encodedString = window.btoa(JSON.stringify(str));
 					var homeURL = veUrl + '/static/';
 					var url = homeURL + 'popup.html?tennantId=' + window.btoa(TENANT_ID) + '&params=' + encodedString;
-
+					
 					var finalUserData = {};
 					if (userData) {
 						for (var key in userData) { 
 							finalUserData[key] = userData[key]; 
 						}
 					}
-					//to add custom fields to video chat
-					finalUserData['firstName'] = firstName;
-					finalUserData['lastName'] = lastName;
-					finalUserData['email'] = email;
 					finalUserData['veVisitorId'] = interactionId;
-					finalUserData['customField1'] = custom;
-					finalUserData['customField1Label'] = "CUSTOM HEADER";
-					finalUserData['customField2'] = message;
-					finalUserData['customField2Label'] = "Subject";
-
 					if (!iframeHolder) {
 						if (!popupinstance) {
 							popupinstance = window.open(url, "popup_instance", "width=770, height=450, left=" + left + ", top=" + top + ", location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar = no");
@@ -245,13 +235,13 @@ var VideoEngager = function () {
 						window.alert("Chat Channel is not available!!!");
 
 					});
-
+				
 				};
-
+				
 				if (autoSubmit) {
 					startVideoChat();
 				} else {
-
+				
 					$.get(buttonHtml, function (body_data) {
 						var oConnectingView = {
 							type: "generic",
@@ -275,23 +265,22 @@ var VideoEngager = function () {
 									lastName = $('#cx_webchat_form_lastname_f1').val();
 									email = $('#cx_webchat_form_email_f1').val();
 									message = $('#cx_webchat_form_subject_f1').val();
-									custom = $('#cx_webchat_form_custom_field_f1').val();
 								}
 								startVideoChat();
 							});
-
+							
 						});
-
-
+						
+						
 					});
 				}
 			};
-
+			
 			oVideoEngager.registerCommand("startVideo", function (e) {
 				startWithVideo = true;
 				videoEngagerChat();
 			});
-
+			
 			oVideoEngager.registerCommand("endCall", function (e) {
 				window._genesys.cxwidget.bus.command("Toaster.close");
 				oVideoEngager.command('WebChatService.endChat');
@@ -311,7 +300,7 @@ var VideoEngager = function () {
 				startWithVideo = false;
 				videoEngagerChat();
 			});
-
+			
 			oVideoEngager.subscribe("WebChatService.ended", function(){
 				console.log('WebChatService.ended');
 				if (!iframeHolder) {
@@ -326,12 +315,12 @@ var VideoEngager = function () {
 
 				window._genesys.cxwidget.bus.command("Toaster.close");
 			});			
-
-
+			
+			
 			oVideoEngager.subscribe("WebChatService.messageReceived", function(msg){
 				console.log('custom WebChatService.messageReceived', msg);
 			});
-
+			
 			oVideoEngager.subscribe("SendMessage.opened", function(){
 				console.log('custom SendMessage.opened');
 			});				
@@ -339,33 +328,33 @@ var VideoEngager = function () {
 			oVideoEngager.subscribe("SendMessageService.messageSent", function(e){
 				console.log('SendMessageService.messageSent', e);
 			});
-
+			
 			oVideoEngager.subscribe("WebChatService.started", function(){
 				console.log('WebChatService.started');
 			});
 			oVideoEngager.ready();
 		};
 
-
+		
 		var messageHandler = function (e) {
 			console.log('messageHandler', e.data);
 			if (e.data.type === 'popupClosed') {
-				CXBus.command('VideoEngager.endCall');
+			   CXBus.command('VideoEngager.endCall');
 			}
 			if (e.data.type === 'callEnded') {
 				CXBus.command('VideoEngager.endCall');
 			}
 
 		};
-
+		
 		if (window.addEventListener) {
 			window.addEventListener("message", messageHandler, false);
 		} else {
 			window.attachEvent("onmessage", messageHandler);
 		}
-
+	
 	};
-
+	
 
 };
 

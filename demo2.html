@@ -1,7 +1,7 @@
 <!DOCTYPE html> 
 <html>
     <head>
-        <title>Genesys Selector Demo</title>
+        <title>Widget Test</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript" 	src="https://code.jquery.com/jquery-3.5.0.js"></script>		
@@ -31,19 +31,6 @@ window._genesys.widgets = {
             ]
       },
       webchat: {
-            /*transport: {
-                  type: 'purecloud-v2-sockets',
-                  dataURL: 'https://api.mypurecloud.com.au',
-                  deploymentKey : 'c2eaaa5c-d755-4e51-9136-b5ee86b92af3',
-                  orgGuid : '327d10eb-0826-42cd-89b1-353ec67d33f8',
-                  interactionData: {
-                        routing: {      
-                              targetType: 'QUEUE',
-                              targetAddress: 'video',
-                              priority: 2
-                        }
-                  }
-            },*/
             transport: {
                   type: 'purecloud-v2-sockets',
                   dataURL: 'https://api.mypurecloud.com',
@@ -179,8 +166,8 @@ window._genesys.widgets = {
 var userData = {firstName: 'Visitor', lastName: 'Test', autoSubmit: false};
 var formData = {cedula: '1800973544'};
 document.addEventListener('VideoEngagerReady', function (e) { 
-	//videoengager.init('myVideoHolder', 'purecloud', 'test_tenant', 'https://dev.videoengager.com/', formData, userData, true);
-      videoengager.init('myVideoHolder', 'purecloud', '0FphTk091nt7G1W7', 'https://videome.leadsecure.com/', formData, userData, true);
+	 videoengager.init('myVideoHolder', 'purecloud', '0FphTk091nt7G1W7', 'https://videome.leadsecure.com/', formData, userData, true);
+
       var s = document.createElement("script");
       s.src = "widgets.min.js";
       s.id = "genesys-widgets-script";
@@ -194,19 +181,6 @@ document.addEventListener('VideoEngagerReady', function (e) {
 			background-attachment: fixed;
 			background-position: center;
         } 
-
-        .cx-control-label[for=cx_webchat_form_customFieldLabel2] {
-              display: none;
-        }
-        #cx_webchat_form_customFieldLabel2{
-              display: none;
-        } 
-        .cx-control-label[for=cx_webchat_form_customFieldLabel1] {
-              display: none;
-        }
-        #cx_webchat_form_customFieldLabel1{
-              display: none;
-        }
       </style>
         		
     </head>

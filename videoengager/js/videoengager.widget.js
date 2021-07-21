@@ -94,6 +94,9 @@ var VideoEngager = function () {
 				markdown: false
 			}).done(function (e2) {
 				// form opened 
+				document.getElementsByClassName("cx-submit")[0].addEventListener("click", function(){
+					startVideoChat();
+				})				
 			});
 		}
 
@@ -147,7 +150,7 @@ var VideoEngager = function () {
 				iframeHolder.style.display = 'block';
 			}
 
-			sendInteractionMessage(interactionId);
+			
 			
 			window.removeEventListener('message', function (e) {});
 			window.addEventListener('message', function (event) {
@@ -228,8 +231,9 @@ var VideoEngager = function () {
 			
 			oVideoEngager.subscribe("WebChatService.started", function(){
 				console.log('WebChatService.started');
-				startVideoChat();
+				sendInteractionMessage(interactionId);
 			});
+			
 			oVideoEngager.ready();
 
 			//terminate call on page close

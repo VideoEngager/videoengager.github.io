@@ -57,7 +57,6 @@ var VideoEngager = function () {
 	}
 
 	this.initExtension = function ($, CXBus, Common) {
-
 		console.log("on init extension VideoEngager");
 		init();
 		oVideoEngager = CXBus.registerPlugin("VideoEngager");
@@ -104,7 +103,7 @@ var VideoEngager = function () {
 				if (oMessage.text && oMessage.text.indexOf(veUrl) != -1) { 
 					var url = oMessage.text;
 					oMessage.html = true;
-					oMessage.text = 'Please press button to start video:<br><br><button type="button" class="cx-btn cx-btn-primary i18n" onclick="startVideoEngagerOutbound(\'' + url + '\');">Start video</button>';
+					oMessage.text = 'Please press button to start video:<br><br><button type="button" class="cx-btn cx-btn-primary i18n" onclick="videoEngager.startVideoEngagerOutbound(\'' + url + '\');">Start video</button>';
 					return oMessage;
 				}
 			}})
@@ -277,7 +276,7 @@ var VideoEngager = function () {
 		}	
 	};
 
-	var startVideoEngagerOutbound = function(url) {
+	this.startVideoEngagerOutbound = function(url) {
 		var left = (screen.width/2)-(770/2);
 		var top = (screen.height/2)-(450/2);
 		if (!popupinstance) {

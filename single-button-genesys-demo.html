@@ -36,6 +36,16 @@
     </script>
 
 <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    var firstname = urlParams.get('firstname');
+    var email = urlParams.get('email')
+    var autoDial = urlParams.get('autoDial')
+    if (!firstname) {
+        firstname = 'Johnathan'
+    }
+    if (!email) {
+        email = 'jon.smith@mail.com'
+    }
 
     if (!window._genesys) window._genesys = {};
     if (!window._gt) window._gt = [];
@@ -69,9 +79,9 @@
                 //in case of useWebChatForm == false, pass the following data to conversation initialization - visible for agent
                 webChatFormData: { 
                       nickname: 'Jonny',
-                      firstname: 'Johnathan',
+                      firstname: firstname,
                       lastname: 'Smith',
-                      email: 'jon.smith@mail.com',
+                      email: email,
                       subject: 'product questions',
                       userData: {}
                 },
@@ -285,6 +295,12 @@
                 'VideoEngager': videoEngager.initExtension
           }
     };
+
+    window.onload = function() {
+        if (autoDial == 'true') {
+            CXBus.command('VideoEngager.startVideoEngager');
+        }
+    }
 
 </script>
 </head>

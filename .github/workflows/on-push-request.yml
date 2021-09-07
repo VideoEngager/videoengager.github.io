@@ -19,6 +19,7 @@ jobs:
         run: |
           rm README.md
           rm -rf .github
+          rm -rf .git
 
       - name: Deploy to S3
         uses: dianurse/s3-upload@v2.1

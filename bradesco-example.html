@@ -7,40 +7,9 @@
       <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
       <meta http-equiv="Pragma" content="no-cache" />
       <meta http-equiv="Expires" content="0" />
-      <script type="text/javascript" 	src="https://code.jquery.com/jquery-3.5.0.js"></script>		
+      <script type="text/javascript" 	src="https://code.jquery.com/jquery-3.5.0.js"></script>	
+      <script type="text/javascript"  src = 'videoengager/js/videoengager.widget.js'></script>
       <script>
-            function jsonConcat(o1, o2) {
-                  for (var key in o2) {
-                        o1[key] = o2[key];
-                  }
-                  return o1;
-            }
-            $.getJSON('https://apps.mypurecloud.com/widgets/9.0/i18n/widgets-fr.i18n.json', function(fr_data) {
-                  var en_videoengager = {
-                        "en_videochat": {
-                              "webchat": {
-                              "ChatFormSubmit": "Start Video",
-                              "WebChatTitle": "Video Chat",
-                              "WebChatName": "Video Chat",
-                              "ChatTitle": "Video Chat",
-                              },
-                        }
-                  }
-                  var fr_videoengager = {
-                        "fr_videochat": {
-                              "webchat": {
-                              "ChatFormSubmit": "Démarrer la vidéo",
-                              "WebChatTitle": "Chat vidéo",
-                              "WebChatName": "Chat vidéo",
-                              "ChatTitle": "Chat vidéo",
-                              },
-                        }
-                  }
-                  var langData = jsonConcat(fr_data, en_videoengager);
-                  langData = jsonConcat(langData, fr_videoengager);
-
-                  const urlParams = new URLSearchParams(window.location.search);
-                  const lang = urlParams.get('lang');
 
                   if (!window._genesys) window._genesys = {};
                   if (!window._gt) window._gt = [];
@@ -48,7 +17,6 @@
                         main: {
                               debug: true,
                               theme: "dark",
-                              lang: lang ? lang : "en",
                               plugins: [
                               "cx-webchat",
                               "cx-webchat-service",
@@ -61,37 +29,69 @@
                               "cx-calendar",
                               "cx-sidebar"
                               ],
-                              i18n: langData
+                              lang: "en"
+                        },
+                        videoengager: {
+                              //callHolder: "myVideoHolder", 
+                              platform: "purecloud", //engage     or purecloud
+                              tenantId : "WmkkxX5AT6QdLF87", 
+                              veUrl: "https://videome.leadsecure.com/", 
+                              audioOnly: false, 
+                              autoAccept: true, 
+                              enablePrecall: false,
+                              useWebChatForm: true,
+                              webChatFormData: {
+                                    nickname: 'Jonny',
+                                    firstname: 'Johnathan',
+                                    lastname: 'Smith',
+                                    email: 'jon.smith@mail.com',
+                                    subject: 'product questions',
+                                    userData: {}
+                              },
+                              i18n: { "en": { 
+                                          "ChatFormSubmitVideo": "Start Video",
+                                          "WebChatTitleVideo": "Video Chat",
+                                          "ChatFormSubmitAudio": "Start Audio",
+                                          "WebChatTitleAudio": "Audio Chat",
+                                           },
+                                      "fr": {
+                                          "ChatFormSubmitVideo": "Démarrer la vidéo",
+                                          "WebChatTitleVideo": "Chat la vidéo",
+                                          "ChatFormSubmitAudio": "Démarrer la audio",
+                                          "WebChatTitleAudio": "Chat audio",
+                                      }
+                              },
+                   /*           form: {
+                                    wrapper: "<table></table>",
+            				inputs: [
+		            			{ id:"form_firstname", name: "firstname", maxlength: "100", placeholder: "FirstName", label: "FirstName", autofocus: !0, "aria-required": !0 },
+				            	{ id:"form_lastname", name: "lastname", maxlength: "100", placeholder: "LastName", label: "LastName", "aria-required": !0 },
+					            { id:"form_email", type: "email", name: "email", maxlength: "100", placeholder: "Email", label: "Email", "aria-required": !0 },
+					// to add custom fields to web chat
+					            { value:"", name: "customField2", maxlength: "100", placeholder: "Cust", label: "Subject" },
+					            { value:"Subject", name: "customField2Label", maxlength: "100", placeholder: "", label: !1, style:"display:none" },
+            					{ value:"", name: "customField1", maxlength: "100", placeholder: "Test 2", label: "BRAND NEW CUSTOM FIELD" },
+		            			{ value:"BRAND NEW CUSTOM FIELD", name: "customField1Label", maxlength: !1, placeholder: !1, label: !1, style:"display:none"},
+				]
+
+                              }  */
                         },
                         webchat: {
                               transport: {
                               type: 'purecloud-v2-sockets',
                               dataURL: 'https://api.mypurecloud.com',
-                              deploymentKey: '973f8326-c601-40c6-82ce-b87e6dafef1c',
-                              orgGuid: 'c4b553c3-ee42-4846-aeb1-f0da3d85058e',
+                              deploymentKey: '94539645-f231-4b26-9531-f50c4e1d9251',
+                              orgGuid: '3bfec5cd-e786-47fd-aa6a-226d7f56aec3',
                               interactionData: {
                                     routing: {
                                           targetType: 'QUEUE',
-                                          targetAddress: 'TestQueue',
+                                          targetAddress: 'VideoCallQueue',
                                           priority: 2
                                     }
                               }
 
-                              },
-                              /*transport: {
-                                    type: 'purecloud-v2-sockets',
-                                    dataURL: 'https://api.mypurecloud.com.au',
-                                    deploymentKey : 'c2eaaa5c-d755-4e51-9136-b5ee86b92af3',
-                                    orgGuid : '327d10eb-0826-42cd-89b1-353ec67d33f8',
-                                    interactionData: {
-                                          routing: {      
-                                                targetType: 'QUEUE',
-                                                targetAddress: 'video',
-                                                priority: 2
-                                          }
-                                    }
-                              },*/
-                              form: {
+                              }, 
+                           /*   form: {
                               wrapper: "<table role='none'>",
                               inputs: [{
                                           id: "cx_sendmessage_form_firstname",
@@ -187,6 +187,7 @@
                                     },
                               ],
                               },
+                              */
                               cometD: {
                               enabled: false,
 
@@ -208,7 +209,7 @@
                               ewtRefreshInterval: 10,
                               channels: [{
                                     enable: true,
-                                    clickCommand: 'VideoEngager.startVideo',
+                                    clickCommand: 'VideoEngager.startVideoEngager',
                                     readyEvent: 'VideoEngager.ready',
                                     displayName: 'Video Chat',
                                     i18n: 'VideoTitle',
@@ -219,7 +220,7 @@
                                           availabilityThresholdMin: 300,
                                           availabilityThresholdMax: 480,
                                           hideChannelWhenThresholdMax: false
-                                    }
+                                    },
                               },
                               {
                                     enable: true,
@@ -236,17 +237,6 @@
                                           availabilityThresholdMax: 3600,
                                           hideChannelWhenThresholdMax: false
                                     },
-                                    onClick: function($, CXBus, Common) {
-                                          var default_lang = window._genesys.widgets.main.lang;
-                                          oVideoEngager.command('App.setLanguage', {
-                                          lang: default_lang
-                                          }).done(function(e) {
-                                                //set language to default 
-                                                _genesys.widgets.bus.command('WebChat.open');
-                                          }).fail(function(e) {
-                                                // App failed to set language
-                                          });
-                                    }
                               },
                               ]
                         },
@@ -263,45 +253,12 @@
                               displayTitle: "How would you like to get in touch?",
                               icon: "agent"
                               }, ]
+                        },
+                        extensions: {
+                              'VideoEngager': videoEngager.initExtension
                         }
                   };
 
-                  (function(o){var f = function(){var d = o.location;o.aTags = o.aTags || [];
-                  for(var i=0;i<o.aTags.length;i++){var oTag = o.aTags[i];var fs = d.getElementsByTagName(oTag.type)[0], e;
-                  if(d.getElementById(oTag.id)) return; e = d.createElement(oTag.type); e.id = oTag.id;if(oTag.type == "script"){e.src = oTag.path;}
-                  else{e.type = 'text/css';e.rel = 'stylesheet';e.href = oTag.path;}if(fs){fs.parentNode.insertBefore(e, fs);}else{d.head.appendChild(e);}
-                  }},ol = window.onload;if(o.onload){typeof window.onload != "function"?window.onload=f:window.onload=function(){ol();f();}}else f();})({
-                        location: document,
-                        onload: false,
-                        aTags: [{
-                              type: "script",
-                              id: "videoengager-widgets-script",
-                              path: "videoengager/js/videoengager.widget.js"
-                              },
-                              {
-                              type: "link",
-                              id: "genesys-widgets-styles",
-                              path: "widgets.min.css"
-                              },
-                        ]
-                  });
-                  var userData = {
-                        firstName: 'Visitor',
-                        lastName: 'Test',
-                        autoSubmit: false
-                  };
-                  var formData = {
-                        cedula: '1800973544'
-                  };
-                  document.addEventListener('VideoEngagerReady', function(e) {
-                        //videoengager.init('myVideoHolder', 'purecloud', 'test_tenant', 'https://dev.videoengager.com/', formData, userData, true);
-                        videoengager.init('myVideoHolder', 'purecloud', '0FphTk091nt7G1W7', 'https://videome.leadsecure.com/', formData, userData, true);
-                        var s = document.createElement("script");
-                        s.src = "widgets.min.js";
-                        s.id = "genesys-widgets-script";
-                        document.head.appendChild(s);
-                  }, false);
-            });
       </script>
       <style type="text/css"> body {
          background-image: url(./videoengager/img/ve.svg);
@@ -313,6 +270,7 @@
       </style>
    </head>
    <body >
+      <script type="text/javascript"  src = 'widgets.min.js'></script>
       <link id="genesys-widgets-styles" href="widgets.min.css" type="text/css" rel="stylesheet"/>
    </body>
 </html>

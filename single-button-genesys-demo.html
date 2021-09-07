@@ -12,8 +12,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="videoengager/css/site.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
-    <script>
+    <script type="text/javascript" 	src="https://code.jquery.com/jquery-3.5.0.js"></script>	
+    <script type="text/javascript"  src = 'videoengager/js/videoengager.widget.js'></script>
+  <script>
         jQuery(document).ready(function ($) {
             $("#divdeEspera").hide();
 
@@ -25,170 +26,283 @@
         	$("#myVideoHolder").hide();
 
             $('#inicioVideoLlamada').click(function () {
-                CXBus.command('VideoEngager.startVideo');	
+                CXBus.command('VideoEngager.startVideoEngager');	
 	        });
             $("#closeVideoButton").click(function() {
                 CXBus.command('VideoEngager.endCall');
             });
 
         });
-        var en_videoengager = {
-                        "en_videochat": {
-                              "webchat": {
-                              "ChatFormSubmit": "Start Video",
-                              "WebChatTitle": "Video Chat",
-                              "WebChatName": "Video Chat",
-                              "ChatTitle": "Video Chat",
-                              },
-                        }
-                  }
+    </script>
 
-        if(!window._genesys)window._genesys = {};
-            if(!window._gt)window._gt = [];
-             window._genesys.widgets = {
-              main: {
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    var firstname = urlParams.get('firstname');
+    var email = urlParams.get('email')
+    var autoDial = urlParams.get('autoDial')
+    if (!firstname) {
+        firstname = 'Johnathan'
+    }
+    if (!email) {
+        email = 'jon.smith@mail.com'
+    }
+
+    if (!window._genesys) window._genesys = {};
+    if (!window._gt) window._gt = [];
+    window._genesys.widgets = {
+          main: {
                 debug: true,
-                theme: "light",
-                lang: "en",
-                i18n: en_videoengager,
-                customStylesheetID: "genesys_widgets_custom",
+                theme: "dark",
                 plugins: [
-                      "cx-webchat",
-                      "cx-webchat-service",
-                      "cx-cobrowse",
-                      "cx-channel-selector",
-                      "cx-stats-service",
-                      "cx-call-us",
-                      "cx-callback-service",
-                      "cx-callback",
-                      "cx-calendar",
-                      "cx-sidebar"
-                ]
+                "cx-webchat",
+                "cx-webchat-service",
+                "cx-cobrowse",
+                "cx-channel-selector",
+                "cx-stats-service",
+                "cx-call-us",
+                "cx-callback-service",
+                "cx-callback",
+                "cx-calendar",
+                "cx-sidebar"
+                ],
+                lang: "en"
+          },
+          videoengager: {
+                callHolder: "myVideoHolder", //provides a place/div/ where the VideoEngager widget should be inserted. Otherwise, popup winddow will be open.
+                platform: "purecloud", // one of 'engage'     or 'purecloud'
+                tenantId : "0FphTk091nt7G1W7",  //VideoEngager tenantId
+                veUrl: "https://videome.leadsecure.com/", //VideoEngager api base url
+                audioOnly: false,  //start the VideoEngager call with audioOnly (without video)
+                autoAccept: true, // during the call negotiation - automatically enter the call
+                enablePrecall: false, //start the VideoEngager session with precall window - the visitor could select their camera/microphone settings
+                useWebChatForm: false, //start VideoEngager session with/without registration form
+                //in case of useWebChatForm == false, pass the following data to conversation initialization - visible for agent
+                webChatFormData: { 
+                      nickname: 'Jonny',
+                      firstname: firstname,
+                      lastname: 'Smith',
+                      email: email,
+                      subject: 'product questions',
+                      userData: {}
+                },
+                i18n: { "en": {  //localize the web chat buttons/tittle in registration form
+                            "ChatFormSubmitVideo": "Start Video",
+                            "WebChatTitleVideo": "Video Chat",
+                            "ChatFormSubmitAudio": "Start Audio",
+                            "WebChatTitleAudio": "Audio Chat",
+                             },
+                        "fr": {
+                            "ChatFormSubmitVideo": "Démarrer la vidéo",
+                            "WebChatTitleVideo": "Chat la vidéo",
+                            "ChatFormSubmitAudio": "Démarrer la audio",
+                            "WebChatTitleAudio": "Chat audio",
+                        }
+                },
+
+                form: { // overrides the webchat form data. comment this property if there is no need to override
+                    wrapper: "<table></table>",
+                    inputs: [
+                        { id:"form_firstname", name: "firstname", maxlength: "100", placeholder: "FirstName", label: "FirstName", autofocus: !0, "aria-required": !0 },
+                        { id:"form_lastname", name: "lastname", maxlength: "100", placeholder: "LastName", label: "LastName", "aria-required": !0 },
+                        { id:"form_email", type: "email", name: "email", maxlength: "100", placeholder: "Email", label: "Email", "aria-required": !0 },
+            // to add custom fields to web chat
+                        { value:"", name: "customField2", maxlength: "100", placeholder: "Cust", label: "Subject" },
+                        { value:"Subject", name: "customField2Label", maxlength: "100", placeholder: "", label: !1, style:"display:none" },
+                        { value:"", name: "customField1", maxlength: "100", placeholder: "Test 2", label: "BRAND NEW CUSTOM FIELD" },
+                        { value:"BRAND NEW CUSTOM FIELD", name: "customField1Label", maxlength: !1, placeholder: !1, label: !1, style:"display:none"},
+                    ]
+
+                        }  
           },
           webchat: {
                 transport: {
-                      type: 'purecloud-v2-sockets',
-                      dataURL: 'https://api.mypurecloud.com',
-                      deploymentKey : '973f8326-c601-40c6-82ce-b87e6dafef1c',
-                      orgGuid : 'c4b553c3-ee42-4846-aeb1-f0da3d85058e',
-                      interactionData: {
-                            routing: {      
-                                  targetType: 'QUEUE',
-                                  targetAddress: 'TestQueue',
-                                  priority: 2
-                            }
+                type: 'purecloud-v2-sockets',
+                dataURL: 'https://api.mypurecloud.com',
+                deploymentKey: '973f8326-c601-40c6-82ce-b87e6dafef1c',
+                orgGuid: 'c4b553c3-ee42-4846-aeb1-f0da3d85058e',
+                interactionData: {
+                      routing: {
+                            targetType: 'QUEUE',
+                            targetAddress: 'TestQueue',
+                            priority: 2
                       }
+                }
+
                 },
+             /*   form: {
+                wrapper: "<table role='none'>",
+                inputs: [{
+                            id: "cx_sendmessage_form_firstname",
+                            name: "firstname",
+                            maxlength: "100",
+                            placeholder: "@i18n:sendmessage.PlaceholderFirstName",
+                            label: "@i18n:sendmessage.FirstName",
+                            autofocus: !0,
+                            "aria-required": !0
+                      },
+                      {
+                            name: "lastname",
+                            maxlength: "100",
+                            placeholder: "@i18n:sendmessage.PlaceholderLastName",
+                            label: "@i18n:sendmessage.LastName",
+                            "aria-required": !0
+                      },
+                      {
+                            id: "cx_sendmessage_form_email",
+                            type: "email",
+                            name: "email",
+                            maxlength: "100",
+                            placeholder: "@i18n:sendmessage.PlaceholderEmail",
+                            label: "@i18n:sendmessage.Email",
+                            "aria-required": !0
+                      },
+                      {
+                            id: "cx_sendmessage_form_subject",
+                            name: "subject",
+                            maxlength: "100",
+                            placeholder: "@i18n:sendmessage.PlaceholderSubject",
+                            label: "@i18n:sendmessage.Subject",
+                            "aria-required": !0
+                      },
+                      {
+                            id: "cx_sendmessage_form_messagebody",
+                            type: "textarea",
+                            name: "messagebody",
+                            placeholder: "@i18n:sendmessage.PlaceholderTypetexthere",
+                            label: !1,
+                            "aria-required": !0
+                      },
+                      // to add custom fields to web chat
+                      {
+                            value: "TEST",
+                            id: "cx_webchat_form_customField2",
+                            name: "customField2",
+                            maxlength: "100",
+                            placeholder: "TEST TEST",
+                            label: "TEST"
+                      },
+                      {
+                            value: "Subject",
+                            id: "cx_webchat_form_customFieldLabel2",
+                            name: "customField2Label",
+                            maxlength: "100",
+                            placeholder: "",
+                            label: !1,
+                            style: "display:none"
+                      },
+                      {
+                            value: "TEST",
+                            id: "cx_webchat_form_customField1",
+                            name: "customField1",
+                            maxlength: "100",
+                            placeholder: "Test 2",
+                            label: "Test 2"
+                      },
+                      {
+                            value: "BRAND NEW CUSTOM FIELD",
+                            id: "cx_webchat_form_customFieldLabel1",
+                            name: "customField1Label",
+                            maxlength: !1,
+                            placeholder: !1,
+                            label: !1,
+                            style: "display:none"
+                      },
+                      {
+                            "id": "cx_webchat_form_language",
+                            "name": "language",
+                            "maxlength": "100",
+                            "placeholder": "Optional",
+                            "label": "Language",
+                            "type": "select",
+                            "options": [{
+                            "text": "English",
+                            "value": "[DEV] - English"
+                            }, {
+                            "text": "Bilingual",
+                            "value": "[DEV] - Bilingual"
+                            }]
+                      },
+                ],
+                },
+                */
                 cometD: {
-                      enabled: false,
-    
+                enabled: false,
+
                 },
                 autoInvite: {
-                      enabled: false,
-                      timeToInviteSeconds: 5,
-                      inviteTimeoutSeconds: 30
+                enabled: false,
+                timeToInviteSeconds: 5,
+                inviteTimeoutSeconds: 30
                 },
                 chatButton: {
-                      enabled: false,
-                      openDelay: 1000,
-                      effectDuration: 300,
-                      hideDuringInvite: true
+                enabled: false,
+                openDelay: 1000,
+                effectDuration: 300,
+                hideDuringInvite: true
                 },
                 uploadsEnabled: true
           },
           channelselector: {
                 ewtRefreshInterval: 10,
-                channels: [
-                {
-                    enable: true,
-                    clickCommand: 'VideoEngager.startVideo',
-                    readyEvent: 'VideoEngager.ready',
-                    displayName: 'Video Chat',
-                    i18n: 'VideoTitle',
-                    icon: 'videochat',
-                    ewt: {
-                        display: true,
-                        queue: 'Omnichannel',
-                        availabilityThresholdMin: 300,
-                        availabilityThresholdMax: 480,
-                        hideChannelWhenThresholdMax: false
-                    }
+                channels: [{
+                      enable: true,
+                      clickCommand: 'VideoEngager.startVideoEngager',
+                      readyEvent: 'VideoEngager.ready',
+                      displayName: 'Video Chat',
+                      i18n: 'VideoTitle',
+                      icon: 'videochat',
+                      ewt: {
+                            display: true,
+                            queue: 'Omnichannel',
+                            availabilityThresholdMin: 300,
+                            availabilityThresholdMax: 480,
+                            hideChannelWhenThresholdMax: false
+                      },
                 },
-                      {
-                             enable: true,
-                             clickCommand: "WebChat.open",
-                             readyEvent: "WebChat.ready",
-                             displayName: "Web Chat",
-                             i10n: "ChatTitle",
-                             icon: "chat",
-                             html: "",
-                             ewt: {
-                                   display: true,
-                                   queue: "",
-                                   availabilityThresholdMin: 300,
-                                   availabilityThresholdMax: 3600,
-                                   hideChannelWhenThresholdMax: false
-                             }
-                       },
+                {
+                      enable: true,
+                      clickCommand: "WebChat.open",
+                      readyEvent: "WebChat.ready",
+                      displayName: "Web Chat",
+                      i10n: "ChatTitle",
+                      icon: "chat",
+                      html: "",
+                      ewt: {
+                            display: true,
+                            queue: "",
+                            availabilityThresholdMin: 300,
+                            availabilityThresholdMax: 3600,
+                            hideChannelWhenThresholdMax: false
+                      },
+                },
                 ]
           },
           sidebar: {
                 showOnStartup: false,
                 position: "right",
                 expandOnHover: true,
-                channels: [
-                      {
-                            name: "ChannelSelector",
-                            clickCommand: "ChannelSelector.open",
-                            readyEvent: "ChannelSelector.ready",
-                            clickOptions: {},
-                            displayName: "Live Assistance",
-                            displayTitle: "How would you like to get in touch?",
-                            icon: "agent"
-                      },
-                     
-                ]
+                channels: [{
+                name: "ChannelSelector",
+                clickCommand: "ChannelSelector.open",
+                readyEvent: "ChannelSelector.ready",
+                clickOptions: {},
+                displayName: "Live Assistance",
+                displayTitle: "How would you like to get in touch?",
+                icon: "agent"
+                }, ]
+          },
+          extensions: {
+                'VideoEngager': videoEngager.initExtension
           }
-           
-                
-            
     };
-            
-        (function(o){var f = function(){var d = o.location;o.aTags = o.aTags || [];
-        for(var i=0;i<o.aTags.length;i++){var oTag = o.aTags[i];var fs = d.getElementsByTagName(oTag.type)[0], e;
-        if(d.getElementById(oTag.id)) return; e = d.createElement(oTag.type); e.id = oTag.id;if(oTag.type == "script"){e.src = oTag.path;}
-        else{e.type = 'text/css';e.rel = 'stylesheet';e.href = oTag.path;}if(fs){fs.parentNode.insertBefore(e, fs);}else{d.head.appendChild(e);}
-        }},ol = window.onload;if(o.onload){typeof window.onload != "function"?window.onload=f:window.onload=function(){ol();f();}}else f();})({
-     
-        location: document, 
-        onload: false, 
-        aTags: [
-     
-            {
-                type: "script",
-                id: "videoengager-widgets-script",
-                path: "videoengager/js/videoengager.widget.js"
-            },
-    
-            
-            {
-                type:"link", 
-                id:"genesys-widgets-styles", 
-                path:"widgets.min.css"
-            }
-        ]
-    });
-    var userData = {firstName: 'Visitor', lastName: 'Test', autoSubmit: false};
-    var formData = {cedula: '1800973544', autoSubmit:true, firstName: 'Kiosk', secondName: 'customer'};
-    document.addEventListener('VideoEngagerReady', function (e) { 
-    	  videoengager.init('myVideoHolder', 'purecloud', '0FphTk091nt7G1W7', 'https://videome.leadsecure.com/', formData, userData, true);
-          var s = document.createElement("script");
-          s.src = "widgets.min.js";
-          s.id = "genesys-widgets-script";
-          document.head.appendChild(s);
-    }, false);
-    </script>
 
+    window.onload = function() {
+        if (autoDial == 'true') {
+            CXBus.command('VideoEngager.startVideoEngager');
+        }
+    }
+
+</script>
 </head>
 
 <body>
@@ -260,9 +374,9 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
 
-    <script src="https://sdk-cdn.mypurecloud.com/javascript-guest/4.1.0/purecloud-guest-chat-client.min.js"></script>
+    <script type="text/javascript"  src = 'widgets.min.js'></script>
     <link id="genesys-widgets-styles" href="widgets.min.css" type="text/css" rel="stylesheet"/>
-   
+ 
 
 </body>
 

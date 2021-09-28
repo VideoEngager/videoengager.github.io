@@ -61,19 +61,11 @@
                                           "WebChatTitleAudio": "Chat audio",
                                       }
                               },
-                   /*           form: {
+                           /* form: {
                                     wrapper: "<table></table>",
             				inputs: [
-		            			{ id:"form_firstname", name: "firstname", maxlength: "100", placeholder: "FirstName", label: "FirstName", autofocus: !0, "aria-required": !0 },
-				            	{ id:"form_lastname", name: "lastname", maxlength: "100", placeholder: "LastName", label: "LastName", "aria-required": !0 },
-					            { id:"form_email", type: "email", name: "email", maxlength: "100", placeholder: "Email", label: "Email", "aria-required": !0 },
-					// to add custom fields to web chat
-					            { value:"", name: "customField2", maxlength: "100", placeholder: "Cust", label: "Subject" },
-					            { value:"Subject", name: "customField2Label", maxlength: "100", placeholder: "", label: !1, style:"display:none" },
-            					{ value:"", name: "customField1", maxlength: "100", placeholder: "Test 2", label: "BRAND NEW CUSTOM FIELD" },
-		            			{ value:"BRAND NEW CUSTOM FIELD", name: "customField1Label", maxlength: !1, placeholder: !1, label: !1, style:"display:none"},
-				]
-
+		            			{ id:"form_firstname", name: "firstname", maxlength: "100", placeholder: "FirstName", label: "FirstName", autofocus: !0, "aria-required": !0 }
+				            ]
                               }  */
                         },
                         webchat: {
@@ -101,89 +93,6 @@
                                           label: "@i18n:sendmessage.FirstName",
                                           autofocus: !0,
                                           "aria-required": !0
-                                    },
-                                    {
-                                          id: "cx_sendmessage_form_lastname",
-                                          name: "lastname",
-                                          maxlength: "100",
-                                          placeholder: "@i18n:sendmessage.PlaceholderLastName",
-                                          label: "@i18n:sendmessage.LastName",
-                                          "aria-required": !0
-                                    },
-                                    {
-                                          id: "cx_sendmessage_form_email",
-                                          type: "email",
-                                          name: "email",
-                                          maxlength: "100",
-                                          placeholder: "@i18n:sendmessage.PlaceholderEmail",
-                                          label: "@i18n:sendmessage.Email",
-                                          "aria-required": !0
-                                    },
-                                    {
-                                          id: "cx_sendmessage_form_subject",
-                                          name: "subject",
-                                          maxlength: "100",
-                                          placeholder: "@i18n:sendmessage.PlaceholderSubject",
-                                          label: "@i18n:sendmessage.Subject",
-                                          "aria-required": !0
-                                    },
-                                    {
-                                          id: "cx_sendmessage_form_messagebody",
-                                          type: "textarea",
-                                          name: "messagebody",
-                                          placeholder: "@i18n:sendmessage.PlaceholderTypetexthere",
-                                          label: !1,
-                                          "aria-required": !0
-                                    },
-                                    // to add custom fields to web chat
-                                    {
-                                          value: "TEST",
-                                          id: "cx_webchat_form_customField2",
-                                          name: "customField2",
-                                          maxlength: "100",
-                                          placeholder: "TEST TEST",
-                                          label: "TEST"
-                                    },
-                                    {
-                                          value: "Subject",
-                                          id: "cx_webchat_form_customFieldLabel2",
-                                          name: "customField2Label",
-                                          maxlength: "100",
-                                          placeholder: "",
-                                          label: !1,
-                                          style: "display:none"
-                                    },
-                                    {
-                                          value: "TEST",
-                                          id: "cx_webchat_form_customField1",
-                                          name: "customField1",
-                                          maxlength: "100",
-                                          placeholder: "Test 2",
-                                          label: "Test 2"
-                                    },
-                                    {
-                                          value: "BRAND NEW CUSTOM FIELD",
-                                          id: "cx_webchat_form_customFieldLabel1",
-                                          name: "customField1Label",
-                                          maxlength: !1,
-                                          placeholder: !1,
-                                          label: !1,
-                                          style: "display:none"
-                                    },
-                                    {
-                                          "id": "cx_webchat_form_language",
-                                          "name": "language",
-                                          "maxlength": "100",
-                                          "placeholder": "Optional",
-                                          "label": "Language",
-                                          "type": "select",
-                                          "options": [{
-                                          "text": "English",
-                                          "value": "[DEV] - English"
-                                          }, {
-                                          "text": "Bilingual",
-                                          "value": "[DEV] - Bilingual"
-                                          }]
                                     },
                               ],
                               },
@@ -238,6 +147,38 @@
                                           hideChannelWhenThresholdMax: false
                                     },
                               },
+                              {
+                                    enable: true,
+                                    clickCommand: "VideoEngager.startCalendar",
+                                    readyEvent: "Calendar.ready",
+                                    displayName: "Schedule Video",
+                                    i10n: "ChatTitle",
+                                    icon: "videochat",
+                                    html: "",
+                                    ewt: {
+                                          display: true,
+                                          queue: "",
+                                          availabilityThresholdMin: 300,
+                                          availabilityThresholdMax: 3600,
+                                          hideChannelWhenThresholdMax: false
+                                    },
+                              },
+                              {
+                                    enable: true,
+                                    clickCommand: "Callback.open",
+                                    readyEvent: "Callback.ready",
+                                    displayName: "Callback",
+                                    i10n: "ChatTitle",
+                                    icon: "videochat",
+                                    html: "",
+                                    ewt: {
+                                          display: true,
+                                          queue: "",
+                                          availabilityThresholdMin: 300,
+                                          availabilityThresholdMax: 3600,
+                                          hideChannelWhenThresholdMax: false
+                                    },
+                              },
                               ]
                         },
                         sidebar: {
@@ -256,6 +197,71 @@
                         },
                         extensions: {
                               'VideoEngager': videoEngager.initExtension
+                        },
+                        calendar: {
+                              showAvailability: false,
+                              numberOfDays: 5,
+                              hideUnavailableTimeSlots: false,
+                              calendarHours: {
+                                    interval: 10,
+                                    allDay: {
+                                          openTime: '09:00',
+                                          closeTime: '23:59'
+                                    }
+                              }
+                        },
+                        callback: {
+                              dataURL: '',
+                              userData: {},
+                              countryCodes: true,
+                              immediateCallback: true,
+                              scheduledCallback: true,
+                              ewt: {
+                                    display: true,
+                                    queue: 'TestQueue',
+                                    threshold: 2000,
+                                    immediateCallback: {
+                                          thresholdMin: 1000,
+                                          thresholdMax: 3000
+                                    } 
+                                    
+                              },
+                              form: {
+                                    wrapper: "<table></table>",
+                                    inputs: [
+
+                                          {
+                                                      id: "cx_form_callback_firstname",
+                                                      name: "firstname",
+                                                      maxlength: "100",
+                                                      placeholder: "@i18n:callback.CallbackPlaceholderOptional",
+                                                      label: "@i18n:callback.CallbackFirstName"
+                                                },
+
+                                                {
+                                                      id: "cx_form_callback_lastname",
+                                                      name: "lastname",
+                                                      maxlength: "100",
+                                                      placeholder: "@i18n:callback.CallbackPlaceholderOptional",
+                                                      label: "@i18n:callback.CallbackLastName"
+                                                },
+
+                                                {
+                                                      id: "cx_form_callback_phone_number",
+                                                      name: "phonenumber",
+                                                      maxlength: "14",
+                                                      placeholder: "@i18n:callback.CallbackPlaceholderRequired",
+                                                      label: "@i18n:callback.CallbackPhoneNumber",
+
+                                                      onkeypress: function(event) {
+                                                
+                                                            // To allow only number inputs
+                                                            return (event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 43)
+                                                      }
+                                                }
+                                    ]
+                              }
+
                         }
                   };
 

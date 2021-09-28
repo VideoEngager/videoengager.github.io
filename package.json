@@ -1,0 +1,37 @@
+{
+  "name": "videoengager.github.io",
+  "version": "1.0.0",
+  "description": "video engager public example repo",
+  "main": "app.js",
+  "scripts": {
+    "start": "node server.js",
+    "webdriver": "node node_modules/protractor/bin/webdriver-manager update --standalone",
+    "protractor": "npx protractor",
+    "test": "npm-run-all -p -r start protractor"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ipekbayrak/videoengager.github.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ipekbayrak/videoengager.github.io/issues"
+  },
+  "homepage": "https://github.com/ipekbayrak/videoengager.github.io#readme",
+  "devDependencies": {
+    "grunt": "^1.3.0",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-express-server": "~0.5.3",
+    "grunt-protractor-runner": "^5.0.0",
+    "load-grunt-tasks": "^5.1.0",
+    "npm-run-all": "^4.1.5",
+    "protractor": "^7.0.0",
+    "time-grunt": "^2.0.0"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "concurrently": "^6.2.0",
+    "express": "^4.17.1"
+  }
+}

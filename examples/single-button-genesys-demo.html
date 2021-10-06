@@ -18,11 +18,6 @@
         jQuery(document).ready(function ($) {
             $("#divdeEspera").hide();
 
-            $("#inicioVideoLlamada").click(function (e) {
-
-            })
-            $("#inicioVideoLlamada").click
-        
         	$("#myVideoHolder").hide();
 
             $('#inicioVideoLlamada').click(function () {
@@ -30,8 +25,17 @@
 	        });
             $("#closeVideoButton").click(function() {
                 CXBus.command('VideoEngager.endCall');
-            });
+            });            
+        });
 
+        window.addEventListener('message', message => {
+            console.log("TEST " + message.data.type);
+            if (message.data.type === "ve_onDocumentReadyCallBack"){
+                console.log("customer page initialization started");
+            }
+            if (message.data.type === "ve_callEndedCallback"){
+                console.log("customer page call ended");
+            }
         });
     </script>
 
@@ -70,8 +74,8 @@
           videoengager: {
                 callHolder: "myVideoHolder", //provides a place/div/ where the VideoEngager widget should be inserted. Otherwise, popup winddow will be open.
                 platform: "purecloud", // one of 'engage'     or 'purecloud'
-                tenantId : "0FphTk091nt7G1W7",  //VideoEngager tenantId
-                veUrl: "https://videome.leadsecure.com/", //VideoEngager api base url
+                tenantId : "0FphTk091nt7G1W7", // "test_tenant",  //VideoEngager tenantId
+                veUrl:  "https://videome.leadsecure.com/", // "https://dev.videoengager.com/", //VideoEngager api base url
                 audioOnly: false,  //start the VideoEngager call with audioOnly (without video)
                 autoAccept: true, // during the call negotiation - automatically enter the call
                 enablePrecall: false, //start the VideoEngager session with precall window - the visitor could select their camera/microphone settings
@@ -117,13 +121,13 @@
           webchat: {
                 transport: {
                 type: 'purecloud-v2-sockets',
-                dataURL: 'https://api.mypurecloud.com',
-                deploymentKey: '973f8326-c601-40c6-82ce-b87e6dafef1c',
-                orgGuid: 'c4b553c3-ee42-4846-aeb1-f0da3d85058e',
+                dataURL: "https://api.mypurecloud.com", //'https://api.mypurecloud.com.au',
+                deploymentKey: '973f8326-c601-40c6-82ce-b87e6dafef1c', //'c2eaaa5c-d755-4e51-9136-b5ee86b92af3',
+                orgGuid: 'c4b553c3-ee42-4846-aeb1-f0da3d85058e', //'327d10eb-0826-42cd-89b1-353ec67d33f8',
                 interactionData: {
                       routing: {
                             targetType: 'QUEUE',
-                            targetAddress: 'TestQueue',
+                            targetAddress: "TestQueue", //'video',
                             priority: 2
                       }
                 }

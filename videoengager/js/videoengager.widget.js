@@ -202,7 +202,7 @@ var VideoEngager = function () {
 		}
 	}
 
-	var sendKeepAliveMessage = function(interactionId){
+	var sendKeepAliveMessage = function(){
 		if (platform == 'purecloud') {
 			oVideoEngager.command('WebChatService.sendTyping')
 			.done(function (e) {

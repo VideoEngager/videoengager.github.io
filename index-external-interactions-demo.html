@@ -5,88 +5,78 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 </head>
-
 <body>
-
-
 <script>
-	
-    $(function () {
-		var serverUrl = 'https://staging.videoengager.com';
-		var shortUrl, tenantId;
-		
-		var pak = '72884930-79d1-3221-166d-58b3a9894e16';
-		var externalId = 'Home';
-		var email = 'slav@videoengager.com';
-		
-	
-		//First we need to impersonate with personal access key and externalId.
-		$.ajax({
-			url: serverUrl + '/api/partners/impersonate/' + pak + '/' + externalId + '/' + email,
-			type: 'GET',
-			complete: function (data) {
+/* global $ */
+$(function () {
+  const serverUrl = 'https://staging.videoengager.com';
+  const pak = '72884930-79d1-3221-166d-58b3a9894e16';
+  const externalId = 'Home';
+  const email = 'slav@videoengager.com';
 
-
-				var rsp = JSON.parse(data.responseText);
-				if (data.status === 200) {
-					var token = rsp.token;
-					var auth = 'Bearer ' + token;
-					//here with the auth token, we retrieve the records for lastt 10 days.
-					var d = new Date();
-					var endDate = d.getTime();
-					d.setDate(d.getDate()-10);
-					var startDate = d.getTime();
-					$.ajax({
-						url: serverUrl + '/api/stats/external.interactions/my/'+startDate+'/'+endDate+'/',
-						type: 'GET',
-						cache: false,
-						beforeSend: function (xhr) {
-							xhr.setRequestHeader('Authorization', auth);
-						},
-						success: function (data) {
-						    console.log("External Interactions for agent(my): ", data);
-						    if (data.length) {
-						        var foundVisitorId = false;
-						        for (var i=0;i<data.length;i++) {
-						          if (data[i].visitorId) {
-                                    $.ajax({
-                                        url: serverUrl + '/api/stats/external.interactions/bySvInteractionId/'+data[i].visitorId,
-                                        type: 'GET',
-                                        cache: false,
-                                        beforeSend: function (xhr) {
-                                            xhr.setRequestHeader('Authorization', auth);
-                                        },
-                                        success: function (data) {
-                                            console.log("Found by visitorId: ", data);
-                                        },
-                                        error: function (xhr) {
-                                            console.log("Finding external interaction by visitor id , error: ", xhr);
-                                        }
-                                    });
-                                    foundVisitorId = true;
-                                    break;
-						          }
-						        }
-						        if (!foundVisitorId) {
-						          console.log("Not found external interactions with not empty visitorId");
-						        }
-    						}
-						},
-						error: function (xhr) {
-						    console.log("Interactions for agent(my), error: ", xhr);
-						}
-					});
-
-				} else {
-					console.log('error complete', rsp.message);
-				}
-			},
-			error: function (err) {
-				console.log('error', err);
-			}
-		});
-    });
-
+  // First we need to impersonate with personal access key and externalId.
+  $.ajax({
+    url: serverUrl + '/api/partners/impersonate/' + pak + '/' + externalId + '/' + email,
+    type: 'GET',
+    complete: function (data) {
+      const rsp = JSON.parse(data.responseText);
+      if (data.status === 200) {
+        const token = rsp.token;
+        const auth = 'Bearer ' + token;
+        // here with the auth token, we retrieve the records for lastt 10 days.
+        const d = new Date();
+        const endDate = d.getTime();
+        d.setDate(d.getDate() - 10);
+        const startDate = d.getTime();
+        $.ajax({
+          url: serverUrl + '/api/stats/external.interactions/my/' + startDate + '/' + endDate + '/',
+          type: 'GET',
+          cache: false,
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', auth);
+          },
+          success: function (data) {
+            console.log('External Interactions for agent(my): ', data);
+            if (data.length) {
+              let foundVisitorId = false;
+              for (let i = 0; i < data.length; i++) {
+                if (data[i].visitorId) {
+                  $.ajax({
+                    url: serverUrl + '/api/stats/external.interactions/bySvInteractionId/' + data[i].visitorId,
+                    type: 'GET',
+                    cache: false,
+                    beforeSend: function (xhr) {
+                      xhr.setRequestHeader('Authorization', auth);
+                    },
+                    success: function (data) {
+                      console.log('Found by visitorId: ', data);
+                    },
+                    error: function (xhr) {
+                      console.log('Finding external interaction by visitor id , error: ', xhr);
+                    }
+                  });
+                  foundVisitorId = true;
+                  break;
+                }
+              }
+              if (!foundVisitorId) {
+                console.log('Not found external interactions with not empty visitorId');
+              }
+            }
+          },
+          error: function (xhr) {
+            console.log('Interactions for agent(my), error: ', xhr);
+          }
+        });
+      } else {
+        console.log('error complete', rsp.message);
+      }
+    },
+    error: function (err) {
+      console.log('error', err);
+    }
+  });
+});
 
 </script>
 </body>

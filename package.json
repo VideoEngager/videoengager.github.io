@@ -1,0 +1,9 @@
+{
+    "name": "videoengager.github.io",
+    "devDependencies": {
+        "semistandard": "^16.0.1"
+    },
+    "scripts": {
+        "test": "semistandard"
+    }
+}

@@ -122,180 +122,167 @@
 
     <div>
         <script>
-var serverUrl = 'https://staging.videoengager.com';
-var shortUrl, tenantId;
+/* global $ moment */
+const serverUrl = 'https://staging.videoengager.com';
 
-var pak = '72884930-79d1-3221-166d-58b3a9894e16';
-var externalId = 'Home';
-var email = 'slav@videoengager.com';
-var tennantId = 'gUqxNu7JS8y94T9F'; //'oIiTR2XQIkb7p0ub';
+const pak = '72884930-79d1-3221-166d-58b3a9894e16';
+const externalId = 'Home';
+const email = 'slav@videoengager.com';
+const tennantId = 'gUqxNu7JS8y94T9F'; // 'oIiTR2XQIkb7p0ub';
 
-var selectedPage = 1;
-var pageSize = 10;
+let selectedPage = 1;
+const pageSize = 10;
 
-var from = "";
-var to = "";
+let from = '';
+let to = '';
 
-var token = "";
+let token = '';
 
-var setTime = function() {
-    to = (new Date).setDate((new Date).getDate() + 1).valueOf();
-    from = (new Date).setDate((new Date).getDate() - 1).valueOf();
+function setTime () {
+  to = (new Date()).setDate((new Date()).getDate() + 1).valueOf();
+  from = (new Date()).setDate((new Date()).getDate() - 1).valueOf();
 
-    $('#fromdate').val(moment(from).format('YYYY-MM-DD'));
-    $('#todate').val(moment(to).format('YYYY-MM-DD'));
+  $('#fromdate').val(moment(from).format('YYYY-MM-DD'));
+  $('#todate').val(moment(to).format('YYYY-MM-DD'));
 }
 
-
-
-var getToken = function(callback) {
-    var postData = {
-        "pak": pak,
-        "firstName": "Demo",
-        "lastName": "User",
-        "email": "demouser@videoengager.com"
-    };
-    $.ajax({
-        url: serverUrl + "/api/partners/impersonate/" + pak + "/" + externalId + "/" + email,
-        type: 'GET',
-        success: callback,
-        error: function(err) {
-            console.log('error', err);
-        }
-    });
-}
-
-var getFromDate = function()  {
-    return (new Date($('#fromdate').val())).getTime();
-}
-
-var getToDate = function()  {
-    return (new Date($('#todate').val())).getTime();
-}
-
-var getAgentEmail = function()  {
-    return $('#singleexternal').val().trim();
-}
-
-
-var getSVInteractions = function(callback) {
-    $.ajax({
-        url: serverUrl + "/api/stats/interactions/tenant/" + getFromDate() + "/" + getToDate() + "?expandRecordings"  + (getAgentEmail() === "" ? "" : "&agent=" + getAgentEmail()) + "&pageSize=" +  pageSize + "&page=" + selectedPage,
-        type: 'GET',
-        cache: true,
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader('Authorization', 'Bearer ' + token)
-        },
-        success: function(response) {
-            if (response) {
-                callback(response.data, response.totalCount, response.pageSize);
-            } else {
-                return;
-            }
-        },
-        error: function(err) {
-            console.log('error', err);
-        }
-    });
-}
-
-
-var getExternalInteractionsBySVInteractionId = function(interaction, index, callback) {
-    $.ajax({
-        url: serverUrl + "/api/stats/external.interactions/bySvInteractionId/" + interaction._id.interactionId,
-        type: 'GET',
-        cache: true,
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader('Authorization', 'Bearer ' + token)
-        },
-        success: function(externalInteractions) {
-            callback(interaction, index, externalInteractions);
-        },
-        error: function(err) {
-            console.log('error', err);
-        }
-    });
-}
-
-
-var processSVInteractions = function(svInteractions, totalCount, pageSize) {
-    $('#myTable').html("");
-    $('.pagination').html("");
-    
-    var counter = 0;
-    for (var i = 0; i <= totalCount ; i += pageSize) {
-        counter += 1;
-        $('.pagination').append('<li class="page-item"><a class="numbers page-link" href="#">' + counter + '<\/a><\/li>  ')
+function getToken (callback) {
+  $.ajax({
+    url: serverUrl + '/api/partners/impersonate/' + pak + '/' + externalId + '/' + email,
+    type: 'GET',
+    success: callback,
+    error: function (err) {
+      console.log('error', err);
     }
-
-    $(".numbers").click(function() {
-        $('#myTable').html("");
-        selectedPage = $(this).text();
-        getList();
-    });
-   
-    loadExternalInteractions(svInteractions);
+  });
 }
 
-var getList = function() {
-    getSVInteractions(processSVInteractions);
+function getFromDate () {
+  return (new Date($('#fromdate').val())).getTime();
 }
 
-var drawData = function(externalInteraction, svInteraction , index) {
-    if (!svInteraction){
-        svInteraction = {_id:{agentId:""}}
+function getToDate () {
+  return (new Date($('#todate').val())).getTime();
+}
+
+function getAgentEmail () {
+  return $('#singleexternal').val().trim();
+}
+
+function getSVInteractions (callback) {
+  $.ajax({
+    url: serverUrl + '/api/stats/interactions/tenant/' + getFromDate() + '/' + getToDate() + '?expandRecordings' + (getAgentEmail() === '' ? '' : '&agent=' + getAgentEmail()) + '&pageSize=' + pageSize + '&page=' + selectedPage,
+    type: 'GET',
+    cache: true,
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+    },
+    success: function (response) {
+      if (response) {
+        callback(response.data, response.totalCount, response.pageSize);
+      }
+    },
+    error: function (err) {
+      console.log('error', err);
     }
-    var $html = $($('#template').html());
-    var genesysURL = 'https://apps.mypurecloud.de/directory/#/engage/admin/interactions/' + externalInteraction.externalInteractionId
-    $html.find('.s').html(svInteraction._id.agentId);
-    $html.find('.a').html('<a href="#" class="list-group-item-action">' + externalInteraction.svInteractionId + '<\/a>');
-    $html.find('.b').html('<a href="' + genesysURL + '" target="_blank" class="list-group-item-action">' + externalInteraction.externalInteractionId + '<\/a>');
-    $html.find('.n').html(index + (selectedPage -1) * pageSize);
-    var callUrl = "";
-    var recordingURL = "";
-    if (externalInteraction) {
-        for (var j = 0; j < svInteraction.calls.length; j++) {
-            callUrl += '<a href="https://staging.videoengager.com/brokerages/report/call/' + svInteraction.calls[j] + '/' + tennantId + '" target="_blank" class="list-group-item-action">' + svInteraction.calls[j] + '<\/a>' + "<br>"
+  });
+}
+
+function getExternalInteractionsBySVInteractionId (interaction, index, callback) {
+  $.ajax({
+    url: serverUrl + '/api/stats/external.interactions/bySvInteractionId/' + interaction._id.interactionId,
+    type: 'GET',
+    cache: true,
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+    },
+    success: function (externalInteractions) {
+      callback(interaction, index, externalInteractions);
+    },
+    error: function (err) {
+      console.log('error', err);
+    }
+  });
+}
+
+function processSVInteractions (svInteractions, totalCount, pageSize) {
+  $('#myTable').html('');
+  $('.pagination').html('');
+
+  let counter = 0;
+  for (let i = 0; i <= totalCount; i += pageSize) {
+    counter += 1;
+    $('.pagination').append('<li class="page-item"><a class="numbers page-link" href="#">' + counter + '</a></li>  ');
+  }
+
+  $('.numbers').click(function () {
+    $('#myTable').html('');
+    selectedPage = $(this).text();
+    getList();
+  });
+
+  loadExternalInteractions(svInteractions);
+}
+
+function getList () {
+  getSVInteractions(processSVInteractions);
+}
+
+function drawData (externalInteraction, svInteraction, index) {
+  if (!svInteraction) {
+    svInteraction = { _id: { agentId: '' } };
+  }
+  const $html = $($('#template').html());
+  const genesysURL = 'https://apps.mypurecloud.de/directory/#/engage/admin/interactions/' + externalInteraction.externalInteractionId;
+  $html.find('.s').html(svInteraction._id.agentId);
+  $html.find('.a').html('<a href="#" class="list-group-item-action">' + externalInteraction.svInteractionId + '</a>');
+  $html.find('.b').html('<a href="' + genesysURL + '" target="_blank" class="list-group-item-action">' + externalInteraction.externalInteractionId + '</a>');
+  $html.find('.n').html(index + (selectedPage - 1) * pageSize);
+  let callUrl = '';
+  let recordingURL = '';
+  if (externalInteraction) {
+    for (let j = 0; j < svInteraction.calls.length; j++) {
+      callUrl += '<a href="https://staging.videoengager.com/brokerages/report/call/' + svInteraction.calls[j] + '/' + tennantId + '" target="_blank" class="list-group-item-action">' + svInteraction.calls[j] + '</a>' + '<br>';
+    }
+    $html.find('.c').html(callUrl);
+
+    for (let j = 0; j < svInteraction.expandedRecordings.length; j++) {
+      for (let f = 0; f < svInteraction.expandedRecordings[j].files.length; f++) {
+        recordingURL += '<a href="#" class="list-group-item-action">' + svInteraction.expandedRecordings[j].files[f] + '</a>' + '<br>';
+      }
+    }
+    $html.find('.d').html(recordingURL);
+    $html.find('.c').html(callUrl);
+    $('#myTable').append($html.prop('outerHTML'));
+  }
+}
+
+function loadExternalInteractions (svInteractions) {
+  for (let i = 0; i < svInteractions.length; i++) {
+    getExternalInteractionsBySVInteractionId(svInteractions[i], i,
+      function (svInteraction, index, externalInteractions) {
+        let externalInteraction;
+        if (!externalInteractions || !externalInteractions[0]) {
+          externalInteraction = { svInteractionId: svInteraction._id.interactionId, externalInteractionId: '' };
+        } else {
+          externalInteraction = externalInteractions[0];
         }
-        $html.find('.c').html(callUrl);
-
-        for (var j = 0; j < svInteraction.expandedRecordings.length; j++) {
-            for (var f = 0;  f < svInteraction.expandedRecordings[j].files.length; f++){
-                recordingURL += '<a href="#" class="list-group-item-action">' + svInteraction.expandedRecordings[j].files[f] + '<\/a>' + "<br>";
-            }
-        }
-        $html.find('.d').html(recordingURL);
-        $html.find('.c').html(callUrl);
-        $('#myTable').append($html.prop('outerHTML'));
-    }
+        drawData(externalInteraction, svInteraction, index);
+      });
+  }
 }
 
-var loadExternalInteractions = function(svInteractions) {
-    for (var i = 0; i < svInteractions.length ; i++) {
-        getExternalInteractionsBySVInteractionId(svInteractions[i], i, 
-                                        function(svInteraction, index, externalInteractions) {
-            var externalInteraction;
-            if (!externalInteractions || !externalInteractions[0]){
-                externalInteraction = {svInteractionId: svInteraction._id.interactionId, externalInteractionId: ''}
-            } else {
-                externalInteraction = externalInteractions[0];
-            }
-            drawData(externalInteraction, svInteraction, index);
-        });  
-    }
-}
+$(document).ready(function () {
+  setTime();
+  getToken(function (data) {
+    token = data.token;
+    getList();
+  });
 
-$(document).ready(function() {
-    setTime();
-    getToken(function(data) {
-        token = data.token;
-        getList();
-    })
-
-    $( "#getdata" ).click(function() {
-        selectedPage = 1;
-        getList();
-    });
+  $('#getdata').click(function () {
+    selectedPage = 1;
+    getList();
+  });
 });
         </script>
     </div>

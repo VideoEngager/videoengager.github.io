@@ -22,6 +22,8 @@ var VideoEngager = function () {
 		"WebChatTitleAudio": "Audio Chat",
 		}};
 	var form;
+	var KEEP_ALIVE_TIME = 10*60*1000; // keep alive time 10min
+        var keepAliveTimer;
 
 	var init = function () {
 		var config = window._genesys.widgets.videoengager;
@@ -84,6 +86,7 @@ var VideoEngager = function () {
 
 		oVideoEngager.subscribe("WebChatService.ended", function(){
 			console.log('WebChatService.ended');
+			if(keepAliveTimer){ clearInterval(keepAliveTimer) }
 			closeIframeOrPopup();
 		});			
 		
@@ -92,6 +95,7 @@ var VideoEngager = function () {
 			if (interactionId != null){
 				sendInteractionMessage(interactionId);
 			}
+			keepAliveTimer = setInterval(sendKeepAliveMessage, KEEP_ALIVE_TIME); 
 			
 		});
 		
@@ -198,6 +202,17 @@ var VideoEngager = function () {
 		}
 	}
 
+	var sendKeepAliveMessage = function(){
+		if (platform == 'purecloud') {
+			oVideoEngager.command('WebChatService.sendTyping')
+			.done(function (e) {
+				console.log("send KeepAlive message success");
+			})
+			.fail(function(e) {
+				console.log("fail to send KeepAlive message");
+			});
+		}
+	}
 	var startWithHiddenChat = function() {
 		if (!webChatFormData.userData) {
 			webChatFormData.userData = {};

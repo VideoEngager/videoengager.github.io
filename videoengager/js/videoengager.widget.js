@@ -23,7 +23,7 @@ var VideoEngager = function () {
 		}};
 	var form;
 	var KEEP_ALIVE_TIME = 10*60*1000; // keep alive time 10min
-    var keepAliveTimer;
+        var keepAliveTimer;
 
 	var init = function () {
 		var config = window._genesys.widgets.videoengager;
@@ -213,7 +213,6 @@ var VideoEngager = function () {
 			});
 		}
 	}
-
 	var startWithHiddenChat = function() {
 		if (!webChatFormData.userData) {
 			webChatFormData.userData = {};

@@ -77,6 +77,7 @@
                 enablePrecall: false, //start the VideoEngager session with precall window - the visitor could select their camera/microphone settings
                 useWebChatForm: false, //start VideoEngager session with/without registration form
                 //in case of useWebChatForm == false, pass the following data to conversation initialization - visible for agent
+                extraAgentMessage: '**This is a VideoEngager Video Call!!!**',
                 webChatFormData: { 
                       nickname: 'Jonny',
                       firstname: firstname,
@@ -120,6 +121,7 @@
                 dataURL: 'https://api.mypurecloud.com',
                 deploymentKey: '973f8326-c601-40c6-82ce-b87e6dafef1c',
                 orgGuid: 'c4b553c3-ee42-4846-aeb1-f0da3d85058e',
+                markdown: true,
                 interactionData: {
                       routing: {
                             targetType: 'QUEUE',

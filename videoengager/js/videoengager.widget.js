@@ -10,6 +10,7 @@ var VideoEngager = function () {
 	var startWithVideo;
 	var autoAccept;
 	var platform;
+	var extraAgentMessage;
 	var veUrl;
 	var enablePrecall;
 	var i18n;
@@ -31,6 +32,7 @@ var VideoEngager = function () {
 		startWithVideo = (config.audioOnly) ? !config.audioOnly : true;
 		autoAccept = (config.autoAccept) ? config.autoAccept : true;
 		platform = config.platform;
+		extraAgentMessage = config.extraAgentMessage;
 		veUrl = config.veUrl;
 		i18n = config.i18n;
 		form = config.form;
@@ -195,6 +197,14 @@ var VideoEngager = function () {
 			oVideoEngager.command('WebChatService.sendMessage',{message:JSON.stringify(message)})
 			.done(function (e) {
 				console.log("send message success:" +message);
+				if (extraAgentMessage) {
+					oVideoEngager.command('WebChatService.sendMessage',{message:extraAgentMessage})
+					.done(function (e) {
+						console.log("send extra message success:", extraAgentMessage);
+					})
+					.fail(function(e) {
+						console.log("could not send extra message: ", extraAgentMessage);
+					});				}
 			})
 			.fail(function(e) {
 				console.log("fail to send message: "+message);
@@ -202,6 +212,7 @@ var VideoEngager = function () {
 		}
 	}
 
+	
 	var sendKeepAliveMessage = function(){
 		if (platform == 'purecloud') {
 			oVideoEngager.command('WebChatService.sendTyping')

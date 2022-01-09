@@ -16,6 +16,8 @@ class VideoEngager {
     let i18n;
     let useWebChatForm;
     let webChatFormData;
+    let title;
+    let submitButton;
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
@@ -158,11 +160,11 @@ class VideoEngager {
     const localizeChatForm = function () {
       const lang = window._genesys.widgets.main.lang;
       if (startWithVideo) {
-        const title = i18nDefault.en.WebChatTitleVideo;
-        const submitButton = i18nDefault.en.ChatFormSubmitVideo;
+        title = i18nDefault.en.WebChatTitleVideo;
+        submitButton = i18nDefault.en.ChatFormSubmitVideo;
       } else {
-        const title = i18nDefault.en.WebChatTitleAudio;
-        const submitButton = i18nDefault.en.ChatFormSubmitAudio;
+        title = i18nDefault.en.WebChatTitleAudio;
+        submitButton = i18nDefault.en.ChatFormSubmitAudio;
       }
       if (startWithVideo) {
         if (i18n[lang] && i18n[lang].WebChatTitleVideo) {

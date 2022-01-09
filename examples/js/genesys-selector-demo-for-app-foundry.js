@@ -1,4 +1,7 @@
 /* global videoEngager */
+const urlParams = new URLSearchParams(window.location.search);
+const debugMode = urlParams.get('debug');
+
 if (!window._genesys) {
   window._genesys = {};
 }
@@ -170,3 +173,40 @@ window._genesys.widgets = {
     VideoEngager: videoEngager.initExtension
   }
 };
+
+const parameters = {
+  staging: {
+    organizationId: '639292ca-14a2-400b-8670-1f545d8aa860',
+    deploymentId: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
+    videoengagerUrl: 'https://staging.videoengager.com/',
+    tennantId: 'oIiTR2XQIkb7p0ub',
+    environment: 'https://mypurecloud.de',
+    queue: 'Support'
+  },
+  dev: {
+    organizationId: '327d10eb-0826-42cd-89b1-353ec67d33f8',
+    deploymentId: 'c2eaaa5c-d755-4e51-9136-b5ee86b92af3',
+    videoengagerUrl: 'https://dev.videoengager.com/',
+    tennantId: 'test_tenant',
+    environment: 'https://mypurecloud.com.au',
+    queue: 'video'
+  },
+  prod: {
+    organizationId: 'c4b553c3-ee42-4846-aeb1-f0da3d85058e',
+    deploymentId: '973f8326-c601-40c6-82ce-b87e6dafef1c',
+    videoengagerUrl: 'https://videome.leadsecure.com/',
+    tennantId: '0FphTk091nt7G1W7',
+    environment: 'https://mypurecloud.com',
+    queue: 'TestQueue'
+  }
+};
+
+// development
+if (debugMode) {
+  window._genesys.widgets.videoengager.tenantId = parameters[debugMode].tennantId;
+  window._genesys.widgets.videoengager.veUrl = parameters[debugMode].videoengagerUrl;
+  window._genesys.widgets.webchat.transport.dataURL = parameters[debugMode].environment;
+  window._genesys.widgets.webchat.transport.deploymentKey = parameters[debugMode].deploymentId;
+  window._genesys.widgets.webchat.transport.orgGuid = parameters[debugMode].organizationId;
+  window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = parameters[debugMode].queue;
+}

@@ -180,7 +180,7 @@ const parameters = {
     deploymentId: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
     videoengagerUrl: 'https://staging.videoengager.com',
     tennantId: 'oIiTR2XQIkb7p0ub',
-    environment: 'https://mypurecloud.de',
+    environment: 'https://api.mypurecloud.de',
     queue: 'Support'
   },
   dev: {
@@ -188,7 +188,7 @@ const parameters = {
     deploymentId: 'c2eaaa5c-d755-4e51-9136-b5ee86b92af3',
     videoengagerUrl: 'https://dev.videoengager.com',
     tennantId: 'test_tenant',
-    environment: 'https://mypurecloud.com.au',
+    environment: 'https://api.mypurecloud.com.au',
     queue: 'video'
   },
   prod: {
@@ -196,7 +196,7 @@ const parameters = {
     deploymentId: '973f8326-c601-40c6-82ce-b87e6dafef1c',
     videoengagerUrl: 'https://videome.leadsecure.com',
     tennantId: '3X0eK2gclYkIML92',
-    environment: 'https://mypurecloud.com',
+    environment: 'https://api.mypurecloud.com',
     queue: 'TestQueue'
   }
 };

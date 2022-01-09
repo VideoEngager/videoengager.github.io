@@ -101,9 +101,6 @@ class VideoEngager {
 
       oVideoEngager.subscribe('WebChatService.agentConnected', function () {
         console.log('WebChatService.agentConnected');
-        if (!interactionId) {
-          interactionId = getGuid();
-        }
         sendInteractionMessage(interactionId);
         startVideoChat();
       });
@@ -263,6 +260,10 @@ class VideoEngager {
     };
 
     const startVideoChat = function () {
+      if (!interactionId) {
+        interactionId = getGuid();
+      }
+
       console.log('InteractionId :', interactionId);
       const left = (screen.width / 2) - (770 / 2);
       const top = (screen.height / 2) - (450 / 2);

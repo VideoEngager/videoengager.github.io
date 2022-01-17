@@ -199,7 +199,7 @@ class VideoEngager {
         // oVideoEngager.command('WebChatService.sendFilteredMessage',{message:JSON.stringify(message), regex: /[a-zA-Z]/})
         oVideoEngager.command('WebChatService.sendMessage', { message: JSON.stringify(message) })
           .done(function (e) {
-            console.log('send message success:' + message);
+            console.log('send message success:' + JSON.stringify(message));
             if (extraAgentMessage) {
               oVideoEngager.command('WebChatService.sendMessage', { message: extraAgentMessage })
                 .done(function (e) {

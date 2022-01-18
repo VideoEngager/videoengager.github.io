@@ -115,7 +115,7 @@
 
     <div>
         <script>
-var serverUrl = 'https://staging.videoengager.com';
+var serverUrl = 'https://staging.leadsecure.com';
 var shortUrl, tenantId;
 
 var pak = '72884930-79d1-3221-166d-58b3a9894e16';
@@ -287,7 +287,7 @@ var drawData = function(externalInteraction, svInteraction, index){
     var recordingURL = "";
     if (svInteraction){
         for (var j = 0; j < svInteraction.calls.length; j++) {
-            callUrl += '<a href="https://staging.videoengager.com/brokerages/report/call/' + svInteraction.calls[j] + '/' + tennantId + '" target="_blank" class="list-group-item-action">' + svInteraction.calls[j] + '<\/a>' + "<br>"
+            callUrl += '<a href="https://staging.leadsecure.com/brokerages/report/call/' + svInteraction.calls[j] + '/' + tennantId + '" target="_blank" class="list-group-item-action">' + svInteraction.calls[j] + '<\/a>' + "<br>"
         }
         $html.find('.c').html(callUrl);
 

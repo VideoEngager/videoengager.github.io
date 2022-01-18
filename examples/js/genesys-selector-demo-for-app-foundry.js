@@ -178,7 +178,7 @@ const parameters = {
   staging: {
     organizationId: '639292ca-14a2-400b-8670-1f545d8aa860',
     deploymentId: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
-    videoengagerUrl: 'https://staging.videoengager.com',
+    videoengagerUrl: 'https://staging.leadsecure.com',
     tennantId: 'oIiTR2XQIkb7p0ub',
     environment: 'https://api.mypurecloud.de',
     queue: 'Support'

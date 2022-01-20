@@ -16,7 +16,7 @@ class VideoEngager {
     let i18n;
     let useWebChatForm;
     let webChatFormData;
-    let onlyChat;
+    let onlyWebChat;
     let title;
     let submitButton;
     const i18nDefault = {
@@ -80,12 +80,12 @@ class VideoEngager {
       });
 
       oVideoEngager.registerCommand('startVideoEngager', function (e) {
-        onlyChat = false;
+        onlyWebChat = false;
         startVideoEngager();
       });
 
       oVideoEngager.registerCommand('startWebChat', function (e) {
-        onlyChat = true;
+        onlyWebChat = true;
         oVideoEngager.command('WebChat.open');
       });
 
@@ -108,7 +108,7 @@ class VideoEngager {
 
       oVideoEngager.subscribe('WebChatService.agentConnected', function () {
         console.log('WebChatService.agentConnected');
-        if (!onlyChat) {
+        if (!onlyWebChat) {
           sendInteractionMessage(interactionId);
           startVideoChat();
         }

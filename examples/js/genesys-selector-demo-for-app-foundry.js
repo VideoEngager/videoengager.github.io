@@ -110,7 +110,7 @@ window._genesys.widgets = {
     },
     {
       enable: true,
-      clickCommand: 'WebChat.open',
+      clickCommand: 'VideoEngager.startWebChat',
       readyEvent: 'WebChat.ready',
       displayName: 'Web Chat',
       i10n: 'ChatTitle',

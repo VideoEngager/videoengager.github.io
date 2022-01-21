@@ -1,0 +1,38 @@
+name: VideoEngager Demo - deploy to cdn.videoengager.com
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+
+jobs:
+  deploy_demo_assets:
+    runs-on: ubuntu-latest  
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Prep for deployment 
+        run: |
+          rm README.md
+          rm -rf .github
+          rm -rf .git
+
+      - name: Deploy to S3
+        uses: dianurse/s3-upload@v2.1
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_REGION: 'eu-central-1'
+          MAX_AGE: '1209600'
+          SOURCE_DIRECTORY: ''
+          DESTINATION_DIRECTORY: ''
+          IS_CACHE_INVALIDATION_REQUIRED: 'true'
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          

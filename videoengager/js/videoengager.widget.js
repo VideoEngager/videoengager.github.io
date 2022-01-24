@@ -105,6 +105,13 @@ class VideoEngager {
         }
       });
 
+      oVideoEngager.subscribe('WebChatService.agentConnected', function () {
+        console.log('WebChatService.agentConnected');
+        if (interactionId !== null) {
+          startVideoChat();
+        }
+      });
+
       oVideoEngager.ready();
 
       window._genesys.widgets.onReady = function (oCXBus) {
@@ -286,9 +293,7 @@ class VideoEngager {
       }
 
       if (!iframeHolder) {
-        if (!popupinstance) {
-          popupinstance = window.open(url, 'popup_instance', 'width=770, height=450, left=' + left + ', top=' + top + ', location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar = no');
-        }
+        popupinstance = window.open(url, 'popup_instance', 'width=770, height=450, left=' + left + ', top=' + top + ', location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar = no');
         popupinstance.focus();
       } else {
         iframeInstance = document.createElement('iframe');

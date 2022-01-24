@@ -16,7 +16,6 @@ class VideoEngager {
     let i18n;
     let useWebChatForm;
     let webChatFormData;
-    let onlyWebChat;
     let title;
     let submitButton;
     const i18nDefault = {
@@ -55,6 +54,9 @@ class VideoEngager {
     };
 
     const startVideoEngager = function () {
+      if (!interactionId) {
+        interactionId = getGuid();
+      }
       if (useWebChatForm) {
         initiateForm();
       } else {
@@ -80,13 +82,7 @@ class VideoEngager {
       });
 
       oVideoEngager.registerCommand('startVideoEngager', function (e) {
-        onlyWebChat = false;
         startVideoEngager();
-      });
-
-      oVideoEngager.registerCommand('startWebChat', function (e) {
-        onlyWebChat = true;
-        oVideoEngager.command('WebChat.open');
       });
 
       oVideoEngager.registerCommand('endCall', function (e) {
@@ -104,13 +100,8 @@ class VideoEngager {
         console.log('WebChatService.started');
 
         keepAliveTimer = setInterval(sendKeepAliveMessage, KEEP_ALIVE_TIME);
-      });
-
-      oVideoEngager.subscribe('WebChatService.agentConnected', function () {
-        console.log('WebChatService.agentConnected');
-        if (!onlyWebChat) {
+        if (interactionId != null) {
           sendInteractionMessage(interactionId);
-          startVideoChat();
         }
       });
 
@@ -269,10 +260,6 @@ class VideoEngager {
     };
 
     const startVideoChat = function () {
-      if (!interactionId) {
-        interactionId = getGuid();
-      }
-
       console.log('InteractionId :', interactionId);
       const left = (screen.width / 2) - (770 / 2);
       const top = (screen.height / 2) - (450 / 2);

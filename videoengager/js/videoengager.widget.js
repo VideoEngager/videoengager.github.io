@@ -121,9 +121,9 @@ class VideoEngager {
             if (!oMessage.text || oMessage.text.indexOf(veUrl) === -1) {
               return null;
             }
-            const url = oMessage.text;
+            window.VE_URL = oMessage.text;
             oMessage.html = true;
-            oMessage.text = '<button type="button" class="cx-btn cx-btn-primary i18n" onclick="videoEngager.startVideoEngagerOutbound(\"' + url + '\");">Start Video</button>';
+            oMessage.text = '<button type="button" class="cx-btn cx-btn-primary i18n" onclick="videoEngager.startVideoEngagerOutbound(window.VE_URL);">Start Video</button>';
             return oMessage;
           }
         })
@@ -311,7 +311,7 @@ class VideoEngager {
     this.startVideoEngagerOutbound = function (url) {
       const left = (screen.width / 2) - (770 / 2);
       const top = (screen.height / 2) - (450 / 2);
-      if (!popupinstance) {
+      if (!popupinstance || popupinstance.closed) {
         popupinstance = window.open(url, 'popup_instance', 'width=770, height=450, left=' + left + ', top=' + top + ', location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar = no');
       }
       popupinstance.focus();

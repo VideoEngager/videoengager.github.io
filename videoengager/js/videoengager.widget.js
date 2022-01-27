@@ -31,6 +31,23 @@ class VideoEngager {
     const KEEP_ALIVE_TIME = 10 * 60 * 1000; // keep alive time 10min
     let keepAliveTimer;
 
+
+	var httpRequest = function (url, jsonParam, HTTPRequestType, authToken,callback, failcallback) {
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open(HTTPRequestType, url);
+		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xmlhttp.setRequestHeader("authorization", "Bearer " + authToken);
+		xmlhttp.onerror = function(){
+			failcallback(xmlhttp);
+		}
+		xmlhttp.onload = function(){
+			if (xmlhttp.readyState === 4){
+				callback(JSON.parse(xmlhttp.responseText))
+			}
+		};
+		xmlhttp.send(jsonParam);
+	}
+
     const init = function () {
       const config = window._genesys.widgets.videoengager;
       TENANT_ID = config.tenantId;
@@ -64,6 +81,25 @@ class VideoEngager {
       }
     };
 
+    const startCalendar = function() {
+      oVideoEngager.command('Calendar.generate')
+      .done(function(e){
+        console.log(e);
+      })
+      .fail(function(e){
+        console.error("Calendar failed  : ", e);
+      });
+  /*
+      oMyPlugin.command('Calendar.showAvailability', {date: '03/22/17'}).done(function(e){
+        // Calendar showed availability successfully
+      
+      }).fail(function(e){
+      
+        // Calendar failed to show availability
+      });
+      */
+    }
+
     this.initExtension = function ($, CXBus, Common) {
       console.log('on init extension VideoEngager');
       init();
@@ -89,6 +125,43 @@ class VideoEngager {
         oVideoEngager.command('WebChatService.endChat');
         closeIframeOrPopup();
       });
+
+      oVideoEngager.registerCommand("startCalendar", function (e) {
+        startCalendar();
+      });
+
+      oVideoEngager.subscribe('Callback.opened', function(e){
+        var AuthToken = null;
+        var date = null;
+  
+        //authenticate
+        var authURL = "https://staging.videoengager.com/api/partners/impersonate/b7abeb05-f821-cff8-0b27-77232116bf1d/639292ca-14a2-400b-8670-1f545d8aa860/slav@videoengager.com";
+        httpRequest(authURL, null,"GET", null, function(data){
+          AuthToken = data.token;;
+        }, function(xmlhttp){
+          debugger;
+  
+          oVideoEngager.command('Callback.showOverlay', {
+  
+            html: '<div>Something Went Wrong</div>'
+  
+          })
+        });
+  
+        oVideoEngager.subscribe('Calendar.selectedDateTime', function(e){
+          date = e.data.date;
+        });
+  
+        // to prevent onClose user confirmation dialog, remove events in inputs
+        document.querySelectorAll("input,textarea").forEach((e) => {
+          var new_element = e.cloneNode(true);
+          e.parentNode.replaceChild(new_element, e);
+        });
+  
+        
+  
+         
+      })
 
       oVideoEngager.subscribe('WebChatService.ended', function () {
         console.log('WebChatService.ended');

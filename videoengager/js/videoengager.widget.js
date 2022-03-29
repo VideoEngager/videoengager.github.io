@@ -31,23 +31,6 @@ class VideoEngager {
     const KEEP_ALIVE_TIME = 10 * 60 * 1000; // keep alive time 10min
     let keepAliveTimer;
 
-
-	var httpRequest = function (url, jsonParam, HTTPRequestType, authToken,callback, failcallback) {
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.open(HTTPRequestType, url);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.setRequestHeader("authorization", "Bearer " + authToken);
-		xmlhttp.onerror = function(){
-			failcallback(xmlhttp);
-		}
-		xmlhttp.onload = function(){
-			if (xmlhttp.readyState === 4){
-				callback(JSON.parse(xmlhttp.responseText))
-			}
-		};
-		xmlhttp.send(jsonParam);
-	}
-
     const init = function () {
       const config = window._genesys.widgets.videoengager;
       TENANT_ID = config.tenantId;
@@ -81,24 +64,66 @@ class VideoEngager {
       }
     };
 
-    const startCalendar = function() {
+    const startCalendar = function () {
       oVideoEngager.command('Calendar.generate')
-      .done(function(e){
-        console.log(e);
-      })
-      .fail(function(e){
-        console.error("Calendar failed  : ", e);
-      });
-  /*
-      oMyPlugin.command('Calendar.showAvailability', {date: '03/22/17'}).done(function(e){
-        // Calendar showed availability successfully
-      
-      }).fail(function(e){
-      
-        // Calendar failed to show availability
-      });
-      */
-    }
+        .done(function (e) {
+          console.log(e);
+        })
+        .fail(function (e) {
+          console.error('Calendar failed  : ', e);
+        });
+    };
+
+    const copyToClipboard = function (e) {
+      const copyText = document.getElementById('meetingUrl');
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(copyText.value);
+    };
+
+    const createGoogleCalendarEvent = function (fullText) {
+      Date.prototype.addHours = function (h) {
+        this.setTime(this.getTime() + (h * 60 * 60 * 1000));
+        return this;
+      };
+
+      const isoToIcal = function (str) {
+        str = str.replace(/-/g, '');
+        str = str.replace(/:/g, '');
+        str = str.replace('.', '');
+        str = str.replace('00000Z', '00Z');
+        return str;
+      };
+
+      const getContentOfLineDefinition = function (definition) {
+        return fullText.substring(fullText.indexOf(definition)).substring(definition.length, fullText.substring(fullText.indexOf(definition)).indexOf('\r'));
+      };
+
+      const toIsoWithOffset = function (date) {
+        return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+      };
+
+      const icalStr = getContentOfLineDefinition('DTSTART:');
+      const strYear = icalStr.substr(0, 4);
+      const strMonth = parseInt(icalStr.substr(4, 2), 10) - 1;
+      const strDay = icalStr.substr(6, 2);
+      const strHour = icalStr.substr(9, 2);
+      const strMin = icalStr.substr(11, 2);
+      const strSec = icalStr.substr(13, 2);
+
+      const oDate = new Date(strYear, strMonth, strDay, strHour, strMin, strSec);
+      const dates = isoToIcal(toIsoWithOffset(oDate)) + '/' + isoToIcal(toIsoWithOffset(oDate.addHours(1)));
+
+      const googleEvent = {
+        baseUrl: 'https://calendar.google.com/calendar/r/eventedit?',
+        text: getContentOfLineDefinition('SUMMARY:'),
+        dates: dates,
+        details: getContentOfLineDefinition('DESCRIPTION:') + '\n' + getContentOfLineDefinition('URL:'),
+        location: getContentOfLineDefinition('LOCATION:')
+      };
+
+      return `${googleEvent.baseUrl}text=${googleEvent.text}&dates=${googleEvent.dates}&details=${googleEvent.details}&location=${googleEvent.location}`;
+    };
 
     this.initExtension = function ($, CXBus, Common) {
       console.log('on init extension VideoEngager');
@@ -126,42 +151,74 @@ class VideoEngager {
         closeIframeOrPopup();
       });
 
-      oVideoEngager.registerCommand("startCalendar", function (e) {
+      oVideoEngager.registerCommand('startCalendar', function (e) {
         startCalendar();
       });
 
-      oVideoEngager.subscribe('Callback.opened', function(e){
-        var AuthToken = null;
-        var date = null;
-  
-        //authenticate
-        var authURL = "https://staging.videoengager.com/api/partners/impersonate/b7abeb05-f821-cff8-0b27-77232116bf1d/639292ca-14a2-400b-8670-1f545d8aa860/slav@videoengager.com";
-        httpRequest(authURL, null,"GET", null, function(data){
-          AuthToken = data.token;;
-        }, function(xmlhttp){
-          debugger;
-  
-          oVideoEngager.command('Callback.showOverlay', {
-  
-            html: '<div>Something Went Wrong</div>'
-  
-          })
+      oVideoEngager.subscribe('Callback.opened', function (e) {
+        // authenticate
+        let date = new Date();
+        document.querySelector('#cx_form_callback_phone_number').value = '';
+        oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
+          document.querySelector('#cx_callback_information').innerText = e.data.responseJSON.body.message;
         });
-  
-        oVideoEngager.subscribe('Calendar.selectedDateTime', function(e){
+
+        oVideoEngager.subscribe('CallbackService.scheduled', function (e) {
+          document.querySelector('#cx-callback-result').innerText = 'Video Call Scheduled';
+          document.querySelector('#cx-callback-result-desc').innerText = 'Your Phone Number';
+          if (document.querySelector('#cx-callback-result-number').innerText === '') {
+            document.querySelector('#cx-callback-result-desc').remove();
+          }
+          $('.cx-buttons-default.cx-callback-done').remove();
+          $('div.cx-footer.cx-callback-scheduled').remove();
+          $('#visitorid').remove();
+          $('#icsDataDownload').remove();
+          $('#downloadLinkHolder').remove();
+          $('#shareURL').remove();
+          $('#visitorInfo').remove();
+          $('.cx-confirmation-wrapper').css('height', 'auto');
+          $('.cx-callback').css('width', '400px');
+          if (e && e.data && e.data.videoengager && e.data.videoengager) {
+            const scheduleDate = new Date(e.data.videoengager.date);
+            let htmlText = '<div id="visitorInfo"><p class="visitorid" id="visitorid">Your meeting is scheduled for</p>';
+            htmlText += '<p class="visitorid">' + scheduleDate.toLocaleDateString() + ' ' + scheduleDate.toLocaleTimeString() + '</p>';
+            htmlText += '<p class="visitorid">Your Meeting URL</p>';
+            htmlText += `<input type="text" value="${e.data.videoengager.meetingUrl}" id="meetingUrl">`;
+            htmlText += '<button id="copyURL">Copy URL</button>';
+            htmlText += '<p>Add this event to your Calendar</p>';
+            htmlText += '</div>';
+            $('.cx-confirmation-wrapper').append(htmlText);
+          }
+          const icsCalendarData = e.data.icsCalendarData;
+          let fileName = new Date(e.data.videoengager.date);
+          fileName = date.getDate() + '' + (date.getMonth() + 1) + date.getFullYear() + date.getHours() + date.getMinutes() + 'videomeeting';
+          const element = document.createElement('a');
+          element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(icsCalendarData));
+          element.setAttribute('download', fileName + '.ics');
+          element.setAttribute('id', 'icsDataDownload');
+          element.setAttribute('class', 'cx-btn cx-btn-default abutton');
+          element.innerText = 'Download .ics';
+          $('.cx-confirmation-wrapper').append('<div id="downloadLinkHolder"></div>');
+          $('#downloadLinkHolder').append(element);
+          let htmlText = '<a class="cx-btn cx-btn-default abutton" target="_blank" href="' + createGoogleCalendarEvent(icsCalendarData) + '">Add to Google Calendar</a>';
+          htmlText += '<a style=" background-color: transparent; border: 0; " class="cx-btn cx-btn-default abutton" target="_blank" href="' + e.data.videoengager.meetingUrl + '">Join Video Meeting</a>';
+          $('#downloadLinkHolder').append(htmlText);
+          $('#copyURL').click(function (event) {
+            event.preventDefault();
+            copyToClipboard();
+          });
+        });
+
+        oVideoEngager.subscribe('Calendar.selectedDateTime', function (e) {
           date = e.data.date;
         });
-  
+
         // to prevent onClose user confirmation dialog, remove events in inputs
-        document.querySelectorAll("input,textarea").forEach((e) => {
-          var new_element = e.cloneNode(true);
-          e.parentNode.replaceChild(new_element, e);
+        document.querySelectorAll('input,textarea').forEach((e) => {
+          const newElement = e.cloneNode(true);
+          e.parentNode.replaceChild(newElement, e);
         });
-  
-        
-  
-         
-      })
+      });
 
       oVideoEngager.subscribe('WebChatService.ended', function () {
         console.log('WebChatService.ended');

@@ -160,7 +160,9 @@ class VideoEngager {
         let date = new Date();
         document.querySelector('#cx_form_callback_phone_number').value = '';
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
-          document.querySelector('#cx_callback_information').innerText = e.data.responseJSON.body.message;
+          if (e.data.responseJSON) {
+            document.querySelector('#cx_callback_information').innerText = e.data.responseJSON.body.message;
+          }
         });
 
         oVideoEngager.subscribe('CallbackService.scheduled', function (e) {

@@ -156,20 +156,24 @@ class VideoEngager {
       });
 
       oVideoEngager.subscribe('Callback.opened', function (e) {
+        document.querySelector('#cx_form_callback_pak').value = window.parameters[window.debugMode].pak;
+        document.querySelector('#cx_form_callback_email').value = window.parameters[window.debugMode].email;
         // authenticate
         let date = new Date();
         document.querySelector('#cx_form_callback_phone_number').value = '';
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
-          if (e.data.responseJSON) {
+          if (e.data.responseJSON && e.data.responseJSON.body) {
             document.querySelector('#cx_callback_information').innerText = e.data.responseJSON.body.message;
           }
         });
 
         oVideoEngager.subscribe('CallbackService.scheduled', function (e) {
           document.querySelector('#cx-callback-result').innerText = 'Video Call Scheduled';
-          document.querySelector('#cx-callback-result-desc').innerText = 'Your Phone Number';
           if (document.querySelector('#cx-callback-result-number').innerText === '') {
             document.querySelector('#cx-callback-result-desc').remove();
+          }
+          if (document.querySelector('#cx-callback-result-desc')) {
+            document.querySelector('#cx-callback-result-desc').innerText = 'Your Phone Number';
           }
           $('.cx-buttons-default.cx-callback-done').remove();
           $('div.cx-footer.cx-callback-scheduled').remove();

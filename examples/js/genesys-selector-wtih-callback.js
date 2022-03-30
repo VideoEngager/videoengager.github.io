@@ -219,6 +219,20 @@ window._genesys.widgets = {
           maxlength: '14',
           placeholder: '+123456789',
           label: '@i18n:callback.CallbackPhoneNumber'
+        },
+        {
+          type: 'hidden',
+          label: 'pak',
+          id: 'cx_form_callback_pak',
+          maxlength: '100',
+          name: 'pak'
+        },
+        {
+          type: 'hidden',
+          label: 'email',
+          id: 'cx_form_callback_email',
+          maxlength: '100',
+          name: 'email'
         }
       ]
     }

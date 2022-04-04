@@ -219,6 +219,13 @@ window._genesys.widgets = {
           maxlength: '14',
           placeholder: '+123456789',
           label: '@i18n:callback.CallbackPhoneNumber'
+        },
+        {
+          type: 'hidden',
+          label: 'tennantId',
+          id: 'cx_form_callback_tennantId',
+          maxlength: '100',
+          name: 'tennantId'
         }
       ]
     }
@@ -226,7 +233,7 @@ window._genesys.widgets = {
   }
 };
 const urlParams = new URLSearchParams(window.location.search);
-window.window.debugMode = urlParams.get('debug');
+window.debugMode = urlParams.get('env') || 'dev';
 
 window.parameters = {
   staging: {
@@ -236,7 +243,6 @@ window.parameters = {
     tennantId: 'oIiTR2XQIkb7p0ub',
     environment: 'https://api.mypurecloud.de',
     queue: 'Support',
-    pak: 'b17cd9a8-e00d-7e98-2894-d33e473e2bbb',
     externalId: 'videoEngager',
     email: 'slav@videoengager.com'
   },
@@ -247,7 +253,6 @@ window.parameters = {
     tennantId: 'test_tenant',
     environment: 'https://api.mypurecloud.com.au',
     queue: 'video',
-    pak: 'DEV2',
     externalId: 'videoEngager',
     email: 't@t'
   },
@@ -258,7 +263,6 @@ window.parameters = {
     tennantId: '3X0eK2gclYkIML92',
     environment: 'https://api.mypurecloud.com',
     queue: 'TestQueue',
-    pak: '72884930-79d1-3221-166d-58b3a9894e16',
     externalId: 'Home',
     email: 'slav@videoengager.com'
   }

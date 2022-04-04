@@ -156,8 +156,7 @@ class VideoEngager {
       });
 
       oVideoEngager.subscribe('Callback.opened', function (e) {
-        document.querySelector('#cx_form_callback_pak').value = window.parameters[window.debugMode].pak;
-        document.querySelector('#cx_form_callback_email').value = window.parameters[window.debugMode].email;
+        document.querySelector('#cx_form_callback_tennantId').value = window.parameters[window.debugMode].tennantId;
         // authenticate
         let date = new Date();
         document.querySelector('#cx_form_callback_phone_number').value = '';

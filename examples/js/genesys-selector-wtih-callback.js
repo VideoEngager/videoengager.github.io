@@ -233,7 +233,7 @@ window._genesys.widgets = {
   }
 };
 const urlParams = new URLSearchParams(window.location.search);
-window.debugMode = urlParams.get('debug') || 'dev';
+window.debugMode = urlParams.get('env') || 'dev';
 
 window.parameters = {
   staging: {

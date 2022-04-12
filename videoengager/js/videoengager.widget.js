@@ -185,12 +185,12 @@ class VideoEngager {
           $('.cx-callback').css('width', '400px');
           if (e && e.data && e.data.videoengager && e.data.videoengager) {
             const scheduleDate = new Date(e.data.videoengager.date);
-            let htmlText = '<div id="visitorInfo"><p class="visitorid" id="visitorid">Your meeting is scheduled for</p>';
-            htmlText += '<p class="visitorid">' + scheduleDate.toLocaleDateString() + ' ' + scheduleDate.toLocaleTimeString() + '</p>';
-            htmlText += '<p class="visitorid">Your Meeting URL</p>';
+            let htmlText = '<div id="visitorInfo"><p class="cx-text" id="visitorid">Your meeting is scheduled for</p>';
+            htmlText += '<p class="cx-text">' + scheduleDate.toLocaleDateString() + ' ' + scheduleDate.toLocaleTimeString() + '</p>';
+            htmlText += '<p class="cx-text">Your Meeting URL</p>';
             htmlText += `<input type="text" value="${e.data.videoengager.meetingUrl}" id="meetingUrl">`;
             htmlText += '<button id="copyURL">Copy URL</button>';
-            htmlText += '<p>Add this event to your Calendar</p>';
+            htmlText += '<p class="cx-text">Add this event to your Calendar</p>';
             htmlText += '</div>';
             $('.cx-confirmation-wrapper').append(htmlText);
           }

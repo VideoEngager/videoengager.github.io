@@ -156,7 +156,7 @@ class VideoEngager {
       });
 
       oVideoEngager.subscribe('Callback.opened', function (e) {
-        document.querySelector('#cx_form_callback_tennantId').value = window.parameters[window.debugMode].tennantId;
+        document.querySelector('#cx_form_callback_tennantId').value = window._genesys.widgets.videoengager.tenantId;
         // authenticate
         let date = new Date();
         document.querySelector('#cx_form_callback_phone_number').value = '';

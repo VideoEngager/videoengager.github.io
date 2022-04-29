@@ -146,6 +146,12 @@ class VideoEngager {
         startVideoEngager();
       });
 
+			oVideoEngager.registerCommand('startWebChat', function (e) {
+				oVideoEngager.command('WebChat.open', {
+					userData: {veVisitorId:null}
+				});
+			});
+
       oVideoEngager.registerCommand('endCall', function (e) {
         oVideoEngager.command('WebChatService.endChat');
         closeIframeOrPopup();

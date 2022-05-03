@@ -1,0 +1,49 @@
+#meetingUrl {
+  width: calc(100% - 90px); 
+  margin: 0;
+  font-size: 1em !important;
+  font-family: Roboto !important;
+}
+#copyURL {
+  color: black;
+  float: right;
+  font-size: 1em !important;
+  font-family: Roboto !important;
+}
+.abutton {
+  text-decoration: none !important;
+  background-color: #EEEEEE;
+  color: #333333;
+  border-top: 1px solid #CCCCCC;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+  border-left: 1px solid #CCCCCC;
+  width: 100%;
+  text-align: center;
+  padding: 3px 10px !important;
+  font-size: 1em !important;
+  height: 30px !important;
+  line-height: none !important;
+}
+.cx-callback .cx-content .cx-confirmation .cx-confirmation-wrapper {
+  font-size: 1em !important;
+  font-family: Roboto !important;
+}
+#downloadLinkHolder {
+  width: 100%;
+  height: 105px;
+  display: grid;
+  align-content: space-between;
+  margin: 10px 0px;
+  width: 100%;
+  font-size: 1em !important;
+  font-family: Roboto !important;
+}
+.cx-widget {
+  font-size: 1em !important;
+  font-family: Roboto !important;
+}
+.cx-text{
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+}

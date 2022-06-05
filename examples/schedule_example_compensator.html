@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Schedule a Video Call</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/custom-iframe.css">
+    <script src="js/draggable.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+        integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js"></script>
+</head>
+
+<body style="position:relative;">
+
+    <div id="mydiv" style="display: none;">
+        <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+        <div id="mydivheader">VideoEngager Iframe
+            <button onclick="closeIframe()" id="exitCall">
+                <svg fill focusable="false" viewBox="0 0 24 24" aria-label="fontSize large">
+                    <path
+                        d="M18.3 5.71a.9959.9959 0 0 0-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z">
+                    </path>
+                </svg> </button>
+        </div>
+        <div id="loader-comp">
+            <div class="wrapper">
+                <span class="circle circle-1"></span>
+                <span class="circle circle-2"></span>
+                <span class="circle circle-3"></span>
+                <span class="circle circle-4"></span>
+                <span class="circle circle-5"></span>
+                <span class="circle circle-6"></span>
+                <span class="circle circle-7"></span>
+                <span class="circle circle-8"></span>
+            </div>
+            <div>Please Wait While We Connect You To The Customer</div>
+        </div>
+        <div id="iframeHolder">
+
+        </div>
+    </div>
+    <div class="container">
+        <h2 class="text-center">Schedule a Video Call</h2>
+    </div>
+
+    <div class="container" id="debug-editor">
+        <table>
+            <tr>
+                <td>
+                    <label>Server URL</label><br>
+                    <input id="serverUrl" value="" /><br>
+                </td>
+                <td>
+                    <label>PAK</label><br>
+                    <input id="pak" value="" /><br>
+                </td>
+                <td>
+                    <label>externalId</label><br>
+                    <input id="externalId" value="" /><br>
+                </td>
+                <td>
+                    <label>Email</label><br>
+                    <input id="email" value="" /><br>
+                </td>
+                <td>
+                    <label>Customer Name</label><br>
+                    <input id="visitorName" value="" /><br>
+                </td>
+                <td>
+                    <label>Customer email</label><br>
+                    <input id="visitorEmail" value="" /><br>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button id="connectButton">Connect</button>
+                    <button id="saveLocalStorageBtn">Save</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="container">
+        <div id='calendar'></div>
+    </div>
+    <div id="calendarModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 id="modalTitle" class="modal-title"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="modalBody" class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="customerName">Customer Name</label>
+                            <input type="text" class="form-control" id="customerName" placeholder="Enter Customer Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerEmail">Customer Email</label>
+                            <input type="email" class="form-control" id="customerEmail"
+                                placeholder="Enter Customer Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Customer Phone number</label>
+                            <input type="phone" class="form-control" id="customerPhone"
+                                placeholder="Enter Customer Phone number">
+                        </div>
+                        <div class="form-group">
+                            <label>Schedule Start Time:</label>
+                            <p id="scheduleStart"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Schedule End Time:</label>
+                            <p id="scheduleEnd"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Duration:</label>
+                            <p id="callDuration"></p>
+                        </div>
+                        <div class="form-group" id="meetingLinkGroup">
+                            <label>Video Meeting Link:</label>
+                            <p><a id="meetingLink" href="" target="_blank"></a></p>
+                        </div>
+                        <div class="form-group" id="agentMeetingLinkGroup">
+                            <label>Video Meeting Link For Agent:</label>
+                            <p><a id="agentMeetingLink" href="" target="_blank"></a></p>
+                        </div>
+                        <div class="form-group" id="agentMeetingLinkGroup">
+                            <label>Video Meeting Iframe For Agent:</label>
+                            <p><a id="agentMeetingLink" href="" target="_blank"></a></p>
+                            <button id="openAgentMeetingLink" class="btn">
+                                <svg width="18" height="14" viewBox="0 0 18 14" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M0 2.23333C0 0.999898 0.999898 0 2.23333 0H8.93333C10.1668 0 11.1667 0.999897 11.1667 2.23333V11.1667C11.1667 12.4001 10.1668 13.4 8.93333 13.4H2.23333C0.999897 13.4 0 12.4001 0 11.1667V2.23333Z"
+                                        fill="white" />
+                                    <path
+                                        d="M14.0173 3.46789C13.639 3.65704 13.4 4.0437 13.4 4.46667V8.93333C13.4 9.3563 13.639 9.74296 14.0173 9.93211L16.2506 11.0488C16.5968 11.2219 17.0079 11.2034 17.3371 10.9999C17.6663 10.7964 17.8667 10.437 17.8667 10.05V3.35C17.8667 2.96299 17.6663 2.60357 17.3371 2.40011C17.0079 2.19664 16.5968 2.17815 16.2506 2.35122L14.0173 3.46789Z"
+                                        fill="white" />
+                                </svg>
+                                Iniciar Videollamada
+                            </button>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="sendNotificationEmail">
+                            <label class="form-check-label" for="sendNotificationEmail">
+                                Send Notification Email
+                            </label>
+                        </div>
+                        <div class="form-check show-in-debug">
+                            <input class="form-check-input" type="checkbox" value="" id="autoAnswer">
+                            <label class="form-check-label" for="autoAnswer">
+                                Allow visitor auto answer
+                            </label>
+                        </div>
+                        <input type="hidden" id="eventId">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="confirmModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Confirmation</h4>
+                </div>
+                <div id="confirmModalBody" class="modal-body">
+                    Are you sure to remove this event?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="cancelBtn">Close</button>
+                    <button type="button" class="btn btn-primary" id="confirmBtn">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var serverUrl = "https://videome.leadsecure.com"
+        var pak = "9be78bc5-a721-9a9b-81a5-87858ddd0bb4";
+        var externalId = "Home";
+        var email = "c4b553c3-ee42-4846-aeb1-f0da3d85058eslav@videoengager.com";
+        var customerName = "Slav Hadjidimitrov";
+        var customerEmail = "slav@videoengager.com";
+        var customerPhone = "123456"
+        var calendar, scheduleStart, scheduleEnd, callDuration, auth, activeStart, activeEnd, fetchStart, fetchEnd;
+        // example for creating iframe for smartvideo
+
+        var createIframe = function (iframeURL) {
+            $('#iframeHolder').html('<iframe allow="camera; microphone; geolocation;" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-downloads" width="100%" height="100%" id="Iframe"></iframe>');
+            $('#Iframe').attr('src', iframeURL);
+
+            if (window.addEventListener) {
+                window.addEventListener("message", messageHandler, false);
+            } else {
+                window.attachEvent("onmessage", messageHandler);
+            }
+        };
+
+        // if iframe is closed remove all iframe html dom elements
+        var closeIframe = function () {
+            $('#iframeHolder').html("");
+            const mydiv = document.getElementById('mydiv');
+            mydiv.style.display = 'none'
+        }
+        function isDebug () {
+            var url = new URL(window.location.href);
+            if (url.searchParams.get("debug") == "true") {
+                return true;
+            }
+            return false;
+        }
+
+        // Get token from API
+        var getToken = function (callback) {
+            $.ajax({
+                url: serverUrl + '/api/partners/impersonate/' + pak + '/' + externalId + '/' + email,
+                type: 'GET',
+                complete: callback,
+                error: function (err) {
+                    console.log('error', err);
+                }
+            });
+        }
+
+        //Fetch schedules with from and to parameters.
+        var fetchSchedules = function (successCallback, failureCallback) {
+            $.ajax({
+                url: serverUrl + '/api/schedules/my/' + fetchStart.getTime() + '/' + fetchEnd.getTime(),
+                type: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', auth);
+                },
+                success: function (result) {
+                    result = result.map(function (item) {
+                        return {
+                            title: 'Video Interview',
+                            start: new Date(item.date),
+                            end: new Date(item.date + item.duration * 60000),
+                            id: item._id,
+                            visitor: item.visitor,
+                            editable: true
+                        }
+                    });
+                    successCallback(result);
+                },
+                error: function (err) {
+                    failureCallback(err);
+                }
+            });
+        }
+
+        // Fetch schedule by id from server
+        var fetchSchedule = function (id, callback) {
+            $.ajax({
+                url: serverUrl + '/api/schedules/my/' + id,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', auth);
+                },
+                success: function (result) {
+                    callback(result)
+                },
+                error: function (err) {
+                    callback(null, err);
+                }
+            });
+        }
+
+        // Create schedule api
+        var createSchedule = function (sendNotificationEmail, postData, callback) {
+            var url = serverUrl + '/api/schedules/my';
+            if (sendNotificationEmail) {
+                url += '?sendNotificationEmail';
+            }
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', auth);
+                },
+                data: JSON.stringify(postData),
+                success: callback,
+                error: function (err) {
+
+                }
+            });
+        }
+
+        // Update schedule api
+        var updateSchedule = function (sendNotificationEmail, postData, callback) {
+            var url = serverUrl + '/api/schedules/my/' + postData._id;
+            if (sendNotificationEmail) {
+                url += '?sendNotificationEmail';
+            }
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                contentType: 'application/json',
+                dataType: 'json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', auth);
+                },
+                data: JSON.stringify(postData),
+                success: callback,
+                error: function (err) {
+
+                }
+            });
+        }
+
+        // Remove schedule from server
+        var removeSchedule = function (eventId, callback) {
+            var url = serverUrl + '/api/schedules/my/' + eventId + '?sendNotificationEmail';
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', auth);
+                },
+                success: function (result) {
+                    callback(result);
+                },
+                error: function (err) {
+                    callback(null, err);
+                }
+            });
+        }
+        //Initialize fullcalendar
+        var initializeCalendar = function () {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                themeSystem: 'bootstrap',
+                initialView: 'timeGridWeek',
+                validRange: {
+                    start: new Date()
+                },
+                allDaySlot: false,
+                slotEventOverlap: false,
+                selectable: true,
+                viewDidMount: function (info) {
+                    activeStart = info.view.activeStart;
+                    activeEnd = info.view.activeEnd;
+                },
+                events: function (info, successCallback, failureCallback) {
+                    fetchStart = info.start;
+                    fetchEnd = info.end;
+                    fetchSchedules(successCallback, failureCallback);
+                },
+                select: function (info) {
+                    //Trigger when user select time to create a event.
+                    console.log(info);
+                    if (!auth) {
+                        window.alert('Please click connect button first.');
+                        return;
+                    }
+                    scheduleStart = info.start;
+                    scheduleEnd = info.end;
+                    callDuration = (scheduleEnd.getTime() - scheduleStart.getTime()) / 60000;
+
+                    $('#customerName').val(customerName);
+                    $('#customerEmail').val(customerEmail);
+                    $('#customerPhone').val(customerPhone);
+                    $('#scheduleStart').html(scheduleStart.toString());
+                    $('#scheduleEnd').html(scheduleEnd.toString());
+                    $('#callDuration').html(callDuration + ' minutes');
+                    $('#meetingLinkGroup').hide();
+                    $('#eventId').val("");
+                    $('#modalTitle').text('Schedule a video call for ' + customerName);
+                    $('#calendarModal').modal();
+                },
+                eventDidMount: function (info) {
+                    var clickCnt = 0;
+                    var oneClickTimer;
+                    $(info.el).append('<i class="fa fa-trash remove-item" style="position: absolute; right: 5px; top: 4px; color: white; z-index: 9;"></i>').on('click', function (ev) {
+                        console.log(info);
+                        if ($(ev.target).hasClass('remove-item')) {
+                            modalConfirm('Are you sure to remove this schedule?', function (confirmed) {
+                                if (confirmed) {
+                                    var eventId = info.event.id;
+                                    removeSchedule(eventId, function (result, err) {
+                                        info.event.remove();
+                                    });
+                                }
+                            });
+                        } else {
+                            clickCnt++;
+                            if (clickCnt === 1) {
+                                oneClickTimer = setTimeout(function () {
+                                    clickCnt = 0;
+                                }, 400)
+                            } else if (clickCnt === 2) {
+                                clearTimeout(oneClickTimer);
+                                clickCnt = 0;
+                                editSchedule(info);
+                            }
+                        }
+                    });
+                },
+                eventDrop: function (info) {
+                    // Trigger when event is drag & drop
+                    console.log(info);
+                    modalConfirm('Are you sure to update this schedule?', function (confirmed) {
+                        if (confirmed) {
+                            updateScheduleDateAndDuration(info.event);
+                        } else {
+                            info.revert();
+                        }
+                    });
+                },
+                eventResize: function (info) {
+                    // Trigger when event is resized
+                    console.log(info);
+                    modalConfirm('Are you sure to update this schedule?', function (confirmed) {
+                        if (confirmed) {
+                            updateScheduleDateAndDuration(info.event);
+                        } else {
+                            info.revert();
+                        }
+                    });
+                }
+            });
+            calendar.render();
+        }
+
+        // Edit schedule
+        var editSchedule = function (info) {
+            var eventId = info.event.id;
+            fetchSchedule(eventId, function (event, err) {
+                if (event) {
+
+                    console.log('event.visitor', event.visitor)
+                    var editName = event.visitor.name;
+                    var editEmail = event.visitor.email;
+                    var editPhone = event.visitor.phone;
+                    var meetingLink = event.visitor.meetingUrl;
+                    callDuration = event.duration;
+                    var agentMeetingLink = event.agent.meetingUrl;
+                    var eventStartDate = new Date(event.date);
+                    var eventEndDate = new Date(event.date + callDuration * 60000);
+                    var autoAnswer = event.visitor.autoAnswer;
+                    ///
+                    const params = window.btoa(JSON.stringify({ schedule: event._id }));
+                    const tranferId = event._id
+                    const token = localStorage.getItem('token');
+                    const url = new URL(agentMeetingLink);
+                    url.pathname = '/static/agent.popup.cloud.html'
+                    url.searchParams.set('token', token);
+                    url.searchParams.set('transferId', tranferId);
+                    url.searchParams.set('params', params);
+                    //
+                    $('#scheduleStart').html(eventStartDate.toString());
+                    $('#scheduleEnd').html(eventEndDate);
+
+                    $('#callDuration').html(callDuration + ' minutes');
+
+                    $('#customerName').val(editName);
+                    $('#customerEmail').val(editEmail);
+                    $('#customerPhone').val(editPhone);
+                    $('#meetingLink').attr('href', meetingLink).text(meetingLink);
+                    $('#agentMeetingLink').attr('href', agentMeetingLink).text(agentMeetingLink);
+                    $('#openAgentMeetingLink').on('click', function (e) {
+                        e.preventDefault();
+                        const mydiv = document.getElementById('mydiv');
+                        mydiv.style.display = '';
+                        createIframe(url.href);
+
+                    });
+
+                    $('#eventId').val(eventId);
+                    $('#meetingLinkGroup').show();
+                    $('#modalTitle').text('Schedule a video call for ' + editName);
+                    $('#autoAnswer').prop('checked', autoAnswer);
+                    $('#calendarModal').modal();
+                }
+            })
+        }
+
+        // Update schedule data
+        var updateScheduleDataFromModal = function (visitor, eventId, sendNotificationEmail) {
+            fetchSchedule(eventId, function (event, err) {
+                event.visitor.name = visitor.name;
+                event.visitor.email = visitor.email;
+                event.visitor.phone = visitor.phone;
+                if (isDebug()) {
+                    event.visitor.autoAnswer = visitor.autoAnswer;
+                }
+                updateSchedule(sendNotificationEmail, event, function (dataSchedule) {
+                    console.log('updateSchedule', dataSchedule);
+                    $('#calendarModal').modal('hide');
+                });
+            });
+        }
+
+        var updateScheduleDateAndDuration = function (event) {
+            var eventId = event.id;
+            var startDate = event.start.getTime();
+            var duration = (event.end.getTime() - startDate) / 60000;
+            fetchSchedule(eventId, function (event, err) {
+                if (event) {
+                    event.date = startDate;
+                    event.duration = duration;
+                    updateSchedule(true, event, function (dataSchedule) {
+                        console.log('updateSchedule', dataSchedule);
+                    });
+                }
+            });
+        }
+
+        // Create schedule data
+        var generateScheduleData = function (visitor, sendNotificationEmail) {
+            var pin = Math.floor(1000 + Math.random() * 9000).toString()
+            var postDataSchedule = {
+                pin: pin,
+                date: scheduleStart.getTime(),
+                duration: callDuration,
+                pak: pak,
+                visitor: visitor
+            };
+            createSchedule(sendNotificationEmail, postDataSchedule, function (dataSchedule) {
+                console.log('createSchedule', dataSchedule);
+                calendar.refetchEvents();
+                $('#calendarModal').modal('hide');
+            });
+        }
+
+        var saveToLocalStorage = function () {
+            serverUrl = $('#serverUrl').val();
+            pak = $('#pak').val();
+            externalId = $('#externalId').val();
+            email = $('#email').val();
+            customerName = $('#visitorName').val();
+            customerEmail = $('#visitorEmail').val();
+            localStorage.setItem('serverUrl', serverUrl);
+            localStorage.setItem('pak', pak);
+            localStorage.setItem('externalId', externalId);
+            localStorage.setItem('email', email);
+            localStorage.setItem('customerName', customerName);
+            localStorage.setItem('customerEmail', customerEmail);
+        };
+        var fetchFromLocalStorage = function () {
+            serverUrl = localStorage.getItem('serverUrl') || serverUrl;
+            pak = localStorage.getItem('pak') || pak;
+            externalId = localStorage.getItem('externalId') || externalId;
+            email = localStorage.getItem('email') || email;
+            customerName = localStorage.getItem('customerName') || customerName;
+            customerEmail = localStorage.getItem('customerEmail') || customerEmail;
+            $('#serverUrl').val(serverUrl);
+            $('#pak').val(pak);
+            $('#externalId').val(externalId);
+            $('#email').val(email);
+            $('#visitorName').val(customerName);
+            $('#visitorEmail').val(customerEmail);
+        }
+
+        var modalConfirm = function (message, callback) {
+            $('#confirmModalBody').text(message);
+            $("#confirmModal").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $("#confirmBtn").unbind().on("click", function () {
+                callback(true);
+                $("#confirmModal").modal('hide');
+            });
+
+            $('#cancelBtn').unbind().on("click", function () {
+                callback(false);
+                $("#confirmModal").modal('hide');
+            });
+        };
+
+        $(document).ready(function () {
+            // window.onmessage = function (event) {
+            //     console.log('recieved event', e)
+            //     if (event?.data?.type) {
+            //         const type = event.data.type
+            //         const mydiv = document.getElementById('mydiv');
+            //         switch (type) {
+            //             case 'popupIsVisible':
+
+            //                 mydiv.style.display = ''
+            //                 break;
+            //             case 'callEstablished':
+
+            //                 break;
+            //             case 'callEnded':
+            //                 mydiv.style.display = 'none'
+            //                 break;
+            //             default:
+            //                 break;
+            //         }
+            //     }
+            // }
+            addEventListener('message', function (e) {
+                console.log('recieved event', e)
+                if (e?.data?.type) {
+                    const type = e.data.type
+                    const mydiv = document.getElementById('mydiv');
+                    switch (type) {
+                        // case 'popupIsVisible':
+
+                        //     mydiv.style.display = ''
+                        //     break;
+                        case 'callEstablished':
+                            const loaderComp = document.getElementById('loader-comp');
+                            loaderComp.style.display = 'none';
+                            break;
+                        case "popupClosed":
+                            closeIframe();
+                            break;
+                        case 'callEnded':
+                            closeIframe();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }, false);
+            fetchFromLocalStorage();
+            if (isDebug()) {
+                $('#debug-editor').show();
+                $('.show-in-debug').show();
+            } else {
+                $('#debug-editor').hide();
+                $('.show-in-debug').hide();
+            }
+
+            getToken(function (data) {
+                var rsp = data.responseJSON;
+                if (data.status === 200) {
+                    var token = rsp.token;
+                    localStorage.setItem('token', token);
+                    auth = 'Bearer ' + token;
+                    initializeCalendar();
+                }
+            });
+        })
+
+        $('#saveLocalStorageBtn').on('click', function () {
+            saveToLocalStorage();
+        });
+
+        $('#connectButton').on('click', function () {
+            saveToLocalStorage();
+            getToken(function (data) {
+                var rsp = data.responseJSON;
+                if (data.status === 200) {
+                    var token = rsp.token;
+                    localStorage.setItem('token', token);
+                    auth = 'Bearer ' + token;
+                    initializeCalendar();
+                }
+            });
+        });
+
+        $('#saveBtn').on('click', function (e) {
+            var sendNotificationEmail = $('#sendNotificationEmail').is(':checked');
+            var autoAnswer = $('#autoAnswer').is(':checked');
+            var visitor = {
+                name: $('#customerName').val(),
+                email: $('#customerEmail').val(),
+                phone: $('#customerPhone').val(),
+                autoAnswer: autoAnswer
+            }
+            if ($('#eventId').val()) {
+                var eventId = $('#eventId').val();
+                updateScheduleDataFromModal(visitor, eventId, sendNotificationEmail);
+            } else {
+                generateScheduleData(visitor, sendNotificationEmail);
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -135,9 +135,9 @@
                             <label>Video Meeting Link For Agent:</label>
                             <p><a id="agentMeetingLink" href="" target="_blank"></a></p>
                         </div>
-                        <div class="form-group" id="agentMeetingLinkGroup">
+                        <div class="form-group" id="agentMeetingLinkIframeGroup">
                             <label>Video Meeting Iframe For Agent:</label>
-                            <p><a id="agentMeetingLink" href="" target="_blank"></a></p>
+                            <p></p>
                             <button id="openAgentMeetingLink" class="btn">
                                 <svg width="18" height="14" viewBox="0 0 18 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -381,6 +381,7 @@
                     $('#scheduleEnd').html(scheduleEnd.toString());
                     $('#callDuration').html(callDuration + ' minutes');
                     $('#meetingLinkGroup').hide();
+                    $('#agentMeetingLinkIframeGroup').hide();
                     $('#eventId').val("");
                     $('#modalTitle').text('Schedule a video call for ' + customerName);
                     $('#calendarModal').modal();
@@ -475,12 +476,16 @@
                     $('#customerPhone').val(editPhone);
                     $('#meetingLink').attr('href', meetingLink).text(meetingLink);
                     $('#agentMeetingLink').attr('href', agentMeetingLink).text(agentMeetingLink);
+                    if (agentMeetingLink) {
+                        $('#agentMeetingLinkIframeGroup').show();
+                    }
                     $('#openAgentMeetingLink').on('click', function (e) {
                         e.preventDefault();
-                        const mydiv = document.getElementById('mydiv');
-                        mydiv.style.display = '';
-                        createIframe(url.href);
-
+                        if (agentMeetingLink) {
+                            const mydiv = document.getElementById('mydiv');
+                            mydiv.style.display = '';
+                            createIframe(url.href);
+                        }
                     });
 
                     $('#eventId').val(eventId);

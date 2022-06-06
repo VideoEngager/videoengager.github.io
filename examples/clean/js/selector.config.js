@@ -22,7 +22,7 @@ window._genesys.widgets = {
     audioOnly: false, // start the VideoEngager call with audioOnly (without video)
     autoAccept: true, // during the call negotiation - automatically enter the call
     enablePrecall: false, // start the VideoEngager session with precall window - the visitor could select their camera/microphone settings
-    useWebChatForm: false, // start VideoEngager session with/without registration form
+    useWebChatForm: true, // start VideoEngager session with/without registration form
     // in case of useWebChatForm == false, pass the following data to conversation initialization - visible for agent
     extraAgentMessage: '**This is a VideoEngager Video Call!!!**',
     webChatFormData: {

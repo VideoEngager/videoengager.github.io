@@ -750,8 +750,8 @@
                         if (data) {
                             $('#customCssContainer').show();
                         }
-                        if (brokerage.branding.customCss.enabled) {
-                            $('#EnableCustomCssCheck').prop('checked', brokerage.branding.customCss.enabled);
+                        if (brokerage.branding.customCss?.enabled) {
+                            $('#EnableCustomCssCheck').prop('checked', brokerage.branding.customCss?.enabled);
                             $('#agent_custom_css').show();
                             $('#visitor_custom_css').show();
                         } else {
@@ -759,8 +759,8 @@
                             $('#agent_custom_css').hide();
                             $('#visitor_custom_css').hide();
                         }
-                        $('#AgentCustomCssPath').val(brokerage.branding.customCss.agentCustomCss);
-                        $('#VisitorCustomCssPath').val(brokerage.branding.customCss.visitorCustomCss);
+                        $('#AgentCustomCssPath').val(brokerage.branding.customCss?.agentCustomCss);
+                        $('#VisitorCustomCssPath').val(brokerage.branding.customCss?.visitorCustomCss);
 
                     },
                     error: function (error) {

@@ -85,38 +85,42 @@
                     <button id="saveLocalStorageBtn">Save</button>
                 </td>
             </tr>
-            <tr id="customCssContainer" style="display: none;">
-                <td>
 
-                    <label>Custom CSS</label><br>
-                    <input id="EnableCustomCssCheck" type="checkbox" value="" /> <label>Enable Custom CSS</label><br>
-                </td>
-                <td id="agent_custom_css" style="display: none;">
-
-                    <label>Agent Custom CSS URL</label><br>
-                    <input id="AgentCustomCssPath" value="" /><br>
-                </td>
-                <td id="visitor_custom_css" style="display: none;">
-
-                    <label>Visitor Custom CSS URL</label><br>
-                    <input id="VisitorCustomCssPath" value="" /><br>
-                </td>
-                <td>
-
-                    <br>
-                    <label id="custom_css_notify" class="custom_css_notify"
-                        style="opacity:0; background: green; ">Notification</label><br>
-                </td>
-            </tr>
-            <tr>
-
-                <td>
-                    <button id="saveBrokerage">Save css Config</button>
-                </td>
-            </tr>
 
         </table>
+
     </div>
+    <table>
+        <tr id="customCssContainer" style="display: none;">
+            <td>
+
+                <label>Custom CSS</label><br>
+                <input id="EnableCustomCssCheck" type="checkbox" value="" /> <label>Enable Custom CSS</label><br>
+            </td>
+            <td id="agent_custom_css" style="display: none;">
+
+                <label>Agent Custom CSS URL</label><br>
+                <input id="AgentCustomCssPath" value="" /><br>
+            </td>
+            <td id="visitor_custom_css" style="display: none;">
+
+                <label>Visitor Custom CSS URL</label><br>
+                <input id="VisitorCustomCssPath" value="" /><br>
+            </td>
+            <td>
+
+                <br>
+                <label id="custom_css_notify" class="custom_css_notify"
+                    style="opacity:0; background: green; ">Notification</label><br>
+            </td>
+        </tr>
+        <tr>
+
+            <td>
+                <button id="saveBrokerage" style="display: none;">Save css Config</button>
+            </td>
+        </tr>
+    </table>
     <div class="container">
         <div id='calendar'></div>
     </div>
@@ -220,10 +224,10 @@
         </div>
     </div>
     <script>
-        var serverUrl = "https://videome.leadsecure.com"
-        var pak = "9be78bc5-a721-9a9b-81a5-87858ddd0bb4";
+        var serverUrl = "https://staging.videoengager.com"
+        var pak = "c50859ee-fda4-258b-6c34-d77566373a7b";
         var externalId = "Home";
-        var email = "c4b553c3-ee42-4846-aeb1-f0da3d85058eslav@videoengager.com";
+        var email = "f6668859-042a-4b04-b998-3e3261fb3dd4slav@videoengager.com";
         var customerName = "Slav Hadjidimitrov";
         var customerEmail = "slav@videoengager.com";
         var customerPhone = "123456"
@@ -235,11 +239,11 @@
             $('#iframeHolder').html('<iframe allow="camera; microphone; geolocation;" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-downloads" width="100%" height="100%" id="Iframe"></iframe>');
             $('#Iframe').attr('src', iframeURL);
 
-            if (window.addEventListener) {
-                window.addEventListener("message", messageHandler, false);
-            } else {
-                window.attachEvent("onmessage", messageHandler);
-            }
+            // if (window.addEventListener) {
+            //     window.addEventListener("message", messageHandler, false);
+            // } else {
+            //     window.attachEvent("onmessage", messageHandler);
+            // }
         };
 
         // if iframe is closed remove all iframe html dom elements
@@ -749,6 +753,7 @@
                         brokerage = data;
                         if (data) {
                             $('#customCssContainer').show();
+                            $('#saveBrokerage').show();
                         }
                         if (brokerage.branding.customCss?.enabled) {
                             $('#EnableCustomCssCheck').prop('checked', brokerage.branding.customCss?.enabled);

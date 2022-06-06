@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Clean Demo</title>
+    <script type="text/javascript" src="./js/script.js"></script>
+    <link href="https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css" type="text/css" rel="stylesheet">
+    <style>
+        input,
+        select {
+            display: flex;
+            width: 350px;
+            font-size: 1em;
+        }
+
+        input[type="radio"] {
+            display: inline;
+            width: auto;
+        }
+
+        label {
+            font-size: 1.2em;
+            font-family: Arial;
+        }
+
+        body {
+            padding: 10px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 5px;
+            font-size: 1em;
+        }
+        #startStopButtons {
+            display: block;
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+            margin: 10px;
+            padding: 10px;
+            font-size: 2em;
+        }
+        p {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body class="container-body">
+    <!-- user environment configuration -->
+    <div id="envConf">
+        <h2>Genesys widget environment configurations</h2>
+
+        <label for="targetAddress"> Queue Name </label>
+        <input type="text" id="targetAddress" name="targetAddress" value="">
+
+        <p>PureCloud agent will receive interaction when is "On Queue" with queue from Queue Name</p>
+
+        <label for="orgGuid"> Organization ID </label>
+        <input type="text" id="orgGuid" name="orgGuid" value="">
+
+        <p>To get your Organization Id open PureCloud as admin and navigate to Admin > Account Settings > Organization Settings > Organization Details (tab) > Advanced > Organization ID</p>
+
+        <label for="deploymentKey"> Deployment ID </label>
+        <input type="text" id="deploymentKey" name="deploymentKey" value="">
+
+        <p>To get your Deployment Id open PureCloud as admin and navigate to Admin > Contact Center > Widgets > Deployment Key (column)</p>
+
+        <label for="tenantId"> Tenant ID </label>
+        <input type="text" id="tenantId" name="tenantId" value="">
+
+        <p>To get your Tenant ID select Apps > SmartVideo_Settings > Tenant ID</p>
+
+        <label for="veUrl"> VideoEngager URL </label>
+        <input type="text" id="veUrl" name="veUrl" value="">
+
+        <p>VideoEngager Server Url</p>
+
+        <label for="dataURL"> Genesys Environment </label>
+        <select name="dataURL" id="dataURL"></select>
+
+        <p>Select PureCloud Region</p>
+
+        <div id="confButtons">
+            <button id="saveConf">Save</button><button id="clearConf">Safe Clear</button>
+            <p>You can save current Advanced Settings to Local Storage. They can be reused from the same browser from the same computer many times. Safe Clear will remove settings from Local Storage and Input Fields</p>
+        </div>
+    </div>
+    <!-- runtime configuration change demo -->
+    <div id="ui_mode">
+        <p>Genesys widget configurations:</p>
+        <input type="radio" id="singlebutton" name="ui_mode" value="singlebutton" checked="checked">
+        <label for="singlebutton">singlebutton</label><br>
+        <input type="radio" id="sidebar" name="ui_mode" value="sidebar">
+        <label for="sidebar">sidebar</label><br>
+        <input type="radio" id="selector" name="ui_mode" value="selector">
+        <label for="selector">selector</label><br>
+    </div>
+    <div>
+        <button id="loadGenesysLib">Load Genesys Widget Lib</button>
+        <p>Genesys Widget Library will be loaded and genesys widget will run instantly according to the configuration</p>
+    </div>
+    <div id="startStopButtons">
+        <!-- singlebutton mode button -->
+        <button id="startVideoCall" style="display: none;">Start Video Call</button>
+        <button id="stopVideoCall" style="display: none;">Stop Video Call</button>
+    </div>
+
+    <div>
+        <pre><textarea id="jsondump" cols="80" rows="20"></textarea></pre>
+    </div>
+
+</body>
+
+</html>

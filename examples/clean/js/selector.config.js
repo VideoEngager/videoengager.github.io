@@ -15,14 +15,15 @@ window._genesys.widgets = {
     ]
   },
   videoengager: {
-    callHolder: 'myVideoHolder',
-    platform: 'purecloud',
-    tenantId: '',
-    veUrl: '',
-    audioOnly: false,
-    autoAccept: true,
-    enablePrecall: false,
-    useWebChatForm: false,
+    callHolder: '', // provides a place/div/ where the VideoEngager widget should be inserted. Otherwise, popup winddow will be open.
+    platform: 'purecloud', // one of 'engage' or 'purecloud'
+    tenantId: '', // VideoEngager tenantId
+    veUrl: '', // VideoEngager api base url
+    audioOnly: false, // start the VideoEngager call with audioOnly (without video)
+    autoAccept: true, // during the call negotiation - automatically enter the call
+    enablePrecall: false, // start the VideoEngager session with precall window - the visitor could select their camera/microphone settings
+    useWebChatForm: false, // start VideoEngager session with/without registration form
+    // in case of useWebChatForm == false, pass the following data to conversation initialization - visible for agent
     extraAgentMessage: '**This is a VideoEngager Video Call!!!**',
     webChatFormData: {
       nickname: 'Visitor',
@@ -31,8 +32,19 @@ window._genesys.widgets = {
       subject: 'Duty Free Demo',
       userData: {}
     },
-    customAttributes: {
-      ipad: true
+    i18n: {
+      en: { // localize the web chat buttons/tittle in registration form
+        ChatFormSubmitVideo: 'Start Video',
+        WebChatTitleVideo: 'Video Chat',
+        ChatFormSubmitAudio: 'Start Audio',
+        WebChatTitleAudio: 'Audio Chat'
+      },
+      fr: {
+        ChatFormSubmitVideo: 'Démarrer la vidéo',
+        WebChatTitleVideo: 'Chat la vidéo',
+        ChatFormSubmitAudio: 'Démarrer la audio',
+        WebChatTitleAudio: 'Chat audio'
+      }
     }
   },
   webchat: {
@@ -72,8 +84,8 @@ window._genesys.widgets = {
       },
       {
         enable: true,
-        clickCommand: 'VideoEngager.startCalendar',
-        readyEvent: 'Calendar.ready',
+        clickCommand: 'Callback.open',
+        readyEvent: 'Callback.ready',
         displayName: 'Schedule Video',
         i10n: 'ChatTitle',
         icon: 'videochat'
@@ -116,7 +128,7 @@ window._genesys.widgets = {
     ewt: {},
     countryCodes: true,
     scheduledCallback: true,
-    form: {
+    form: { // overrides the webchat form data. comment this property if there is no need to override
       wrapper: '<table></table>',
       inputs: [
         {

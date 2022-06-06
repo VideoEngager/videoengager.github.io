@@ -18,12 +18,14 @@ class VideoEngager {
     let webChatFormData;
     let title;
     let submitButton;
+    let customAttributes;
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
         WebChatTitleVideo: 'Video Chat',
         ChatFormSubmitAudio: 'Start Audio',
-        WebChatTitleAudio: 'Audio Chat'
+        WebChatTitleAudio: 'Audio Chat',
+        scheduledFor: 'Your meeting is scheduled for'
       }
     };
     let form;
@@ -51,6 +53,7 @@ class VideoEngager {
           console.log('iframe holder is passing, but not found: ', config.callHolder);
         }
       }
+      customAttributes = config.customAttributes ? config.customAttributes : null;
     };
 
     const startVideoEngager = function () {
@@ -183,9 +186,10 @@ class VideoEngager {
           $('#visitorInfo').remove();
           $('.cx-confirmation-wrapper').css('height', 'auto');
           $('.cx-callback').css('width', '400px');
+
           if (e && e.data && e.data.videoengager && e.data.videoengager) {
             const scheduleDate = new Date(e.data.videoengager.date);
-            let htmlText = '<div id="visitorInfo"><p class="cx-text" id="visitorid">Your meeting is scheduled for</p>';
+            let htmlText = '<div id="visitorInfo"><p class="cx-text" id="visitorid">' + i18n[lang].scheduledFor + '</p>';
             htmlText += '<p class="cx-text">' + scheduleDate.toLocaleDateString() + ' ' + scheduleDate.toLocaleTimeString() + '</p>';
             htmlText += '<p class="cx-text">Your Meeting URL</p>';
             htmlText += `<input type="text" value="${e.data.videoengager.meetingUrl}" id="meetingUrl">`;
@@ -405,7 +409,7 @@ class VideoEngager {
       console.log('InteractionId :', interactionId);
       const left = (screen.width / 2) - (770 / 2);
       const top = (screen.height / 2) - (450 / 2);
-      const str = {
+      let str = {
         video_on: startWithVideo,
         sessionId: interactionId,
         hideChat: true,
@@ -417,6 +421,10 @@ class VideoEngager {
         skip_private: true,
         inichat: 'false'
       };
+
+      if (customAttributes) {
+        str = Object.assign(str, customAttributes);
+      }
 
       const encodedString = window.btoa(JSON.stringify(str));
       const homeURL = veUrl + '/static/';

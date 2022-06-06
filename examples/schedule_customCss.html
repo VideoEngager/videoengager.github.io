@@ -85,6 +85,36 @@
                     <button id="saveLocalStorageBtn">Save</button>
                 </td>
             </tr>
+            <tr id="customCssContainer" style="display: none;">
+                <td>
+
+                    <label>Custom CSS</label><br>
+                    <input id="EnableCustomCssCheck" type="checkbox" value="" /> <label>Enable Custom CSS</label><br>
+                </td>
+                <td id="agent_custom_css" style="display: none;">
+
+                    <label>Agent Custom CSS URL</label><br>
+                    <input id="AgentCustomCssPath" value="" /><br>
+                </td>
+                <td id="visitor_custom_css" style="display: none;">
+
+                    <label>Visitor Custom CSS URL</label><br>
+                    <input id="VisitorCustomCssPath" value="" /><br>
+                </td>
+                <td>
+
+                    <br>
+                    <label id="custom_css_notify" class="custom_css_notify"
+                        style="opacity:0; background: green; ">Notification</label><br>
+                </td>
+            </tr>
+            <tr>
+
+                <td>
+                    <button id="saveBrokerage">Save css Config</button>
+                </td>
+            </tr>
+
         </table>
     </div>
     <div class="container">
@@ -197,6 +227,7 @@
         var customerName = "Slav Hadjidimitrov";
         var customerEmail = "slav@videoengager.com";
         var customerPhone = "123456"
+        let brokerage;
         var calendar, scheduleStart, scheduleEnd, callDuration, auth, activeStart, activeEnd, fetchStart, fetchEnd;
         // example for creating iframe for smartvideo
 
@@ -224,6 +255,63 @@
             }
             return false;
         }
+        const customContainer = document.getElementById('custom_css_notify');
+        let cssNotifyTimeout
+        const customCssNotify = {
+            error: (notification) => {
+                if (cssNotifyTimeout) {
+                    clearTimeout(cssNotifyTimeout);
+                }
+                customContainer.style.opacity = 0;
+                customContainer.style.background = 'red';
+                customContainer.style.color = 'white';
+                customContainer.style.opacity = 100;
+                customContainer.innerText = notification;
+                cssNotifyTimeout = setTimeout(() => {
+                    customContainer.style.opacity = 0;
+                }, 5000);
+            },
+            info: (notification) => {
+                if (cssNotifyTimeout) {
+                    clearTimeout(cssNotifyTimeout);
+                }
+                customContainer.style.opacity = 0;
+                customContainer.style.background = 'blue';
+                customContainer.style.color = 'white';
+                customContainer.style.opacity = 100;
+                customContainer.innerText = notification;
+                cssNotifyTimeout = setTimeout(() => {
+                    customContainer.style.opacity = 0;
+                }, 5000);
+            },
+            success: (notification) => {
+                if (cssNotifyTimeout) {
+                    clearTimeout(cssNotifyTimeout);
+                }
+                customContainer.style.opacity = 0;
+                customContainer.style.background = 'green';
+                customContainer.style.color = 'black';
+                customContainer.style.opacity = 100;
+                customContainer.innerText = notification;
+                cssNotifyTimeout = setTimeout(() => {
+                    customContainer.style.opacity = 0;
+                }, 5000);
+            },
+            warning: (notification) => {
+                if (cssNotifyTimeout) {
+                    clearTimeout(cssNotifyTimeout);
+                }
+                customContainer.style.opacity = 0;
+                customContainer.style.background = 'orange';
+                customContainer.style.color = 'black';
+                customContainer.style.opacity = 100;
+                customContainer.innerText = notification;
+                cssNotifyTimeout = setTimeout(() => {
+                    customContainer.style.opacity = 0;
+                }, 5000);
+            },
+        }
+
 
         // Get token from API
         var getToken = function (callback) {
@@ -648,6 +736,39 @@
                 $('#debug-editor').hide();
                 $('.show-in-debug').hide();
             }
+            const getUserData = function (token) {
+                $.ajax({
+                    url: serverUrl + '/api/brokerages/users/me',
+                    type: 'GET',
+                    method: 'GET',
+                    contentType: 'application/json',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('Authorization', 'bearer ' + localStorage.getItem('token'));
+                    },
+                    success: function (data) {
+                        brokerage = data;
+                        if (data) {
+                            $('#customCssContainer').show();
+                        }
+                        if (brokerage.branding.customCss.enabled) {
+                            $('#EnableCustomCssCheck').prop('checked', brokerage.branding.customCss.enabled);
+                            $('#agent_custom_css').show();
+                            $('#visitor_custom_css').show();
+                        } else {
+                            $('#EnableCustomCssCheck').prop('checked', false);
+                            $('#agent_custom_css').hide();
+                            $('#visitor_custom_css').hide();
+                        }
+                        $('#AgentCustomCssPath').val(brokerage.branding.customCss.agentCustomCss);
+                        $('#VisitorCustomCssPath').val(brokerage.branding.customCss.visitorCustomCss);
+
+                    },
+                    error: function (error) {
+                        failureCallback(error);
+                        console.error(error);
+                    }
+                });
+            };
 
             getToken(function (data) {
                 var rsp = data.responseJSON;
@@ -656,10 +777,19 @@
                     localStorage.setItem('token', token);
                     auth = 'Bearer ' + token;
                     initializeCalendar();
+                    getUserData();
                 }
             });
         })
-
+        $('#EnableCustomCssCheck').on('change', function () {
+            if (this.checked) {
+                $('#agent_custom_css').show();
+                $('#visitor_custom_css').show();
+            } else {
+                $('#agent_custom_css').hide();
+                $('#visitor_custom_css').hide();
+            }
+        });
         $('#saveLocalStorageBtn').on('click', function () {
             saveToLocalStorage();
         });
@@ -692,6 +822,46 @@
             } else {
                 generateScheduleData(visitor, sendNotificationEmail);
             }
+        });
+
+        /**
+         * Saves user settings
+         * @param settings
+         */
+        const saveBrokerageSettings = function (settings) {
+
+            $.ajax({
+                url: serverUrl + '/api/brokerages/users/me',
+                type: 'PUT',
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(settings),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'bearer ' + localStorage.getItem('token'));
+                },
+                success: function () {
+                    customCssNotify.success('Settings saved successfully');
+                },
+                error: function (error) {
+                    $('#saveSettingsMessage').text('Invalid brokerage data');
+                    console.error(error);
+                    customCssNotify.success('Invalid brokerage data');
+                }
+            });
+        };
+        $('#saveBrokerage').on('click', function (e) {
+            const customCssEnabled = $('#EnableCustomCssCheck').prop('checked');
+            const settings = {
+                branding: {
+                    customCss: {
+                        enabled: customCssEnabled,
+                        agentCustomCss: customCssEnabled ? $('#AgentCustomCssPath').val() : null,
+                        visitorCustomCss: customCssEnabled ? $('#VisitorCustomCssPath').val() : null
+                    },
+
+                }
+            }
+            saveBrokerageSettings(settings);
         });
     </script>
 </body>

@@ -195,7 +195,18 @@ class VideoEngager {
         document.querySelector('#cx_form_callback_tennantId').value = window._genesys.widgets.videoengager.tenantId;
         // authenticate
         let date = new Date();
-        document.querySelector('#cx_form_callback_phone_number').value = '';
+        document.querySelector('#cx_form_callback_phone_number').value = window._genesys.widgets.videoengager.dialCountryCode || '';
+        const cbox = document.querySelectorAll('.country');
+        // set click event listener for dial code selector
+        for (const element of cbox) {
+          element.addEventListener('click', function (e) {
+            if (e && e.currentTarget &&
+              e.currentTarget.children[2] &&
+              e.currentTarget.children[2].innerText) {
+              document.querySelector('#cx_form_callback_phone_number').value = e.currentTarget.children[2].innerText;
+            }
+          });
+        }
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
           if (e.data.responseJSON && e.data.responseJSON.body) {
             document.querySelector('#cx_callback_information').innerText = e.data.responseJSON.body.message;

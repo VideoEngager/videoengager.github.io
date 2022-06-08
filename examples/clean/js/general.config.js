@@ -13,7 +13,7 @@ window._genesys.widgets = {
   },
   videoengager: {
     callHolder: '', // provides a place/div/ where the VideoEngager widget should be inserted. Otherwise, popup winddow will be open.
-    platform: '', // one of 'engage'     or 'purecloud'
+    platform: 'purecloud', // one of 'engage'     or 'purecloud'
     tenantId: '', // VideoEngager tenantId
     veUrl: '', // VideoEngager api base url
     audioOnly: false, // start the VideoEngager call with audioOnly (without video)

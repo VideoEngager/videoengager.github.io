@@ -1,0 +1,13 @@
+{
+    "en": {
+        "orgGuid": "639292ca-14a2-400b-8670-1f545d8aa860",
+        "deploymentKey": "1b4b1124-b51c-4c38-899f-3a90066c76cf",
+        "veUrl": "https://staging.leadsecure.com",
+        "tenantId": "oIiTR2XQIkb7p0ub",
+        "dataURL": "https://api.mypurecloud.de",
+        "targetAddress": "Support"
+    },
+    "de": {
+        "targetAddress": "Support_DE"
+    }
+}

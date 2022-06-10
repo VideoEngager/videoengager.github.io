@@ -1,13 +1,5 @@
-/* global videoEngager */
-const urlParams = new URLSearchParams(window.location.search);
-const debugMode = urlParams.get('debug');
-
-if (!window._genesys) {
-  window._genesys = {};
-}
-if (!window._gt) {
-  window._gt = [];
-}
+if (!window._genesys) window._genesys = {};
+if (!window._gt) window._gt = [];
 window._genesys.widgets = {
   main: {
     debug: true,
@@ -28,20 +20,19 @@ window._genesys.widgets = {
   },
   videoengager: {
     // callHolder: "myVideoHolder",
-    // platfor: engage or purecloud
-    platform: 'purecloud',
+    platform: 'purecloud', // engage or purecloud
     tenantId: '0FphTk091nt7G1W7',
-    veUrl: 'https://videome.leadsecure.com',
+    veUrl: 'https://videome.leadsecure.com/',
     audioOnly: false,
     autoAccept: true,
     enablePrecall: false,
     useWebChatForm: true,
     webChatFormData: {
-      nickname: 'videoengager',
-      firstname: 'videoengager.github.io',
-      lastname: 'leadsecure',
-      email: 'development@videoengager.com',
-      subject: 'test',
+      nickname: 'Jonny',
+      firstname: 'Johnathan',
+      lastname: 'Smith',
+      email: 'jon.smith@mail.com',
+      subject: 'product questions',
       userData: {}
     },
     i18n: {
@@ -124,32 +115,35 @@ window._genesys.widgets = {
         hideChannelWhenThresholdMax: false
       }
     },
-    {
+    /* {
       enable: true,
-      clickCommand: 'CallUs.open',
-      displayName: 'Call Us',
-      i18n: 'CallusTitle',
-      icon: 'call-outgoing',
+      clickCommand: 'VideoEngager.startCalendar',
+      readyEvent: 'Calendar.ready',
+      displayName: 'Schedule Video',
+      i10n: 'ChatTitle',
+      icon: 'videochat',
+      html: '',
       ewt: {
         display: true,
-        queue: 'callus_ewt_test_eservices',
+        queue: '',
         availabilityThresholdMin: 300,
-        availabilityThresholdMax: 480,
+        availabilityThresholdMax: 3600,
         hideChannelWhenThresholdMax: false
       }
-    },
+    }, */
     {
       enable: true,
       clickCommand: 'Callback.open',
-      displayName: 'Receive a Call',
-      i18n: 'CallbackTitle',
+      readyEvent: 'Callback.ready',
+      displayName: 'Schedule Video Meeting',
+      i10n: 'ChatTitle',
       icon: 'call-incoming',
       html: '',
       ewt: {
         display: true,
-        queue: 'callback_ewt_test_eservices',
+        queue: '',
         availabilityThresholdMin: 300,
-        availabilityThresholdMax: 480,
+        availabilityThresholdMax: 3600,
         hideChannelWhenThresholdMax: false
       }
     }
@@ -171,17 +165,86 @@ window._genesys.widgets = {
   },
   extensions: {
     VideoEngager: videoEngager.initExtension
+  },
+  calendar: {
+    showAvailability: false,
+    numberOfDays: 5,
+    hideUnavailableTimeSlots: false,
+    calendarHours: {
+      interval: 10,
+      allDay: {
+        openTime: '09:00',
+        closeTime: '23:59'
+      }
+    }
+  },
+  callback: {
+    dataURL: 'https://dev.videoengager.com/api/genesys/callback',
+    userData: {
+      environment: 'https://api.mypurecloud.com'
+    },
+    countryCodes: true,
+    immediateCallback: true,
+    scheduledCallback: true,
+    ewt: {
+      display: true,
+      queue: 'TestQueue',
+      threshold: 2000,
+      immediateCallback: {
+        thresholdMin: 1000,
+        thresholdMax: 3000
+      }
+    },
+    form: {
+      wrapper: '<table></table>',
+      inputs: [
+        {
+          id: 'cx_form_callback_firstname',
+          name: 'firstname',
+          maxlength: '100',
+          placeholder: '@i18n:callback.CallbackPlaceholderOptional',
+          label: '@i18n:callback.CallbackFirstName'
+        },
+
+        {
+          id: 'cx_form_callback_lastname',
+          name: 'lastname',
+          maxlength: '100',
+          placeholder: '@i18n:callback.CallbackPlaceholderOptional',
+          label: '@i18n:callback.CallbackLastName'
+        },
+        {
+          id: 'cx_form_callback_phone_number',
+          name: 'phonenumber',
+          maxlength: '14',
+          placeholder: '+123456789',
+          label: '@i18n:callback.CallbackPhoneNumber'
+        },
+        {
+          type: 'hidden',
+          label: 'tennantId',
+          id: 'cx_form_callback_tennantId',
+          maxlength: '100',
+          name: 'tennantId'
+        }
+      ]
+    }
+
   }
 };
+const urlParams = new URLSearchParams(window.location.search);
+window.debugMode = urlParams.get('env') || 'dev';
 
-const parameters = {
+window.parameters = {
   staging: {
     organizationId: '639292ca-14a2-400b-8670-1f545d8aa860',
     deploymentId: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
     videoengagerUrl: 'https://staging.leadsecure.com',
     tennantId: 'oIiTR2XQIkb7p0ub',
     environment: 'https://api.mypurecloud.de',
-    queue: 'Support'
+    queue: 'Support',
+    externalId: 'videoEngager',
+    email: 'slav@videoengager.com'
   },
   dev: {
     organizationId: '327d10eb-0826-42cd-89b1-353ec67d33f8',
@@ -189,7 +252,9 @@ const parameters = {
     videoengagerUrl: 'https://dev.videoengager.com',
     tennantId: 'test_tenant',
     environment: 'https://api.mypurecloud.com.au',
-    queue: 'video'
+    queue: 'video',
+    externalId: 'videoEngager',
+    email: 't@t'
   },
   prod: {
     organizationId: 'c4b553c3-ee42-4846-aeb1-f0da3d85058e',
@@ -197,16 +262,21 @@ const parameters = {
     videoengagerUrl: 'https://videome.leadsecure.com',
     tennantId: '3X0eK2gclYkIML92',
     environment: 'https://api.mypurecloud.com',
-    queue: 'TestQueue'
+    queue: 'TestQueue',
+    externalId: 'Home',
+    email: 'slav@videoengager.com'
   }
 };
 
 // development
-if (debugMode) {
-  window._genesys.widgets.videoengager.tenantId = parameters[debugMode].tennantId;
-  window._genesys.widgets.videoengager.veUrl = parameters[debugMode].videoengagerUrl;
-  window._genesys.widgets.webchat.transport.dataURL = parameters[debugMode].environment;
-  window._genesys.widgets.webchat.transport.deploymentKey = parameters[debugMode].deploymentId;
-  window._genesys.widgets.webchat.transport.orgGuid = parameters[debugMode].organizationId;
-  window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = parameters[debugMode].queue;
+if (window.debugMode) {
+  window._genesys.widgets.videoengager.tenantId = window.parameters[window.debugMode].tennantId;
+  window._genesys.widgets.videoengager.veUrl = window.parameters[window.debugMode].videoengagerUrl;
+  window._genesys.widgets.webchat.transport.dataURL = window.parameters[window.debugMode].environment;
+  window._genesys.widgets.webchat.transport.deploymentKey = window.parameters[window.debugMode].deploymentId;
+  window._genesys.widgets.webchat.transport.orgGuid = window.parameters[window.debugMode].organizationId;
+  window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = window.parameters[window.debugMode].queue;
+  window._genesys.widgets.callback.dataURL = window.parameters[window.debugMode].videoengagerUrl + '/api/genesys/callback';
+  window._genesys.widgets.callback.ewt.queue = window.parameters[window.debugMode].queue;
+  window._genesys.widgets.callback.userData.environment = window.parameters[window.debugMode].environment;
 }

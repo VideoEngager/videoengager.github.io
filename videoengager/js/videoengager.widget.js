@@ -51,6 +51,9 @@ class VideoEngager {
       extraAgentMessage = config.extraAgentMessage;
       veUrl = config.veUrl;
       selectedLang = window._genesys.widgets.main.lang || 'en';
+      if (!config.i18n) {
+        config.i18n = {};
+      }
       if (!config.i18n[selectedLang]) {
         config.i18n[selectedLang] = {};
       }

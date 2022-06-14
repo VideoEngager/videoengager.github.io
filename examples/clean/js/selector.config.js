@@ -85,7 +85,7 @@ window._genesys.widgets = {
       },
       {
         enable: true,
-        clickCommand: 'Callback.open',
+        clickCommand: 'VideoEngager.openCallback',
         readyEvent: 'Callback.ready',
         displayName: 'Schedule Video',
         i10n: 'ChatTitle',

@@ -1,6 +1,8 @@
 /* global XMLHttpRequest CXBus  */
 const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
 const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/videoengager.widget.js';
+const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
+
 const genesysEnvList = [
   'mypurecloud.com.au',
   'mypurecloud.com',
@@ -26,11 +28,17 @@ document.addEventListener('DOMContentLoaded', async function (e) {
   // otherwise use local storage if exist
   fillEnvironmentParameters();
 
+  const scriptElement = document.createElement('link');
+  scriptElement.setAttribute('type', 'text/css');
+  scriptElement.setAttribute('rel', 'stylesheet');
+  scriptElement.setAttribute('href', videoengagerWidgetCSSCDN);
+  document.head.append(scriptElement);
+
   // 1- load cxbus
   await loadJS(widgetBaseUrl + 'cxbus.min.js');
   CXBus.configure({ debug: true, pluginsPath: widgetBaseUrl + 'plugins/' });
   // 2- load video engager
-  await loadJS(videoengagerWidgetCDN);
+  await loadJS('/videoengager/js/videoengager.widget.js');
   // 3- load config
   await loadJS('./js/general.config.js');
 

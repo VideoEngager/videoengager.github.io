@@ -21,6 +21,7 @@ class VideoEngager {
     let submitButton;
     let customAttributes;
     let callback = null;
+ 
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
@@ -43,6 +44,18 @@ class VideoEngager {
     let enablePrecallForced;
     const KEEP_ALIVE_TIME = 10 * 60 * 1000; // keep alive time 10min
     let keepAliveTimer;
+
+    const base = `<div>
+    <form class="cx-content wrapper" data-async="" enctype="multipart/form-data" novalidate="">
+        <div class="cx-confirmation" role="dialog" aria-labelledby="cx-callback-result cx-callback-result-desc cx-callback-result-number">
+            <div class="cx-confirmation-wrapper" style="height: auto;">
+                <h3 id="cx-callback-result" class="i18n cx-confirm-description" data-message="CallbackConfirmDescription"></h3>
+                <div id="cx-callback-result-desc" class="i18n cx-number-description" data-message="CallbackNumberDescription">Your Phone Number</div>
+                <h4 id="cx-callback-result-number" class="cx-number-confirm"></h4>
+            </div>
+        </div>
+    </form>
+</div>`;
 
     const init = function () {
       const config = window._genesys.widgets.videoengager;
@@ -74,68 +87,25 @@ class VideoEngager {
       customAttributes = config.customAttributes ? config.customAttributes : null;
     };
 
-    const startVideoEngager = function () {
-      if (popupinstance && !popupinstance.closed) {
-        popupinstance.focus();
-        return;
-      }
+    const terminateCallback = function () {
+      fetch('https://dev.videoengager.com/api/genesys/callback', {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          conversationId: callback.conversationID,
+          tennantId: TENANT_ID
+        }),
+        method: 'DELETE'
+      });
+      oVideoEngager.command('Callback.close');
+      callback = null;
 
-      if (!interactionId) {
-        interactionId = getGuid();
-      }
-      if (useWebChatForm) {
-        initiateForm();
-      } else {
-        startWithHiddenChat();
-      }
     };
 
-    const QuerySelector = function (query) {
-      if (document.querySelector(query)) {
-        return document.querySelector(query);
-      } else {
-        return { remove: () => null };
-      }
-    };
-
-    const startCalendar = function () {
-      oVideoEngager.command('Calendar.generate')
-        .done(function (e) {
-          console.log(e);
-        })
-        .fail(function (e) {
-          console.error('Calendar failed  : ', e);
-        });
-    };
-
-    const openCallback = function () {
-      if (callback !== null) {
-        // open callback page
-        document.querySelector('.cx-callback').style.display = 'block';
-      } else {
-        oVideoEngager.command('Callback.open')
-          .done(function (e) {
-            console.log(e);
-          })
-          .fail(function (e) {
-            console.error('Calendar failed  : ', e);
-          });
-      }
-    };
-
-    const copyToClipboard = function (e) {
-      const copyText = document.getElementById('meetingUrl');
-      copyText.select();
-      copyText.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(copyText.value);
-    };
-
-    const showScheduledCallback = function (e, date) {
-      callback = {};
-      callback.videoengager = e.data.videoengager;
-      callback.icsCalendarData = e.data.icsCalendarData;
-      callback.conversationID = e.data.genesys.conversation.id;
-
+    const populateCallbackUI = function (date) {
+      QuerySelector('.cx-body').innerHTML = base;
       QuerySelector('#cx-callback-result').innerText = i18n.VideoCallScheduled;
       if (QuerySelector('#cx-callback-result-number').innerText === '') {
         QuerySelector('#cx-callback-result-desc').remove();
@@ -190,22 +160,112 @@ class VideoEngager {
         copyToClipboard();
       });
       QuerySelector('#endcallback').addEventListener('click', function (e) {
-        fetch('https://dev.videoengager.com/api/genesys/callback', {
+        terminateCallback();
+        console.log('callback terminated by button');
+      });
+      
+      window.localStorage.setItem('conversationId', callback.conversationID);
+    };
+
+    const alreadyExistCallback = function (data, date) {
+      if (data && data.videoengager && data.icsCalendarData && data.genesys) {
+        date = new Date(data.videoengager.date);
+        if (date < new Date()) {
+          window.localStorage.removeItem('conversationId');
+          openCallbackPanel();
+          return;
+        }
+        callback = {};
+        callback.videoengager = data.videoengager;
+        callback.icsCalendarData = data.icsCalendarData;
+        callback.conversationID = data.genesys.id;
+        console.log('exist callback');
+        oVideoEngager.command('Callback.open')
+          .done(function (e) {
+            populateCallbackUI(date);
+          });
+      } else {
+        window.localStorage.removeItem('conversationId');
+        oVideoEngager.command('Callback.open');
+      }
+    };
+
+    const openCallbackPanel = function () {
+      oVideoEngager.command('Callback.open')
+        .done(function (e) {
+          console.log(e);
+        })
+        .fail(function (e) {
+          console.error('Calendar failed  : ', e);
+        });
+    };
+
+    const startVideoEngager = function () {
+      if (popupinstance && !popupinstance.closed) {
+        popupinstance.focus();
+        return;
+      }
+
+      if (!interactionId) {
+        interactionId = getGuid();
+      }
+      if (useWebChatForm) {
+        initiateForm();
+      } else {
+        startWithHiddenChat();
+      }
+    };
+
+    const QuerySelector = function (query) {
+      if (document.querySelector(query)) {
+        return document.querySelector(query);
+      } else {
+        return {
+          remove: () => null,
+          style: {}
+        };
+      }
+    };
+
+    const startCalendar = function () {
+      oVideoEngager.command('Calendar.generate')
+        .done(function (e) {
+          console.log(e);
+        })
+        .fail(function (e) {
+          console.error('Calendar failed  : ', e);
+        });
+    };
+
+    const openCallback = function () {
+      if (callback !== null) {
+        // open callback page
+        document.querySelector('.cx-callback').style.display = 'block';
+        return;
+      }
+      const storedConversationId = window.localStorage.getItem('conversationId');
+      if (storedConversationId) {
+        fetch('https://dev.videoengager.com/api/genesys/callback/' + TENANT_ID + '/' + storedConversationId, {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json'
           },
-          referrer: 'https://developer.genesys.cloud/',
-          referrerPolicy: 'strict-origin-when-cross-origin',
-          body: JSON.stringify({
-            conversationID: callback.conversationID,
-            tennantId: TENANT_ID
-          }),
-          method: 'DELETE'
-        });
-        oVideoEngager.command('Callback.close');
-        callback = null;
-      });
+          method: 'GET'
+        })
+          .then(response => response.json())
+          .then(function (data) {
+            alreadyExistCallback(data);
+          });
+      } else {
+        openCallbackPanel();
+      }
+    };
+
+    const copyToClipboard = function (e) {
+      const copyText = document.getElementById('meetingUrl');
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(copyText.value);
     };
 
     const createGoogleCalendarEvent = function (fullText) {
@@ -327,7 +387,11 @@ class VideoEngager {
           if (!e || !e.data || !e.data.videoengager) {
             return; // handle error
           }
-          showScheduledCallback(e, date);
+          callback = {};
+          callback.videoengager = e.data.videoengager;
+          callback.icsCalendarData = e.data.icsCalendarData;
+          callback.conversationID = e.data.genesys.conversation.id;
+          populateCallbackUI(date);
         });
 
         oVideoEngager.subscribe('Calendar.selectedDateTime', function (e) {

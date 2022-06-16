@@ -21,7 +21,7 @@ class VideoEngager {
     let submitButton;
     let customAttributes;
     let callback = null;
- 
+    let callbackTimeout = null;
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
@@ -43,6 +43,7 @@ class VideoEngager {
     let form;
     let enablePrecallForced;
     const KEEP_ALIVE_TIME = 10 * 60 * 1000; // keep alive time 10min
+    const MIN30 = 30 * 60 * 1000;
     let keepAliveTimer;
 
     const base = `<div>
@@ -50,8 +51,6 @@ class VideoEngager {
         <div class="cx-confirmation" role="dialog" aria-labelledby="cx-callback-result cx-callback-result-desc cx-callback-result-number">
             <div class="cx-confirmation-wrapper" style="height: auto;">
                 <h3 id="cx-callback-result" class="i18n cx-confirm-description" data-message="CallbackConfirmDescription"></h3>
-                <div id="cx-callback-result-desc" class="i18n cx-number-description" data-message="CallbackNumberDescription">Your Phone Number</div>
-                <h4 id="cx-callback-result-number" class="cx-number-confirm"></h4>
             </div>
         </div>
     </form>
@@ -94,17 +93,18 @@ class VideoEngager {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          conversationId: callback.conversationID,
+          conversationId: callback.conversationId,
           tennantId: TENANT_ID
         }),
         method: 'DELETE'
       });
       oVideoEngager.command('Callback.close');
       callback = null;
-
+      clearTimeout(callbackTimeout);
+      callbackTimeout = null;
     };
 
-    const populateCallbackUI = function (date) {
+    const populateCallbackUI = function () {
       QuerySelector('.cx-body').innerHTML = base;
       QuerySelector('#cx-callback-result').innerText = i18n.VideoCallScheduled;
       if (QuerySelector('#cx-callback-result-number').innerText === '') {
@@ -126,13 +126,15 @@ class VideoEngager {
       const closeButton = QuerySelector('.cx-button-close');
       closeButton.replaceWith(closeButton.cloneNode(true));
 
-      QuerySelector('.cx-button-close').addEventListener('click', function (e) {
+      QuerySelector('.cx-button-close').addEventListener('click', function () {
         document.querySelector('.cx-callback').style.display = 'none';
       });
 
       const scheduleDate = new Date(callback.videoengager.date);
       let confirmationText = '<div id="visitorInfo"><p class="cx-text" id="visitorid">' + i18n.ScheduledFor + '</p>';
       confirmationText += '<p class="cx-text">' + scheduleDate.toLocaleDateString() + ' ' + scheduleDate.toLocaleTimeString() + '</p>';
+      confirmationText += '<p class="cx-text">' + i18n.YourPhoneNumber + '</p>';
+      confirmationText += '<p class="cx-text">' + callback.videoengager.phone + '</p>';
       confirmationText += '<p class="cx-text">' + i18n.YourMeetingURL + '</p>';
       confirmationText += '<button id="copyURL">' + i18n.CopyURL + '</button>';
       confirmationText += `<input type="text" value="${callback.videoengager.meetingUrl}" id="meetingUrl">`;
@@ -141,8 +143,7 @@ class VideoEngager {
       QuerySelector('.cx-confirmation-wrapper').innerHTML += confirmationText;
 
       const icsCalendarData = callback.icsCalendarData;
-      let fileName = new Date(callback.videoengager.date);
-      fileName = date.getDate() + '' + (date.getMonth() + 1) + date.getFullYear() + date.getHours() + date.getMinutes() + 'videomeeting';
+      const fileName = scheduleDate.getDate() + '' + (scheduleDate.getMonth() + 1) + scheduleDate.getFullYear() + scheduleDate.getHours() + scheduleDate.getMinutes() + 'videomeeting';
       const element = document.createElement('a');
       element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(icsCalendarData));
       element.setAttribute('download', fileName + '.ics');
@@ -159,18 +160,24 @@ class VideoEngager {
         e.preventDefault();
         copyToClipboard();
       });
-      QuerySelector('#endcallback').addEventListener('click', function (e) {
+      QuerySelector('#endcallback').addEventListener('click', function () {
         terminateCallback();
         console.log('callback terminated by button');
       });
-      
-      window.localStorage.setItem('conversationId', callback.conversationID);
+
+      window.localStorage.setItem('conversationId', callback.conversationId);
+
+      callbackTimeout = setTimeout(function () {
+        clearTimeout(callbackTimeout);
+        terminateCallback();
+      }, scheduleDate.getTime() - new Date().getTime() + MIN30);
     };
 
     const alreadyExistCallback = function (data, date) {
       if (data && data.videoengager && data.icsCalendarData && data.genesys) {
-        date = new Date(data.videoengager.date);
-        if (date < new Date()) {
+        date = data.videoengager.date;
+        // check if callback date has been passed
+        if (new Date(date + MIN30) < new Date()) {
           window.localStorage.removeItem('conversationId');
           openCallbackPanel();
           return;
@@ -178,11 +185,11 @@ class VideoEngager {
         callback = {};
         callback.videoengager = data.videoengager;
         callback.icsCalendarData = data.icsCalendarData;
-        callback.conversationID = data.genesys.id;
+        callback.conversationId = data.genesys.id;
         console.log('exist callback');
         oVideoEngager.command('Callback.open')
-          .done(function (e) {
-            populateCallbackUI(date);
+          .done(function () {
+            populateCallbackUI();
           });
       } else {
         window.localStorage.removeItem('conversationId');
@@ -243,9 +250,9 @@ class VideoEngager {
         document.querySelector('.cx-callback').style.display = 'block';
         return;
       }
-      const storedConversationId = window.localStorage.getItem('conversationId');
-      if (storedConversationId) {
-        fetch('https://dev.videoengager.com/api/genesys/callback/' + TENANT_ID + '/' + storedConversationId, {
+      const storedconversationId = window.localStorage.getItem('conversationId');
+      if (storedconversationId) {
+        fetch('https://dev.videoengager.com/api/genesys/callback/' + TENANT_ID + '/' + storedconversationId, {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json'
@@ -364,7 +371,6 @@ class VideoEngager {
       oVideoEngager.subscribe('Callback.opened', function (e) {
         QuerySelector('#cx_form_callback_tennantId').value = window._genesys.widgets.videoengager.tenantId;
         // authenticate
-        let date = new Date();
         QuerySelector('#cx_form_callback_phone_number').value = window._genesys.widgets.videoengager.dialCountryCode || '';
         const cbox = document.querySelectorAll('.country');
         // set click event listener for dial code selector
@@ -379,7 +385,7 @@ class VideoEngager {
         }
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
           if (e.data.responseJSON && e.data.responseJSON.body) {
-            QuerySelector('#cx_callback_information').innerText = e.data.responseJSON.body.message;
+            QuerySelector('#cx_callback_information').innerText = JSON.stringify(e.data.responseJSON.body.message);
           }
         });
 
@@ -390,12 +396,12 @@ class VideoEngager {
           callback = {};
           callback.videoengager = e.data.videoengager;
           callback.icsCalendarData = e.data.icsCalendarData;
-          callback.conversationID = e.data.genesys.conversation.id;
-          populateCallbackUI(date);
+          callback.conversationId = e.data.genesys.conversation.id;
+          populateCallbackUI();
         });
 
         oVideoEngager.subscribe('Calendar.selectedDateTime', function (e) {
-          date = e.data.date;
+          // date selected
         });
 
         // to prevent onClose user confirmation dialog, remove events in inputs

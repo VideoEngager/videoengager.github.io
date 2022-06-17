@@ -170,14 +170,21 @@ class VideoEngager {
       callbackTimeout = setTimeout(function () {
         clearTimeout(callbackTimeout);
         terminateCallback();
-      }, scheduleDate.getTime() - new Date().getTime() + MIN30);
+      }, new Date().getTime() + MIN30);
     };
 
     const alreadyExistCallback = function (data, date) {
       if (data && data.videoengager && data.icsCalendarData && data.genesys) {
         date = data.videoengager.date;
         // check if callback date has been passed
-        if (new Date(date + MIN30) < new Date()) {
+        // only check if participans are not connected
+        let connected = false;
+        for (const participant of data.genesys.participants) {
+          if (participant.state === 'connected') {
+            connected = true;
+          }
+        }
+        if (connected !== true && new Date(date + MIN30) < new Date()) {
           window.localStorage.removeItem('conversationId');
           openCallbackPanel();
           return;

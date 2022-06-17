@@ -170,7 +170,7 @@ class VideoEngager {
       callbackTimeout = setTimeout(function () {
         clearTimeout(callbackTimeout);
         terminateCallback();
-      }, new Date().getTime() + MIN30);
+      }, MIN30);
     };
 
     const alreadyExistCallback = function (data, date) {

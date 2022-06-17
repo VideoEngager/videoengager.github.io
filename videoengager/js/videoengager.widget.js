@@ -21,7 +21,6 @@ class VideoEngager {
     let submitButton;
     let customAttributes;
     let callback = null;
-    let callbackTimeout = null;
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
@@ -100,8 +99,6 @@ class VideoEngager {
       });
       oVideoEngager.command('Callback.close');
       callback = null;
-      clearTimeout(callbackTimeout);
-      callbackTimeout = null;
     };
 
     const populateCallbackUI = function () {
@@ -166,11 +163,6 @@ class VideoEngager {
       });
 
       window.localStorage.setItem('conversationId', callback.conversationId);
-
-      callbackTimeout = setTimeout(function () {
-        clearTimeout(callbackTimeout);
-        terminateCallback();
-      }, MIN30);
     };
 
     const alreadyExistCallback = function (data, date) {

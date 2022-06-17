@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
   await loadJS(widgetBaseUrl + 'cxbus.min.js');
   CXBus.configure({ debug: true, pluginsPath: widgetBaseUrl + 'plugins/' });
   // 2- load video engager
-  await loadJS('/videoengager/js/videoengager.widget.js');
+  await loadJS(videoengagerWidgetCDN);
   // 3- load config
   await loadJS('./js/general.config.js');
 

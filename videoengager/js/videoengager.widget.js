@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* global fetch */
+/* global fetch alert */
 class VideoEngager {
   constructor () {
     let popupinstance = null;
@@ -86,7 +86,7 @@ class VideoEngager {
     };
 
     const terminateCallback = function () {
-      fetch('https://dev.videoengager.com/api/genesys/callback', {
+      fetch(window._genesys.widgets.videoengager.veUrl + '/api/genesys/callback', {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json'
@@ -96,6 +96,9 @@ class VideoEngager {
           tennantId: TENANT_ID
         }),
         method: 'DELETE'
+      }).catch(function (e) {
+        alert('Error on removing callback');
+        console.error(e);
       });
       oVideoEngager.command('Callback.close');
       callback = null;
@@ -233,16 +236,6 @@ class VideoEngager {
       }
     };
 
-    const startCalendar = function () {
-      oVideoEngager.command('Calendar.generate')
-        .done(function (e) {
-          console.log(e);
-        })
-        .fail(function (e) {
-          console.error('Calendar failed  : ', e);
-        });
-    };
-
     const openCallback = function () {
       if (callback !== null) {
         // open callback page
@@ -251,7 +244,7 @@ class VideoEngager {
       }
       const storedconversationId = window.localStorage.getItem('conversationId');
       if (storedconversationId) {
-        fetch('https://dev.videoengager.com/api/genesys/callback/' + TENANT_ID + '/' + storedconversationId, {
+        fetch(window._genesys.widgets.videoengager.veUrl + '/api/genesys/callback/' + TENANT_ID + '/' + storedconversationId, {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json'
@@ -261,6 +254,9 @@ class VideoEngager {
           .then(response => response.json())
           .then(function (data) {
             alreadyExistCallback(data);
+          }).catch(function (e) {
+            alert('Error on getting existing callback \ntenantId: ' + TENANT_ID + '\nconversationId: ' + storedconversationId);
+            console.error(e);
           });
       } else {
         openCallbackPanel();
@@ -359,29 +355,17 @@ class VideoEngager {
         closeIframeOrPopup();
       });
 
-      oVideoEngager.registerCommand('startCalendar', function (e) {
-        startCalendar();
-      });
-
       oVideoEngager.registerCommand('openCallback', function (e) {
         openCallback();
       });
 
       oVideoEngager.subscribe('Callback.opened', function (e) {
+        QuerySelector('#cx_form_callback_subject').style.display = 'none';
+        QuerySelector('label[for="cx_form_callback_subject"]').style.display = 'none';
+
         QuerySelector('#cx_form_callback_tennantId').value = window._genesys.widgets.videoengager.tenantId;
         // authenticate
         QuerySelector('#cx_form_callback_phone_number').value = window._genesys.widgets.videoengager.dialCountryCode || '';
-        const cbox = document.querySelectorAll('.country');
-        // set click event listener for dial code selector
-        for (const element of cbox) {
-          element.addEventListener('click', function (e) {
-            if (e && e.currentTarget &&
-              e.currentTarget.children[2] &&
-              e.currentTarget.children[2].innerText) {
-              QuerySelector('#cx_form_callback_phone_number').value = e.currentTarget.children[2].innerText;
-            }
-          });
-        }
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
           if (e.data.responseJSON && e.data.responseJSON.body) {
             QuerySelector('#cx_callback_information').innerText = JSON.stringify(e.data.responseJSON.body.message);

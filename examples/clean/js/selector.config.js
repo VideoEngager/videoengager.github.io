@@ -11,7 +11,8 @@ window._genesys.widgets = {
       'webchatservice',
       'sidebar',
       'calendar',
-      'callbackservice'
+      'callbackservice',
+      'common'
     ]
   },
   videoengager: {
@@ -85,7 +86,7 @@ window._genesys.widgets = {
       },
       {
         enable: true,
-        clickCommand: 'Callback.open',
+        clickCommand: 'VideoEngager.openCallback',
         readyEvent: 'Callback.ready',
         displayName: 'Schedule Video',
         i10n: 'ChatTitle',
@@ -110,14 +111,14 @@ window._genesys.widgets = {
     ]
   },
   calendar: {
-    showAvailability: false,
-    numberOfDays: 5,
+    showAvailability: true,
+    numberOfDays: 7,
     hideUnavailableTimeSlots: false,
     calendarHours: {
-      interval: 10,
+      interval: 60,
       allDay: {
-        openTime: '09:00',
-        closeTime: '23:59'
+        openTime: '08:00',
+        closeTime: '19:00'
       }
     }
   },
@@ -128,39 +129,6 @@ window._genesys.widgets = {
     },
     ewt: {},
     countryCodes: true,
-    scheduledCallback: true,
-    form: { // overrides the webchat form data. comment this property if there is no need to override
-      wrapper: '<table></table>',
-      inputs: [
-        {
-          id: 'cx_form_callback_firstname',
-          name: 'firstname',
-          maxlength: '100',
-          placeholder: '@i18n:callback.CallbackPlaceholderOptional',
-          label: '@i18n:callback.CallbackFirstName'
-        },
-        {
-          id: 'cx_form_callback_lastname',
-          name: 'lastname',
-          maxlength: '100',
-          placeholder: '@i18n:callback.CallbackPlaceholderOptional',
-          label: '@i18n:callback.CallbackLastName'
-        },
-        {
-          id: 'cx_form_callback_phone_number',
-          name: 'phonenumber',
-          maxlength: '14',
-          placeholder: '+123456789',
-          label: '@i18n:callback.CallbackPhoneNumber'
-        },
-        {
-          type: 'hidden',
-          label: 'tennantId',
-          id: 'cx_form_callback_tennantId',
-          maxlength: '100',
-          name: 'tennantId'
-        }
-      ]
-    }
+    scheduledCallback: true
   }
 };

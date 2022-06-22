@@ -11,7 +11,8 @@ window._genesys.widgets = {
       'webchatservice',
       'sidebar',
       'calendar',
-      'callbackservice'
+      'callbackservice',
+      'common'
     ]
   },
   videoengager: {

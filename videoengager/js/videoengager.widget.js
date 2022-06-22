@@ -97,8 +97,12 @@ class VideoEngager {
         }),
         method: 'DELETE'
       }).catch(function (e) {
-        alert('Error on removing callback');
         console.error(e);
+        const Common = window._genesys.widgets.common;
+        if (!Common) {
+          return;
+        }
+        Common.showAlert(QuerySelector('.cx-widget.cx-callback'), { text: 'Error on removing callback', buttonText: 'Ok' });
       });
       oVideoEngager.command('Callback.close');
       callback = null;
@@ -255,8 +259,14 @@ class VideoEngager {
           .then(function (data) {
             alreadyExistCallback(data);
           }).catch(function (e) {
-            alert('Error on getting existing callback \ntenantId: ' + TENANT_ID + '\nconversationId: ' + storedconversationId);
             console.error(e);
+            const Common = window._genesys.widgets.common;
+            if (!Common) {
+              return;
+            }
+            oVideoEngager.command('Callback.open').done(function () {
+              Common.showAlert(QuerySelector('.cx-widget.cx-callback'), { text: 'Error on getting existing callback \ntenantId: ' + TENANT_ID + '\nconversationId: ' + storedconversationId, buttonText: 'Ok' });
+            });
           });
       } else {
         openCallbackPanel();

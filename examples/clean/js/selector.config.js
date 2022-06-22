@@ -111,7 +111,7 @@ window._genesys.widgets = {
     ]
   },
   calendar: {
-    showAvailability: true,
+    showAvailability: false,
     numberOfDays: 7,
     hideUnavailableTimeSlots: false,
     calendarHours: {

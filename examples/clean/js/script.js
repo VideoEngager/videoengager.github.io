@@ -204,7 +204,7 @@ const setConfig = async function (uimode) {
   window._genesys.widgets.webchat.transport.orgGuid = document.querySelector('#orgGuid').value;
   window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = document.querySelector('#targetAddress').value;
   if (uimode !== 'singlebutton') {
-    window._genesys.widgets.callback.dataURL = document.querySelector('#veUrl').value + '/api/genesys/callback/' + document.querySelector('#tenantId').value;
+    window._genesys.widgets.callback.dataURL = document.querySelector('#veUrl').value + '/api/genesys/callback';
     window._genesys.widgets.callback.ewt.queue = document.querySelector('#targetAddress').value;
     window._genesys.widgets.callback.userData.environment = document.querySelector('#dataURL').value;
   }

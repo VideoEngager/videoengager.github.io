@@ -86,15 +86,11 @@ class VideoEngager {
     };
 
     const terminateCallback = function () {
-      fetch(window._genesys.widgets.videoengager.veUrl + '/api/genesys/callback', {
+      fetch(window._genesys.widgets.videoengager.veUrl + '/api/genesys/callback/' + TENANT_ID + '/' + callback.conversationId, {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          conversationId: callback.conversationId,
-          tennantId: TENANT_ID
-        }),
         method: 'DELETE'
       }).catch(function (e) {
         console.error(e);

@@ -127,13 +127,6 @@ class VideoEngager {
       QuerySelector('.cx-confirmation-wrapper').style.height = 'auto';
       QuerySelector('.cx-callback').style.width = '400px';
 
-      const closeButton = QuerySelector('.cx-button-close');
-      closeButton.replaceWith(closeButton.cloneNode(true));
-
-      QuerySelector('.cx-button-close').addEventListener('click', function () {
-        document.querySelector('.cx-callback').style.display = 'none';
-      });
-
       const scheduleDate = new Date(callback.videoengager.date);
       let confirmationText = '<div id="visitorInfo"><p class="cx-text" id="visitorid">' + i18n.ScheduledFor + '</p>';
       confirmationText += '<p class="cx-text">' + scheduleDate.toLocaleDateString() + ' ' + scheduleDate.toLocaleTimeString() + '</p>';
@@ -172,9 +165,9 @@ class VideoEngager {
       window.localStorage.setItem('conversationId', callback.conversationId);
     };
 
-    const alreadyExistCallback = function (data, date) {
+    const processCallbackRead = function (data) {
       if (data && data.videoengager && data.icsCalendarData && data.genesys) {
-        date = data.videoengager.date;
+        const date = data.videoengager.date;
         // check if callback date has been passed
         // only check if participans are not connected
         let connected = false;
@@ -185,7 +178,7 @@ class VideoEngager {
         }
         if (connected !== true && new Date(date + MIN30) < new Date()) {
           window.localStorage.removeItem('conversationId');
-          openCallbackPanel();
+          // openCallbackPanel();
           return;
         }
         callback = {};
@@ -193,24 +186,10 @@ class VideoEngager {
         callback.icsCalendarData = data.icsCalendarData;
         callback.conversationId = data.genesys.id;
         console.log('exist callback');
-        oVideoEngager.command('Callback.open')
-          .done(function () {
-            populateCallbackUI();
-          });
+        populateCallbackUI();
       } else {
         window.localStorage.removeItem('conversationId');
-        oVideoEngager.command('Callback.open');
       }
-    };
-
-    const openCallbackPanel = function () {
-      oVideoEngager.command('Callback.open')
-        .done(function (e) {
-          console.log(e);
-        })
-        .fail(function (e) {
-          console.error('Calendar failed  : ', e);
-        });
     };
 
     const startVideoEngager = function () {
@@ -240,12 +219,7 @@ class VideoEngager {
       }
     };
 
-    const openCallback = function () {
-      if (callback !== null) {
-        // open callback page
-        document.querySelector('.cx-callback').style.display = 'block';
-        return;
-      }
+    const checkExistingCallback = function () {
       const storedconversationId = window.localStorage.getItem('conversationId');
       if (storedconversationId) {
         fetch(window._genesys.widgets.videoengager.veUrl + '/api/genesys/callback/' + TENANT_ID + '/' + storedconversationId, {
@@ -257,20 +231,18 @@ class VideoEngager {
         })
           .then(response => response.json())
           .then(function (data) {
-            alreadyExistCallback(data);
+            processCallbackRead(data);
           }).catch(function (e) {
             console.error(e);
             const Common = window._genesys.widgets.common;
             if (!Common) {
               return;
             }
-            oVideoEngager.command('Callback.open').done(function () {
-              Common.showAlert(QuerySelector('.cx-widget.cx-callback'), { text: 'Error on getting existing callback \ntenantId: ' + TENANT_ID + '\nconversationId: ' + storedconversationId, buttonText: 'Ok' });
-            });
+            Common.showAlert(QuerySelector('.cx-widget.cx-callback'), { text: 'Error on getting existing callback \ntenantId: ' + TENANT_ID + '\nconversationId: ' + storedconversationId, buttonText: 'Ok' });
           });
-      } else {
-        openCallbackPanel();
+        return false;
       }
+      return true;
     };
 
     const copyToClipboard = function (e) {
@@ -354,6 +326,13 @@ class VideoEngager {
         return oData;
       });
 
+      oVideoEngager.before('CallbackService.configure', function (oData) {
+        window._genesys.widgets.callback.dataURL += '/' + window._genesys.widgets.videoengager.tenantId;
+        console.log('CallbackService dataURL:', window._genesys.widgets.callback.dataURL);
+        console.log('oData:', oData);
+        return oData;
+      });
+
       oVideoEngager.registerCommand('startWebChat', function (e) {
         oVideoEngager.command('WebChat.open', {
           userData: { veVisitorId: null }
@@ -366,7 +345,7 @@ class VideoEngager {
       });
 
       oVideoEngager.registerCommand('openCallback', function (e) {
-        openCallback();
+        checkExistingCallback();
       });
 
       oVideoEngager.subscribe('Callback.opened', function (e) {
@@ -381,6 +360,8 @@ class VideoEngager {
             QuerySelector('#cx_callback_information').innerText = JSON.stringify(e.data.responseJSON.body.message);
           }
         });
+
+        checkExistingCallback();
 
         oVideoEngager.subscribe('CallbackService.scheduled', function (e) {
           if (!e || !e.data || !e.data.videoengager) {

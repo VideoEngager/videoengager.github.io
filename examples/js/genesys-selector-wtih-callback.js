@@ -4,17 +4,12 @@ window._genesys.widgets = {
   main: {
     debug: true,
     theme: 'dark',
-    plugins: [
-      'cx-webchat',
-      'cx-webchat-service',
-      'cx-cobrowse',
-      'cx-channel-selector',
-      'cx-stats-service',
-      'cx-call-us',
-      'cx-callback-service',
-      'cx-callback',
-      'cx-calendar',
-      'cx-sidebar'
+    preload: [
+      'webchatservice',
+      'sidebar',
+      'calendar',
+      'callbackservice',
+      'common'
     ],
     lang: 'en'
   },

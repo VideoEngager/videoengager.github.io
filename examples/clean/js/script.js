@@ -1,6 +1,6 @@
 /* global XMLHttpRequest CXBus  */
 const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
-const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/videoengager.widget.js';
+const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/1.02/videoengager.widget.js';
 const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
 
 const genesysEnvList = [

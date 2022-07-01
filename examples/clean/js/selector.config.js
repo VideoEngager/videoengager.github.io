@@ -11,7 +11,8 @@ window._genesys.widgets = {
       'webchatservice',
       'sidebar',
       'calendar',
-      'callbackservice'
+      'callbackservice',
+      'common'
     ]
   },
   videoengager: {
@@ -111,13 +112,13 @@ window._genesys.widgets = {
   },
   calendar: {
     showAvailability: false,
-    numberOfDays: 5,
+    numberOfDays: 7,
     hideUnavailableTimeSlots: false,
     calendarHours: {
-      interval: 10,
+      interval: 60,
       allDay: {
-        openTime: '09:00',
-        closeTime: '23:59'
+        openTime: '08:00',
+        closeTime: '19:00'
       }
     }
   },

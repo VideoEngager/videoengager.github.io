@@ -352,8 +352,8 @@ class VideoEngager {
         // authenticate
         QuerySelector('#cx_form_callback_phone_number').value = window._genesys.widgets.videoengager.dialCountryCode || '';
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
-          if (e.data.responseJSON && e.data.responseJSON.body) {
-            QuerySelector('#cx_callback_information').innerText = JSON.stringify(e.data.responseJSON.body.message);
+          if (e.data.responseJSON && e.data.responseJSON.message) {
+            QuerySelector('#cx_callback_information').innerText = JSON.stringify(e.data.responseJSON.message);
           }
         });
 

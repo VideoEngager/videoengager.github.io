@@ -12,6 +12,7 @@ class VideoEngager {
     let autoAccept;
     let platform;
     let extraAgentMessage;
+    let attachPopup;
     let veUrl;
     let enablePrecall;
     let i18n;
@@ -62,6 +63,7 @@ class VideoEngager {
       autoAccept = (config.autoAccept) ? config.autoAccept : true;
       platform = config.platform;
       extraAgentMessage = config.extraAgentMessage;
+      attachPopup = config.attachPopup ? config.attachPopup : false;
       veUrl = config.veUrl;
       selectedLang = window._genesys.widgets.main.lang || 'en';
       if (!config.i18n) {
@@ -440,6 +442,16 @@ class VideoEngager {
       });
     };
 
+    this.terminateWebChatInteraction = function () {
+      if (!attachPopup) {
+        return;
+      }
+      return oVideoEngager.command('WebChat.endChat')
+        .fail(function (e) {
+          console.error(e);
+        });
+    };
+
     const initiateForm = function () {
       const webChatOpenData = {
         userData: { veVisitorId: interactionId },
@@ -492,15 +504,8 @@ class VideoEngager {
       document.getElementsByClassName('cx-submit')[0].innerHTML = submitButton;
     };
 
-    this.terminateInteraction = function () {
+    this.terminateCall = function () {
       closeIframeOrPopup();
-      oVideoEngager.command('WebChat.endChat')
-        .done(function (e) {
-          oVideoEngager.command('WebChat.close');
-        })
-        .fail(function (e) {
-          //
-        });
     };
 
     const sendInteractionMessage = function (interactionId) {
@@ -630,10 +635,10 @@ class VideoEngager {
     const closeIframeOrPopup = function () {
       interactionId = null;
       if (!iframeHolder) {
-        if (popupinstance) {
+        if (popupinstance && attachPopup) {
           popupinstance.close();
+          popupinstance = null;
         }
-        popupinstance = null;
       } else {
         if (iframeHolder.getElementsByTagName('iframe')[0]) {
           iframeHolder.removeChild(iframeHolder.getElementsByTagName('iframe')[0]);
@@ -667,7 +672,8 @@ if (window.addEventListener) {
 
 // terminate call on page close
 window.onbeforeunload = function () {
-  videoEngager.terminateInteraction();
+  videoEngager.terminateCall();
+  videoEngager.terminateWebChatInteraction();
 };
 
 const eventName = 'VideoEngagerReady';

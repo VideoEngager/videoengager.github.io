@@ -504,7 +504,8 @@ class VideoEngager {
       document.getElementsByClassName('cx-submit')[0].innerHTML = submitButton;
     };
 
-    this.terminateCall = function () {
+    // terminate call
+    this.terminateInteraction = function () {
       closeIframeOrPopup();
     };
 
@@ -672,7 +673,7 @@ if (window.addEventListener) {
 
 // terminate call on page close
 window.onbeforeunload = function () {
-  videoEngager.terminateCall();
+  videoEngager.terminateInteraction();
   videoEngager.terminateWebChatInteraction();
 };
 

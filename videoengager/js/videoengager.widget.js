@@ -12,7 +12,6 @@ class VideoEngager {
     let autoAccept;
     let platform;
     let extraAgentMessage;
-    let attachPopup;
     let veUrl;
     let enablePrecall;
     let i18n;
@@ -63,7 +62,6 @@ class VideoEngager {
       autoAccept = (config.autoAccept) ? config.autoAccept : true;
       platform = config.platform;
       extraAgentMessage = config.extraAgentMessage;
-      attachPopup = config.attachPopup ? config.attachPopup : false;
       veUrl = config.veUrl;
       selectedLang = window._genesys.widgets.main.lang || 'en';
       if (!config.i18n) {
@@ -443,10 +441,10 @@ class VideoEngager {
     };
 
     this.terminateWebChatInteraction = function () {
-      if (!attachPopup) {
-        return;
-      }
       return oVideoEngager.command('WebChat.endChat')
+        .done(function (e) {
+          oVideoEngager.command('WebChat.close');
+        })
         .fail(function (e) {
           console.error(e);
         });
@@ -507,6 +505,7 @@ class VideoEngager {
     // terminate call
     this.terminateInteraction = function () {
       closeIframeOrPopup();
+      this.terminateWebChatInteraction();
     };
 
     const sendInteractionMessage = function (interactionId) {
@@ -636,7 +635,7 @@ class VideoEngager {
     const closeIframeOrPopup = function () {
       interactionId = null;
       if (!iframeHolder) {
-        if (popupinstance && attachPopup) {
+        if (popupinstance) {
           popupinstance.close();
           popupinstance = null;
         }
@@ -673,8 +672,7 @@ if (window.addEventListener) {
 
 // terminate call on page close
 window.onbeforeunload = function () {
-  videoEngager.terminateInteraction();
-  videoEngager.terminateWebChatInteraction();
+  // videoEngager.terminateInteraction();
 };
 
 const eventName = 'VideoEngagerReady';

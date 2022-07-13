@@ -21,7 +21,6 @@ window._genesys.widgets = {
     enablePrecall: false, // start the VideoEngager session with precall window - the visitor could select their camera/microphone settings
     useWebChatForm: false, // start VideoEngager session with/without registration form
     // in case of useWebChatForm == false, pass the following data to conversation initialization - visible for agent
-    attachPopup: true, // if popup is attached, popup will be closed on page navigation
     extraAgentMessage: '**This is a VideoEngager Video Call!!!**',
     webChatFormData: {
       nickname: 'Visitor',

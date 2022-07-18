@@ -21,6 +21,7 @@ class VideoEngager {
     let submitButton;
     let customAttributes;
     let callback = null;
+    let defaultQueue = null;
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
@@ -83,6 +84,7 @@ class VideoEngager {
         }
       }
       customAttributes = config.customAttributes ? config.customAttributes : null;
+      defaultQueue = window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress;
     };
 
     const terminateCallback = function () {
@@ -437,6 +439,31 @@ class VideoEngager {
           .fail(function (e) {
             console.error('failed to regsiter preprocessor');
           });
+      });
+
+      oVideoEngager.subscribe('ChannelSelector.opened', function (e) {
+        $('.cx-channel').on('click', function (event) {
+          const currentChannel = window._genesys.widgets.channelselector.channels[parseInt(event.currentTarget.classList[1].substring(7))];
+          if (currentChannel && currentChannel.queue) {
+            window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = currentChannel.queue;
+            return;
+          }
+          window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = defaultQueue;
+        });
+      });
+
+      oVideoEngager.subscribe('SideBar.opened', function (e) {
+        $('.cx-sidebar > *').on('click', function (event) {
+          if (event.currentTarget.className === '' || event.currentTarget.className === 'ChannelSelector') {
+            return;
+          }
+          const currentChannel = window._genesys.widgets.sidebar.channels[parseInt(event.currentTarget.classList[0].substring(7))];
+          if (currentChannel && currentChannel.queue) {
+            window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = currentChannel.queue;
+            return;
+          }
+          window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = defaultQueue;
+        });
       });
     };
 

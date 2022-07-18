@@ -1,8 +1,52 @@
 /* eslint-disable no-console */
-/* global fetch alert */
+/* global fetch */
+const PopupManager = function () {
+  const left = (window.screen.width / 2) - (770 / 2);
+  const top = (window.screen.height / 2) - (450 / 2);
+  const popupSpesification = 'width=770, height=450, left=' + left + ', top=' + top + ', location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar = no';
+  const popupId = 'popup_instance';
+  this.popupinstance = null;
+  this.attachPopup = function () {
+    this.popupinstance = window.open('', popupId, popupSpesification);
+    if (!this.popupinstance || this.popupinstance.closed || typeof this.popupinstance.closed === 'undefined') {
+      // POPUP BLOCKED
+      console.log('popup was closed and popup blocker enabled');
+      return false;
+    }
+    try {
+      if (this.popupinstance.location && this.popupinstance.location.host === '') {
+        console.log('popup was closed and popup blocker disabled');
+        this.close();
+        return false;
+      }
+    } catch (e) {
+      console.log('popup exists');
+      return true;
+    }
+    return true;
+  };
+  this.createPopup = function (url) {
+    this.popupinstance = window.open(url, popupId, popupSpesification);
+    this.focus();
+  };
+  this.popupExist = function () {
+    return this.popupinstance && !this.popupinstance.closed;
+  };
+  this.focus = function () {
+    if (this.popupExist()) {
+      this.popupinstance.focus();
+    }
+  };
+  this.close = function () {
+    if (this.popupExist()) {
+      this.popupinstance.close();
+      this.popupinstance = null;
+    }
+  };
+};
 class VideoEngager {
   constructor () {
-    let popupinstance = null;
+    const popupManager = new PopupManager();
     let iframeHolder = null;
     let iframeInstance;
     let oVideoEngager;
@@ -83,6 +127,33 @@ class VideoEngager {
         }
       }
       customAttributes = config.customAttributes ? config.customAttributes : null;
+    };
+
+    const generateVisitorUrl = function () {
+      let str = {
+        video_on: startWithVideo,
+        sessionId: interactionId,
+        hideChat: true,
+        type: 'initial',
+        defaultGroup: 'floor',
+        view_widget: '4',
+        offline: true,
+        aa: autoAccept,
+        skip_private: true,
+        inichat: 'false'
+      };
+      if (customAttributes) {
+        str = Object.assign(str, customAttributes);
+      }
+      const encodedString = window.btoa(JSON.stringify(str));
+      const homeURL = veUrl + '/static/';
+      let url = `${homeURL}popup.html?tennantId=${window.btoa(TENANT_ID)}&params=${encodedString}`;
+      if (enablePrecallForced && enablePrecall) {
+        url += '&pcfl=true';
+      } else if (enablePrecallForced && !enablePrecall) {
+        url += '&precall=false';
+      }
+      return url;
     };
 
     const terminateCallback = function () {
@@ -189,8 +260,8 @@ class VideoEngager {
     };
 
     const startVideoEngager = function () {
-      if (popupinstance && !popupinstance.closed) {
-        popupinstance.focus();
+      if (popupManager.popupExist()) {
+        popupManager.focus();
         return;
       }
 
@@ -296,7 +367,6 @@ class VideoEngager {
       console.log('on init extension VideoEngager');
       init();
       oVideoEngager = CXBus.registerPlugin('VideoEngager');
-      oVideoEngager.publish('ready');
       oVideoEngager.registerCommand('startVideo', function (e) {
         // videochat channel is selected
         console.log('startVideoTriggered');
@@ -314,8 +384,8 @@ class VideoEngager {
       });
 
       oVideoEngager.before('WebChat.open', function (oData) {
-        console.log('before webchat open');
         oData.userData = oData.userData ? oData.userData : {};
+        console.log('before webchat open', oData);
         if (!oData.userData.veVisitorId) {
           oData.userData.veVisitorId = null;
         }
@@ -403,8 +473,6 @@ class VideoEngager {
         }
       });
 
-      oVideoEngager.ready();
-
       oVideoEngager.subscribe('WebChatService.ready', function (oCXBus) {
         console.log('[CXW] Widget bus has been initialized!');
         oVideoEngager.command('WebChatService.registerPreProcessor', {
@@ -438,6 +506,60 @@ class VideoEngager {
             console.error('failed to regsiter preprocessor');
           });
       });
+
+      CXBus.subscribe('WebChatService.restored', function (e) {
+        console.log('Chat restored', e);
+        /**
+         * 1 - check if it is a video call from comparing visitor id
+         * 2 - recover popup if exist
+         * 3 - recover visitor id
+         */
+        // get current session's interactionId
+        CXBus.command('WebChatService.getSessionData').done(function (sessionData) {
+          console.log('WebChatService.getSessionData', sessionData);
+          const conversationId = sessionData.conversationId;
+          const jwt = sessionData.jwt;
+          const memberId = sessionData.memberId;
+          fetch(window._genesys.widgets.webchat.transport.dataURL + '/api/v2/webchat/guest/conversations/' + conversationId + '/members/' + memberId, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + jwt
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Success:', data);
+              if (!data || !data.customFields || !data.customFields.veVisitorId) {
+                return;
+              }
+              localizeChatForm();
+              interactionId = data.customFields.veVisitorId;
+              if (iframeHolder) {
+                const url = generateVisitorUrl();
+                iframeInstance = document.createElement('iframe');
+                iframeInstance.width = '100%';
+                iframeInstance.height = '100%';
+                iframeInstance.id = 'videoengageriframe';
+                iframeInstance.allow = 'microphone; camera';
+                iframeInstance.src = url;
+                iframeHolder.querySelectorAll('iframe').forEach(e => e.remove());
+                iframeHolder.insertBefore(iframeInstance, iframeHolder.firstChild);
+                iframeHolder.style.display = 'block';
+                return;
+              }
+              if (popupManager.attachPopup()) {
+                popupManager.focus();
+              }
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+            });
+        });
+      });
+
+      oVideoEngager.ready();
+      oVideoEngager.publish('ready');
     };
 
     this.terminateWebChatInteraction = function () {
@@ -575,41 +697,16 @@ class VideoEngager {
     };
 
     const startVideoChat = function () {
-      if ((popupinstance && !popupinstance.closed) || iframeInstance) {
+      if (popupManager.popupExist() || iframeInstance) {
         console.log('already have opened video call');
         return;
       }
 
       console.log('InteractionId :', interactionId);
-      const left = (screen.width / 2) - (770 / 2);
-      const top = (screen.height / 2) - (450 / 2);
-      let str = {
-        video_on: startWithVideo,
-        sessionId: interactionId,
-        hideChat: true,
-        type: 'initial',
-        defaultGroup: 'floor',
-        view_widget: '4',
-        offline: true,
-        aa: autoAccept,
-        skip_private: true,
-        inichat: 'false'
-      };
-      if (customAttributes) {
-        str = Object.assign(str, customAttributes);
-      }
-      const encodedString = window.btoa(JSON.stringify(str));
-      const homeURL = veUrl + '/static/';
-      let url = `${homeURL}popup.html?tennantId=${window.btoa(TENANT_ID)}&params=${encodedString}`;
-      if (enablePrecallForced && enablePrecall) {
-        url += '&pcfl=true';
-      } else if (enablePrecallForced && !enablePrecall) {
-        url += '&precall=false';
-      }
-
+      const url = generateVisitorUrl();
       if (!iframeHolder) {
-        popupinstance = window.open(url, 'popup_instance', 'width=770, height=450, left=' + left + ', top=' + top + ', location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar = no');
-        popupinstance.focus();
+        popupManager.createPopup(url);
+        popupManager.focus();
       } else {
         iframeInstance = document.createElement('iframe');
         iframeInstance.width = '100%';
@@ -624,21 +721,16 @@ class VideoEngager {
     };
 
     this.startVideoEngagerOutbound = function (url) {
-      const left = (screen.width / 2) - (770 / 2);
-      const top = (screen.height / 2) - (450 / 2);
-      if (!popupinstance || popupinstance.closed) {
-        popupinstance = window.open(url, 'popup_instance', 'width=770, height=450, left=' + left + ', top=' + top + ', location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar = no');
+      if (!popupManager.popupExist()) {
+        popupManager.createPopup(url);
       }
-      popupinstance.focus();
+      popupManager.focus();
     };
 
     const closeIframeOrPopup = function () {
       interactionId = null;
       if (!iframeHolder) {
-        if (popupinstance) {
-          popupinstance.close();
-          popupinstance = null;
-        }
+        popupManager.close();
       } else {
         if (iframeHolder.getElementsByTagName('iframe')[0]) {
           iframeHolder.removeChild(iframeHolder.getElementsByTagName('iframe')[0]);

@@ -1,5 +1,23 @@
 /* eslint-disable no-console */
 /* global fetch alert */
+
+const assignTransport = function (update, source) {
+  source.type && (update.type = source.type);
+  source.dataURL && (update.dataURL = source.dataURL);
+  source.deploymentKey && (update.deploymentKey = source.deploymentKey);
+  source.orgGuid && (update.orgGuid = source.orgGuid);
+  source.markdown && (update.markdown = source.markdown);
+  if (!source.interactionData || !source.interactionData.routing) {
+    return;
+  }
+  const routing = source.interactionData.routing;
+  !update.interactionData && (update.interactionData = {});
+  !update.interactionData.routing && (update.interactionData.routing = {});
+  routing.targetType && (update.interactionData.routing.targetType = routing.targetType);
+  routing.targetAddress && (update.interactionData.routing.targetAddress = routing.targetAddress);
+  routing.priority && (update.interactionData.routing.priority = routing.priority);
+};
+
 class VideoEngager {
   constructor () {
     let popupinstance = null;
@@ -21,7 +39,8 @@ class VideoEngager {
     let submitButton;
     let customAttributes;
     let callback = null;
-    let defaultQueue = null;
+    let defaultTransport = null;
+    let veTransport = null;
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
@@ -84,7 +103,13 @@ class VideoEngager {
         }
       }
       customAttributes = config.customAttributes ? config.customAttributes : null;
-      defaultQueue = window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress;
+
+      // custom queueId form custom transport
+      if (!config.transport) {
+        return;
+      }
+      defaultTransport = JSON.parse(JSON.stringify(window._genesys.widgets.webchat.transport));
+      veTransport = JSON.parse(JSON.stringify(config.transport));
     };
 
     const terminateCallback = function () {
@@ -191,6 +216,8 @@ class VideoEngager {
     };
 
     const startVideoEngager = function () {
+      assignTransport(window._genesys.widgets.webchat.transport, veTransport);
+
       if (popupinstance && !popupinstance.closed) {
         popupinstance.focus();
         return;
@@ -385,6 +412,7 @@ class VideoEngager {
 
       oVideoEngager.subscribe('WebChatService.ended', function () {
         console.log('WebChatService.ended');
+        assignTransport(window._genesys.widgets.webchat.transport, defaultTransport);
         if (keepAliveTimer) { clearInterval(keepAliveTimer); }
         closeIframeOrPopup();
       });
@@ -439,31 +467,6 @@ class VideoEngager {
           .fail(function (e) {
             console.error('failed to regsiter preprocessor');
           });
-      });
-
-      oVideoEngager.subscribe('ChannelSelector.opened', function (e) {
-        $('.cx-channel').on('click', function (event) {
-          const currentChannel = window._genesys.widgets.channelselector.channels[parseInt(event.currentTarget.classList[1].substring(7))];
-          if (currentChannel && currentChannel.queue) {
-            window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = currentChannel.queue;
-            return;
-          }
-          window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = defaultQueue;
-        });
-      });
-
-      oVideoEngager.subscribe('SideBar.opened', function (e) {
-        $('.cx-sidebar > *').on('click', function (event) {
-          if (event.currentTarget.className === '' || event.currentTarget.className === 'ChannelSelector') {
-            return;
-          }
-          const currentChannel = window._genesys.widgets.sidebar.channels[parseInt(event.currentTarget.classList[0].substring(7))];
-          if (currentChannel && currentChannel.queue) {
-            window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = currentChannel.queue;
-            return;
-          }
-          window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = defaultQueue;
-        });
       });
     };
 

@@ -1,21 +1,21 @@
 /* eslint-disable no-console */
 /* global fetch alert */
 
-const assignTransport = function (update, source) {
-  source.type && (update.type = source.type);
-  source.dataURL && (update.dataURL = source.dataURL);
-  source.deploymentKey && (update.deploymentKey = source.deploymentKey);
-  source.orgGuid && (update.orgGuid = source.orgGuid);
-  source.markdown && (update.markdown = source.markdown);
+const assignTransport = function (target, source) {
+  source.type && (target.type = source.type);
+  source.dataURL && (target.dataURL = source.dataURL);
+  source.deploymentKey && (target.deploymentKey = source.deploymentKey);
+  source.orgGuid && (target.orgGuid = source.orgGuid);
+  source.markdown && (target.markdown = source.markdown);
   if (!source.interactionData || !source.interactionData.routing) {
     return;
   }
   const routing = source.interactionData.routing;
-  !update.interactionData && (update.interactionData = {});
-  !update.interactionData.routing && (update.interactionData.routing = {});
-  routing.targetType && (update.interactionData.routing.targetType = routing.targetType);
-  routing.targetAddress && (update.interactionData.routing.targetAddress = routing.targetAddress);
-  routing.priority && (update.interactionData.routing.priority = routing.priority);
+  !target.interactionData && (target.interactionData = {});
+  !target.interactionData.routing && (target.interactionData.routing = {});
+  routing.targetType && (target.interactionData.routing.targetType = routing.targetType);
+  routing.targetAddress && (target.interactionData.routing.targetAddress = routing.targetAddress);
+  routing.priority && (target.interactionData.routing.priority = routing.priority);
 };
 
 class VideoEngager {
@@ -216,7 +216,9 @@ class VideoEngager {
     };
 
     const startVideoEngager = function () {
-      assignTransport(window._genesys.widgets.webchat.transport, veTransport);
+      if (veTransport) {
+        assignTransport(window._genesys.widgets.webchat.transport, veTransport);
+      }
 
       if (popupinstance && !popupinstance.closed) {
         popupinstance.focus();
@@ -412,7 +414,9 @@ class VideoEngager {
 
       oVideoEngager.subscribe('WebChatService.ended', function () {
         console.log('WebChatService.ended');
-        assignTransport(window._genesys.widgets.webchat.transport, defaultTransport);
+        if (defaultTransport) {
+          assignTransport(window._genesys.widgets.webchat.transport, defaultTransport);
+        }
         if (keepAliveTimer) { clearInterval(keepAliveTimer); }
         closeIframeOrPopup();
       });

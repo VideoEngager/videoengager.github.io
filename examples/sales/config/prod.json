@@ -1,0 +1,13 @@
+{
+    "en": {
+        "orgGuid": "c4b553c3-ee42-4846-aeb1-f0da3d85058e",
+        "deploymentKey": "973f8326-c601-40c6-82ce-b87e6dafef1c",
+        "veUrl": "https://videome.leadsecure.com",
+        "tenantId": "0FphTk091nt7G1W7",
+        "dataURL": "https://api.mypurecloud.com",
+        "targetAddress": "Support"
+    },
+    "de": {
+        "targetAddress": "TestQueue"
+    }
+}

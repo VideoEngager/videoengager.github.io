@@ -51,9 +51,21 @@ document.addEventListener('DOMContentLoaded', async function (e) {
     setConfig(uimode);
     // dump configuration json
     dumpJSON();
+    // dump tampermonkey script
+    dumpTamper(uimode);
     // 4- load genesys widgets library
     CXBus.loadPlugin('widgets-core').done(function () {
       setUIHandlers();
+    });
+    $('#loadGenesysLib').attr('disabled', true);
+    $('#jsondumpbutton').attr('disabled', false);
+    $('#tampermonkeybutton').attr('disabled', false);
+
+    document.querySelector('#downloadjson').addEventListener('click', async function (e) {
+      download('jsonScript.js', document.getElementById('jsondump').value);
+    });
+    document.querySelector('#downloadtamper').addEventListener('click', async function (e) {
+      download('tampermonkey.js', document.getElementById('tempermonkeydump').value);
     });
   });
 });
@@ -107,6 +119,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = envConfig.en.veUrl;
     document.querySelector('#tenantId').value = envConfig.en.tenantId;
     document.querySelector('#dataURL').selectedIndex = genesysEnvList.indexOf(envConfig.en.dataURL.substring(12));
+    $('#collapseOne').removeClass('show');
   } else if (window.localStorage && window.localStorage.getItem('envConf') === 'true') {
     document.querySelector('#targetAddress').value = window.localStorage.getItem('targetAddress');
     document.querySelector('#orgGuid').value = window.localStorage.getItem('orgGuid');
@@ -114,6 +127,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = window.localStorage.getItem('veUrl');
     document.querySelector('#tenantId').value = window.localStorage.getItem('tenantId');
     document.querySelector('#dataURL').selectedIndex = window.localStorage.getItem('dataURL');
+    $('#collapseOne').removeClass('show');
   }
 
   // set listener for save and clear buttons
@@ -173,6 +187,82 @@ const dumpJSON = function () {
   document.querySelector('#jsondump').innerHTML = text;
 };
 
+const dumpTamper = function (uimode) {
+  let config = JSON.stringify(window._genesys.widgets, null, 2);
+  config = config.replace('"extensions": {}', 'extensions: { VideoEngager: videoEngager.initExtension }');
+  config = 'window._genesys.widgets = ' + config;
+  config = `if (!window._genesys) window._genesys = {};
+  if (!window._gt) window._gt = [];
+  ` + config;
+  let singlebutton = '';
+  if (uimode === 'singlebutton') {
+    singlebutton = `    // insert fixed button
+    var fixedButton = document.createElement('button');
+    fixedButton.style.cssText = 'position: fixed;width: 100px;height: 50px;z-index: 100;bottom: 10px;right: 10px;';
+    fixedButton.id = "startVideoCall";
+    fixedButton.innerText = "Start Video Call";
+    fixedButton.addEventListener("click", function () {CXBus.command('VideoEngager.startVideoEngager');});
+    document.body.appendChild(fixedButton);`;
+  }
+  const template = `// ==UserScript==
+  // @name         callback staging
+  // @namespace    http://tampermonkey.net/
+  // @version      0.1
+  // @description  try to take over the world!
+  // @author       You
+  // @match        https://www.videoengager.com/
+  // @icon         https://www.google.com/s2/favicons?domain=videoengager.com
+  // @grant        none
+  // ==/UserScript==
+  
+  (async function () {
+    // helper function to load external resources
+    const loadCSS = function (url) {
+      const scriptElement = document.createElement('link');
+      scriptElement.setAttribute('type', 'text/css');
+      scriptElement.setAttribute('rel', 'stylesheet');
+      scriptElement.setAttribute('href', url);
+      document.head.append(scriptElement);
+    };
+    const loadJS = function (url, id) {
+      return new Promise(function (resolve, reject) {
+        const scriptElement = document.createElement('script');
+        if (typeof id === 'string') {
+          scriptElement.setAttribute('id', id);
+        }
+        scriptElement.setAttribute('src', url);
+        scriptElement.addEventListener('load', function () {
+          resolve();
+        });
+        scriptElement.addEventListener('error', function (e) {
+          reject(e);
+        });
+        document.head.append(scriptElement);
+      });
+    };
+
+    ${singlebutton}
+
+    const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
+    const videoengagerWidget = 'https://videoengager.github.io/videoengager/js/videoengager.widget.js';
+    const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
+  
+    // styling files are loaded
+    loadCSS('https://videoengager.github.io/widgets.min.css');
+    loadCSS(videoengagerWidgetCSSCDN);
+    // videoengager library
+    // 1- load cxbus
+    await loadJS(widgetBaseUrl + 'cxbus.min.js');
+    CXBus.configure({ debug: true, pluginsPath: widgetBaseUrl + 'plugins/' });
+    // 2- load video engager
+    await loadJS(videoengagerWidget);
+    // 3- load config
+    ${config}
+    CXBus.loadPlugin('widgets-core');
+  })();`;
+  document.querySelector('#tempermonkeydump').innerHTML = template;
+};
+
 /**
  * listener will triggered when agent picked video call up
  */
@@ -213,6 +303,16 @@ const setConfig = async function (uimode) {
     window._genesys.widgets.callback.userData.environment = document.querySelector('#dataURL').value;
   }
 };
+
+function download (filename, text) {
+  const element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
 
 const setUIHandlers = function () {
   document.querySelector('#startVideoCall').addEventListener('click', function () {

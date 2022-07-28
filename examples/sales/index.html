@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Sales Demo</title>
+    <title>Genesys Widget Integrations Demo</title>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <!-- Google Fonts -->
@@ -42,106 +42,224 @@
 </head>
 
 <body class="container-body">
-    <!-- user environment configuration -->
-    <div id="envConf">
-        <h2>Genesys widget environment configurations</h2>
+    <div class="container">
+        <div class="row">
+            <div class="col-md">
+                <!-- user environment configuration -->
+                <div id="envConf">
+                    <div class="p-5 text-center bg-light">
+                        <h1 class="mb-3">Genesys Widget Integrations Demo</h1>
+                        <h4 class="mb-3">VideoEngager Integrations</h4>
 
-        <div class="form-outline">
-            <input type="text" id="targetAddress" class="form-control" data-mdb-showcounter="false" maxlength="20" />
-            <label class="form-label" for="targetAddress">Queue Name</label>
-            <div class="form-helper"></div>
+                        <div id="ui_mode" class="btn-group m-2">
+                            <input class="btn-check" type="radio" name="ui_mode" id="singlebutton" value="singlebutton"
+                                autocomplete="off" checked />
+                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="singlebutton">single
+                                button</label>
+
+                            <input class="btn-check" type="radio" name="ui_mode" id="sidebar" value="sidebar"
+                                autocomplete="off" />
+                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                                for="sidebar">sidebar</label>
+
+                            <input class="btn-check" type="radio" name="ui_mode" id="selector" value="selector"
+                                autocomplete="off" />
+                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark"
+                                for="selector">selector</label>
+                        </div>
+
+                        <button id="loadGenesysLib" class="btn btn-primary m-2">Load Genesys Widget Lib</button>
+
+                    </div>
+                    <p class="note note-primary">
+                        When you load genesys widget, it is mandatory to <strong>refresh the page before trying another configuration</strong>.
+                    </p>
+
+                    <div class="accordion" id="accordionExample">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-mdb-toggle="collapse"
+                                    data-mdb-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Genesys Widget Environment Configurations
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                                data-mdb-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    <p class="note note-info">
+                                        <strong>Help:</strong> If you need help about how to learn these parameters,
+                                        please follow our
+                                        <a
+                                            href="https://github.com/VideoEngager/SmartVideoWebSDK/blob/master/click2videoguide.pdf">Click
+                                            2 Video Guide</a>
+                                    </p>
+
+                                    <div class="form-outline">
+                                        <input type="text" id="targetAddress" class="form-control"
+                                            data-mdb-showcounter="false" maxlength="20" />
+                                        <label class="form-label" for="targetAddress">Queue Name</label>
+                                    </div>
+                                    <div class="form-text pb-2">
+                                        PureCloud agent will receive interaction when is "On Queue" with queue from
+                                        Queue Name
+                                    </div>
+
+                                    <div class="col-auto m-2">
+                                        <span id="textExample2" class="form-text"></span>
+                                    </div>
+
+                                    <div class="form-helper"></div>
+
+                                    <div class="form-outline">
+                                        <input type="text" id="orgGuid" class="form-control"
+                                            data-mdb-showcounter="false" maxlength="20" />
+                                        <label class="form-label" for="orgGuid">Organization ID</label>
+                                        <div class="form-helper"></div>
+                                    </div>
+                                    <div class="form-text pb-2">
+                                        To get your Organization Id open PureCloud as admin and navigate to Admin >
+                                        Account Settings
+                                        > Organization
+                                        Settings > Organization Details (tab) > Advanced > Organization ID
+                                    </div>
+
+                                    <div class="form-outline">
+                                        <input type="text" id="deploymentKey" class="form-control"
+                                            data-mdb-showcounter="false" maxlength="20" />
+                                        <label class="form-label" for="deploymentKey">Deployment ID</label>
+                                        <div class="form-helper"></div>
+                                    </div>
+
+                                    <div class="form-text pb-2">
+                                        To get your Deployment Id open PureCloud as admin and navigate to Admin >
+                                        Contact
+                                        Center >
+                                        Widgets >
+                                        Deployment Key (column)
+                                    </div>
+
+                                    <div class="form-outline">
+                                        <input type="text" id="tenantId" class="form-control"
+                                            data-mdb-showcounter="false" maxlength="20" />
+                                        <label class="form-label" for="tenantId">Tenant ID</label>
+                                        <div class="form-helper"></div>
+                                    </div>
+
+                                    <div class="form-text pb-2">
+                                        To get your Tenant ID select Apps > SmartVideo_Settings > Tenant ID
+                                    </div>
+
+                                    <div class="form-outline">
+                                        <input type="text" id="veUrl" class="form-control" data-mdb-showcounter="false"
+                                            maxlength="20" />
+                                        <label class="form-label" for="veUrl">VideoEngager URL</label>
+                                        <div class="form-helper"></div>
+                                    </div>
+
+                                    <div class="form-text pb-2">
+                                        VideoEngager Server Url
+                                    </div>
+
+                                    <label for="dataURL"> Genesys Environment </label>
+                                    <select class="form-select" aria-label="Default select example" name="dataURL"
+                                        id="dataURL"></select>
+
+                                    <div class="form-text pb-2">
+                                        Select PureCloud Region
+                                    </div>
+
+                                    <div id="confButtons">
+                                        <button id="saveConf" class="m-2 btn btn-outline-primary btn-rounded"
+                                            data-mdb-ripple-color="dark">Save</button>
+                                        <button id="clearConf" class="m-2 btn btn-outline-danger btn-rounded"
+                                            data-mdb-ripple-color="dark">Clear</button>
+                                    </div>
+                                    <p class="note note-warning">
+                                        You can save current Advanced Settings to Local Storage. They can be reused
+                                        from the same
+                                        browser from
+                                        the same computer many times. Clear will remove settings from Local
+                                        Storage and
+                                        Input Fields
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- runtime configuration change demo -->
+
+
+                <div id="startStopButtons">
+                    <!-- singlebutton mode button -->
+                    <div class="fixed">
+                        <a id="startVideoCall" class="btn btn-primary btn-floating btn-lg"
+                            style="background-color: #3659f4; display: none;">
+                            <i class="fas fa-video"></i>
+                        </a>
+
+                        <a id="stopVideoCall" class="btn btn-primary btn-floating btn-lg"
+                            style="background-color: #3662f4; display: none !important;">
+                            <i class="fas fa-stop"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <p class="note note-primary">
+                    Please use your Genesys Cloud and VideoEngager <strong>configuration parameters</strong> here.
+                </p>
+
+                <div>
+                    <div class="accordion" id="jsonAccordeon">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="jsonHeader">
+                                <button disabled id="jsondumpbutton" class="accordion-button collapsed" type="button"
+                                    data-mdb-toggle="collapse" data-mdb-target="#jsonCollapse" aria-expanded="false"
+                                    aria-controls="jsonCollapse">
+                                    JSON Dump
+                                </button>
+                            </h2>
+                            <div id="jsonCollapse" class="accordion-collapse collapse" aria-labelledby="jsonHeader"
+                                data-mdb-parent="#jsonAccordeon">
+                                <div class="accordion-body">
+                                    <button id="downloadjson" class="btn btn-primary m-2">Download JSON</button>
+                                    <pre>
+                                        <div class="form-outline" style=" width: auto; ">
+                                            <textarea class="form-control" id="jsondump" cols="80" rows="20" style=" font-size: small; "></textarea>
+                                            <label class="form-label" for="jsondump">JSON Configuration</label>
+                                        </div>
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="tampermonkeyHeader">
+                                <button disabled id="tampermonkeybutton" class="accordion-button collapsed"
+                                    type="button" data-mdb-toggle="collapse" data-mdb-target="#tampermonkyCollapse"
+                                    aria-expanded="false" aria-controls="tampermonkyCollapse">
+                                    TemperMonkey Script Download
+                                </button>
+                            </h2>
+                            <div id="tampermonkyCollapse" class="accordion-collapse collapse"
+                                aria-labelledby="tampermonkeyHeader" data-mdb-parent="#jsonAccordeon">
+                                <div class="accordion-body">
+                                    <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey Script</button>
+                                    <pre>
+                                        <div class="form-outline" style=" width: auto; ">
+                                            <textarea class="form-control" id="tempermonkeydump" cols="80" rows="20" style=" font-size: small; "></textarea>
+                                            <label class="form-label" for="tempermonkeydump">TamperMonkey Script</label>
+                                        </div>
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="note note-light">
+                        <strong>Locked until widget load.</strong> You can get generated JSON and TamperMonkey scripts when you load genesys libraray.
+                    </p>
+                </div>
+            </div>
         </div>
-
-        <p>PureCloud agent will receive interaction when is "On Queue" with queue from Queue Name</p>
-
-        <div class="form-outline">
-            <input type="text" id="orgGuid" class="form-control" data-mdb-showcounter="false" maxlength="20" />
-            <label class="form-label" for="orgGuid">Organization ID</label>
-            <div class="form-helper"></div>
-        </div>
-
-        <p>To get your Organization Id open PureCloud as admin and navigate to Admin > Account Settings > Organization
-            Settings > Organization Details (tab) > Advanced > Organization ID</p>
-
-        <div class="form-outline">
-            <input type="text" id="deploymentKey" class="form-control" data-mdb-showcounter="false" maxlength="20" />
-            <label class="form-label" for="deploymentKey">Deployment ID</label>
-            <div class="form-helper"></div>
-        </div>
-
-        <p>To get your Deployment Id open PureCloud as admin and navigate to Admin > Contact Center > Widgets >
-            Deployment Key (column)</p>
-
-        <div class="form-outline">
-            <input type="text" id="tenantId" class="form-control" data-mdb-showcounter="false" maxlength="20" />
-            <label class="form-label" for="tenantId">Tenant ID</label>
-            <div class="form-helper"></div>
-        </div>
-
-        <p>To get your Tenant ID select Apps > SmartVideo_Settings > Tenant ID</p>
-
-        <div class="form-outline">
-            <input type="text" id="veUrl" class="form-control" data-mdb-showcounter="false" maxlength="20" />
-            <label class="form-label" for="veUrl">VideoEngager URL</label>
-            <div class="form-helper"></div>
-        </div>
-
-        <p>VideoEngager Server Url</p>
-
-        <label for="dataURL"> Genesys Environment </label>
-        <select class="form-select" aria-label="Default select example" name="dataURL" id="dataURL"></select>
-
-        <p>Select PureCloud Region</p>
-
-        <div id="confButtons">
-            <button id="saveConf" class="btn btn-outline-primary btn-rounded" data-mdb-ripple-color="dark">Save</button>
-            <button id="clearConf" class="btn btn-outline-danger btn-rounded" data-mdb-ripple-color="dark">Safe Clear</button>
-
-
-            <p>You can save current Advanced Settings to Local Storage. They can be reused from the same browser from
-                the same computer many times. Safe Clear will remove settings from Local Storage and Input Fields</p>
-        </div>
-    </div>
-    <!-- runtime configuration change demo -->
-    <div>
-        <p>Genesys widget configurations:</p>
-        <div id="ui_mode" class="btn-group">
-
-            <input class="btn-check" type="radio" name="ui_mode" id="singlebutton" value="singlebutton"
-                autocomplete="off" checked />
-            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark"
-                for="singlebutton">singlebutton</label>
-
-            <input class="btn-check" type="radio" name="ui_mode" id="sidebar" value="sidebar" autocomplete="off" />
-            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="sidebar">sidebar</label>
-
-            <input class="btn-check" type="radio" name="ui_mode" id="selector" value="selector" autocomplete="off" />
-            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="selector">selector</label>
-        </div>
-    </div>
-    <div>
-        <p>Load genesys widget after configuration:</p>
-        <button id="loadGenesysLib" class="btn btn-primary">Load Genesys Widget Lib</button>
-        <p>Genesys Widget Library will be loaded and genesys widget will run instantly according to the configuration
-        </p>
-    </div>
-    <div id="startStopButtons">
-        <!-- singlebutton mode button -->
-        <div class="fixed">
-            <a id="startVideoCall" class="btn btn-primary btn-floating btn-lg"
-                style="background-color: #f44336; display: none;">
-                <i class="fas fa-video"></i>
-            </a>
-
-            <a id="stopVideoCall" class="btn btn-primary btn-floating btn-lg"
-                style="background-color: #f44336; display: none !important;">
-                <i class="fas fa-stop"></i>
-            </a>
-        </div>
-    </div>
-
-    <div>
-        <pre><textarea id="jsondump" cols="80" rows="20"></textarea></pre>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

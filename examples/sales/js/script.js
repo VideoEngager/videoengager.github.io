@@ -184,6 +184,10 @@ const dumpJSON = function () {
   let text = JSON.stringify(window._genesys.widgets, null, 2);
   text = text.replace('"extensions": {}', 'extensions: { VideoEngager: videoEngager.initExtension }');
   text = 'window._genesys.widgets = ' + text;
+  text = `
+  if (!window._genesys) window._genesys = {};
+  if (!window._gt) window._gt = [];
+  ` + text;
   document.querySelector('#jsondump').innerHTML = text;
 };
 

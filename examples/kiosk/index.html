@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>VideoEngager - iPad Single Button Demo</title>
+    <link href="./css/ipad-single-button.css" type="text/css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src = '/videoengager/js/videoengager.widget.js'></script>
+    <script type="text/javascript" src="./js/ipad-single-button.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+
+<body class="container-body">
+    <header id="header-logo" class="header-css">
+        <img width="30px" height="30px" src="./img/logo.png" />
+        <div id="lang">
+            <img class="lang_flag" id="de_flag" src="./img/de_flag.png">
+            <img class="lang_flag" id="en_flag" src="./img/en_flag.png">
+        </div>
+    </header>
+
+    <div id="oncall-screen" style="display: none;">
+        <div id="closeVideoButtonHolder">
+            <img class="button" id="closeVideoButton" src="./img/endcall.png">
+        </div>
+        <div id="myVideoHolder"></div>
+        <div id="carousel" class="carousel slide" data-ride="carousel" data-interval="5000">
+            <div class="carousel-inner">
+                <div class="carousel-item active" style=" -webkit-perspective: none; perspective: none; ">
+                    <div id="loadingScreen" style="display: none;">
+                        <div class="loader1"></div>
+                        <div class="loader2"></div>
+                        <p id="loadingText"></p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-4-768x392.jpg" alt="slide4">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-3-768x392.jpg" alt="slide4">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-2-768x576.png" alt="slide4">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-1-768x392.jpg" alt="slide4">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="error-text" style="display: none;"></div>
+    <div id="initial-screen" style="display: none">
+        <div class="text-center" id="titleContainer">
+            <p class="header-text"></p>
+            <p class="secondery-text"></p>
+        </div>
+
+        <div class="text-center" id="buttonContainer">
+            <div class="callButtonContainer">
+                <div class="bottom-text">
+                    <p id="consent"></p>
+                </div>
+                <span id="StartVideoCall">
+                    <div class="button2">
+                        <span id="connectButton"></span>
+                    </div>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div id="footerPreCall">
+            <div class="container">
+                <span id="footer-text" class="text-muted footer-initial"></span>
+            </div>
+        </div>
+        <div id="footerOnCall">
+            <div class="container">
+                <span class="text-muted footer-oncall"></span>
+            </div>
+        </div>
+    </footer>
+
+    <div id="errorModal" class="modal fade">
+        <div role="document" class="modal-custom" tabindex="-1" aria-hidden="true">
+            <div class="modal-content-custom">
+                <div class="modal-header">
+                    <div style="width: 100px;height:100px;">
+                        <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"
+                            data-testid="ErrorOutlineRoundedIcon" fill="white">
+                            <path
+                                d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h5 class="modal-title" id="modalTitle">Error</h5>
+
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer-custom">
+                    <button type="button" class="error-button" data-dismiss="modal" aria-label="Close">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

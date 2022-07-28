@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', async function (e) {
     await loadJS('./js/' + uimode + '.config.js');
     // read config from UI
     setConfig(uimode);
+    // set ve config
+    setVeConfig();
     // dump configuration json
     dumpJSON();
     // 4- load genesys widgets library
@@ -166,6 +168,10 @@ const dumpJSON = function () {
   let text = JSON.stringify(window._genesys.widgets, null, 2);
   text = text.replace('"extensions": {}', 'extensions: { VideoEngager: videoEngager.initExtension }');
   text = 'window._genesys.widgets = ' + text;
+  text = `
+  if (!window._genesys) window._genesys = {};
+  if (!window._gt) window._gt = [];
+  ` + text;
   document.querySelector('#jsondump').innerHTML = text;
 };
 
@@ -207,6 +213,25 @@ const setConfig = async function (uimode) {
     window._genesys.widgets.callback.dataURL = document.querySelector('#veUrl').value + '/api/genesys/callback';
     window._genesys.widgets.callback.ewt.queue = document.querySelector('#targetAddress').value;
     window._genesys.widgets.callback.userData.environment = document.querySelector('#dataURL').value;
+  }
+};
+
+const setVeConfig = function () {
+  window._genesys.widgets.videoengager.audioOnly = document.querySelector('#audioOnly').checked;
+  window._genesys.widgets.videoengager.autoAccept = document.querySelector('#autoAccept').checked;
+  window._genesys.widgets.videoengager.enablePrecall = document.querySelector('#enablePrecall').checked;
+  window._genesys.widgets.videoengager.useWebChatForm = document.querySelector('#useWebChatForm').checked;
+  window._genesys.widgets.videoengager.extraAgentMessage = document.querySelector('#extraAgentMessage').value;
+
+  window._genesys.widgets.videoengager.webChatFormData.nickname = document.querySelector('#nickname').value;
+  window._genesys.widgets.videoengager.webChatFormData.firstname = document.querySelector('#firstname').value;
+  window._genesys.widgets.videoengager.webChatFormData.lastname = document.querySelector('#lastname').value;
+  window._genesys.widgets.videoengager.webChatFormData.subject = document.querySelector('#subject').value;
+
+  try {
+    window._genesys.widgets.videoengager.webChatFormData.userData = JSON.parse(document.querySelector('#customUserData').value);
+  } catch (e) {
+    document.querySelector('#customUserData').value += ' ERROR';
   }
 };
 

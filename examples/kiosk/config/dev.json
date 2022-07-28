@@ -1,0 +1,13 @@
+{
+    "en": {
+        "organizationId": "327d10eb-0826-42cd-89b1-353ec67d33f8",
+        "deploymentId": "c2eaaa5c-d755-4e51-9136-b5ee86b92af3",
+        "videoengagerUrl": "https://dev.videoengager.com",
+        "tennantId": "test_tenant",
+        "environment": "https://api.mypurecloud.com.au",
+        "queue": "video"
+    },
+    "de": {
+        "queue": "video_DE"
+    }
+}

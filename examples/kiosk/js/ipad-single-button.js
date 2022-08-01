@@ -79,7 +79,7 @@ const lang = {
     header: '{0} to Video',
     headerEmphasie: 'Click',
     motto: 'SmartVideo Kiosk Demo',
-    buttonExplaination: 'By clicking connect, you are giving your concent to do a video call and eventually being recorded.',
+    buttonExplaination: 'By clicking connect you are giving your consent to possibly be recorded during the video call.',
     footer: 'Video Engager Genesys Single Button Call.',
     connect: 'Connect',
     loadingText: 'Connecting to an Agent',

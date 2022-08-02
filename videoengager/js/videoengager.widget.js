@@ -712,7 +712,7 @@ class VideoEngager {
         iframeInstance.width = '100%';
         iframeInstance.height = '100%';
         iframeInstance.id = 'videoengageriframe';
-        iframeInstance.allow = 'microphone; camera';
+        iframeInstance.allow = 'microphone; camera; autoplay; fullscreen;';
         iframeInstance.src = url;
         iframeHolder.querySelectorAll('iframe').forEach(e => e.remove());
         iframeHolder.insertBefore(iframeInstance, iframeHolder.firstChild);

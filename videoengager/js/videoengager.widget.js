@@ -445,7 +445,7 @@ class VideoEngager {
         });
 
         // to prevent onClose user confirmation dialog, remove events in inputs
-        document.querySelectorAll('input,textarea').forEach((e) => {
+        document.querySelectorAll('[id^="cx_form_callback"]').forEach((e) => {
           const newElement = e.cloneNode(true);
           e.parentNode.replaceChild(newElement, e);
         });

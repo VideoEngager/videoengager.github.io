@@ -50,6 +50,7 @@ window._genesys.widgets = {
     }
   },
   webchat: {
+    confirmFormCloseEnabled: false,
     transport: {
       type: 'purecloud-v2-sockets',
       dataURL: '',
@@ -137,22 +138,44 @@ window._genesys.widgets = {
           id: 'cx_form_callback_firstname',
           name: 'firstname',
           maxlength: '100',
-          placeholder: '@i18n:callback.CallbackPlaceholderOptional',
-          label: '@i18n:callback.CallbackFirstName'
+          placeholder: '@i18n:callback.CallbackPlaceholderRequired',
+          label: '@i18n:callback.CallbackFirstName',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              return true;
+            } else {
+              return false;
+            }
+          }
         },
         {
           id: 'cx_form_callback_lastname',
           name: 'lastname',
           maxlength: '100',
-          placeholder: '@i18n:callback.CallbackPlaceholderOptional',
-          label: '@i18n:callback.CallbackLastName'
+          placeholder: '@i18n:callback.CallbackPlaceholderRequired',
+          label: '@i18n:callback.CallbackLastName',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              return true;
+            } else {
+              return false;
+            }
+          }
         },
         {
           id: 'cx_form_callback_phone_number',
           name: 'phonenumber',
           maxlength: '14',
-          placeholder: '+123456789',
-          label: '@i18n:callback.CallbackPhoneNumber'
+          placeholder: '@i18n:callback.CallbackPlaceholderRequired',
+          label: '@i18n:callback.CallbackPhoneNumber',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            const regex = /^[+\d].(?:[\d.\s()]{5,18})$/;
+            if (input && input.val().match(regex)) {
+              return true;
+            } else {
+              return false;
+            }
+          }
         },
         {
           type: 'hidden',

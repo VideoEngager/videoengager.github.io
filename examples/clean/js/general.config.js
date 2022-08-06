@@ -45,6 +45,7 @@ window._genesys.widgets = {
     }
   },
   webchat: {
+    confirmFormCloseEnabled: false,
     transport: {
       type: 'purecloud-v2-sockets',
       dataURL: '',

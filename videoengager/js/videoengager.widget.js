@@ -443,12 +443,6 @@ class VideoEngager {
         oVideoEngager.subscribe('Calendar.selectedDateTime', function (e) {
           // date selected
         });
-
-        // to prevent onClose user confirmation dialog, remove events in inputs
-        document.querySelectorAll('[id^="cx_form_callback"]').forEach((e) => {
-          const newElement = e.cloneNode(true);
-          e.parentNode.replaceChild(newElement, e);
-        });
       });
 
       oVideoEngager.subscribe('WebChatService.ended', function () {

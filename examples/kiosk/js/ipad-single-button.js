@@ -282,7 +282,14 @@ const loadGenesysWidget = function () {
 
 const startCleanInteraction = function () {
   setOnCallScreen();
+
   CXBus.command('VideoEngager.startVideoEngager');
+
+  $('.carousel-item').removeClass('active');
+  $('#carousel-item-1').addClass('active');
+  $('.carousel').carousel({
+    interval: 5000
+  });
 };
 
 const genesysConfigInit = function () {

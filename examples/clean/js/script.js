@@ -51,6 +51,8 @@ document.addEventListener('DOMContentLoaded', async function (e) {
     setConfig(uimode);
     // set ve config
     setVeConfig();
+    // set genesys options
+    setGenesysOption(uimode);
     // dump configuration json
     dumpJSON();
     // 4- load genesys widgets library
@@ -216,12 +218,29 @@ const setConfig = async function (uimode) {
   }
 };
 
+const setGenesysOption = function (uimode) {
+  if (uimode !== 'singlebutton') {
+    window._genesys.widgets.calendar.showAvailability = document.querySelector('#showAvailability').checked;
+    window._genesys.widgets.calendar.numberOfDays = Number(document.querySelector('#numberOfDays').value) || 5;
+    window._genesys.widgets.calendar.hideUnavailableTimeSlots = document.querySelector('#hideUnavailableTimeSlots').checked;
+    window._genesys.widgets.calendar.calendarHours.interval = Number(document.querySelector('#interval').value) || 15;
+    window._genesys.widgets.calendar.calendarHours.allDay.openTime = document.querySelector('#openTime').value;
+    window._genesys.widgets.calendar.calendarHours.allDay.closeTime = document.querySelector('#closeTime').value;
+
+    window._genesys.widgets.callback.countryCodes = document.querySelector('#countryCodes').checked;
+    window._genesys.widgets.callback.scheduledCallback = document.querySelector('#scheduledCallback').checked;
+    window._genesys.widgets.callback.immediateCallback = document.querySelector('#immediateCallback').checked;
+  }
+  window._genesys.widgets.webchat.confirmFormCloseEnabled = document.querySelector('#confirmFormCloseEnabled').checked;
+};
+
 const setVeConfig = function () {
   window._genesys.widgets.videoengager.audioOnly = document.querySelector('#audioOnly').checked;
   window._genesys.widgets.videoengager.autoAccept = document.querySelector('#autoAccept').checked;
   window._genesys.widgets.videoengager.enablePrecall = document.querySelector('#enablePrecall').checked;
   window._genesys.widgets.videoengager.useWebChatForm = document.querySelector('#useWebChatForm').checked;
   window._genesys.widgets.videoengager.extraAgentMessage = document.querySelector('#extraAgentMessage').value;
+  window._genesys.widgets.videoengager.dialCountryCode = document.querySelector('#dialCountryCode').value;
 
   window._genesys.widgets.videoengager.webChatFormData.nickname = document.querySelector('#nickname').value;
   window._genesys.widgets.videoengager.webChatFormData.firstname = document.querySelector('#firstname').value;

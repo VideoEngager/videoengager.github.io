@@ -108,6 +108,9 @@
         <label for="extraAgentMessage"> extraAgentMessage </label>
         <input type="text" id="extraAgentMessage" name="extraAgentMessage" value="**This is a VideoEngager Video Call!!!**">
         <p>This message will be seen by agent on interaction apeparence</p>
+        <label for="dialCountryCode"> dialCountryCode </label>
+        <input type="text" id="dialCountryCode" name="dialCountryCode" value="+1">
+        <p>Default Callback Phone Number Country Code</p>
         <br>
         <div>
             <p style="margin: 0;">WebChat Form Data</p>
@@ -137,6 +140,43 @@
         <label for="sidebar">sidebar</label><br>
         <input type="radio" id="selector" name="ui_mode" value="selector">
         <label for="selector">selector</label><br>
+    </div>
+    <div id="genesysOptions">
+        <h2>Genesys Callback Options:</h2>
+        <input class="checkbox" type="checkbox" id="confirmFormCloseEnabled">
+        <label for="confirmFormCloseEnabled">confirmFormCloseEnabled</label>
+        <p>Show confirmation dialog box on web chat form close</p>
+        <input class="checkbox" type="checkbox" id="countryCodes" checked="checked">
+        <label for="countryCodes">countryCodes</label>
+        <p>Show phone country code selector</p>
+        <input class="checkbox" type="checkbox" id="immediateCallback">
+        <label for="immediateCallback">immediateCallback</label>
+        <p>Enable scheduling callback "as soon as possible" option</p>
+        <input class="checkbox" type="checkbox" id="scheduledCallback" checked="checked">
+        <label for="scheduledCallback">scheduledCallback</label>
+        <p>Enable picking a date to schedule a callback</p>
+        <br>
+        <div>
+            <h3>Availability</h3>
+            <input class="checkbox" type="checkbox" id="showAvailability" checked="checked">
+            <label for="showAvailability">showAvailability</label>
+            <p>Enable availability api calls</p>
+            <label for="numberOfDays"> numberOfDays </label>
+            <input type="text" id="numberOfDays" name="numberOfDays" value="5">
+            <p>How much day should availability calendar show</p>
+            <input class="checkbox" type="checkbox" id="hideUnavailableTimeSlots">
+            <label for="hideUnavailableTimeSlots">hideUnavailableTimeSlots</label>
+            <p>Hide or show zero capacity time slots</p>
+            <label for="interval"> interval </label>
+            <input type="text" id="interval" name="interval" value="10">
+            <p>minutes between each slot</p>
+            <label for="openTime"> openTime </label>
+            <input type="text" id="openTime" name="openTime" value="08:00">
+            <p>minutes between each slot</p>
+            <label for="closeTime"> closeTime </label>
+            <input type="text" id="closeTime" name="closeTime" value="19:00">
+            <p>minutes between each slot</p>
+        </div>
     </div>
     <div>
         <button id="loadGenesysLib">Load Genesys Widget Lib</button>

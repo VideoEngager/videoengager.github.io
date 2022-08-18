@@ -178,6 +178,22 @@ window._genesys.widgets = {
           }
         },
         {
+          id: 'cx_form_callback_email',
+          type: 'email',
+          name: 'customer_email',
+          maxlength: '100',
+          placeholder: '@i18n:callback.CallbackPlaceholderRequired',
+          label: 'Email',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            const re = /\S+@\S+\.\S+/;
+            if (input && input.val().match(re)) {
+              return true;
+            } else {
+              return false;
+            }
+          }
+        },
+        {
           type: 'hidden',
           label: 'tennantId',
           id: 'cx_form_callback_tennantId',

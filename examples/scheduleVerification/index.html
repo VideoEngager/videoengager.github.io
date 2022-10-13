@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <title>Schedule a Video Call</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js"></script>
+  </head>
+    <body>
+        <div class="container">
+            <h2 class="text-center">Schedule a Video Call</h2>
+        </div>
+        <div class="container" id="debug-editor">
+            <table>
+                <tr>
+                    <td>
+                        <label>Server URL</label><br>
+                        <input id="serverUrl" value="" /><br>
+                    </td>
+                    <td>
+                        <label>PAK</label><br>
+                        <input id="pak" value="" /><br>
+                    </td>
+                    <td>
+                        <label>externalId</label><br>
+                        <input id="externalId" value="" /><br>
+                    </td>
+                    <td>
+                        <label>Email</label><br>
+                        <input id="email" value="" /><br>
+                    </td>
+                    <td>
+                        <label>Customer Name</label><br>
+                        <input id="visitorName" value="" /><br>
+                    </td>
+                    <td>
+                        <label>Customer email</label><br>
+                        <input id="visitorEmail" value="" /><br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button id="connectButton">Connect</button>
+                        <button id="saveLocalStorageBtn">Save</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="container">
+            <div id='calendar'></div>
+        </div>    
+        <div id="calendarModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 id="modalTitle" class="modal-title"></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="modalBody" class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="customerName">Customer Name</label>
+                                <input type="text" class="form-control" id="customerName" placeholder="Enter Customer Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="customerEmail">Customer Email</label>
+                                <input type="email" class="form-control" id="customerEmail" placeholder="Enter Customer Email">
+                            </div>
+                            <div class="form-group">
+                                <label for="customerPhone">Customer Phone number</label>
+                                <input type="phone" class="form-control" id="customerPhone" placeholder="Enter Customer Phone number">
+                            </div>
+                            <div class="form-group">
+                                <label>Schedule Start Time:</label>
+                                <p id="scheduleStart"></p>
+                            </div>
+                            <div class="form-group">
+                                <label>Schedule End Time:</label>
+                                <p id="scheduleEnd"></p>
+                            </div>
+                            <div class="form-group">
+                                <label>Duration:</label>
+                                <p id="callDuration"></p>
+                            </div>
+                            <div class="form-group" id="meetingLinkGroup">
+                                <label>Video Meeting Link:</label>
+                                <p><a id="meetingLink" href="" target="_blank"></a></p>
+                            </div>
+                            <div class="form-group" id="agentMeetingLinkGroup">
+                                <label>Video Meeting Link For Agent:</label>
+                                <p><a id="agentMeetingLink" href="" target="_blank"></a></p>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="sendNotificationEmail">
+                                <label class="form-check-label" for="sendNotificationEmail">
+                                  Send Notification Email
+                                </label>
+                            </div>
+                            <div class="form-check show-in-debug">
+                                <input class="form-check-input" type="checkbox" value="" id="autoAnswer">
+                                <label class="form-check-label" for="autoAnswer">
+                                  Allow visitor auto answer
+                                </label>
+                            </div>
+                            <input type="hidden" id="eventId">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="detailsModal" class="modal fade" style="overflow: scroll;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 id="modalTitleDetail" class="modal-title"></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="modalBodyDetail" class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="customerName">Customer Name</label>
+                                <input type="text" class="form-control" id="customerNameDetail" placeholder="Enter Customer Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="customerEmail">Customer Email</label>
+                                <input type="email" class="form-control" id="customerEmailDetail" placeholder="Enter Customer Email">
+                            </div>
+                            <div class="form-group">
+                                <label for="customerPhone">Customer Phone number</label>
+                                <input type="phone" class="form-control" id="customerPhoneDetail" placeholder="Enter Customer Phone number">
+                            </div>
+                            <div class="form-group">
+                                <label>Schedule Start Time:</label>
+                                <p id="scheduleStartDetail"></p>
+                            </div>
+                            <div class="form-group" id="meetingLinkGroupDetail">
+                                <label>Video Meeting Link:</label>
+                                <p><a id="meetingLinkDetail" href="" target="_blank"></a></p>
+                            </div>
+                            <div class="form-group" id="agentMeetingLinkGroupDetail">
+                                <label>Video Meeting Link For Agent:</label>
+                                <p><a id="agentMeetingLinkDetail" href="" target="_blank"></a></p>
+                            </div>
+                            <div class="form-check show-in-debug">
+                                <input class="form-check-input" type="checkbox" value="" id="autoAnswerDetail" disabled>
+                                <label class="form-check-label" for="autoAnswer">
+                                  Allow visitor auto answer
+                                </label>
+                            </div>
+                            <input type="hidden" id="eventIdDetail">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="verifyModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Email Verification</h4>
+                    </div>
+                    <div id="verifyModalBody" class="modal-body">
+                        Please enter the code that sent to your email.
+                    </div>
+                    <div id="verifyEmail" class="modal-body"></div>
+                    <input type="text" class="form-control" id="verifyCode" placeholder="Enter Verification Code">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="verifycancelBtn">Close</button>
+                        <button type="button" class="btn btn-primary" id="verifyconfirmBtn">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="confirmModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Confirmation</h4>
+                    </div>
+                    <div id="confirmModalBody" class="modal-body">
+                        Are you sure to remove this event?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="cancelBtn">Close</button>
+                        <button type="button" class="btn btn-primary" id="confirmBtn">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="./script.js"></script>
+    </body>
+</html>

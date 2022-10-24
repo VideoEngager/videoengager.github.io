@@ -1,11 +1,5 @@
 /* eslint-disable no-console */
 /* globals $ console jQuery localStorage FullCalendar */
-let pak = 'DEV2';
-let externalId = 'Home';
-let email = '327d10eb-0826-42cd-89b1-353ec67d33f8mustafa@videoengager.com';
-let customerName = 'Slav Hadjidimitrov';
-let customerEmail = 'mustafa@videoengager.com';
-const customerPhone = '123456';
 let calendar, scheduleStart, scheduleEnd, callDuration, auth, activeStart, activeEnd, fetchStart, fetchEnd;
 
 function isDebug () {
@@ -16,10 +10,13 @@ function isDebug () {
   return false;
 }
 const urlParams = new URLSearchParams(window.location.search);
-const debugMode = urlParams.get('debug') || 'dev';
+const debugMode = urlParams.get('env') || 'dev';
 
 const myJSObject = {
   staging: {
+    pak: 'b7abeb05-f821-cff8-0b27-77232116bf1d',
+    externalId: '639292ca-14a2-400b-8670-1f545d8aa860',
+    email: 'slav@videoengager.com',
     organizationId: '639292ca-14a2-400b-8670-1f545d8aa860',
     deploymentId: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
     videoengagerUrl: 'https://staging.leadsecure.com',
@@ -29,10 +26,13 @@ const myJSObject = {
     queue: 'Support'
   },
   dev: {
+    pak: 'DEV2',
+    externalId: 'videoEngager',
+    email: '327d10eb-0826-42cd-89b1-353ec67d33f8mustafa@videoengager.com',
+    customerName: 'Slav Hadjidimitrov',
+    customerEmail: 'mustafa@videoengager.com',
     serverUrl: 'https://dev.videoengager.com',
     videoengagerUrl: 'https://dev.videoengager.com',
-    pak: 'DEV2',
-    email: '327d10eb-0826-42cd-89b1-353ec67d33f8mustafa@videoengager.com',
     firstName: 'agent-2',
     division: 'Home',
     source: 'mypurecloud.com.au',
@@ -57,9 +57,8 @@ const myJSObject = {
 // Get token from API
 const getToken = function (callback) {
   $.ajax({
-    url: myJSObject[debugMode].serverUrl + '/api/partners/impersonateCreate',
-    type: 'POST',
-    data: myJSObject[debugMode],
+    url: myJSObject[debugMode].serverUrl + '/api/partners/impersonate/' + myJSObject[debugMode].pak + '/' + myJSObject[debugMode].externalId + '/' + myJSObject[debugMode].email,
+    type: 'GET',
     complete: callback,
     error: function (err) {
       console.log('error', err);
@@ -175,6 +174,11 @@ const createSchedule = function (postData, callback) {
           keyboard: false,
           show: true
         });
+      } else {
+        console.error(err);
+        modalConfirm('Server response in an undefined error. Status Code: ' + err.status, function () {
+          $('#confirmModal').modal('hide');
+        });
       }
     }
   });
@@ -248,15 +252,15 @@ const initializeCalendar = function () {
       scheduleEnd = info.end;
       callDuration = (scheduleEnd.getTime() - scheduleStart.getTime()) / 60000;
       $('#agentMeetingLinkGroup').hide();
-      $('#customerName').val(customerName);
-      $('#customerEmail').val(customerEmail);
-      $('#customerPhone').val(customerPhone);
+      $('#customerName').val();
+      $('#customerEmail').val();
+      $('#customerPhone').val();
       $('#scheduleStart').html(scheduleStart.toString());
       $('#scheduleEnd').html(scheduleEnd.toString());
       $('#callDuration').html(callDuration + ' minutes');
       $('#meetingLinkGroup').hide();
       $('#eventId').val('');
-      $('#modalTitle').text('Schedule a video call for ' + customerName);
+      $('#modalTitle').text('Schedule a video call');
       $('#calendarModal').modal();
     },
     eventDidMount: function (info) {
@@ -394,35 +398,6 @@ const generateScheduleData = function (visitor) {
   });
 };
 
-const saveToLocalStorage = function () {
-//  myJSObject[debugMode] = $('#serverUrl').val();
-  pak = $('#pak').val();
-  externalId = $('#externalId').val();
-  email = $('#email').val();
-  customerName = $('#visitorName').val();
-  customerEmail = $('#visitorEmail').val();
-  localStorage.setItem('serverUrl', myJSObject[debugMode]);
-  localStorage.setItem('pak', pak);
-  localStorage.setItem('externalId', externalId);
-  localStorage.setItem('email', email);
-  localStorage.setItem('customerName', customerName);
-  localStorage.setItem('customerEmail', customerEmail);
-};
-const fetchFromLocalStorage = function () {
-//  myJSObject[debugMode] = localStorage.getItem('serverUrl') || myJSObject[debugMode];
-  pak = localStorage.getItem('pak') || pak;
-  externalId = localStorage.getItem('externalId') || externalId;
-  email = localStorage.getItem('email') || email;
-  customerName = localStorage.getItem('customerName') || customerName;
-  customerEmail = localStorage.getItem('customerEmail') || customerEmail;
-  $('#serverUrl').val(serverUrl);
-  $('#pak').val(pak);
-  $('#externalId').val(externalId);
-  $('#email').val(email);
-  $('#visitorName').val(customerName);
-  $('#visitorEmail').val(customerEmail);
-};
-
 const modalConfirm = function (message, callback) {
   $('#confirmModalBody').text(message);
   $('#confirmModal').modal({
@@ -443,7 +418,6 @@ const modalConfirm = function (message, callback) {
 };
 
 $(document).ready(function () {
-  fetchFromLocalStorage();
   if (isDebug()) {
     $('#debug-editor').show();
     $('.show-in-debug').show();
@@ -463,12 +437,7 @@ $(document).ready(function () {
   });
 });
 
-$('#saveLocalStorageBtn').on('click', function () {
-  saveToLocalStorage();
-});
-
 $('#connectButton').on('click', function () {
-  saveToLocalStorage();
   getToken(function (data) {
     const rsp = data.responseJSON;
     if (data.status === 200) {

@@ -1,4 +1,5 @@
-/* globals $ console jQuery localStorage */
+/* eslint-disable no-console */
+/* globals $ console jQuery localStorage FullCalendar */
 let pak = 'DEV2';
 let externalId = 'Home';
 let email = '327d10eb-0826-42cd-89b1-353ec67d33f8mustafa@videoengager.com';
@@ -56,7 +57,7 @@ const myJSObject = {
 // Get token from API
 const getToken = function (callback) {
   $.ajax({
-    url: myJSObject[debugMode].serverUrl+ '/api/partners/impersonateCreate',
+    url: myJSObject[debugMode].serverUrl + '/api/partners/impersonateCreate',
     type: 'POST',
     data: myJSObject[debugMode],
     complete: callback,
@@ -69,12 +70,18 @@ const getToken = function (callback) {
 // Fetch schedules with from and to parameters.
 const fetchSchedules = function (successCallback, failureCallback) {
   $.ajax({
-    url: myJSObject[debugMode].serverUrl+ '/api/schedules/tenant/' + fetchStart.getTime() + '/' + fetchEnd.getTime(),
+    url: myJSObject[debugMode].serverUrl + '/api/schedules/tenant/' + fetchStart.getTime() + '/' + fetchEnd.getTime(),
     type: 'GET',
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', auth);
     },
     success: function (result) {
+      result = result.filter((item) => {
+        if (item.active) {
+          return item;
+        }
+        return null;
+      });
       result = result.map(function (item) {
         return {
           title: 'Video Interview',
@@ -96,7 +103,7 @@ const fetchSchedules = function (successCallback, failureCallback) {
 // Fetch schedule by id from server
 const fetchSchedule = function (id, callback) {
   $.ajax({
-    url: myJSObject[debugMode].serverUrl+ '/api/schedules/my/' + id,
+    url: myJSObject[debugMode].serverUrl + '/api/schedules/my/' + id,
     type: 'GET',
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', auth);
@@ -116,46 +123,39 @@ const verifyScheduleByCode = function (code) {
     type: 'GET',
     contentType: 'application/json',
     dataType: 'json',
-    beforeSend: function (xhr) {
-      xhr.setRequestHeader('Authorization', auth);
-    },
     error: function (err) {
+      console.error(err);
       modalConfirm('Code and your mail do not match.', function () {
         $('#confirmModal').modal('hide');
       });
     },
     success: function (res) {
       console.log(res);
-      const videoengager = res.videoengager;
       $('#verifyModal').modal('hide');
-      $('#customerNameDetail').val(videoengager.name);
-      $('#customerEmailDetail').val(videoengager.email);
-      $('#customerPhoneDetail').val(videoengager.phone);
-      $('#scheduleStartDetail').html(new Date(videoengager.date).toString());
+      $('#customerNameDetail').val(res.name);
+      $('#customerEmailDetail').val(res.email);
+      $('#customerPhoneDetail').val(res.phone);
+      $('#scheduleStartDetail').html(new Date(res.date).toString());
       $('#meetingLinkGroup').hide();
-      $('#meetingLinkDetail').html(videoengager.meetingUrl);
-      $('#agentMeetingLinkDetail').html(videoengager.agentUrl);
+      $('#agentMeetingLinkGroupDetail').hide();
+      $('#meetingLinkDetail').html(res.meetingUrl);
+      $('#agentMeetingLinkDetail').html(res.agentUrl);
       $('#eventIdDetail').val('');
-      $('#modalTitleDetail').text('Schedule a video call for ' + videoengager.name);
+      $('#modalTitleDetail').text('Schedule a video call for ' + res.name);
       $('#detailsModal').modal();
+      calendar.refetchEvents();
     }
   });
 };
 
 // Create schedule api
-const createSchedule = function (sendNotificationEmail, postData, callback) {
-  let url = myJSObject[debugMode].serverUrl+ '/api/schedules/create/' + myJSObject[debugMode].tennantId;
-  if (sendNotificationEmail) {
-    url += '?sendNotificationEmail';
-  }
+const createSchedule = function (postData, callback) {
+  const url = myJSObject[debugMode].serverUrl + '/api/schedules/create/' + myJSObject[debugMode].tennantId;
   $.ajax({
     url: url,
     type: 'POST',
     contentType: 'application/json',
     dataType: 'json',
-    beforeSend: function (xhr) {
-      xhr.setRequestHeader('Authorization', auth);
-    },
     data: JSON.stringify(postData),
     success: callback,
     error: function (err) {
@@ -163,6 +163,9 @@ const createSchedule = function (sendNotificationEmail, postData, callback) {
         $('#verifyModal').modal('hide');
         $('#calendarModal').modal('hide');
         jQuery('#verifyEmail').html(err.responseJSON.email);
+        $('#verifycancelBtn').unbind().on('click', async function () {
+          $('#verifyModal').modal('hide');
+        });
         $('#verifyconfirmBtn').unbind().on('click', async function () {
           verifyScheduleByCode(jQuery('#verifyCode').val());
         });
@@ -178,11 +181,8 @@ const createSchedule = function (sendNotificationEmail, postData, callback) {
 };
 
 // Update schedule api
-const updateSchedule = function (sendNotificationEmail, postData, callback) {
-  let url = myJSObject[debugMode].serverUrl+ '/api/schedules/my/' + postData._id;
-  if (sendNotificationEmail) {
-    url += '?sendNotificationEmail';
-  }
+const updateSchedule = function (postData, callback) {
+  const url = myJSObject[debugMode].serverUrl + '/api/schedules/my/' + postData._id;
   $.ajax({
     url: url,
     type: 'PUT',
@@ -194,14 +194,14 @@ const updateSchedule = function (sendNotificationEmail, postData, callback) {
     data: JSON.stringify(postData),
     success: callback,
     error: function (err) {
-
+      console.error(err);
     }
   });
 };
 
 // Remove schedule from server
 const removeSchedule = function (eventId, callback) {
-  const url = myJSObject[debugMode].serverUrl+ '/api/schedules/my/' + eventId + '?sendNotificationEmail';
+  const url = myJSObject[debugMode].serverUrl + '/api/schedules/my/' + eventId + '?sendNotificationEmail';
   $.ajax({
     url: url,
     type: 'DELETE',
@@ -247,7 +247,7 @@ const initializeCalendar = function () {
       scheduleStart = info.start;
       scheduleEnd = info.end;
       callDuration = (scheduleEnd.getTime() - scheduleStart.getTime()) / 60000;
-
+      $('#agentMeetingLinkGroup').hide();
       $('#customerName').val(customerName);
       $('#customerEmail').val(customerEmail);
       $('#customerPhone').val(customerPhone);
@@ -314,7 +314,7 @@ const initializeCalendar = function () {
 };
 
 // Edit schedule
-var editSchedule = function (info) {
+const editSchedule = function (info) {
   const eventId = info.event.id;
   fetchSchedule(eventId, function (event, err) {
     if (event) {
@@ -347,7 +347,7 @@ var editSchedule = function (info) {
 };
 
 // Update schedule data
-const updateScheduleDataFromModal = function (visitor, eventId, sendNotificationEmail) {
+const updateScheduleDataFromModal = function (visitor, eventId) {
   fetchSchedule(eventId, function (event, err) {
     event.visitor.name = visitor.name;
     event.visitor.email = visitor.email;
@@ -355,14 +355,14 @@ const updateScheduleDataFromModal = function (visitor, eventId, sendNotification
     if (isDebug()) {
       event.visitor.autoAnswer = visitor.autoAnswer;
     }
-    updateSchedule(sendNotificationEmail, event, function (dataSchedule) {
+    updateSchedule(event, function (dataSchedule) {
       console.log('updateSchedule', dataSchedule);
       $('#calendarModal').modal('hide');
     });
   });
 };
 
-var updateScheduleDateAndDuration = function (event) {
+const updateScheduleDateAndDuration = function (event) {
   const eventId = event.id;
   const startDate = event.start.getTime();
   const duration = (event.end.getTime() - startDate) / 60000;
@@ -378,7 +378,7 @@ var updateScheduleDateAndDuration = function (event) {
 };
 
 // Create schedule data
-const generateScheduleData = function (visitor, sendNotificationEmail) {
+const generateScheduleData = function (visitor) {
   const pin = Math.floor(1000 + Math.random() * 9000).toString();
   const postDataSchedule = {
     pin: pin,
@@ -387,7 +387,7 @@ const generateScheduleData = function (visitor, sendNotificationEmail) {
     pak: pak,
     visitor: visitor
   };
-  createSchedule(sendNotificationEmail, postDataSchedule, function (dataSchedule) {
+  createSchedule(postDataSchedule, function (dataSchedule) {
     console.log('createSchedule', dataSchedule);
     calendar.refetchEvents();
     $('#calendarModal').modal('hide');
@@ -423,7 +423,7 @@ const fetchFromLocalStorage = function () {
   $('#visitorEmail').val(customerEmail);
 };
 
-var modalConfirm = function (message, callback) {
+const modalConfirm = function (message, callback) {
   $('#confirmModalBody').text(message);
   $('#confirmModal').modal({
     backdrop: 'static',
@@ -481,18 +481,15 @@ $('#connectButton').on('click', function () {
 });
 
 $('#saveBtn').on('click', function (e) {
-  const sendNotificationEmail = $('#sendNotificationEmail').is(':checked');
-  const autoAnswer = $('#autoAnswer').is(':checked');
   const visitor = {
     name: $('#customerName').val(),
     email: $('#customerEmail').val(),
-    phone: $('#customerPhone').val(),
-    autoAnswer: autoAnswer
+    phone: $('#customerPhone').val()
   };
   if ($('#eventId').val()) {
     const eventId = $('#eventId').val();
-    updateScheduleDataFromModal(visitor, eventId, sendNotificationEmail);
+    updateScheduleDataFromModal(visitor, eventId);
   } else {
-    generateScheduleData(visitor, sendNotificationEmail);
+    generateScheduleData(visitor);
   }
 });

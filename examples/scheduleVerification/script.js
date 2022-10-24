@@ -10,7 +10,7 @@ function isDebug () {
   return false;
 }
 const urlParams = new URLSearchParams(window.location.search);
-const debugMode = urlParams.get('env') || 'dev';
+const debugMode = urlParams.get('env') || 'prod';
 
 const myJSObject = {
   staging: {

@@ -52,7 +52,7 @@ function subscribeToGenesysListeners () {
     }
     /** 1. popupClosed || This means that the user has closed the SmartVideo Call */
     if (event.data && event.data.type === 'popupClosed') {
-      window.CXBus.command('WebChat.endChat');
+      window.CXBus.command('WebChatService.endChat');
     }
   }, false);
 }
@@ -87,7 +87,7 @@ function startButtonsListeners () {
   });
   const cancelVideoCallButton = document.getElementById('cancelVideoCallButton');
   cancelVideoCallButton.addEventListener('click', function () {
-    window.CXBus.command('WebChat.endChat');
+    window.CXBus.command('WebChatService.endChat');
   });
 }
 

@@ -14,7 +14,6 @@ window._genesys.widgets = {
     preload: ['calendar', 'callbackservice', 'webchatservice']
   },
   videoengager: {
-    callHolder: '',
     platform: 'purecloud',
     tenantId: 'test_tenant',
     veUrl: 'https://dev.videoengager.com',

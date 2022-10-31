@@ -1,10 +1,12 @@
 
 function loadLibraries () {
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com/widgets/9.0/plugins/' });
-  window.CXBus.loadPlugin('widgets-core').done(function () {
-    startButtonsListeners();
-    subscribeToGenesysListeners();
-  });
+  window.CXBus.loadPlugin('widgets-core')
+
+    .done(function () {
+      startButtonsListeners();
+      subscribeToGenesysListeners();
+    });
 }
 function subscribeToGenesysListeners () {
   const videoCallButton = document.getElementById('videoCallButton');
@@ -20,22 +22,22 @@ function subscribeToGenesysListeners () {
   }
   // Genesys widget listeners
 
-  // 1.WebChatService.opened || Registration Form form has opened
-  window.CXBus.subscribe('WebChatService.opened', hideVideoButton);
+  // 1.WebChat.opened || Registration Form form has opened
+  window.CXBus.subscribe('WebChat.opened', hideVideoButton);
 
-  // 2. WebChatService.cancelled || WebChatService.closed || Registration Form has been Closed or canceled
-  window.CXBus.subscribe('WebChatService.closed', showVideoButton);
-  window.CXBus.subscribe('WebChatService.cancelled', showVideoButton);
+  // 2. WebChat.cancelled || WebChat.closed || Registration Form has been Closed or canceled
+  window.CXBus.subscribe('WebChat.closed', showVideoButton);
+  window.CXBus.subscribe('WebChat.cancelled', showVideoButton);
 
-  /** 3. WebChatService.started || handle the Call Placed Event event
+  /** 3. WebChat.started || handle the Call Placed Event event
  * (this means that user has submitted the Registration Form and the call is waiting to be picked by an agent) */
-  window.CXBus.subscribe('WebChatService.started', showVideoButton);
+  window.CXBus.subscribe('WebChat.started', showVideoButton);
 
-  // 4. WebChatService.ended || handle call ended event
-  window.CXBus.subscribe('WebChatService.ended', showVideoButton);
+  // 4. WebChat.ended || handle call ended event
+  window.CXBus.subscribe('WebChat.ended', showVideoButton);
 
-  // 5.WebChatService.failed || handle call failed event
-  window.CXBus.subscribe('WebChatService.failed', function (err) {
+  // 5.WebChat.failed || handle call failed event
+  window.CXBus.subscribe('WebChat.failed', function (err) {
     showVideoButton();
     console.error(err);
   });
@@ -50,7 +52,7 @@ function subscribeToGenesysListeners () {
     }
     /** 1. popupClosed || This means that the user has closed the SmartVideo Call */
     if (event.data && event.data.type === 'popupClosed') {
-      window.CXBus.command('WebChatService.endChat');
+      window.CXBus.command('WebChat.endChat');
     }
   }, false);
 }
@@ -85,7 +87,7 @@ function startButtonsListeners () {
   });
   const cancelVideoCallButton = document.getElementById('cancelVideoCallButton');
   cancelVideoCallButton.addEventListener('click', function () {
-    window.CXBus.command('WebChatService.endChat');
+    window.CXBus.command('WebChat.endChat');
   });
 }
 

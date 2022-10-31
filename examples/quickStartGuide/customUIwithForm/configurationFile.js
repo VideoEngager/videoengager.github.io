@@ -26,7 +26,12 @@ window._genesys.widgets = {
       subject: 'Video Call',
       userData: {}
     },
-    dialCountryCode: '+1'
+    i18n: {
+      en: {
+        ChatFormSubmitVideo: 'Start Video',
+        WebChatTitleVideo: 'Video Chat'
+      }
+    }
   },
   webchat: {
     transport: {

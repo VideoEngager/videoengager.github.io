@@ -14,7 +14,6 @@ window._genesys.widgets = {
     preload: ['calendar', 'callbackservice', 'webchatservice']
   },
   videoengager: {
-    callHolder: '',
     platform: 'purecloud',
     tenantId: 'test_tenant',
     veUrl: 'https://dev.videoengager.com',
@@ -27,7 +26,12 @@ window._genesys.widgets = {
       subject: 'Video Call',
       userData: {}
     },
-    dialCountryCode: '+1'
+    i18n: {
+      en: {
+        ChatFormSubmitVideo: 'Start Video',
+        WebChatTitleVideo: 'Video Chat'
+      }
+    }
   },
   webchat: {
     transport: {

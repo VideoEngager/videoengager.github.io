@@ -5,7 +5,8 @@ window._genesys.widgets = {
     downloadGoogleFont: false,
     debug: true,
     theme: 'light',
-    lang: 'en'
+    lang: 'en',
+    preload: ['calendar', 'callbackservice', 'webchatservice']
   },
   videoengager: {
     callHolder: '',

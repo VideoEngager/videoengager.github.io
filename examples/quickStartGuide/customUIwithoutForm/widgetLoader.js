@@ -31,17 +31,21 @@ function subscribeToGenesysListeners () {
 
   /** 3. WebChat.started || handle the Call Placed Event event
  * (this means that user has submitted the Registration Form and the call is waiting to be picked by an agent) */
-  window.CXBus.subscribe('WebChat.started', showVideoButton);
+  window.CXBus.subscribe('WebChatService.started', showVideoButton);
 
   // 4. WebChat.ended || handle call ended event
-  window.CXBus.subscribe('WebChat.ended', showVideoButton);
+  window.CXBus.subscribe('WebChatService.ended', showVideoButton);
 
   // 5.WebChat.failed || handle call failed event
   window.CXBus.subscribe('WebChat.failed', function (err) {
     showVideoButton();
     console.error(err);
   });
-
+  // 6. WebChatService.error || handle call failed event
+  window.CXBus.subscribe('WebChatService.error', function (err) {
+    showVideoButton();
+    console.error(err);
+  });
   /** handling SmartVideo Call  Events */
 
   window.addEventListener('message', function (event) {

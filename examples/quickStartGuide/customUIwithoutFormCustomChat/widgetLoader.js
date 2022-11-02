@@ -1,4 +1,4 @@
-const messages = [];
+let lastMessage;
 function loadLibraries () {
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com/widgets/9.0/plugins/' });
   window.CXBus.loadPlugin('widgets-core')
@@ -17,8 +17,7 @@ function subscribeToGenesysListeners () {
   window.CXBus.subscribe('WebChatService.messageReceived', (event) => {
     console.log('WebChatService.messageReceived', event);
     const newMessages = event.data?.messages || [];
-    messages.push(...newMessages);
-    updateMessages();
+    updateMessages(newMessages);
   });
 
   /** 3. WebChat.started || handle the Call Placed Event event
@@ -123,23 +122,40 @@ function startWebChat () {
   });
 }
 
+/**
+ * @param {String} HTML representing a single element
+ * @return {Element}
+ */
+function htmlToElement (html) {
+  const template = document.createElement('template');
+  html = html.trim(); // Never return a text node of whitespace as the result
+  template.innerHTML = html;
+  return template.content.firstChild;
+}
+// const regex = /\\n|\\r\\n|\\n\\r|\\r/g;
 function createNewMessage (message) {
-  const messageElement = `<div class="chat-message" data-user-type="${message.from.type}">
+  const messageText = message.text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+
+  const messageElementHTML = `<div class="chat-message animate__animated animate__fadeIn" data-user-type="${message.from.type}">
                     <div class="flex  ${message.from.type === 'Client' ? 'items-end justify-end' : 'items-end'} " >
-                        <div data-container="messagesHolder" class="flex flex-col space-y-2 text-xs max-w-xs mx-2 ${message.from.type === 'Client' ? 'order-1 items-end' : 'order-2 items-star'} ">
-                             <div id="${message.id}"><span class="px-4 py-2 rounded-lg inline-block ${message.from.type === 'Client' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}">${message.text}</span></div>
+                        <div data-container="messagesHolder" class="flex flex-col space-y-2 text-xs max-w-[340px] mx-2 ${message.from.type === 'Client' ? 'order-1 items-end' : 'order-2 items-star'} ">
+                             <div id="${message.id}" class="animate__animated  ${message.from.type === 'Client' ? 'animate__slideInLeft' : 'animate__slideInRight'}"><span class="px-4 py-2 whitespace-normal rounded-lg inline-block ${message.from.type === 'Client' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}">${messageText}</span></div>
                          <img src="${message.from.type}.svg"
-                           alt="My profile" class="w-6 h-6 rounded-full ${message.from.type === 'Client' ? 'order-2' : 'order-1'}">
+                           alt="My profile" class="w-6 h-6 animate__animated ${message.from.type === 'Client' ? 'animate__slideInLeft' : 'animate__slideInRight'}  rounded-full ${message.from.type === 'Client' ? 'order-2' : 'order-1'}">
                     </div>
                  </div>`;
+  const messageElement = htmlToElement(messageElementHTML);
   const messagesContiner = document.getElementById('messages');
-  messagesContiner.innerHTML += messageElement;
+  messagesContiner.appendChild(messageElement);
 }
-
 function injectMessage (message, lastMessage) {
-  const messageElement = `<div id="${message.id}"><span class="px-4 py-2 rounded-lg inline-block ${message.from.type === 'Client' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}">${message.text}</span></div>`;
+  const messageText = message.text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+
+  const messageElementHTML = `<div id="${message.id}"  class="animate__animated ${message.from.type === 'Client' ? 'animate__slideInLeft' : 'animate__slideInRight'} "><span class="whitespace-normal animate__animated animate__fadeIn px-4 py-2 rounded-lg inline-block ${message.from.type === 'Client' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}">${messageText}</span></div>`;
+  const messageElement = htmlToElement(messageElementHTML);
+
   const lastMessageElement = document.getElementById(lastMessage.id);
-  lastMessageElement.parentElement.innerHTML += messageElement;
+  lastMessageElement.parentElement.appendChild(messageElement);
 }
 
 function addNewMessage (message, lastMessage) {
@@ -155,10 +171,9 @@ function addNewMessage (message, lastMessage) {
   const messagesContiner = document.getElementById('messages');
   messagesContiner.scrollTop = messagesContiner.scrollHeight;
 }
-function updateMessages () {
-  let lastMessage;
-  const messagesContiner = document.getElementById('messages');
-  messagesContiner.innerHTML = '';
+function updateMessages (messages) {
+  // const messagesContiner = document.getElementById('messages');
+  // messagesContiner.innerHTML = '';
   for (const singleMessage of messages) {
     if (singleMessage.type !== 'Message') continue;
     addNewMessage(singleMessage, lastMessage);
@@ -169,10 +184,12 @@ function onChatSubmit () {
   const messageInput = document.getElementById('messageInput');
   const message = messageInput.value;
   messageInput.value = '';
+  autoGrow(messageInput);
   window.CXBus.command('WebChatService.sendMessage', {
     message
   }).fail(() => {
     messageInput.value = message;
+    autoGrow(messageInput);
   });
   return false;
 }
@@ -182,6 +199,11 @@ function endChatCommand () {
 function sendIsTyping () {
   window.CXBus.command('WebChatService.sendTyping');
 }
+function autoGrow (element) {
+  element.style.height = '30px';
+  element.style.height = (element.scrollHeight) + 'px';
+}
+window.autoGrow = autoGrow;
 window.endChatCommand = endChatCommand;
 window.onChatSubmit = onChatSubmit;
 window.sendIsTyping = sendIsTyping;

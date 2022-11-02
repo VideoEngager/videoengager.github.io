@@ -1,5 +1,6 @@
 
 function loadLibraries () {
+  /** Perform Loading Libraries */
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com/widgets/9.0/plugins/' });
   window.CXBus.loadPlugin('widgets-core').done(function () {
     startButtonsListeners();

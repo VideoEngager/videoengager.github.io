@@ -2,7 +2,6 @@
 function loadLibraries () {
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com/widgets/9.0/plugins/' });
   window.CXBus.loadPlugin('widgets-core')
-
     .done(function () {
       startButtonsListeners();
       subscribeToGenesysListeners();
@@ -60,18 +59,33 @@ function subscribeToGenesysListeners () {
     }
   }, false);
 }
+function validateFormInputs () {
+  const reportValidity = document.forms.customForm.reportValidity();
+
+  if (reportValidity) {
+    return true;
+  } else {
+    throw new Error('Please fill all required fields');
+  }
+}
 function getInputs () {
+  validateFormInputs();
   const subject = document.getElementById('subjectInput').value;
   const nickName = document.getElementById('nickNameInput').value;
   const lastName = document.getElementById('lastNameInput').value;
   const firstName = document.getElementById('firstNameInput').value;
+  const customField1 = document.getElementById('customField1').value;
+  const customField2 = document.getElementById('customField2').value;
   return {
     subject,
     nickName,
     lastName,
-    firstName
+    firstName,
+    customField1,
+    customField2
   };
 }
+
 function startButtonsListeners () {
   const callbackButton = document.getElementById('callbackButton');
   callbackButton.style.display = '';
@@ -100,11 +114,17 @@ function startCallback () {
     const form = getInputs();
     window.CXBus.command('Callback.open', {
       form: {
-        autoSubmit: false,
+        autoSubmit: true,
         firstname: form.firstName,
         lastname: form.lastName,
         subject: form.subject
         // desiredTime: 'now',
+      },
+      userData: {
+        customField1: form.customField1,
+        customField1Label: 'Custom Field 1 Label',
+        customField2: form.customField2,
+        customField2Label: 'Custom Field 2 Label'
       }
     }).done(function () {
       resolve();
@@ -120,6 +140,14 @@ function startVideoCall () {
     window._genesys.widgets.videoengager.webChatFormData.lastname = form.lastName;
     window._genesys.widgets.videoengager.webChatFormData.nickname = form.nickName;
     window._genesys.widgets.videoengager.webChatFormData.subject = form.subject;
+    window._genesys.widgets.videoengager.webChatFormData.userData = {
+      customField1: form.customField1,
+      customField1Label: 'Custom Field 1 Label',
+      customField2: form.customField2,
+      customField2Label: 'Custom Field 2 Label'
+    };
+    // handling different Queue name for video Call
+    window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = window._genesys.widgets.videoengager.transport.interactionData.routing.targetAddressVideo;
     window.CXBus.command('VideoEngager.startVideoEngager').done(function () {
       resolve();
     }).fail(function (err) {
@@ -130,13 +158,21 @@ function startVideoCall () {
 function startWebChat () {
   return new Promise(function (resolve, reject) {
     const form = getInputs();
-    window.CXBus.command('WebChat.open', {
+    // handling different Queue name for Chat Call
+    window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = window._genesys.widgets.videoengager.transport.interactionData.routing.targetAddressChat;
+    window.CXBus.command('WebChatService.startChat', {
       form: {
-        autoSubmit: false,
+        autoSubmit: true,
         firstname: form.firstName,
         lastname: form.lastName,
-        subject: form.subject
-        // desiredTime: 'now',
+        subject: form.subject,
+        email: 'mamoun@saasd.com'
+      },
+      userData: {
+        customField1: form.customField1,
+        customField1Label: 'Custom Field 1 Label',
+        customField2: form.customField2,
+        customField2Label: 'Custom Field 2 Label'
       }
     }).done(function () {
       resolve();

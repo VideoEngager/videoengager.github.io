@@ -147,7 +147,8 @@ function startVideoCall () {
       customField2Label: 'Custom Field 2 Label'
     };
     // handling different Queue name for video Call
-    window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = window._genesys.widgets.videoengager.transport.interactionData.routing.targetAddressVideo;
+    const targetAddress = window._genesys.widgets.videoengager.transport.interactionData.routing.targetAddressVideo;
+    window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = targetAddress;
     window.CXBus.command('VideoEngager.startVideoEngager').done(function () {
       resolve();
     }).fail(function (err) {
@@ -159,7 +160,8 @@ function startWebChat () {
   return new Promise(function (resolve, reject) {
     const form = getInputs();
     // handling different Queue name for Chat Call
-    window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = window._genesys.widgets.videoengager.transport.interactionData.routing.targetAddressChat;
+    const targetAddress = window._genesys.widgets.videoengager.transport.interactionData.routing.targetAddressVideo;
+    window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = targetAddress;
     window.CXBus.command('WebChatService.startChat', {
       form: {
         autoSubmit: true,

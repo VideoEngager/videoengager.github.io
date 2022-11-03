@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <!-------------------- SmartVideo Widget -------------------->
 
@@ -77,45 +78,51 @@
         </div>
     </div>
     <!-- Custom Chat -->
-    <div id="chatWidget" style="display:none;"
-        class="absolute bottom-0 min-w-[350px] right-10 h-[55vh]  bg-white rounded-t-lg">
-        <div class="flex-1 px-3 py-2 justify-between flex flex-col h-full">
-            <div class="flex sm:items-center  justify-between border-b-2 pb-2 border-gray-200">
-                <img src="Agent.svg" alt="Agent" class="w-10 h-10 rounded-full">
-                <div class="relative flex items-center space-x-4">
-
-                    <div class="flex flex-col leading-tight">
-
-                        <span class="text-md text-gray-600">Agent</span>
-                    </div>
+    <div id="chatWidget"
+        class="absolute bottom-0 min-w-[350px] right-10 h-[55vh]  bg-white overflow-hidden rounded-t-xl">
+        <div class="flex-1 justify-between flex flex-col h-full">
+            <div
+                class="flex items-center py-2 px-3 justify-between border-b-2 bg-gradient-to-l from-indigo-500 to-blue-500 pb-2 border-gray-200 rounded-br-xl shadow-md">
+                <div class="flex gap-3 items-center">
+                    <img src="Agent.svg" alt="Agent" class="w-10 h-10 rounded-full bg-white">
+                    <span class="text-md text-white font-bold">Agent</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <button type="button" onclick="endChatCommand()"
-                        class="inline-flex items-center justify-center rounded-lg border px-2 py-1 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                        Close
+                        class="inline-flex items-center justify-center rounded-lg border px-2 py-2 transition duration-500 ease-in-out fill-white hover:fill-indigo-300 hover:border-indigo-300 outline-none">
+                        <?xml version="1.0" encoding="utf-8"?><svg version="1.1" id="Layer_1"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+                            y="0px" width="10px" height="10px" viewBox="0 0 121.31 122.876"
+                            enable-background="new 0 0 121.31 122.876" xml:space="preserve">
+                            <g>
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                    d="M90.914,5.296c6.927-7.034,18.188-7.065,25.154-0.068 c6.961,6.995,6.991,18.369,0.068,25.397L85.743,61.452l30.425,30.855c6.866,6.978,6.773,18.28-0.208,25.247 c-6.983,6.964-18.21,6.946-25.074-0.031L60.669,86.881L30.395,117.58c-6.927,7.034-18.188,7.065-25.154,0.068 c-6.961-6.995-6.992-18.369-0.068-25.397l30.393-30.827L5.142,30.568c-6.867-6.978-6.773-18.28,0.208-25.247 c6.983-6.963,18.21-6.946,25.074,0.031l30.217,30.643L90.914,5.296L90.914,5.296z" />
+                            </g>
+                        </svg>
                     </button>
                 </div>
             </div>
             <div id="messages"
-                class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
+                class="flex flex-col space-y-4 p-3 overflow-x-hidden whitespace-normal break-all max-w-[350px] overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
 
 
 
 
             </div>
-            <div class="border-t-2 relative border-gray-200  pt-8 mb-2 sm:mb-0">
+            <div class="border-t-2 relative border-gray-200  mb-2 sm:mb-0">
                 <span id="agentIsTyping" style="display: none;"
-                    class="absolute top-1 left-3 text-gray-500 text-sm animate-pulse transition-all">Agent Is
+                    class="absolute  -top-8 left-14 text-gray-500 text-sm animate-pulse transition-all">Agent Is
                     typing...</span>
                 <form onsubmit="onChatSubmit();return false;" class="relative flex overflow-hidden rounded-md">
 
-                    <input onchange="sendIsTyping()" type="text" id="messageInput" placeholder="Write your message!"
-                        class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-3 bg-gray-200 rounded-md py-3">
+                    <textarea onblur="autoGrow(this)" oninput="autoGrow(this)" onchange="sendIsTyping()" type="text"
+                        id="messageInput" placeholder="Write your message!" style="min-height: 60px;"
+                        class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600  resize-none overflow-hidden placeholder-gray-600 pl-3  rounded-md py-2"></textarea>
                     <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
 
                         <button type="submit"
-                            class="inline-flex items-center justify-center rounded-lg px-2 py-4 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="inline-flex items-center justify-center rounded-lg px-2 py-4 transition duration-500 ease-in-out  fill-blue-500 hover:fill-blue-700 focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                 class="h-6 w-6 ml-2 transform rotate-90">
                                 <path
                                     d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
@@ -154,7 +161,7 @@
         const el = document.getElementById('messages')
         el.scrollTop = el.scrollHeight
     </script>
-    <!--  End Of Custom Chat -->
+    <!--   End Of Custom Chat  -->
 </body>
 
 </html>

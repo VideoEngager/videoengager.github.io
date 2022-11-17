@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.css" rel="stylesheet" />
+    <!-- Syntax Highlighter-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
 
     <script type="text/javascript" src="./js/script.js"></script>
 
@@ -223,12 +226,16 @@
                                 <div class="accordion-body">
                                     <button id="downloadjson" class="btn btn-primary m-2">Download JS Configuration
                                         File</button>
-                                    <pre>
-                                        <div class="form-outline" style=" width: auto; ">
-                                            <textarea class="form-control" id="jsondump" cols="80" rows="20" style=" font-size: small; "></textarea>
-                                            <label class="form-label" for="jsondump">Javascript Configuration</label>
-                                        </div>
-                                    </pre>
+
+                                    <div class="form-outline" style=" width: auto; ">
+
+                                        <pre>  <code   id="jsondump" style="border-radius:10px; max-height:60vh;" class="language-javascript line-numbers">
+                                                                                        </code> </pre>
+
+
+
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -245,12 +252,11 @@
                                 <div class="accordion-body">
                                     <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey
                                         Script</button>
-                                    <pre>
-                                        <div class="form-outline" style=" width: auto; ">
-                                            <textarea class="form-control" id="tempermonkeydump" cols="80" rows="20" style=" font-size: small; "></textarea>
-                                            <label class="form-label" for="tempermonkeydump">TamperMonkey Script</label>
-                                        </div>
-                                    </pre>
+
+                                    <div class="form-outline" style=" width: auto; ">
+                                        <pre>  <code   id="tempermonkeydump" style="border-radius:10px; max-height:60vh;" class="language-javascript line-numbers">
+                                                                                                                                    </code> </pre>
+                                    </div>
                                 </div>
                             </div>
                         </div>

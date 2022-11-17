@@ -188,7 +188,9 @@ const dumpJSON = function () {
   if (!window._genesys) window._genesys = {};
   if (!window._gt) window._gt = [];
   ` + text;
-  document.querySelector('#jsondump').innerHTML = text;
+  const elem = document.getElementById('jsondump');
+  elem.innerHTML = text;
+  window.hljs.highlightElement(elem);
 };
 
 const dumpTamper = function (uimode) {
@@ -264,7 +266,9 @@ const dumpTamper = function (uimode) {
     ${config}
     CXBus.loadPlugin('widgets-core');
   })();`;
-  document.querySelector('#tempermonkeydump').innerHTML = template;
+  const elem = document.getElementById('tempermonkeydump');
+  elem.innerHTML = template;
+  window.hljs.highlightElement(elem);
 };
 
 /**

@@ -16,7 +16,7 @@ const loadJS = function (url, id) {
     document.head.append(scriptElement);
   });
 };
-async function loadLibrariesForExistingCall (configObject){
+async function loadLibrariesForExistingConfig (configObject){
   const config = JSON.parse(configObject);
   if (!window._genesys) window._genesys = {};
   if (!window._gt) window._gt = [];
@@ -27,24 +27,14 @@ async function loadLibrariesForExistingCall (configObject){
   /** Perform Loading Libraries */
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com.au/widgets/9.0/plugins/' });
   window.CXBus.loadPlugin('widgets-core').done(function () {
-    console.log('widgets-core loaded, should initialize a call')
-    const callExists = videoEngager.checkIfPopupExists();
-    if (callExists) {
-      videoEngager.popupManager.focus();
-    } else {
-      // removing old local storage config since it is not valid anymore then refreshing the page
-      localStorage.removeItem('activeInteractionConfig');
-      window.location.reload();
-    }
     loadGenesysListeners();
   });
 }
-async function loadLibrariesForNewCall () {
+async function loadLibrariesForFreshConfig () {
   await loadJS('configurationFile.js')
   /** Perform Loading Libraries */
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com.au/widgets/9.0/plugins/' });
   window.CXBus.loadPlugin('widgets-core').done(function () {
-    console.log('widgets-core loaded')
     loadGenesysListeners();
   });
 }
@@ -52,14 +42,14 @@ async function loadLibraries() {
   const configObject = localStorage.getItem('activeInteractionConfig');
   if (configObject) {
     try {
-      loadLibrariesForExistingCall(configObject);
+      loadLibrariesForExistingConfig(configObject);
     }
     catch (error) {
       console.error('invalid config object', error);
-      loadLibrariesForNewCall();
+      loadLibrariesForFreshConfig();
     }
   } else {
-    loadLibrariesForNewCall();
+    loadLibrariesForFreshConfig();
   }
 
 }
@@ -74,7 +64,12 @@ function loadGenesysListeners() {
   window.CXBus.subscribe('WebChatService.ended', () => {
     localStorage.removeItem('activeInteractionConfig');
   });
-
+  CXBus.subscribe('VideoEngager.callEnded',(event)=>{
+      console.log('call ended', event);
+  })
+  CXBus.subscribe('VideoEngager.callExists',(event)=>{
+      console.log('call exists', event);
+  })
 }
 function startVideoCall() {
   return new Promise(function (resolve, reject) {

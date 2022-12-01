@@ -33,17 +33,17 @@ const PopupManager = function () {
     return this.popupinstance && !this.popupinstance.closed;
   };
   this.focus = function () {
-    console.log('focus',this.popupExist());
+    console.log('focus', this.popupExist());
 
     if (this.popupExist()) {
       this.popupinstance.focus();
     }
   };
   this.close = function () {
-    if (this.popupExist()) {
+    if (this.popupinstance.close) {
       this.popupinstance.close();
-      this.popupinstance = null;
     }
+    this.popupinstance = null;
   };
 };
 class VideoEngager {
@@ -51,8 +51,8 @@ class VideoEngager {
     const popupManager = new PopupManager();
     this.popupManager = popupManager;
     this.callExists = false;
-    this.checkIfPopupExists = function (){
-      if(popupManager.attachPopup()){
+    this.checkIfPopupExists = function () {
+      if (popupManager.attachPopup()) {
         this.callExists = true;
         return true;
       } else {
@@ -60,7 +60,7 @@ class VideoEngager {
         return false;
       }
     }
-   
+  
     let popupinstance = null;
     let iframeHolder = null;
     let iframeInstance;
@@ -91,7 +91,7 @@ class VideoEngager {
     let enablePrecallForced;
     const KEEP_ALIVE_TIME = 10 * 60 * 1000; // keep alive time 10min
     let keepAliveTimer;
-
+    let isSmartVideoCall = false
     const init = function () {
       const config = window._genesys.widgets.videoengager;
       TENANT_ID = config.tenantId;
@@ -118,11 +118,13 @@ class VideoEngager {
     const checkIfCallExist = async function () {
       return new Promise((resolve, reject) => {
         oVideoEngager.command('WebChatService.verifySession').done(function (e) {
+          console.log('WebChatService.verifySession',e);
           if (e.sessionActive) {
             console.log('session active alreadyyy');
             resolve(true);
             // dont show chat invite 
           } else if (!e.sessionActive) {
+    
             resolve(false)
           }
 
@@ -133,10 +135,18 @@ class VideoEngager {
       checkIfCallExist().then((callExist) => {
         if (callExist) {
           if (popupManager.attachPopup()) {
-            popupinstance = popupManager.popupinstance;
-            popupinstance
+            isSmartVideoCall = true;
+            oVideoEngager.publish('callExists', { conversationId, memberId, interactionId });
+
           } else {
-            this.terminateInteraction();
+            if (!interactionId) {
+              interactionId = getGuid();
+            }
+            if (useWebChatForm) {
+              initiateForm();
+            } else {
+              startWithHiddenChat();
+            }
           }
         } else {
           if (!interactionId) {
@@ -154,7 +164,7 @@ class VideoEngager {
       //   return;
       // }
 
-    
+
     };
 
     const startCalendar = function () {
@@ -217,11 +227,29 @@ class VideoEngager {
 
       return `${googleEvent.baseUrl}text=${googleEvent.text}&dates=${googleEvent.dates}&details=${googleEvent.details}&location=${googleEvent.location}`;
     };
-
+   
     this.initExtension = function ($, CXBus, Common) {
+      const messageHandler = function (e) {
+        console.log('messageHandler', e.data);
+        if (e.data.type === 'popupClosed') {
+          oVideoEngager.publish('callEnded', { isSmartVideoCall: isSmartVideoCall });
+          // call not ended
+        }
+        if (e.data.type === 'callEnded') {
+          oVideoEngager.publish('callEnded', { isSmartVideoCall: isSmartVideoCall });
+        }
+      };
+
+      if (window.addEventListener) {
+        window.addEventListener('message', messageHandler, false);
+      } else {
+        window.attachEvent('onmessage', messageHandler);
+      }
       console.log('on init extension VideoEngager');
       init();
       oVideoEngager = CXBus.registerPlugin('VideoEngager');
+      oVideoEngager.registerEvents(["callEnded", "callExists"]);
+
       oVideoEngager.publish('ready');
       oVideoEngager.registerCommand('startVideo', function (e) {
         // videochat channel is selected
@@ -335,13 +363,13 @@ class VideoEngager {
 
       oVideoEngager.subscribe('WebChatService.ended', function () {
         console.log('WebChatService.ended');
+        isSmartVideoCall = false;
         if (keepAliveTimer) { clearInterval(keepAliveTimer); }
         closeIframeOrPopup();
       });
 
       oVideoEngager.subscribe('WebChatService.started', function () {
         console.log('WebChatService.started');
-
         keepAliveTimer = setInterval(sendKeepAliveMessage, KEEP_ALIVE_TIME);
         if (interactionId) {
           sendInteractionMessage(interactionId);
@@ -418,10 +446,12 @@ class VideoEngager {
               if (!data || !data.customFields || !data.customFields.veVisitorId) {
                 return;
               }
+              isSmartVideoCall = true;
               if (window._genesys.widgets.videoengager.useWebChatForm) {
                 localizeChatForm();
               }
               interactionId = data.customFields.veVisitorId;
+              
               if (iframeHolder) {
                 const url = generateVisitorUrl();
                 iframeInstance = document.createElement('iframe');
@@ -433,12 +463,12 @@ class VideoEngager {
                 iframeHolder.querySelectorAll('iframe').forEach(e => e.remove());
                 iframeHolder.insertBefore(iframeInstance, iframeHolder.firstChild);
                 iframeHolder.style.display = 'block';
+                oVideoEngager.publish('callExists', { conversationId, memberId, interactionId });
                 return;
               }
               if (popupManager.attachPopup()) {
-                popupManager.focus();
-              } else {
-                this.terminateInteraction();
+                oVideoEngager.publish('callExists', { conversationId, memberId, interactionId });
+                // send event instead of focus
               }
             })
             .catch((error) => {
@@ -471,6 +501,7 @@ class VideoEngager {
       oVideoEngager.command('WebChat.open', webChatOpenData)
         .done(function (e2) {
           // form opened
+          isSmartVideoCall = true;
           document.getElementsByClassName('cx-submit')[0].addEventListener('click', function () {
             startVideoChat();
           });
@@ -575,6 +606,7 @@ class VideoEngager {
       startVideoChat();
       oVideoEngager.command('WebChatService.startChat', webChatFormData)
         .done(function (e) {
+          isSmartVideoCall = true;
           console.log('WebChatService started Chat');
         }).fail(function (err) {
 
@@ -653,13 +685,17 @@ class VideoEngager {
     };
 
     this.startVideoEngagerOutbound = function (url) {
-      if (popupManager.attachPopup()) {
+      if (popupManager.popupExist()) {
+        console.log('already have popupExist video call, should focus');
         popupManager.focus();
-      } else if (!popupManager.popupExist()) {
+      } else  if (popupManager.attachPopup()) {
+        console.log('already have opened video call, should focus');
         popupManager.focus();
-      } else {
+      }  else {
+        console.log('url should create popup :', url);
         popupManager.createPopup(url);
       }
+     
     };
 
     const closeIframeOrPopup = function () {
@@ -684,22 +720,7 @@ class VideoEngager {
 const videoEngager = new VideoEngager();
 window.videoEngager = videoEngager;
 
-const messageHandler = function (e) {
-  console.log('messageHandler', e.data);
-  if (e.data.type === 'popupClosed') {
-    videoEngager.terminateInteraction()
-    // call not ended
-  }
-  if (e.data.type === 'callEnded') {
-    videoEngager.terminateInteraction()
-  }
-};
 
-if (window.addEventListener) {
-  window.addEventListener('message', messageHandler, false);
-} else {
-  window.attachEvent('onmessage', messageHandler);
-}
 
 // terminate call on page close
 // window.onbeforeunload = function () {

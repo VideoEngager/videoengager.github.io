@@ -24,7 +24,7 @@ window._genesys.widgets = {
      * Otherwise, popup window will be opened.
      * In case callHolder points to non-existing dom element, popup windows will be opened.
     */
-    // callHolder: '',
+    // callHolder: 'someiframe',
     /**
      * Possible values:“engage” or “purecloud”. Defines the Genesys backend platform
      */
@@ -96,7 +96,14 @@ window._genesys.widgets = {
         displayName: 'Video Chat',
         i18n: 'VideoTitle',
         icon: 'videochat'
-      }
+      },{
+        enable: true,
+        clickCommand: 'WebChat.open',
+        readyEvent: 'WebChat.ready',
+        displayName: 'Web Chat',
+        i10n: 'ChatTitle',
+        icon: 'chat'
+      },
     ]
   }
 };

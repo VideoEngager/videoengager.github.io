@@ -141,9 +141,9 @@ window._genesys.widgets = {
     {
       enable: true,
       clickCommand: 'Callback.open',
-      displayName: 'Receive a Call',
-      i18n: 'CallbackTitle',
-      icon: 'call-incoming',
+      displayName: 'Schedule Video Meeting',
+      i10n: 'ChatTitle',
+      icon: 'videochat',
       html: '',
       ewt: {
         display: true,

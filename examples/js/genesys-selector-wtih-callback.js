@@ -35,13 +35,15 @@ window._genesys.widgets = {
         ChatFormSubmitVideo: 'Start Video',
         WebChatTitleVideo: 'Video Chat',
         ChatFormSubmitAudio: 'Start Audio',
-        WebChatTitleAudio: 'Audio Chat'
+        WebChatTitleAudio: 'Audio Chat',
+        ScheduleVideoMeeting: 'Schedule Video Meeting'
       },
       fr: {
         ChatFormSubmitVideo: 'Démarrer la vidéo',
         WebChatTitleVideo: 'Chat la vidéo',
         ChatFormSubmitAudio: 'Démarrer la audio',
-        WebChatTitleAudio: 'Chat audio'
+        WebChatTitleAudio: 'Chat audio',
+        ScheduleVideoMeeting: 'Planifier une réunion vidéo'
       }
     }
   },
@@ -58,11 +60,9 @@ window._genesys.widgets = {
           priority: 2
         }
       }
-
     },
     cometD: {
       enabled: false
-
     },
     autoInvite: {
       enabled: true,
@@ -110,29 +110,13 @@ window._genesys.widgets = {
         hideChannelWhenThresholdMax: false
       }
     },
-    /* {
-      enable: true,
-      clickCommand: 'VideoEngager.startCalendar',
-      readyEvent: 'Calendar.ready',
-      displayName: 'Schedule Video',
-      i10n: 'ChatTitle',
-      icon: 'videochat',
-      html: '',
-      ewt: {
-        display: true,
-        queue: '',
-        availabilityThresholdMin: 300,
-        availabilityThresholdMax: 3600,
-        hideChannelWhenThresholdMax: false
-      }
-    }, */
     {
       enable: true,
       clickCommand: 'Callback.open',
       readyEvent: 'Callback.ready',
       displayName: 'Schedule Video Meeting',
-      i10n: 'ChatTitle',
-      icon: 'call-incoming',
+      i10n: 'ScheduleVideoMeeting',
+      icon: 'videochat',
       html: '',
       ewt: {
         display: true,
@@ -174,7 +158,7 @@ window._genesys.widgets = {
     }
   },
   callback: {
-    dataURL: 'https://dev.videoengager.com/api/genesys/callback',
+    dataURL: 'http://localhost:3000/api/genesys/callback',
     userData: {
       environment: 'https://api.mypurecloud.com'
     },
@@ -246,6 +230,20 @@ window._genesys.widgets = {
           validate: function (event, form, input, label, $, CXBus, Common) {
             const re = /\S+@\S+\.\S+/;
             if (input && input.val().match(re)) {
+              return true;
+            } else {
+              return false;
+            }
+          }
+        },
+        {
+          id: 'cx_form_callback_subject',
+          name: 'customer_subject',
+          maxlength: '100',
+          placeholder: '@i18n:callback.CallbackPlaceholderRequired',
+          label: 'Subject',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
               return true;
             } else {
               return false;

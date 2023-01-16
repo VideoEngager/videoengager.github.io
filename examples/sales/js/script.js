@@ -1,8 +1,8 @@
-/* global XMLHttpRequest CXBus  */
+/* global XMLHttpRequest CXBus mdb $ */
 const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
 const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/1.02/videoengager.widget.js';
 const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
-
+const BOOTSTRAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js';
 const genesysEnvList = [
   'mypurecloud.com.au',
   'mypurecloud.com',
@@ -16,6 +16,21 @@ const genesysEnvList = [
   'apne2.pure.cloud',
   'mypurecloud.jp'
 ];
+
+/**
+ * load a javascript file
+ * @param {string} url script url
+ * @returns {Promise} promise
+ */
+function loadLibrary (url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
 
 /** *  MAIN FUNCTION * **/
 
@@ -157,6 +172,8 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#tenantId').value = '';
     document.querySelector('#dataURL').selectedIndex = '-1';
   });
+
+  await loadLibrary(BOOTSTRAP_CDN);
 
   document.querySelectorAll('.form-outline').forEach((formOutline) => {
     new mdb.Input(formOutline).init();

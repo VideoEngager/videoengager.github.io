@@ -17,21 +17,6 @@ const genesysEnvList = [
   'mypurecloud.jp'
 ];
 
-/**
- * load a javascript file
- * @param {string} url script url
- * @returns {Promise} promise
- */
-function loadLibrary (url) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
-
 /** *  MAIN FUNCTION * **/
 
 // on document ready
@@ -172,8 +157,6 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#tenantId').value = '';
     document.querySelector('#dataURL').selectedIndex = '-1';
   });
-
-  await loadLibrary(BOOTSTRAP_CDN);
 
   document.querySelectorAll('.form-outline').forEach((formOutline) => {
     new mdb.Input(formOutline).init();

@@ -11,11 +11,6 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.css" rel="stylesheet" />
-    <!-- Jquery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Syntax Highlighter-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/vs2015.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
 
     <script type="text/javascript" src="./js/script.js"></script>
 
@@ -119,10 +114,10 @@
                                         <div class="form-helper"></div>
                                     </div>
                                     <div class="form-text pb-2">
-                                        To get your Organization Id open PureCloud as admin and navigate to Admin &#62;
+                                        To get your Organization Id open PureCloud as admin and navigate to Admin >
                                         Account Settings
-                                        &#62; Organization
-                                        Settings &#62; Organization Details (tab) &#62; Advanced &#62; Organization ID
+                                        > Organization
+                                        Settings > Organization Details (tab) > Advanced > Organization ID
                                     </div>
 
                                     <div class="form-outline">
@@ -133,10 +128,10 @@
                                     </div>
 
                                     <div class="form-text pb-2">
-                                        To get your Deployment Id open PureCloud as admin and navigate to Admin &#62;
+                                        To get your Deployment Id open PureCloud as admin and navigate to Admin >
                                         Contact
-                                        Center &#62;
-                                        Widgets &#62;
+                                        Center >
+                                        Widgets >
                                         Deployment Key (column)
                                     </div>
 
@@ -148,12 +143,11 @@
                                     </div>
 
                                     <div class="form-text pb-2">
-                                        To get your Tenant ID select Apps &#62; SmartVideo_Settings &#62; Tenant ID
+                                        To get your Tenant ID select Apps > SmartVideo_Settings > Tenant ID
                                     </div>
 
                                     <div class="form-outline">
-                                        <input type="text" id="veUrl" class="form-control"
-                                            data-mdb-showcounter="false" />
+                                        <input type="text" id="veUrl" class="form-control" data-mdb-showcounter="false" />
                                         <label class="form-label" for="veUrl">VideoEngager URL</label>
                                         <div class="form-helper"></div>
                                     </div>
@@ -224,18 +218,14 @@
                             <div id="jsonCollapse" class="accordion-collapse collapse" aria-labelledby="jsonHeader"
                                 data-mdb-parent="#jsonAccordeon">
                                 <div class="accordion-body">
-                                    <button id="downloadjson" class="btn btn-primary m-2">Download JS Configuration
+                                    <button id="downloadjson" class="btn btn-primary m-2">
                                         File</button>
-
-                                    <div class="form-outline" style=" width: auto; ">
-
-                                        <pre>  <code   id="jsondump" style="border-radius:10px; max-height:60vh;" class="language-javascript line-numbers">
-                                                                                        </code> </pre>
-
-
-
-                                    </div>
-
+                                    <pre>
+                                        <div class="form-outline" style=" width: auto; ">
+                                            <textarea class="form-control" id="jsondump" cols="80" rows="20" style=" font-size: small; "></textarea>
+                                            <label class="form-label" for="jsondump">JSON Configuration</label>
+                                        </div>
+                                    </pre>
                                 </div>
                             </div>
                         </div>
@@ -250,29 +240,25 @@
                             <div id="tampermonkyCollapse" class="accordion-collapse collapse"
                                 aria-labelledby="tampermonkeyHeader" data-mdb-parent="#jsonAccordeon">
                                 <div class="accordion-body">
-                                    <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey
-                                        Script</button>
-
-                                    <div class="form-outline" style=" width: auto; ">
-                                        <pre>  <code   id="tempermonkeydump" style="border-radius:10px; max-height:60vh;" class="language-javascript line-numbers">
-                                                                                                                                    </code> </pre>
-                                    </div>
+                                    <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey Script</button>
+                                    <pre>
+                                        <div class="form-outline" style=" width: auto; ">
+                                            <textarea class="form-control" id="tempermonkeydump" cols="80" rows="20" style=" font-size: small; "></textarea>
+                                            <label class="form-label" for="tempermonkeydump">TamperMonkey Script</label>
+                                        </div>
+                                    </pre>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <p class="note note-light">
-                        <strong>Locked until widget load.</strong> You can get generated Javascript Configuration and
-                        TamperMonkey scripts when you load genesys libraray.
+                        <strong>Locked until widget load.</strong> You can get generated JSON and TamperMonkey scripts when you load genesys libraray.
                     </p>
                 </div>
             </div>
         </div>
     </div>
-
-
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js"></script>
 </body>
-
 </html>

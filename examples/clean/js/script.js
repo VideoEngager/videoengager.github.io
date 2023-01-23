@@ -247,6 +247,7 @@ const setVeConfig = function () {
   window._genesys.widgets.videoengager.webChatFormData.lastname = document.querySelector('#lastname').value;
   window._genesys.widgets.videoengager.webChatFormData.subject = document.querySelector('#subject').value;
 
+  window._genesys.widgets.videoengager.enableCalendarAPI = document.querySelector('#enableCalendarAPI').checked;
   try {
     window._genesys.widgets.videoengager.webChatFormData.userData = JSON.parse(document.querySelector('#customUserData').value);
   } catch (e) {

@@ -13,9 +13,7 @@ const states = {
     const loading = document.getElementById('loading-section');
     const frameSection = document.getElementById('frame-section');
     const formSection = document.getElementById('form-section');
-    const form = document.getElementById('form-inputs');
     // @ts-ignore
-    const elements = form && form?.elements;
     switch (value) {
       case 'loading':
         loading?.classList.remove('opacity-0');
@@ -43,30 +41,12 @@ const states = {
         formSection?.classList.remove('-z-10');
         formSection?.classList.add('z-10');
         break;
-      case 'user-data-form-submitted':
-        loading?.classList.add('opacity-0');
-        loading?.classList.add('-z-10');
-        for (const single of elements) {
-          if (single.localName === 'input') {
-            single.parentElement.remove();
-            continue;
-          }
-          if (single.localName === 'button') {
-            single.innerHTML = 'Click To Start';
-            single.disabled = false;
-            single.type = 'button';
-            single.addEventListener('click', () => {
-              states.state = 'call-start-requested';
-            });
-            continue;
-          }
-        }
-        break;
       case 'call-start-requested':
         frameSection?.classList.remove('opacity-0');
         frameSection?.classList.remove('-z-10');
         formSection?.classList.add('opacity-0');
         formSection?.classList.add('-z-10');
+        frameSection?.classList.add('z-10');
         window.CXBus.command('VideoEngager.startVideoEngager');
         break;
       default:
@@ -117,7 +97,7 @@ function checkUserData () {
     }
     Object.assign(window._genesys.widgets.videoengager.webChatFormData.userData, states.userData.customUserData);
     if (states.userData.skipForm) {
-      states.state = 'user-data-form-submitted';
+      states.state = 'call-start-requested';
       return;
     } else {
       injectForm(states.userData.form);
@@ -154,7 +134,6 @@ async function loadLibrariesForFreshConfig () {
       // window.localStorage.setItem('activeInteractionConfig', JSON.stringify(window._genesys.widgets));
     });
     await waitVideoEngager();
-    loadGenesysListeners();
 
     states.state = 'checkUserData';
   }).fail(function (err) {
@@ -165,6 +144,18 @@ async function loadLibrariesForFreshConfig () {
 const originalInputs = [
   'firstName', 'lastName', 'email', 'addressStreet', 'addressCity', 'addressPostalCode', 'addressState', 'phoneNumber', 'phoneType', 'customerId'
 ];
+const inputsLabels = {
+  firstName: 'First Name',
+  lastName: 'Last Name',
+  email: 'Email',
+  addressStreet: 'Address',
+  addressCity: 'City',
+  addressPostalCode: 'Postal Code',
+  addressState: 'State',
+  phoneNumber: 'Phone Number',
+  phoneType: 'Phone Type',
+  customerId: 'Customer ID'
+}
 /**
  *
  * @param {Array<{value?:string,name:string,required?:boolean,label?:string}>} userData
@@ -250,12 +241,12 @@ function injectForm (formData) {
   form.innerHTML += '<div class="w-full"><h1 class="text-xl font-semibold whitespace-nowrap">Start Video Session with Agent</h1><p class="text-gray-400 text-sm">SmartVideo</p> </div>';
   for (const item of formData) {
     const elID = item.name + '-input-id';
-    const placeHolder = item.placeHoder || item.label || item.name;
-    const title = item.label || item.name;
+    const label = inputsLabels[item.name] || item.label || item.name;
+    const placeHolder = item.placeHoder || label;
     const name = item.name;
     const el = ` <div class="w-full flex flex-col gap-1">
-  <label for="${elID}" class="text-sm font-semibold text-gray-700">${title}</label>
-   <input type="text" placeHolder="${placeHolder}" title="${title}" name="${name}" id="${elID}" class="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+  <label for="${elID}" class="text-sm font-semibold text-gray-700">${label}</label>
+   <input type="text" placeHolder="${placeHolder}" title="${label}" name="${name}" id="${elID}" class="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
  </div>`;
     form.innerHTML += el;
     const inputElement = document.getElementById(elID);
@@ -340,51 +331,14 @@ function onFormSubmit (event) {
   for (const single of elements) {
     if (single.localName === 'input') {
       data[single.name] = single.value;
-      single.parentElement.parentElement.removeChild(single.parentElement);
-      continue;
-    }
-    if (single.localName === 'button') {
-      single.innerHTML = 'Click To Start';
-      single.disabled = false;
-      single.type = 'button';
-      single.addEventListener('click', () => {
-        states.state = 'call-start-requested';
-      });
       continue;
     }
   }
   Object.assign(window._genesys.widgets.webchat.userData, data);
 
-  states.state = 'user-data-form-submitted';
+  states.state = 'call-start-requested';
 }
 window.onFormSubmit = onFormSubmit;
-// genesys widgets listeners
-function loadGenesysListeners () {
-  // * (this means that user has submitted the Registration Form and the call is waiting to be picked by an agent) */
-  window.CXBus.subscribe('WebChatService.started', () => {
-    // window.localStorage.setItem('activeInteractionConfig', JSON.stringify(window._genesys.widgets));
-  });
-
-  // 4. WebChat.ended || handle call ended event
-  window.CXBus.subscribe('WebChatService.ended', () => {
-    // window.localStorage.removeItem('activeInteractionConfig');
-  });
-  window.CXBus.subscribe('VideoEngager.callEnded', (event) => {
-    console.log('call ended', event);
-  });
-  window.CXBus.subscribe('VideoEngager.callExists', (event) => {
-    console.log('call exists', event);
-  });
-}
-// function startVideoCall () {
-//   return new Promise(function (resolve, reject) {
-//     window.CXBus.command('VideoEngager.startVideoEngager').done(function () {
-//       resolve();
-//     }).fail(function (err) {
-//       reject(err);
-//     });
-//   });
-// }
 
 window.onload = function () {
   loadLibraries();

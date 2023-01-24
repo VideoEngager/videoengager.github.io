@@ -20,12 +20,7 @@ function MyComponent () {
    */
   const [veURL, setVeURL] = React.useState('');
   const [tennantID, setTennantID] = React.useState([]);
-  const [selectedFields, setSelectedFields] = React.useState([
-    {
-      name: 'addressStreet',
-      label: 'addressStreet'
-    }
-  ]);
+  const [selectedFields, setSelectedFields] = React.useState([]);
   const [customFields, setCustomFields] = React.useState([]);
   const availableOption = [
     'firstName', 'lastName', 'email', 'addressStreet', 'addressCity', 'addressPostalCode', 'addressState', 'phoneNumber', 'phoneType', 'customerId'
@@ -76,7 +71,7 @@ function MyComponent () {
     };
     const stringify = JSON.stringify(data);
     const encoded = btoa(stringify);
-    return `http://127.0.0.1:5501/short-url/index.html?d=${encoded}`;
+    return `https://videoengager.github.io/examples/customURL?d=${encoded}`;
   }, [veURL, tennantID, selectedFields, customFields]);
   return (
     <div className={styles.container}>
@@ -107,7 +102,7 @@ function MyComponent () {
         <SelectedFieldsComponent selectedFields={selectedFields} setSelectedFields={setSelectedFields} />
         <SelectedFieldsComponent selectedFields={customFields} setSelectedFields={setCustomFields} custom />
 
-        <button className={styles.button} type='submit'>Submit</button>
+        {/* <button className={styles.button} type='submit'>Submit</button> */}
       </form>
     </div>
   );
@@ -121,20 +116,22 @@ function SelectedFieldsComponent ({ setSelectedFields, selectedFields, custom })
           <div>
             Field: <strong>{field.name}</strong>
           </div>
-          <div className={styles.inputContainer}>
-            <label htmlFor={field.name}>Label</label>
-            <input
-              onChange={(event) => {
-                const value = event.target.value;
-                setSelectedFields(prev => {
-                  const newState = [...prev];
-                  newState[index].label = value;
-                  return newState;
-                });
-              }} className={styles.inputText} type='text' value={field.label} name={field.name}
-            />
+          {custom && (
+            <div className={styles.inputContainer}>
+              <label htmlFor={field.name}>Label</label>
+              <input
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSelectedFields(prev => {
+                    const newState = [...prev];
+                    newState[index].label = value;
+                    return newState;
+                  });
+                }} className={styles.inputText} type='text' value={field.label} name={field.name}
+              />
 
-          </div>
+            </div>
+          )}
           {/* checkbox */}
           <div className={styles.checkboxDiv}>
             <input

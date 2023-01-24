@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Smart Video Widget Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-------------------- SmartVideo Widget -------------------->
+
+    <!-- Loading in the Correct Order -->
+    <!-- 1. Load the VideoEngager Extension -->
+
+    <!-- 2. Load the Genesis Widgets Core -->
+    <script src="https://apps.mypurecloud.com/widgets/9.0/cxbus.min.js" defer type="text/javascript"></script>
+    <script src="https://cdn.videoengager.com/videoengager/js/1.02/videoengager.widget.js" defer></script>
+    <script src="widgetLoader.js" type="text/javascript" defer></script>
+    <!-------------------- SmartVideo Widget -------------------->
+
+</head>
+
+
+<body class="bg-slate-100">
+<section id="loading-section" 
+class="fixed top-0 left-0 right-0 bottom-0 z-10 backdrop-blur-sm backdrop-brightness-50 flex items-center justify-center transition-all duration-300"> 
+    <div class="flex gap-4 text-blue-700 text-lg font-bold">
+        <h3>
+            Loading
+        </h3>
+<div class="animate-spin -ml-1 mr-3 h-8 w-8 text-white">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="blue" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+</div>
+</div>
+</section>
+<section id="background" class="absolute top-0 left-0 right-0 bottom-0 " >
+<div class="w-full h-full relative">
+    <div name="top-left" class="absolute top-0 left-0">
+    <svg xmlns="http://www.w3.org/2000/svg" width="196" height="186" fill="none"><circle cx="-2" cy="-12" r="174" stroke="#7CADFF" stroke-width="48" opacity=".5"/></svg>
+</div>
+<div name="top-right" class="absolute top-0 right-0">
+    <svg xmlns="http://www.w3.org/2000/svg" width="140" height="240" fill="none"><circle cx="130" cy="110" r="106" stroke="#7CADFF" stroke-width="48" opacity=".5"/></svg>
+</div>
+<div name="bottom-left" class="absolute bottom-[10%] left-[10%]">
+    <svg xmlns="http://www.w3.org/2000/svg" width="162" height="162" fill="none"><g fill="#7CADFF" clip-path="url(#a)" opacity=".5"><path d="M2.978 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM2.978 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM2.978 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM28.934 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 31.911a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM28.934 135.734a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 161.689a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 109.778a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM54.889 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM54.889 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM54.889 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM80.845 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM80.845 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM106.8 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM106.8 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM132.756 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM132.756 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM158.711 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM158.711 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955Z"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h162v162H0z"/></clipPath></defs></svg>
+    </div>
+    <div name="bottom-right" class="absolute bottom-[15%] right-[10%]">
+        <svg xmlns="http://www.w3.org/2000/svg" width="162" height="162" fill="none"><g fill="#7CADFF" clip-path="url(#a)" opacity=".5"><path d="M2.978 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM2.978 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM2.978 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM2.978 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM28.934 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 31.911a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM28.934 135.734a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 161.689a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM28.934 109.778a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM54.889 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM54.889 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM54.889 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM54.889 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM80.845 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM80.845 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM80.845 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM106.8 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM106.8 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM106.8 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM132.756 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM132.756 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM132.756 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 5.956a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM158.711 31.911a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 83.822a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 135.734a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 161.689a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955ZM158.711 57.867a2.978 2.978 0 1 0 0-5.956 2.978 2.978 0 0 0 0 5.956ZM158.711 109.778a2.978 2.978 0 1 0 0-5.955 2.978 2.978 0 0 0 0 5.955Z"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h162v162H0z"/></clipPath></defs></svg>
+        </div>
+    </div>
+</section>
+<section id="form-section" class="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center -z-10 opacity-0" >
+    <form id="form-inputs" onsubmit="onFormSubmit(event)" class="bg-white shadow-md px-6 py-7 rounded-md flex flex-col gap-3">
+        <div class="w-full">
+            <h1 class="text-xl font-semibold whitespace-nowrap">
+                Start Video Session with Agent
+            </h1>
+            <p class="text-gray-400 text-sm">SmartVideo</p>
+        </div>
+        <div class="w-full flex flex-col gap-1">
+            <label for="first-name-input" class="text-sm font-semibold text-gray-700">First Name</label>
+            <input type="text" title="First Name" name="firstName" id="first-name-input" class="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+        <div class="w-full flex flex-col gap-1">
+            <label for="last-name-input" class="text-sm font-semibold text-gray-700">Last Name</label>
+            <input type="text" title="Last Name" required name="lastName" id="last-name-input" class="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+        <div class="w-full flex flex-col gap-1">
+            <label for="email-input" class="text-sm font-semibold text-gray-700">Email</label>
+            <input type="email" title="email" required name="email" id="email-input" class="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+        <div class="w-full flex flex-col gap-1">
+            <label for="customer-id-input" class="text-sm font-semibold text-gray-700">Customer ID</label>
+            <input type="text" title="Customer ID" required name="customerId" id="customer-id-input" class="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+   
+        <!-- button -->
+        <div class="w-full flex flex-col gap-1 py-2">
+            <button id="start-video-session" name="button" type="submit" class="bg-blue-500 text-white rounded-md px-2 py-1 font-semibold hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white disabled:bg-gray-500">
+                Submit
+            </button>
+        </div>
+    </form>
+</section>
+<section id="frame-section" class="-z-10 opacity-0 fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center" >
+<div id="iframe-smart-video" class="w-full h-full"></iframe>
+</section>
+</body>
+
+</html>

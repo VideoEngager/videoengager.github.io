@@ -237,18 +237,11 @@ window._genesys.widgets = {
           }
         },
         {
-          id: 'cx_form_callback_subject',
-          name: 'customer_subject',
+          id: 'veSubject',
+          name: 'veSubject',
           maxlength: '100',
-          placeholder: '@i18n:callback.CallbackPlaceholderRequired',
-          label: 'Subject',
-          validate: function (event, form, input, label, $, CXBus, Common) {
-            if (input && input.val()) {
-              return true;
-            } else {
-              return false;
-            }
-          }
+          placeholder: '@i18n:callback.CallbackPlaceholderOptional',
+          label: 'Subject'
         },
         {
           type: 'hidden',

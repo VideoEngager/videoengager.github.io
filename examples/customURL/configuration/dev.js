@@ -26,8 +26,8 @@ window._genesys.widgets = {
      * Possible values:“engage” or “purecloud”. Defines the Genesys backend platform
      */
     platform: 'purecloud',
-    // tenantId: 'test_tenant',
-    // veUrl: 'https://dev.videoengager.com',
+    tenantId: 'test_tenant',
+    veUrl: 'https://dev.videoengager.com',
     /**
     * autoAccept: Defines the behavior during the call negotiation - whether or not to automatically enters the call.
    */

@@ -55,14 +55,7 @@ const states = {
     this.internalState = value;
   },
 
-  userData: {},
-  /**
-   * @type {object}
-   */
-  tennantData: {
-    veUrl: null,
-    tenantId: null
-  }
+  userData: {}
 };
 
 /**
@@ -71,7 +64,7 @@ const states = {
  * @param {string} [id=undefined]
  * @returns {Promise<void>}
  */
-function loadJSX (url, id) {
+function loadJSs (url, id) {
   return new Promise(function (resolve, reject) {
     const scriptElement = document.createElement('script');
     if (typeof id === 'string') {
@@ -123,9 +116,6 @@ function waitVideoEngager () {
   });
 }
 async function loadLibrariesForFreshConfig () {
-  await loadJSX('configurationFile.js');
-  window._genesys.widgets.videoengager.veUrl = states.tennantData.veUrl;
-  window._genesys.widgets.videoengager.tenantId = states.tennantData.tenantId;
   /** Perform Loading Libraries */
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com.au/widgets/9.0/plugins/' });
   window.CXBus.loadPlugin('widgets-core').done(async function () {
@@ -264,21 +254,26 @@ function injectForm (formData) {
 
 async function loadLibraries () {
   const url = new URL(window.location.href);
-  let veURL = 'https://dev.videoengager.com';
-  let tennantID = 'test_tenant';
   let form = defaultForm;
   let skipForm = false;
   let customUserData = {};
+  const env = url.searchParams.get('env');
+  try {
+    await loadJSs('configuration/' + env + '.js');
+  } catch (error) {
+    console.error(error);
+    console.log('loading default configuration');
+    await loadJSs('configuration/dev.js');
+  }
+
   const encodedData = url.searchParams.get('d');
   if (encodedData) {
     try {
       const data = JSON.parse(atob(encodedData));
       checkURL(data.v);
-      veURL = data.v;
       if (!data.t) {
         throw new Error('invalid tennantID');
       }
-      tennantID = data.t;
       if (data.ud) {
         const { formInputs, customData } = processUserData(data.ud);
         customUserData = customData;
@@ -291,16 +286,10 @@ async function loadLibraries () {
       }
     } catch (error) {
       form = defaultForm;
-      veURL = 'https://dev.videoengager.com';
-      tennantID = 'test_tenant';
     }
   }
 
   try {
-    // const data = await fetchTennant(tennantID, veURL);
-    // states.data = data;
-    states.tennantData.veUrl = veURL;
-    states.tennantData.tenantId = tennantID;
     states.userData = {
       customUserData,
       skipForm,

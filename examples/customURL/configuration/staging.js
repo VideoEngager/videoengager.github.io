@@ -26,8 +26,8 @@ window._genesys.widgets = {
      * Possible values:“engage” or “purecloud”. Defines the Genesys backend platform
      */
     platform: 'purecloud',
-    tenantId: 'test_tenant',
-    veUrl: 'https://dev.videoengager.com',
+    tenantId: 'oIiTR2XQIkb7p0ub',
+    veUrl: 'https://staging.leadsecure.com',
     /**
     * autoAccept: Defines the behavior during the call negotiation - whether or not to automatically enters the call.
    */
@@ -62,14 +62,14 @@ window._genesys.widgets = {
   webchat: {
     transport: {
       type: 'purecloud-v2-sockets',
-      dataURL: 'https://api.mypurecloud.com.au',
-      deploymentKey: '1cd594f7-654d-4cb2-9578-c57c25fc05dd',
-      orgGuid: '327d10eb-0826-42cd-89b1-353ec67d33f8',
+      dataURL: 'https://api.mypurecloud.de',
+      deploymentKey: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
+      orgGuid: '639292ca-14a2-400b-8670-1f545d8aa860',
       markdown: true,
       interactionData: {
         routing: {
           targetType: 'QUEUE',
-          targetAddress: 'video', // change this field
+          targetAddress: 'Support', // change this field
           priority: 2
         }
       }

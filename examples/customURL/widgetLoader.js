@@ -145,7 +145,7 @@ const inputsLabels = {
   phoneNumber: 'Phone Number',
   phoneType: 'Phone Type',
   customerId: 'Customer ID'
-}
+};
 /**
  *
  * @param {Array<{value?:string,name:string,required?:boolean,label?:string}>} userData
@@ -213,14 +213,6 @@ const defaultForm = [
     label: 'Customer ID'
   }
 ];
-function checkURL (url) {
-  try {
-    const u = new window.URL(url);
-    console.log(u);
-  } catch (error) {
-    throw new Error('invalid URL');
-  }
-}
 
 function injectForm (formData) {
   const form = document.getElementById('form-inputs');
@@ -270,10 +262,6 @@ async function loadLibraries () {
   if (encodedData) {
     try {
       const data = JSON.parse(atob(encodedData));
-      checkURL(data.v);
-      if (!data.t) {
-        throw new Error('invalid tennantID');
-      }
       if (data.ud) {
         const { formInputs, customData } = processUserData(data.ud);
         customUserData = customData;

@@ -120,8 +120,16 @@ async function loadLibrariesForFreshConfig () {
   window.CXBus.configure({ debug: true, pluginsPath: 'https://apps.mypurecloud.com.au/widgets/9.0/plugins/' });
   window.CXBus.loadPlugin('widgets-core').done(async function () {
     window.CXBus.subscribe('WebChatService.restored', () => {
-      window.CXBus.command('WebChatService.endChat');
+      window.CXBus.command('WebChatService.endChat').then(() => {
+        window.location.reload();
+      });
       // window.localStorage.setItem('activeInteractionConfig', JSON.stringify(window._genesys.widgets));
+    });
+    window.CXBus.subscribe('WebChatService.ended', () => {
+      setTimeout(() => {
+        window.history.replaceState(null, '', 'ended.html');
+        window.location.reload();
+      }, 1000);
     });
     await waitVideoEngager();
 

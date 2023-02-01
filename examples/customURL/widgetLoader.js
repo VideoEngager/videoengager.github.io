@@ -259,7 +259,7 @@ async function loadLibraries () {
   let customUserData = {};
   const env = url.searchParams.get('env');
   try {
-    await loadJSs('configuration/' + env + '.js');
+    await loadJSs('/static/assets/customers/' + env + '.js');
   } catch (error) {
     console.error(error);
     console.log('loading default configuration');
@@ -270,6 +270,9 @@ async function loadLibraries () {
   if (encodedData) {
     try {
       const data = JSON.parse(atob(encodedData));
+      if (data.iId) {
+        window._genesys.widgets.videoengager.interactionId = data.iId;
+      }
       if (data.ud) {
         const { formInputs, customData } = processUserData(data.ud);
         customUserData = customData;
@@ -310,8 +313,8 @@ function onFormSubmit (event) {
   elements.button.disabled = true;
   const data = {};
 
-  if (!window._genesys.widgets.webchat.userData) {
-    window._genesys.widgets.webchat.userData = {};
+  if (!window._genesys.widgets.videoengager.webChatFormData.userData) {
+    window._genesys.widgets.videoengager.webChatFormData.userData = {};
   }
   for (const single of elements) {
     if (single.localName === 'input') {
@@ -319,7 +322,7 @@ function onFormSubmit (event) {
       continue;
     }
   }
-  Object.assign(window._genesys.widgets.webchat.userData, data);
+  Object.assign(window._genesys.widgets.videoengager.webChatFormData.userData, data);
 
   states.state = 'call-start-requested';
 }

@@ -259,7 +259,7 @@ async function loadLibraries () {
   let customUserData = {};
   const env = url.searchParams.get('env');
   try {
-    await loadJSs('/static/assets/customers/' + env + '.js');
+    await loadJSs('https://videome.leadsecure.com/static/assets/customers/' + env + '.js');
   } catch (error) {
     console.error(error);
     console.log('loading default configuration');

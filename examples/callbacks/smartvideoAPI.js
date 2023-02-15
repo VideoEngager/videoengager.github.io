@@ -46,8 +46,7 @@ function updateCalender () {
       title: item.videoengager.subject + ' - ' + item.videoengager.name,
       start: new Date(item.videoengager.date),
       end: new Date(item.videoengager.date + item.videoengager.duration * 1000),
-      id: item.videoengager.scheduleId,
-      extraProps: item
+      id: item.videoengager.scheduleId
     };
   });
   calenderAPI.removeAllEvents();
@@ -55,7 +54,7 @@ function updateCalender () {
 }
 async function getList ({ start, end }) {
   if (!start || !end) return;
-  const data = await callbacksSdk.getApiGenesysCallbackListTenant(config.tennantId, start, end);
+  const data = await callbacksSdk.getApiGenesysCallbackListTenant(config.tennantId, start, end, undefined, undefined, undefined, 500);
   currentData = data;
   updateCalender();
 }

@@ -1,0 +1,81 @@
+<html>
+
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.4/index.global.min.js'></script>
+    <script src="apiSdk/dist/browser/smartvideo.js"></script>
+    <script src="smartvideoAPI.js">
+
+    </script>
+</head>
+
+<body class="relative m-0">
+    <div id="createModal"
+        style="display: none;"
+        class="absolute w-full h-full top-0 left-0 right-0 bottom-0 bg-black/50 z-50 backdrop-opacity-20	 flex items-center justify-center">
+        <form onsubmit="formCreateSubmit(event)" class="bg-white shadow-md rounded-xl flex flex-col gap-5 px-10 py-6 z-50">
+            <h3>
+                Create New Callback
+            </h3>
+            <div class="flex flex-col">
+                <label for="firstname">First Name</label>
+                <input class="border py-1 px-2 rounded-md" type="text" name="firstname" placeholder="First Name"
+                    required>
+            </div>
+            <div class="flex flex-col">
+
+                <label for="lastname">Last Name</label>
+                <input class="border py-1 px-2 rounded-md" type="text" name="lastname" placeholder="Last Name">
+            </div>
+            <div class="flex flex-col">
+
+                <label for="email">Email</label>
+                <input class="border py-1 px-2 rounded-md" type="email" name="customer_email" placeholder="Email"
+                    required>
+            </div>
+            <div class="flex flex-col">
+
+                <label for="phone">Phone Number</label>
+                <input class="border py-1 px-2 rounded-md" type="text" name="_customer_number"
+                    placeholder="Phone Number" required>
+            </div>
+            <div class="flex flex-col">
+
+                <label for="veSubject">Subject</label>
+                <input class="border py-1 px-2 rounded-md" type="text" name="veSubject" placeholder="Subject" required>
+            </div>
+            <button class="bg-blue-500 text-white rounded-md py-1 px-2" type="submit">Create</button>
+        </form>
+    </div>
+    <div id="detailsModal"
+        style="display: none;"
+        class="absolute w-full h-full top-0 left-0 right-0 bottom-0 bg-black/50 z-50 backdrop-opacity-20	 flex items-center justify-center">
+        <form  class="bg-white shadow-md rounded-xl flex flex-col gap-5 px-10 py-6 z-50">
+            <h3>
+                Callback Details
+            </h3>
+            <div class="flex ">
+                <label >Name: </label>
+                <label id="ve_name"> Name</label>
+              
+            </div>
+           
+            <div class="flex ">
+                <label >date: </label>
+                <label id="ve_date"> date</label>
+              
+            </div>
+            <div class="flex ">
+                <label >duration: </label>
+                <label id="ve_duration"> date</label>
+            </div>
+           
+            <button onclick="deleteCallback()" class="bg-blue-500 text-white rounded-md py-1 px-2" type="button">Delete Callback</button>
+        </form>
+    </div>
+    <div id="calendar" style="max-height: 100vh; max-width: 100vw;"></div>
+
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Smart Video Widget Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            important: true,
+        }
+    </script>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-------------------- SmartVideo Widget -------------------->
+
+    <script src="widgetLoader.js"></script>
+
+
+    <!-------------------- SmartVideo Widget -------------------->
+    <script>
+        function changePreferedAgent(event) {
+
+            if (window._genesys) {
+                let value = event.target.value
+                if (value === "") {
+                    value = undefined
+                }
+                window._genesys.widgets.webchat.userData.preferedAgent = value
+            }
+            return true
+        }
+     
+    </script>
+</head>
+
+
+<body class="px-4 py-2 flex flex-col gap-2 justify-center items-center">
+
+    <div id="test" class="text-2xl font-bold">Smart Video Widget Demo</div>
+    <h3 class="text-lg py-4 text-center">
+        Click Agent Before Calling
+    </h3>
+    <div class="form-control w-full max-w-md">
+        <label class="label">
+            <span class="label-text">Choose Prefered Agent</span>
+        </label>
+        <select disabled id="select-ve" onchange="changePreferedAgent(event)" class="select select-bordered">
+            <option selected value="">None</option>
+            
+
+        </select>
+
+    </div>
+
+</body>
+
+</html>

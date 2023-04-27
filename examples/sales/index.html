@@ -15,6 +15,13 @@
     <script type="text/javascript" src="./js/script.js"></script>
 
     <style>
+    .github-btn-container {
+        display: flex;
+        justify-content: flex-end;
+    }
+    </style>
+
+    <style>
         body {
             padding: 10px;
         }
@@ -47,6 +54,12 @@
                 <!-- user environment configuration -->
                 <div id="envConf">
                     <div class="p-5 text-center bg-light">
+                        <div class="github-btn-container">
+                        <a href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/sales" target="_blank" class="github-source-btn btn btn-dark">
+                            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" alt="GitHub" style="vertical-align: middle; margin-right: 5px;">
+                            View Source on GitHub
+                        </a>
+                        </div>
                         <h1 class="mb-3">Genesys Widget Integrations Demo</h1>
                         <h4 class="mb-3">VideoEngager Integrations</h4>
 
@@ -85,12 +98,11 @@
                                 data-mdb-parent="#accordionExample">
                                 <div class="accordion-body">
                                     <p class="note note-info">
-                                        <strong>Help:</strong> If you need help about how to learn these parameters,
-                                        please follow our
-                                        <a href="https://github.com/VideoEngager/SmartVideoWebSDK/blob/master/click2videoguide.pdf">Click
-                                            2 Video Guide</a>
+                                        <strong>Help:</strong> If you need help about how to learn these parameters, please follow our SmartVideo SDK Parameters
+                                        <a data-toggle="tooltip" title="Learn more about the SmartVideo SDK Parameters" href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank">
+                                            <i class="fas fa-question-circle"></i>
+                                        </a>
                                     </p>
-
                                     <div class="form-outline">
                                         <input type="text" id="targetAddress" class="form-control"
                                             data-mdb-showcounter="false" />
@@ -205,6 +217,12 @@
                     Please use your Genesys Cloud and VideoEngager <strong>configuration parameters</strong> here.
                 </p>
 
+                <p class="note note-warning">
+                    To try schedule video meeting functionality, please configure your Genesys Org/SmartVideo Settings. 
+                    <a data-toggle="tooltip" title="Learn more about the Schedule Meeting Setup for Genesys Administrator" href="https://help.videoengager.com/hc/en-us/articles/7710742952461-Schedule-Meeting-Setup-for-Genesys-Administrator" target="_blank">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                </p>
                 <div>
                     <div class="accordion" id="jsonAccordeon">
                         <div class="accordion-item">
@@ -257,5 +275,11 @@
      <!-- Syntax Highlighter-->
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/vs2015.min.css">
      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+     <script>
+        // Initialize tooltips
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+    </script>
 </body>
 </html>

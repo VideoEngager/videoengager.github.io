@@ -330,7 +330,7 @@ const genesysConfigInit = function () {
         userData: {}
       },
       customAttributes: {
-        ipad: true
+        ipad: true // hide video widget controll buttons and move video preview to right bottom corner
       }
     },
     webchat: {

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Smart Video Widget Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            important: true,
+        }
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-------------------- SmartVideo Widget -------------------->
+    <script src="widgetLoader.js"></script>
+    <!-------------------- SmartVideo Widget -------------------->
+</head>
+<body class="px-4 py-2 flex flex-col gap-2 justify-center items-center">
+    <div id="error-container" class="flex justify-center transition-all duration-300 opacity-0 -z-10 items-center w-full max-w-md fixed backdrop-blur-sm backdrop-brightness-50  top-0 left-0 right-0 bottom-0 min-w-full min-h-full">
+     <div class="rounded-lg shadow-md bg-white p-3 flex flex-col justify-center items-center gap-3">
+        <div id="error-text">Error</div>
+        <div id="error-description">Error Description</div>
+     </div>
+    </div>
+    <div id="videoengager-iframe" class="fixed top-0 left-0 right-0 bottom-0 min-w-full min-h-full">
+        
+    </div>
+</body>
+</html>

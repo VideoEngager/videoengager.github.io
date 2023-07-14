@@ -12,38 +12,32 @@
         document.body.appendChild(script);
       });
     }
-
+    const availableEnvs = {
+      'd': 'dev',
+      p: 'prod',
+      s: 'staging'
+    }
+    function getRedirectUrl() {
+      const pathName = window.location.pathname;
+      const pathNameArray = pathName.split('/');
+      const firstPath = pathNameArray[1];
+      let env;
+      if (availableEnvs[pathNameArray]) {
+        env = availableEnvs[pathNameArray];
+      }
+      const secondPath = pathNameArray[2];
+      const thirdPath = pathNameArray[3];
+      if (env && (secondPath === 've' || secondPath === 'pin') && thirdPath) {
+        return `/examples/outbound-custom-visitor-url/index.html?param=/${secondPath}/${thirdPath}`;
+      }
+      return null
+    }
     window.onload = function () {
 
-      const newHref = '/examples/outbound-custom-visitor-url/index.html'
-      if (window.location.pathname.includes("/ve/")) {
-        // redirect to ve folder
-        // move route without changing path in browser
-        fetch(newHref)
-          .then(response => response.text())
-          .then(html => {
-            // Replace the current page content with the new page content
-            document.documentElement.innerHTML = html;
-            loadJsAsync("/examples/outbound-custom-visitor-url/app.js");
-          })
-          .catch(error => {
-            console.error('Error loading new page:', error);
-            document.body.innerHTML = "404 Not Found";
-          });
-      } else if (window.location.pathname.includes("/pin/")) {
-        //redirect to pin folder
-        fetch(newHref)
-          .then(response => response.text())
-          .then(html => {
-            // Replace the current page content with the new page content
-            document.documentElement.innerHTML = html;
-            loadJsAsync("/examples/outbound-custom-visitor-url/app.js");
 
-          })
-          .catch(error => {
-            console.error('Error loading new page:', error);
-            document.body.innerHTML = "404 Not Found";
-          });
+     const redirectUrl = getRedirectUrl();
+     if (redirectUrl) {
+        window.location.replace(redirectUrl);
       } else {
         //redirect to 404
         document.body.innerHTML = "404 Not Found";

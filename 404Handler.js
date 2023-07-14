@@ -14,7 +14,7 @@ function getRedirectUrl () {
   const secondPath = pathNameArray[2];
   const thirdPath = pathNameArray[3];
   if (env && (secondPath === 've' || secondPath === 'pin') && thirdPath) {
-    return `/examples/outbound-custom-visitor-url/index.html?param=/${secondPath}/${thirdPath}`;
+    return `/examples/outbound-custom-visitor-url/index.html?env=${env}&param=/${secondPath}/${thirdPath}`;
   }
   return null;
 }

@@ -22,8 +22,8 @@
       const pathNameArray = pathName.split('/');
       const firstPath = pathNameArray[1];
       let env;
-      if (availableEnvs[pathNameArray]) {
-        env = availableEnvs[pathNameArray];
+      if (availableEnvs[firstPath]) {
+        env = availableEnvs[firstPath];
       }
       const secondPath = pathNameArray[2];
       const thirdPath = pathNameArray[3];

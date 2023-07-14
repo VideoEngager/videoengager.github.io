@@ -1,3 +1,40 @@
 <html>
-  <body>404 page</body>
+  <head>
+    <script>
+      //check if path includes ve or pin
+      window.onload = function () {
+        const newHref = '/examples/outbound-custom-visitor-url/index.html'
+        if (window.location.pathname.includes("/ve/")) {
+          // redirect to ve folder
+          // move route without changing path in browser
+          fetch(newHref)
+          .then(response => response.text())
+          .then(html => {
+            // Replace the current page content with the new page content
+            document.documentElement.innerHTML = html;
+          })
+          .catch(error => {
+            console.error('Error loading new page:', error);
+            document.body.innerHTML = "404 Not Found";
+          });
+        } else if (window.location.pathname.includes("/pin/")) {
+          //redirect to pin folder
+          fetch(newHref)
+          .then(response => response.text())
+          .then(html => {
+            // Replace the current page content with the new page content
+            document.documentElement.innerHTML = html;
+          })
+          .catch(error => {
+            console.error('Error loading new page:', error);
+            document.body.innerHTML = "404 Not Found";
+          });
+        } else {
+          //redirect to 404
+          document.body.innerHTML = "404 Not Found";
+        }
+      }
+    </script>
+  </head>
+  <body>Please Wait..</body>
 </html>

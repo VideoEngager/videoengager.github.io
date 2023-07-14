@@ -1,38 +1,34 @@
 <html class="relative">
-    <head>
-        <title>Smart Video Interactions API</title>
-        <script
-        src="app.js"
-        ></script>
-        <link rel="stylesheet" href="style.css">
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://unpkg.com/videoengager-js-sdk@1.3.0/dist/browser/main.js"></script>
-        <script>
-            tailwind.config = {
-              important: true,
-            }
-          </script>
-           </head>
-  
-    <body class="bg-gray-100 w-full h-full flex flex-col  z-[1000]">
-        <div id="header-id" style="height: 60vh;border-radius: 0% 0% 25% 25%;" class="z-0 transition-all duration-500 relative animate-gradient w-full flex flex-col items-center justify-start  bg-white shadow-md px-6 py-4 bg-gradient-to-r text-white to-[#373bd7] via-[#2428ad] from-[#686cf2] ">
-            <div class="w-full flex justify-between font-mono text-xl font-bold">
-                Company Brand
+
+<head>
+    <title>Smart Video Interactions API</title>
+    <script src="/examples/outbound-custom-visitor-url/app.js"></script>
+    <link rel="stylesheet" href="/examples/outbound-custom-visitor-url/style.css">
+</head>
+
+<body class="bg-gray-100 w-full h-full flex flex-col  z-[1000]">
+    <div id="header-id" style="height: 60vh;border-radius: 0% 0% 25% 25%;"
+        class="z-0 transition-all duration-500 relative animate-gradient w-full flex flex-col items-center justify-start  bg-white shadow-md px-6 py-4 bg-gradient-to-r text-white to-[#373bd7] via-[#2428ad] from-[#686cf2] ">
+        <div class="w-full flex justify-between font-mono text-xl font-bold">
+            Company Brand
+        </div>
+        <div id="loading-id"
+            class=" absolute z-[1000] transition-all duration-300 -bottom-5 left-0 w-full flex items-center justify-center">
+            <div class=" bg-gray-100 shadow-lg rounded-md px-3 py-2 flex items-center gap-3">
+                <span class="animate-pulse text-lg text-[#686cf2]">
+                    Connecting ...
+                </span> <svg class="animate-spin  h-5 w-5 text-[#2428ad]" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
             </div>
-            <div id="loading-id" class=" absolute z-[1000] transition-all duration-300 -bottom-5 left-0 w-full flex items-center justify-center">
-                <div class=" bg-gray-100 shadow-lg rounded-md px-3 py-2 flex items-center gap-3">
-                    <span class="animate-pulse text-lg text-[#686cf2]">
-                        Connecting ...
-                    </span> <svg class="animate-spin  h-5 w-5 text-[#2428ad]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                </div>
-            </div>
+        </div>
     </div>
-        
-    <iframe id="iframe-ve" class="transition-opacity duration-300"
-    style="opacity: 0;width: 0px;height: 0px;"
-    ></iframe>
-    </body>
+
+    <iframe id="iframe-ve" class="transition-opacity duration-300" style="opacity: 0;width: 0px;height: 0px;"></iframe>
+</body>
+
 </html>

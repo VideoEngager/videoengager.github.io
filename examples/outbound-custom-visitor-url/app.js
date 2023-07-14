@@ -1,12 +1,14 @@
 const environments = {
   dev: 'https://dev.videoengager.com',
+  dev2: 'https://dev.videoengager.com',
   prod: 'https://prod.leadsecure.com',
   staging: 'https://staging.leadsecure.com'
 };
 const tenants = {
   prod: '0FphTk091nt7G1W7',
   staging: 'oIiTR2XQIkb7p0ub',
-  dev: 'test_tenant'
+  dev: 'test_tenant',
+  dev2: 'o3GiLS9GIT8Q4A9L'
 };
 function getPinOrCode (stringValue = '', dontCheckAgain = false) {
   const data = {

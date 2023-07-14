@@ -1,5 +1,6 @@
 const availableEnvs = {
   d: 'dev',
+  c: 'dev2',
   p: 'prod',
   s: 'staging'
 };

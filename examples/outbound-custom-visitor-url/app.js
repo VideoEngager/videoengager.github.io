@@ -112,11 +112,7 @@ function wait (ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 async function loadScripts () {
-  await loadJsAsync('https://cdn.tailwindcss.com');
   await loadJsAsync('https://unpkg.com/videoengager-js-sdk@1.3.0/dist/browser/main.js');
-  window.tailwind.config = {
-    important: true
-  };
 }
 function loadJsAsync (url) {
   return new Promise((resolve, reject) => {

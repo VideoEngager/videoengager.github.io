@@ -1,0 +1,30 @@
+
+  .animate-gradient {
+    background-size: 300% 300%;
+
+    -webkit-animation: AnimationName 4s ease infinite;
+    -moz-animation: AnimationName 4s ease infinite;
+    -o-animation: AnimationName 4s ease infinite;
+    animation: AnimationName 4s ease infinite;
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:17% 0%}
+    50%{background-position:84% 100%}
+    100%{background-position:17% 0%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:17% 0%}
+    50%{background-position:84% 100%}
+    100%{background-position:17% 0%}
+}
+@-o-keyframes AnimationName {
+    0%{background-position:17% 0%}
+    50%{background-position:84% 100%}
+    100%{background-position:17% 0%}
+}
+@keyframes AnimationName {
+    0%{background-position:17% 0%}
+    50%{background-position:84% 100%}
+    100%{background-position:17% 0%}
+}

@@ -1,49 +1,98 @@
 <html>
-
 <head>
-  <script>
-    //check if path includes ve or pin
-    function loadJsAsync(url) {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.onload = resolve;
-        script.onerror = reject;
-        document.body.appendChild(script);
-      });
+  
+  <title></title>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <script type="text/javascript" src="/404Handler.js" ></script>
+  <style type="text/css" media="screen">
+    body {
+      background-color: #f1f1f1;
+      margin: 0;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
-    const availableEnvs = {
-      'd': 'dev',
-      p: 'prod',
-      s: 'staging'
-    }
-    function getRedirectUrl() {
-      const pathName = window.location.pathname;
-      const pathNameArray = pathName.split('/');
-      const firstPath = pathNameArray[1];
-      let env;
-      if (availableEnvs[firstPath]) {
-        env = availableEnvs[firstPath];
-      }
-      const secondPath = pathNameArray[2];
-      const thirdPath = pathNameArray[3];
-      if (env && (secondPath === 've' || secondPath === 'pin') && thirdPath) {
-        return `/examples/outbound-custom-visitor-url/index.html?param=/${secondPath}/${thirdPath}`;
-      }
-      return null
-    }
-    window.onload = function () {
 
+    .container {
+      margin: 50px auto 40px auto;
+      width: 600px;
+      text-align: center;
+    }
 
-     const redirectUrl = getRedirectUrl();
-     if (redirectUrl) {
-        window.location.replace(redirectUrl);
-      } else {
-        //redirect to 404
-        document.body.innerHTML = "404 Not Found";
+    a {
+      color: #4183c4;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      width: 800px;
+      position: relative;
+      left: -100px;
+      letter-spacing: -1px;
+      line-height: 60px;
+      font-size: 60px;
+      font-weight: 100;
+      margin: 0px 0 50px 0;
+      text-shadow: 0 1px 0 #fff;
+    }
+
+    p {
+      color: rgba(0, 0, 0, 0.5);
+      margin: 20px 0;
+      line-height: 1.6;
+    }
+
+    ul {
+      list-style: none;
+      margin: 25px 0;
+      padding: 0;
+    }
+
+    li {
+      display: table-cell;
+      font-weight: bold;
+      width: 1%;
+    }
+
+    .logo {
+      display: inline-block;
+      margin-top: 35px;
+    }
+
+    .logo-img-2x {
+      display: none;
+    }
+
+    @media only screen and (-webkit-min-device-pixel-ratio: 2),
+    only screen and (min--moz-device-pixel-ratio: 2),
+    only screen and (-o-min-device-pixel-ratio: 2/1),
+    only screen and (min-device-pixel-ratio: 2),
+    only screen and (min-resolution: 192dpi),
+    only screen and (min-resolution: 2dppx) {
+      .logo-img-1x {
+        display: none;
+      }
+
+      .logo-img-2x {
+        display: inline-block;
       }
     }
-  </script>
+
+    #suggestions {
+      margin-top: 35px;
+      color: #ccc;
+    }
+
+    #suggestions a {
+      color: #666666;
+      font-weight: 200;
+      font-size: 14px;
+      margin: 0 10px;
+    }
+  </style>
+
 </head>
 
 <body>Please Wait..</body>

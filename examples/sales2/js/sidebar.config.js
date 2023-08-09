@@ -78,7 +78,7 @@ window._genesys.widgets = {
         icon: 'call-outgoing'
       },
       {
-        clickCommand: 'VideoEngager.startVideoEngager',
+        clickCommand: 'VideoEngager.startVideo',
         readyEvent: 'VideoEngager.ready',
         displayName: 'Video Chat',
         i18n: 'VideoTitle',

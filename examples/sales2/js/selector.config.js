@@ -78,7 +78,7 @@ window._genesys.widgets = {
       },
       {
         enable: true,
-        clickCommand: 'VideoEngager.startVideoEngager',
+        clickCommand: 'VideoEngager.startVideo',
         readyEvent: 'VideoEngager.ready',
         displayName: 'Video Chat',
         i18n: 'VideoTitle',

@@ -15,6 +15,66 @@ const genesysEnvList = [
   'apne2.pure.cloud',
   'mypurecloud.jp'
 ];
+const requiredFieldsCheck = function () {
+  let unfilledInputId;
+
+  document.querySelectorAll('input.form-control,#dataURL').forEach(input => {
+    if (!input.value && !unfilledInputId) {
+      unfilledInputId = input.id;
+    }
+  });
+
+  return unfilledInputId;
+};
+
+const validateInputsFormat = function () {
+  const urlRegex = /^(https?):\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+  const regex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  const orgGuidElement = document.getElementById('orgGuid');
+  const deploymentIdElement = document.getElementById('deploymentKey');
+  const veUrlElement = document.getElementById('veUrl');
+
+  const orgGuidValid = regex.test(orgGuidElement.value);
+  const deploymentIdValid = regex.test(deploymentIdElement.value);
+
+  const invalidIds = [];
+
+  if (!orgGuidValid) {
+    invalidIds.push(orgGuidElement.id);
+  }
+
+  if (!deploymentIdValid) {
+    invalidIds.push(deploymentIdElement.id);
+  }
+
+  if (!urlRegex.test(veUrlElement.value)) {
+    invalidIds.push(veUrlElement.id);
+  }
+
+  return invalidIds;
+};
+
+function checkInputs () {
+  const inputs = document.querySelectorAll('.form-control');
+  const button = document.getElementById('loadGenesysLib');
+
+  let allInputsFilled = true;
+  inputs.forEach(input => {
+    if (input.value === '') {
+      allInputsFilled = false;
+    }
+  });
+  const dataURLDropdown = document.getElementById('dataURL');
+  if (dataURLDropdown.value === '') {
+    allInputsFilled = false;
+  }
+
+  if (allInputsFilled) {
+    button.removeAttribute('disabled');
+  } else {
+    button.setAttribute('disabled', true);
+  }
+}
 
 /** *  MAIN FUNCTION * **/
 
@@ -43,14 +103,15 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
   // load genesys library on button click (genesys library will run on load)
   document.querySelector('#loadGenesysLib').addEventListener('click', async function (e) {
-    const selectors = ['#tenantId', '#veUrl', '#dataURL', '#deploymentKey', '#orgGuid', '#targetAddress'];
-
-    for (const selector of selectors) {
-      const value = sanitizeInput(selector);
-      if (!value) {
-        showToastError(`Field corresponding to selector ${selector} is empty!`);
-        return;
-      }
+    const unfilledInputId = requiredFieldsCheck();
+    if (unfilledInputId) {
+      showToastError(`Field corresponding to selector #${unfilledInputId} is empty!`, 'Please fill all the inputs!');
+      return;
+    }
+    const invalidIds = validateInputsFormat();
+    if (invalidIds.length > 0) {
+      showToastError(`Field corresponding to selector #${invalidIds.join(', #')} is invalid!`, 'Please check the inputs!');
+      return;
     }
 
     const uimode = document.querySelector('input[name="ui_mode"]:checked').value;
@@ -82,6 +143,11 @@ document.addEventListener('DOMContentLoaded', async function (e) {
   document.getElementById('refreshPage').addEventListener('click', function () {
     window.location.reload();
   });
+  checkInputs();
+  // Check the inputs every time they change
+  $('input.form-control,#dataURL').on('input', function () {
+    checkInputs();
+  });
 });
 
 /** *  HELPER FUNCTIONS * **/
@@ -92,6 +158,7 @@ const fillDataURLDropdown = function () {
     option.value = 'https://api.' + env;
     option.text = env;
     document.querySelector('#dataURL').appendChild(option);
+    document.querySelector('#dataURL').selectedIndex = -1;
   }
 };
 
@@ -133,7 +200,6 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = envConfig.en.veUrl;
     document.querySelector('#tenantId').value = envConfig.en.tenantId;
     document.querySelector('#dataURL').selectedIndex = genesysEnvList.indexOf(envConfig.en.dataURL.substring(12));
-    $('#collapseOne').removeClass('show');
   } else if (window.localStorage && window.localStorage.getItem('envConf') === 'true') {
     document.querySelector('#targetAddress').value = window.localStorage.getItem('targetAddress');
     document.querySelector('#orgGuid').value = window.localStorage.getItem('orgGuid');
@@ -141,11 +207,20 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = window.localStorage.getItem('veUrl');
     document.querySelector('#tenantId').value = window.localStorage.getItem('tenantId');
     document.querySelector('#dataURL').selectedIndex = window.localStorage.getItem('dataURL');
-    $('#collapseOne').removeClass('show');
   }
 
   // set listener for save and clear buttons
   document.querySelector('#saveConf').addEventListener('click', async function (e) {
+    const unfilledInputId = requiredFieldsCheck();
+    if (unfilledInputId) {
+      showToastError(`Field corresponding to selector #${unfilledInputId} is empty!`, 'Please fill all the inputs!');
+      return;
+    }
+    const invalidIds = validateInputsFormat();
+    if (invalidIds.length > 0) {
+      showToastError(`Field corresponding to selector #${invalidIds.join(', #')} is invalid!`, 'Please check the inputs!');
+      return;
+    }
     window.localStorage.setItem('envConf', 'true');
     window.localStorage.setItem('targetAddress', document.querySelector('#targetAddress').value);
     window.localStorage.setItem('orgGuid', document.querySelector('#orgGuid').value);
@@ -170,6 +245,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = '';
     document.querySelector('#tenantId').value = '';
     document.querySelector('#dataURL').selectedIndex = '-1';
+    checkInputs();
   });
 
   document.querySelectorAll('.form-outline').forEach((formOutline) => {
@@ -314,13 +390,14 @@ const sanitizeInput = (selector) => {
   return ''; // Default fallback.
 };
 
-const showToastError = function (message) {
+const showToastError = function (message, title = 'Error') {
   // Clone the template toast
   const toastTemplate = document.querySelector('#errorToast');
   const toastClone = toastTemplate.cloneNode(true);
 
   // Add the error message
   toastClone.querySelector('.toast-body').textContent = message;
+  toastClone.querySelector('.me-auto').textContent = title;
 
   // Append the cloned toast to the toast container
   const toastContainer = document.querySelector('#toastContainer');

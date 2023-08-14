@@ -1,8 +1,7 @@
-/* global XMLHttpRequest CXBus mdb $ */
+/* global XMLHttpRequest CXBus mdb console $ bootstrap */
 const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
 const videoengagerWidgetCDN = '/examples/sales2/videoengager.widget.js';
 const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
-const BOOTSTRAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js';
 const genesysEnvList = [
   'mypurecloud.com.au',
   'mypurecloud.com',
@@ -44,6 +43,16 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
   // load genesys library on button click (genesys library will run on load)
   document.querySelector('#loadGenesysLib').addEventListener('click', async function (e) {
+    const selectors = ['#tenantId', '#veUrl', '#dataURL', '#deploymentKey', '#orgGuid', '#targetAddress'];
+
+    for (const selector of selectors) {
+      const value = sanitizeInput(selector);
+      if (!value) {
+        showToastError(`Field corresponding to selector ${selector} is empty!`);
+        return;
+      }
+    }
+
     const uimode = document.querySelector('input[name="ui_mode"]:checked').value;
     // apply demo mode configurations
     await loadJS('./js/' + uimode + '.config.js');
@@ -62,11 +71,16 @@ document.addEventListener('DOMContentLoaded', async function (e) {
     $('#tampermonkeybutton').attr('disabled', false);
 
     document.querySelector('#downloadjson').addEventListener('click', async function (e) {
-      download('jsonScript.js', document.getElementById('jsondump').value);
+      const content = document.getElementById('jsondump').textContent || document.getElementById('jsondump').innerText;
+      download('jsonScript.js', content);
     });
     document.querySelector('#downloadtamper').addEventListener('click', async function (e) {
-      download('tampermonkey.js', document.getElementById('tempermonkeydump').value);
+      const content = document.getElementById('tempermonkeydump').textContent || document.getElementById('tempermonkeydump').innerText;
+      download('tampermonkey.js', content);
     });
+  });
+  document.getElementById('refreshPage').addEventListener('click', function () {
+    window.location.reload();
   });
 });
 
@@ -211,10 +225,10 @@ const dumpTamper = function (uimode) {
     document.body.appendChild(fixedButton);`;
   }
   const template = `// ==UserScript==
-  // @name         callback staging
+  // @name         Videoengager Tampermonkey Script
   // @namespace    http://tampermonkey.net/
   // @version      0.1
-  // @description  try to take over the world!
+  // @description  Genesys Widget Demo
   // @author       You
   // @match        https://www.videoengager.com/
   // @icon         https://www.google.com/s2/favicons?domain=videoengager.com
@@ -292,23 +306,51 @@ const setVideoCallStartedListener = function () {
   }
 };
 
-/**
- * set given genesys keys and videoengager parameters if exist
- * @param {object} config
- * @returns
- */
+const sanitizeInput = (selector) => {
+  const element = document.querySelector(selector);
+  if (element && typeof element.value === 'string') {
+    return element.value.trim(); // Remove leading and trailing spaces.
+  }
+  return ''; // Default fallback.
+};
+
+const showToastError = function (message) {
+  // Clone the template toast
+  const toastTemplate = document.querySelector('#errorToast');
+  const toastClone = toastTemplate.cloneNode(true);
+
+  // Add the error message
+  toastClone.querySelector('.toast-body').textContent = message;
+
+  // Append the cloned toast to the toast container
+  const toastContainer = document.querySelector('#toastContainer');
+  toastContainer.appendChild(toastClone);
+
+  // Use Bootstrap's toast API to show the toast
+  const toast = new bootstrap.Toast(toastClone);
+  toast.show();
+
+  // Remove the toast element from the DOM after it's hidden
+  toastClone.addEventListener('hidden.bs.toast', function () {
+    toastClone.remove();
+  });
+  // sctoll to top
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
+
 const setConfig = async function (uimode) {
-  // tenant ID
-  window._genesys.widgets.videoengager.tenantId = document.querySelector('#tenantId').value;
-  window._genesys.widgets.videoengager.veUrl = document.querySelector('#veUrl').value;
-  window._genesys.widgets.webchat.transport.dataURL = document.querySelector('#dataURL').value;
-  window._genesys.widgets.webchat.transport.deploymentKey = document.querySelector('#deploymentKey').value;
-  window._genesys.widgets.webchat.transport.orgGuid = document.querySelector('#orgGuid').value;
-  window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = document.querySelector('#targetAddress').value;
+  window._genesys.widgets.videoengager.tenantId = sanitizeInput('#tenantId');
+  window._genesys.widgets.videoengager.veUrl = sanitizeInput('#veUrl');
+  window._genesys.widgets.webchat.transport.dataURL = sanitizeInput('#dataURL');
+  window._genesys.widgets.webchat.transport.deploymentKey = sanitizeInput('#deploymentKey');
+  window._genesys.widgets.webchat.transport.orgGuid = sanitizeInput('#orgGuid');
+  window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = sanitizeInput('#targetAddress');
+
   if (uimode !== 'singlebutton') {
-    window._genesys.widgets.callback.dataURL = document.querySelector('#veUrl').value + '/api/genesys/callback';
-    window._genesys.widgets.callback.ewt.queue = document.querySelector('#targetAddress').value;
-    window._genesys.widgets.callback.userData.environment = document.querySelector('#dataURL').value;
+    window._genesys.widgets.callback.dataURL = `${sanitizeInput('#veUrl')}/api/genesys/callback`;
+    window._genesys.widgets.callback.ewt.queue = sanitizeInput('#targetAddress');
+    window._genesys.widgets.callback.userData.environment = sanitizeInput('#dataURL');
   }
 };
 
@@ -354,6 +396,7 @@ const setUIHandlers = function () {
   CXBus.subscribe('WebChatService.error', function (e) {
     // Log the error and continue
     console.error('WebService error' + JSON.stringify(e));
+    showToastError(e?.data?.errors[0]?.response?.responseJSON?.message);
   });
 
   setVideoCallStartedListener();

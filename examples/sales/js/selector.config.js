@@ -70,6 +70,14 @@ window._genesys.widgets = {
     channels: [
       {
         enable: true,
+        clickCommand: 'VideoEngager.startAudio',
+        readyEvent: 'VideoEngager.ready',
+        displayName: 'Audio Call',
+        i18n: 'VideoTitle',
+        icon: 'call-outgoing'
+      },
+      {
+        enable: true,
         clickCommand: 'VideoEngager.startVideoEngager',
         readyEvent: 'VideoEngager.ready',
         displayName: 'Video Chat',

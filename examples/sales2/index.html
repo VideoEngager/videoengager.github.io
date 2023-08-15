@@ -67,144 +67,106 @@
                 <div id="envConf">
                     <div class="p-5 text-center bg-light">
                         <div class="github-btn-container">
-                        <a href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/sales" target="_blank" class="github-source-btn btn btn-dark">
-                            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" alt="GitHub" style="vertical-align: middle; margin-right: 5px;">
-                            View Source on GitHub
-                        </a>
+                            <a href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/sales" target="_blank" class="github-source-btn btn btn-dark">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" alt="GitHub" style="vertical-align: middle; margin-right: 5px;">
+                                View Source on GitHub
+                            </a>
                         </div>
                         <h1 class="mb-3">Genesys Widget Integrations Demo</h1>
-                        <h4 class="mb-3">VideoEngager Integrations</h4>
-
+                        <h5 class="mb-3">User Interface modes for the Genesys Widget:</h5>
                         <div id="ui_mode" class="btn-group m-2">
-                            <input class="btn-check" type="radio" name="ui_mode" id="singlebutton" value="singlebutton"
-                                checked />
-                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="singlebutton">single
-                                button</label>
-
+                            <input class="btn-check" type="radio" name="ui_mode" id="singlebutton" value="singlebutton" checked />
+                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="singlebutton">Single Button Mode</label>
+                
                             <input class="btn-check" type="radio" name="ui_mode" id="sidebar" value="sidebar" />
-                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark"
-                                for="sidebar">sidebar</label>
-
+                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="sidebar">Sidebar Mode</label>
+                
                             <input class="btn-check" type="radio" name="ui_mode" id="selector" value="selector" />
-                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark"
-                                for="selector">selector</label>
+                            <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="selector">Selector Mode</label>
                         </div>
-
-                        <button id="loadGenesysLib" class="btn btn-primary m-2" disabled>Load Genesys Widget Lib</button>
-                        <!-- refresh page button with icon -->
+                
+                        <button id="loadGenesysLib" class="btn btn-primary m-2" disabled>Initialize Genesys Widget Library</button>
+                
                         <button id="refreshPage" class="btn btn-warning m-2">
-                            <i class="fas fa-sync-alt"></i>
-                            Refresh Page
+                            <i class="fas fa-sync-alt"></i> Refresh Page
                         </button>
                     </div>
                     <p class="note note-primary">
-                        When you load genesys widget, it is mandatory to <strong>refresh the page before trying another
-                            configuration</strong>.
+                        Welcome to VideoEngager's <strong>Click-to-Video</strong> demonstration. 
+                        <br>
+                        Configure your preferred Genesys Widget UI mode above, then click the <strong>Initialize Genesys Widget Library</strong> button.
+                        <br>
+                        Ensure to input the necessary <strong>Genesys Widget Environment Parameters</strong> below.
                     </p>
-
+                
                     <div class="accordion" id="accordionExample">
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingOne">
                                 <button class="accordion-button collapsed show" type="button" data-mdb-toggle="collapse"
                                     data-mdb-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                    Genesys Widget Environment Configurations
+                                    Genesys Widget Configuration Parameters
                                 </button>
                             </h2>
-                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                                data-mdb-parent="#accordionExample">
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-mdb-parent="#accordionExample">
                                 <div class="accordion-body">
                                     <p class="note note-info">
                                         SmartVideo SDK Parameters
-                                        <a data-toggle="tooltip" title="Learn more about the SmartVideo SDK Parameters" href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank">
+                                        <a data-toggle="tooltip" title="Detailed guide on SmartVideo SDK Parameters" href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank">
                                             <i class="fas fa-question-circle"></i>
                                         </a>
                                     </p>
                                     <div class="form-outline">
-                                        <input type="text" id="targetAddress" class="form-control"
-                                            data-mdb-showcounter="false" required/>
-                                        <label class="form-label" for="targetAddress">Queue Name</label>
+                                        <input type="text" id="targetAddress" class="form-control" data-mdb-showcounter="false" required/>
+                                        <label class="form-label" for="targetAddress">Agent Queue Name</label>
                                     </div>
                                     <div class="form-text pb-2">
-                                        PureCloud agent will receive interaction when is "On Queue" with queue from
-                                        Queue Name
+                                        Designate the name of the PureCloud agent's queue. Agents should be set to "On Queue" based on this input.
                                     </div>
-
-                                    <div class="col-auto m-2">
-                                        <span id="textExample2" class="form-text"></span>
-                                    </div>
-
-                                    <div class="form-helper"></div>
-
+                
                                     <div class="form-outline">
-                                        <input type="text" id="orgGuid" class="form-control"
-                                            data-mdb-showcounter="false" required />
-                                        <label class="form-label" for="orgGuid">Organization ID</label>
-                                        <div class="form-helper"></div>
+                                        <input type="text" id="orgGuid" class="form-control" data-mdb-showcounter="false" required />
+                                        <label class="form-label" for="orgGuid">Organization Identifier (ID)</label>
                                     </div>
                                     <div class="form-text pb-2">
-                                        To get your Organization Id open PureCloud as admin and navigate to Admin >
-                                        Account Settings
-                                        > Organization
-                                        Settings > Organization Details (tab) > Advanced > Organization ID
+                                        Navigate to PureCloud's Admin section: Admin > Account Settings > Organization Settings > Organization Details (tab) > Advanced > Organization ID to locate your Organization ID.
                                     </div>
-
+                
                                     <div class="form-outline">
-                                        <input type="text" id="deploymentKey" class="form-control"
-                                            data-mdb-showcounter="false" required />
-                                        <label class="form-label" for="deploymentKey">Deployment ID</label>
-                                        <div class="form-helper"></div>
+                                        <input type="text" id="deploymentKey" class="form-control" data-mdb-showcounter="false" required />
+                                        <label class="form-label" for="deploymentKey">Deployment Key ID</label>
                                     </div>
-
                                     <div class="form-text pb-2">
-                                        To get your Deployment Id open PureCloud as admin and navigate to Admin >
-                                        Contact
-                                        Center >
-                                        Widgets >
-                                        Deployment Key (column)
+                                        Find your Deployment Key by navigating in PureCloud to: Admin > Contact Center > Widgets > Deployment Key (column).
                                     </div>
-
+                
                                     <div class="form-outline">
-                                        <input type="text" id="tenantId" class="form-control"
-                                            data-mdb-showcounter="false" required />
-                                        <label class="form-label" for="tenantId">Tenant ID</label>
-                                        <div class="form-helper"></div>
+                                        <input type="text" id="tenantId" class="form-control" data-mdb-showcounter="false" required />
+                                        <label class="form-label" for="tenantId">Tenant Identifier (ID)</label>
                                     </div>
-
                                     <div class="form-text pb-2">
-                                        To get your Tenant ID select Apps > SmartVideo_Settings > Tenant ID
+                                        Retrieve your Tenant ID by selecting: Apps > SmartVideo_Settings > Tenant ID.
                                     </div>
-
+                
                                     <div class="form-outline">
                                         <input type="text" id="veUrl" class="form-control" data-mdb-showcounter="false" value="https://videome.leadsecue.com" required />
-                                        <label class="form-label" for="veUrl">VideoEngager URL</label>
-                                        <div class="form-helper"></div>
+                                        <label class="form-label" for="veUrl">VideoEngager Server Address</label>
                                     </div>
-
                                     <div class="form-text pb-2">
-                                        VideoEngager Server Url
+                                        Provide the full URL address for the VideoEngager Server.
                                     </div>
-
-                                    <label for="dataURL"> Genesys Environment </label>
-                                    <select class="form-select" name="dataURL"
-                                        id="dataURL"></select>
-
+                
+                                    <label for="dataURL">Select Genesys Environment Region</label>
+                                    <select class="form-select" name="dataURL" id="dataURL"></select>
                                     <div class="form-text pb-2">
-                                        Select PureCloud Region
+                                        Designate the appropriate PureCloud region for your setup.
                                     </div>
-
+                
                                     <div id="confButtons">
-                                        <button id="saveConf" class="m-2 btn btn-outline-primary btn-rounded"
-                                            data-mdb-ripple-color="dark">Save</button>
-                                        <button id="clearConf" class="m-2 btn btn-outline-danger btn-rounded"
-                                            data-mdb-ripple-color="dark">Clear</button>
+                                        <button id="saveConf" class="m-2 btn btn-outline-primary btn-rounded" data-mdb-ripple-color="dark">Save Configuration</button>
+                                        <button id="clearConf" class="m-2 btn btn-outline-danger btn-rounded" data-mdb-ripple-color="dark">Clear All Inputs</button>
                                     </div>
                                     <p class="note note-warning">
-                                        You can save current Advanced Settings to Local Storage. They can be reused
-                                        from the same
-                                        browser from
-                                        the same computer many times. Clear will remove settings from Local
-                                        Storage and
-                                        Input Fields
+                                        Optionally, save the current advanced settings to your Local Storage for future use. Using the 'Clear' button will erase settings from both Local Storage and the input fields.
                                     </p>
                                 </div>
                             </div>

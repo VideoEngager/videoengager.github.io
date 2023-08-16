@@ -153,36 +153,36 @@ document.addEventListener('DOMContentLoaded', async function (e) {
   // introjs
   introJs().setOptions({
     steps: [
-        {
-            intro: "Welcome to the VideoEngager Genesys Widget Demo! Let's take a quick tour."
-        },
-        {
-            element: '#collapseOne',
-            intro: 'Meet the Configuration Section. Here, you can tailor your environment settings. Please note that all inputs are mandatory.'
-        },
-        {
-            element: '#ui_mode',
-            intro: 'Choose the UI mode that best fits your needs from this dropdown.'
-        },
-        {
-            element: '#loadGenesysLib',
-            intro: 'Once ready, click this button to initiate the Genesys Widgets Library.'
-        },
-        {
-            element: '#refreshPage',
-            intro: ' If you want to change ui mode and parameters, refresh the page first.'
-          },
-        {
-            element: '#saveConf',
-            intro: 'Don’t forget to save your configurations by clicking here!'
-        },
-        {
-            element: '#jsonAccordeon',
-            intro: 'Download javascript configuration to use it in your page or tanpermonkey script to use in your demo page'
-          }
+      {
+        intro: "Welcome to the VideoEngager Genesys Widget Demo! Let's take a quick tour."
+      },
+      {
+        element: '#collapseOne',
+        intro: 'Meet the Configuration Section. Here, you can tailor your environment settings. Please note that all inputs are mandatory.'
+      },
+      {
+        element: '#ui_mode',
+        intro: 'Choose the UI mode that best fits your needs from this dropdown.'
+      },
+      {
+        element: '#loadGenesysLib',
+        intro: 'Once ready, click this button to initiate the Genesys Widgets Library.'
+      },
+      {
+        element: '#refreshPage',
+        intro: ' If you want to change ui mode and parameters, refresh the page first.'
+      },
+      {
+        element: '#saveConf',
+        intro: 'Don’t forget to save your configurations by clicking here!'
+      },
+      {
+        element: '#jsonAccordeon',
+        intro: 'Download javascript configuration to use it in your page or tanpermonkey script to use in your demo page'
+      }
     ]
-}).start();
-
+  }).start();
+});
 
 /** *  HELPER FUNCTIONS * **/
 

@@ -158,28 +158,29 @@ document.addEventListener('DOMContentLoaded', async function (e) {
       },
       {
         element: '#collapseOne',
-        intro: 'Here is the the Configuration Section. All fields are required and are specific for your organisation. Check help for more information.'
+        intro: 'Configuring SDKs: All fields are required and are specific to your organization. Visit <a href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank">help</a> for more information.',
+        position: 'right'
       },
       {
         element: '#saveConf',
-        intro: 'After you fill all the fields, save it locally, so that they can be reused next time you load the page.'
+        intro: 'Once all the fields are completed, save them locally so that the settings can be reused the next time you load the page.'
       },
       {
         element: '#ui_mode',
-        intro: 'Select the UI mode to be used in the demo.'
+        intro: 'Choose the preferred UI mode for the demonstration.'
       },
       {
         element: '#loadGenesysLib',
-        intro: 'Once ready, click this button to load widget libraries and have a ready for a demo page.'
+        intro: 'Once the UI mode is selected, click <b>Load Widget</b> to load SmartVideo and Genesys libraries. The page is now ready for demonstrations.'
       },
       {
         element: '#refreshPage',
-        intro: ' If you want to change UI mode or parameters, refresh the page first.'
+        intro: 'To change the UI mode or parameters, the page must be reloaded by pressing the <b>Refresh</b> button.'
       },
 
       {
         element: '#jsonAccordeon',
-        intro: 'Download javascript configuration to use it in your page or Tampermonkey script to use in your demo page. For more information check help links.'
+        intro: 'Users have the option to download the demo configuration or the Tampermonkey script, both ready for use on customer pages. Additional information is available through the provided help links.'
       }
     ]
   }).start();

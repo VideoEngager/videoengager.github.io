@@ -12,12 +12,18 @@
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.css" rel="stylesheet" />
 
+    <script type="text/javascript" src="https://unpkg.com/intro.js/intro.js"></script>
+    <link href="https://unpkg.com/intro.js/introjs.css" rel="stylesheet" />
+
     <script type="text/javascript" src="./js/script.js"></script>
 
     <style>
     .github-btn-container {
         display: flex;
         justify-content: flex-end;
+    }
+    .input-error:not(:focus) {
+        border: 2px solid red !important;
     }
     </style>
 
@@ -85,18 +91,14 @@
                             <label class="btn btn-outline-dark" data-mdb-ripple-color="dark" for="selector">Selector Mode</label>
                         </div>
                 
-                        <button id="loadGenesysLib" class="btn btn-primary m-2" disabled>Initialize Genesys Widget Library</button>
+                        <button id="loadGenesysLib" class="btn btn-primary m-2" disabled>Load widget</button>
                 
-                        <button id="refreshPage" class="btn btn-warning m-2">
-                            <i class="fas fa-sync-alt"></i> Refresh Page
+                        <button id="refreshPage" class="btn btn-outline-primary m-2">
+                            <i class="fas fa-sync-alt"></i> Refresh
                         </button>
                     </div>
                     <p class="note note-primary">
-                        Welcome to VideoEngager's <strong>Click-to-Video</strong> demonstration. 
-                        <br>
-                        Configure your preferred Genesys Widget UI mode above, then click the <strong>Initialize Genesys Widget Library</strong> button.
-                        <br>
-                        Ensure to input the necessary <strong>Genesys Widget Environment Parameters</strong> below.
+                        To use the demo: Select Genesys Widget UI mode above, then click <strong>Load widget</strong>.
                     </p>
                 
                     <div class="accordion" id="accordionExample">
@@ -109,8 +111,8 @@
                             </h2>
                             <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-mdb-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    <p class="note note-info">
-                                        SmartVideo SDK Parameters
+                                    <p class="note note-danger">
+                                        Configure <strong>required</strong> SmartVideo SDK Parameters
                                         <a data-toggle="tooltip" title="Detailed guide on SmartVideo SDK Parameters" href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank">
                                             <i class="fas fa-question-circle"></i>
                                         </a>
@@ -209,13 +211,16 @@
                                     data-mdb-toggle="collapse" data-mdb-target="#jsonCollapse" aria-expanded="false"
                                     aria-controls="jsonCollapse">
                                     Javascript Configuration
+                                    <a data-toggle="tooltip" title="Genesys widget configuration" href="https://docs.genesys.com/Documentation/GWC/latest/Deployment/GWCConfig" target="_blank">
+                                        <i class="fas fa-question-circle"></i>
+                                    </a>
                                 </button>
                             </h2>
                             <div id="jsonCollapse" class="accordion-collapse collapse" aria-labelledby="jsonHeader"
                                 data-mdb-parent="#jsonAccordeon">
                                 <div class="accordion-body">
                                     <button id="downloadjson" class="btn btn-primary m-2">
-                                        File</button>
+                                        download configuration file</button>
                                     <pre>
                                         <code class="form-control" id="jsondump" class="language-javascript line-numbers" cols="80" rows="20" style=" font-size: small; "></code>
                                     </pre>
@@ -227,7 +232,10 @@
                                 <button disabled id="tampermonkeybutton" class="accordion-button collapsed"
                                     type="button" data-mdb-toggle="collapse" data-mdb-target="#tampermonkyCollapse"
                                     aria-expanded="false" aria-controls="tampermonkyCollapse">
-                                    TemperMonkey Script Download
+                                    TamperMonkey Script Download
+                                    <a data-toggle="tooltip" title="TamperMonkey Help" href="https://www.tampermonkey.net/" target="_blank">
+                                        <i class="fas fa-question-circle"></i>
+                                    </a>
                                 </button>
                             </h2>
                             <div id="tampermonkyCollapse" class="accordion-collapse collapse"
@@ -235,7 +243,7 @@
                                 <div class="accordion-body">
                                     <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey Script</button>
                                     <pre>
-                                        <code  class="language-javascript line-numbers" class="form-control" id="tempermonkeydump" cols="80" rows="20" style=" font-size: small; "></code>
+                                        <code class="language-javascript line-numbers" class="form-control" id="tampermonkeydump" cols="80" rows="20" style=" font-size: small; "></code>
                                       </pre>
                                 </div>
                             </div>

@@ -399,6 +399,7 @@ class VideoEngager {
         // authenticate
         QuerySelector('#cx_form_callback_phone_number').value = window._genesys.widgets.videoengager.dialCountryCode || '';
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
+          oVideoEngager.publish('error', e);
           if (e.data.responseJSON && e.data.responseJSON.message) {
             if (e.data.responseJSON.message === 'A caller id number cannot be parsed as a phone address') {
               QuerySelector('#cx_callback_information').innerText = i18n.PhoneNumberError;

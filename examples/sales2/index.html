@@ -119,18 +119,18 @@
                                     </p>
                                     <div class="form-outline">
                                         <input type="text" id="targetAddress" class="form-control" data-mdb-showcounter="false" required/>
-                                        <label class="form-label" for="targetAddress">Agent Queue Name</label>
+                                        <label class="form-label" for="targetAddress">Genesys Cloud Queue Name</label>
                                     </div>
                                     <div class="form-text pb-2">
-                                        Designate the name of the PureCloud agent's queue. Agents should be set to "On Queue" based on this input.
+                                        The name of an ACD queue in the Genesys Cloud organization.
                                     </div>
                 
                                     <div class="form-outline">
                                         <input type="text" id="orgGuid" class="form-control" data-mdb-showcounter="false" required />
-                                        <label class="form-label" for="orgGuid">Organization ID</label>
+                                        <label class="form-label" for="orgGuid">Genesys Cloud Organization ID</label>
                                     </div>
                                     <div class="form-text pb-2">
-                                        Navigate to PureCloud's Admin section: Admin > Account Settings > Organization Settings > Organization Details (tab) > Advanced > Organization ID to locate your Organization ID.
+                                        Navigate to Genesys Cloud Admin section: Admin > Account Settings > Organization Settings > Organization Details (tab) > Advanced > Organization ID to locate your Organization ID.
                                     </div>
                 
                                     <div class="form-outline">
@@ -138,7 +138,7 @@
                                         <label class="form-label" for="deploymentKey">Deployment Key</label>
                                     </div>
                                     <div class="form-text pb-2">
-                                        Find your Deployment Key by navigating in PureCloud to: Admin > Contact Center > Widgets > Deployment Key (column).
+                                         A valid Widget Deployment. Find your Deployment Key by navigating in Genesys Cloud to: Admin > Contact Center > Widgets > Deployment Key (column).
                                     </div>
                 
                                     <div class="form-outline">
@@ -146,7 +146,7 @@
                                         <label class="form-label" for="tenantId">Tenant ID</label>
                                     </div>
                                     <div class="form-text pb-2">
-                                        Retrieve your Tenant ID by selecting: Apps > SmartVideo_Settings > Tenant ID.
+                                        SmartVideo tenant. Retrieve your Tenant ID by selecting: Apps > SmartVideo_Settings > Tenant ID.
                                     </div>
                 
                                     <div class="form-outline">
@@ -159,10 +159,10 @@
                                         Provide the full URL address for the VideoEngager Server.
                                     </div>
                 
-                                    <label for="dataURL">Select Genesys Environment Region</label>
+                                    <label class="form-label" for="dataURL">Genesys Cloud Region</label>
                                     <select class="form-select" name="dataURL" id="dataURL"></select>
                                     <div class="form-text pb-2">
-                                        Designate the appropriate PureCloud region for your setup.
+                                        Choose the region for your Genesys Cloud organization.
                                     </div>
                 
                                     <div id="confButtons">

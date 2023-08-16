@@ -1,4 +1,4 @@
-/* global XMLHttpRequest CXBus mdb console $ bootstrap */
+/* global XMLHttpRequest CXBus mdb console $ bootstrap introJs */
 const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
 const videoengagerWidgetCDN = '/examples/sales2/videoengager.widget.js';
 const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
@@ -55,25 +55,21 @@ const validateInputsFormat = function () {
 };
 
 function checkInputs () {
-  const inputs = document.querySelectorAll('.form-control');
+  const inputs = document.querySelectorAll('input.form-control,#dataURL');
   const button = document.getElementById('loadGenesysLib');
 
   let allInputsFilled = true;
+
   inputs.forEach(input => {
-    if (input.value === '') {
+    if (input.value.trim() === '') {
+      input.classList.add('input-error');
       allInputsFilled = false;
+    } else {
+      input.classList.remove('input-error');
     }
   });
-  const dataURLDropdown = document.getElementById('dataURL');
-  if (dataURLDropdown.value === '') {
-    allInputsFilled = false;
-  }
 
-  if (allInputsFilled) {
-    button.removeAttribute('disabled');
-  } else {
-    button.setAttribute('disabled', true);
-  }
+  button.disabled = !allInputsFilled;
 }
 
 /** *  MAIN FUNCTION * **/
@@ -114,6 +110,11 @@ document.addEventListener('DOMContentLoaded', async function (e) {
       return;
     }
 
+    // disable all inputs
+    document.querySelectorAll('input.form-control,#dataURL').forEach(input => {
+      input.setAttribute('disabled', true);
+    });
+
     const uimode = document.querySelector('input[name="ui_mode"]:checked').value;
     // apply demo mode configurations
     await loadJS('./js/' + uimode + '.config.js');
@@ -133,11 +134,11 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
     document.querySelector('#downloadjson').addEventListener('click', async function (e) {
       const content = document.getElementById('jsondump').textContent || document.getElementById('jsondump').innerText;
-      download('jsonScript.js', content);
+      download(new Date().getTime() + 'widgetconfig.js', content);
     });
     document.querySelector('#downloadtamper').addEventListener('click', async function (e) {
-      const content = document.getElementById('tempermonkeydump').textContent || document.getElementById('tempermonkeydump').innerText;
-      download('tampermonkey.js', content);
+      const content = document.getElementById('tampermonkeydump').textContent || document.getElementById('tampermonkeydump').innerText;
+      download(new Date().getTime() + 'tampermonkey.js', content);
     });
   });
   document.getElementById('refreshPage').addEventListener('click', function () {
@@ -148,7 +149,40 @@ document.addEventListener('DOMContentLoaded', async function (e) {
   $('input.form-control,#dataURL').on('input', function () {
     checkInputs();
   });
-});
+
+  // introjs
+  introJs().setOptions({
+    steps: [
+        {
+            intro: "Welcome to the VideoEngager Genesys Widget Demo! Let's take a quick tour."
+        },
+        {
+            element: '#collapseOne',
+            intro: 'Meet the Configuration Section. Here, you can tailor your environment settings. Please note that all inputs are mandatory.'
+        },
+        {
+            element: '#ui_mode',
+            intro: 'Choose the UI mode that best fits your needs from this dropdown.'
+        },
+        {
+            element: '#loadGenesysLib',
+            intro: 'Once ready, click this button to initiate the Genesys Widgets Library.'
+        },
+        {
+            element: '#refreshPage',
+            intro: ' If you want to change ui mode and parameters, refresh the page first.'
+          },
+        {
+            element: '#saveConf',
+            intro: 'Don’t forget to save your configurations by clicking here!'
+        },
+        {
+            element: '#jsonAccordeon',
+            intro: 'Download javascript configuration to use it in your page or tanpermonkey script to use in your demo page'
+          }
+    ]
+}).start();
+
 
 /** *  HELPER FUNCTIONS * **/
 
@@ -356,7 +390,7 @@ const dumpTamper = function (uimode) {
     ${config}
     CXBus.loadPlugin('widgets-core');
   })();`;
-  const elem = document.getElementById('tempermonkeydump');
+  const elem = document.getElementById('tampermonkeydump');
   elem.innerHTML = template;
   window.hljs.highlightElement(elem);
 };

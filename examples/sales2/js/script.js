@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
       },
       {
         element: '#loadGenesysLib',
-        intro: 'Once ready, click this button to liad libraries the Genesys Widgets Library.'
+        intro: 'Once ready, click this button to load widget libraries and have a ready for a demo page.'
       },
       {
         element: '#refreshPage',
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
       {
         element: '#jsonAccordeon',
-        intro: 'Download javascript configuration to use it in your page or tanpermonkey script to use in your demo page'
+        intro: 'Download javascript configuration to use it in your page or Tampermonkey script to use in your demo page. For more information check help links.'
       }
     ]
   }).start();

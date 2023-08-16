@@ -150,32 +150,33 @@ document.addEventListener('DOMContentLoaded', async function (e) {
     checkInputs();
   });
 
-  // introjs
   introJs().setOptions({
+    dontShowAgain: true,
     steps: [
       {
         intro: "Welcome to the VideoEngager Genesys Widget Demo! Let's take a quick tour."
       },
       {
         element: '#collapseOne',
-        intro: 'Meet the Configuration Section. Here, you can tailor your environment settings. Please note that all inputs are mandatory.'
-      },
-      {
-        element: '#ui_mode',
-        intro: 'Choose the UI mode that best fits your needs from this dropdown.'
-      },
-      {
-        element: '#loadGenesysLib',
-        intro: 'Once ready, click this button to initiate the Genesys Widgets Library.'
-      },
-      {
-        element: '#refreshPage',
-        intro: ' If you want to change ui mode and parameters, refresh the page first.'
+        intro: 'Here is the the Configuration Section. All fields are required and are specific for your organisation. Check help for more information.'
       },
       {
         element: '#saveConf',
-        intro: 'Don’t forget to save your configurations by clicking here!'
+        intro: 'After you fill all the fields, save it locally, so that they can be reused next time you load the page.'
       },
+      {
+        element: '#ui_mode',
+        intro: 'Select the UI mode to be used in the demo.'
+      },
+      {
+        element: '#loadGenesysLib',
+        intro: 'Once ready, click this button to liad libraries the Genesys Widgets Library.'
+      },
+      {
+        element: '#refreshPage',
+        intro: ' If you want to change UI mode or parameters, refresh the page first.'
+      },
+
       {
         element: '#jsonAccordeon',
         intro: 'Download javascript configuration to use it in your page or tanpermonkey script to use in your demo page'

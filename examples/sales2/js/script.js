@@ -510,5 +510,10 @@ const setUIHandlers = function () {
     showToastError(e?.data?.errors[0]?.response?.responseJSON?.message);
   });
 
+  // custom videoengager error
+  CXBus.subscribe('VideoEngager.error', function (e) {
+    e?.data?.data?.responseJSON?.error && showToastError(e?.data?.data?.responseJSON?.error, 'Callback Error');
+  });
+
   setVideoCallStartedListener();
 };

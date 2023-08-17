@@ -236,6 +236,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = envConfig.en.veUrl;
     document.querySelector('#tenantId').value = envConfig.en.tenantId;
     document.querySelector('#dataURL').selectedIndex = genesysEnvList.indexOf(envConfig.en.dataURL.substring(12));
+    $('#collapseOne').removeClass('show');
   } else if (window.localStorage && window.localStorage.getItem('envConf') === 'true') {
     document.querySelector('#targetAddress').value = window.localStorage.getItem('targetAddress');
     document.querySelector('#orgGuid').value = window.localStorage.getItem('orgGuid');
@@ -243,6 +244,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = window.localStorage.getItem('veUrl');
     document.querySelector('#tenantId').value = window.localStorage.getItem('tenantId');
     document.querySelector('#dataURL').selectedIndex = window.localStorage.getItem('dataURL');
+    $('#collapseOne').removeClass('show');
   }
 
   // set listener for save and clear buttons
@@ -509,7 +511,7 @@ const setUIHandlers = function () {
   CXBus.subscribe('WebChatService.error', function (e) {
     // Log the error and continue
     console.error('WebService error' + JSON.stringify(e));
-    showToastError(e?.data?.errors[0]?.response?.responseJSON?.message);
+    e?.data?.errors[0]?.response?.responseJSON?.message && showToastError(e?.data?.errors[0]?.response?.responseJSON?.message);
   });
 
   // custom videoengager error

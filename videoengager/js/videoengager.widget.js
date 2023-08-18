@@ -259,6 +259,30 @@ class VideoEngager {
       }
     };
 
+    const checkCallEnd = async function (CXBus) {
+      const sessionData = await CXBus.command('WebChatService.getSessionData');
+      const conversationId = sessionData.conversationId;
+      const jwt = sessionData.jwt;
+      const memberId = sessionData.memberId;
+      const result = await fetch(window._genesys.widgets.webchat.transport.dataURL + '/api/v2/webchat/guest/conversations/' + conversationId + '/members', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + jwt
+        }
+      }).then(response => response.json());
+      const message = JSON.parse(result.data);
+
+      if (message.metadata && message.metadata.type === 'member-change') {
+        if (message.eventBody && message.eventBody.member && message.eventBody.member.state === 'DISCONNECTED') {
+          if (message.eventBody.member.id === memberId) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
     const startVideoEngager = function () {
       if (popupManager.popupExist()) {
         popupManager.focus();
@@ -746,7 +770,9 @@ const messageHandler = function (e) {
     // call not ended
   }
   if (e.data.type === 'callEnded') {
-    CXBus.command('VideoEngager.endCall');
+    if (checkCallEnd(CXBus)){
+      CXBus.command('VideoEngager.endCall');
+    }
   }
 };
 

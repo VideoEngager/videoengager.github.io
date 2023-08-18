@@ -54,6 +54,27 @@ const validateInputsFormat = function () {
   return invalidIds;
 };
 
+const checkCallEnd = async function () {
+  const sessionData = await CXBus.command('WebChatService.getSessionData');
+  const conversationId = sessionData.conversationId;
+  const jwt = sessionData.jwt;
+  // const memberId = sessionData.memberId;
+  const result = await fetch(window._genesys.widgets.webchat.transport.dataURL + '/api/v2/webchat/guest/conversations/' + conversationId + '/members', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + jwt
+    }
+  }).then(response => response.json());
+  // result is an array
+  for (const member of result.entities) {
+    if (member.role === 'AGENT' && member.state === 'DISCONNECTED') {
+      return true;
+    }
+  }
+  return false;
+};
+
 function checkInputs () {
   const inputs = document.querySelectorAll('input.form-control,#dataURL');
   const button = document.getElementById('loadGenesysLib');
@@ -402,15 +423,18 @@ const dumpTamper = function (uimode) {
 /**
  * listener will triggered when agent picked video call up
  */
-const setVideoCallStartedListener = function () {
-  const messageHandler = function (e) {
+const setVideoCallStartedListener = async function () {
+  const messageHandler = async function (e) {
     console.log('messageHandler', e.data);
     if (e.data && e.data.type === 'CallStarted') {
       console.log('video call started');
     }
     if (e.data && e.data.type === 'popupClosed') {
       console.log('video popup closed');
-      CXBus.command('WebChatService.endChat');
+      const callEnded = await checkCallEnd();
+      if (!callEnded) {
+        CXBus.command('WebChatService.endChat');
+      }
     }
   };
   if (window.addEventListener) {
@@ -511,7 +535,8 @@ const setUIHandlers = function () {
   CXBus.subscribe('WebChatService.error', function (e) {
     // Log the error and continue
     console.error('WebService error' + JSON.stringify(e));
-    e?.data?.errors[0]?.response?.responseJSON?.message && showToastError(e?.data?.errors[0]?.response?.responseJSON?.message);
+    const message = e?.data?.errors[0]?.response?.responseJSON?.message || JSON.stringify(e);
+    showToastError(message);
   });
 
   // custom videoengager error

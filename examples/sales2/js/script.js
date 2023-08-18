@@ -15,6 +15,19 @@ const genesysEnvList = [
   'apne2.pure.cloud',
   'mypurecloud.jp'
 ];
+
+const getLabelTextByInputId = function (inputId) {
+  const inputElem = document.getElementById(inputId);
+
+  if (!inputElem) {
+    return null;
+  }
+
+  const labelElem = document.querySelector(`label[for="${inputId}"]`);
+
+  return labelElem ? labelElem.textContent.trim() : null;
+};
+
 const requiredFieldsCheck = function () {
   let unfilledInputId;
 
@@ -24,7 +37,7 @@ const requiredFieldsCheck = function () {
     }
   });
 
-  return unfilledInputId;
+  return getLabelTextByInputId(unfilledInputId);
 };
 
 const validateInputsFormat = function () {
@@ -51,6 +64,10 @@ const validateInputsFormat = function () {
     invalidIds.push(veUrlElement.id);
   }
 
+  //  convert id to label text
+  invalidIds.forEach((id, index) => {
+    invalidIds[index] = getLabelTextByInputId(id);
+  });
   return invalidIds;
 };
 
@@ -122,12 +139,12 @@ document.addEventListener('DOMContentLoaded', async function (e) {
   document.querySelector('#loadGenesysLib').addEventListener('click', async function (e) {
     const unfilledInputId = requiredFieldsCheck();
     if (unfilledInputId) {
-      showToastError(`Field corresponding to selector #${unfilledInputId} is empty!`, 'Please fill all the inputs!');
+      showToastError(`Field corresponding to selector "${unfilledInputId}" is empty!`, 'Please fill all the inputs!');
       return;
     }
     const invalidIds = validateInputsFormat();
     if (invalidIds.length > 0) {
-      showToastError(`Field corresponding to selector #${invalidIds.join(', #')} is invalid!`, 'Please check the inputs!');
+      showToastError(`Field corresponding to selector "${invalidIds.join(', ')}" is invalid!`, 'Please check the inputs!');
       return;
     }
 
@@ -161,6 +178,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
       const content = document.getElementById('tampermonkeydump').textContent || document.getElementById('tampermonkeydump').innerText;
       download(new Date().getTime() + 'tampermonkey.js', content);
     });
+    showToastInfo('Genesys libraries loaded!', 'Success');
   });
   document.getElementById('refreshPage').addEventListener('click', function () {
     window.location.reload();
@@ -272,12 +290,12 @@ const fillEnvironmentParameters = async function () {
   document.querySelector('#saveConf').addEventListener('click', async function (e) {
     const unfilledInputId = requiredFieldsCheck();
     if (unfilledInputId) {
-      showToastError(`Field corresponding to selector #${unfilledInputId} is empty!`, 'Please fill all the inputs!');
+      showToastError(`Field corresponding to selector "${unfilledInputId}" is empty!`, 'Please fill all the inputs!');
       return;
     }
     const invalidIds = validateInputsFormat();
     if (invalidIds.length > 0) {
-      showToastError(`Field corresponding to selector #${invalidIds.join(', #')} is invalid!`, 'Please check the inputs!');
+      showToastError(`Field corresponding to selector "${invalidIds.join(', ')}" is invalid!`, 'Please check the inputs!');
       return;
     }
     window.localStorage.setItem('envConf', 'true');
@@ -287,6 +305,7 @@ const fillEnvironmentParameters = async function () {
     window.localStorage.setItem('veUrl', document.querySelector('#veUrl').value);
     window.localStorage.setItem('tenantId', document.querySelector('#tenantId').value);
     window.localStorage.setItem('dataURL', document.querySelector('#dataURL').selectedIndex);
+    showToastInfo("Configuration saved to local store! Saved configuration will appear on page load when you don't have URL environment parameter.", 'Success');
   });
 
   document.querySelector('#clearConf').addEventListener('click', async function (e) {
@@ -305,6 +324,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#tenantId').value = '';
     document.querySelector('#dataURL').selectedIndex = '-1';
     checkInputs();
+    showToastInfo('Configuration cleared from local store! You can now fill the fields and save them again.', 'Success');
   });
 
   document.querySelectorAll('.form-outline').forEach((formOutline) => {
@@ -455,6 +475,32 @@ const sanitizeInput = (selector) => {
 const showToastError = function (message, title = 'Error') {
   // Clone the template toast
   const toastTemplate = document.querySelector('#errorToast');
+  const toastClone = toastTemplate.cloneNode(true);
+
+  // Add the error message
+  toastClone.querySelector('.toast-body').textContent = message;
+  toastClone.querySelector('.me-auto').textContent = title;
+
+  // Append the cloned toast to the toast container
+  const toastContainer = document.querySelector('#toastContainer');
+  toastContainer.appendChild(toastClone);
+
+  // Use Bootstrap's toast API to show the toast
+  const toast = new bootstrap.Toast(toastClone);
+  toast.show();
+
+  // Remove the toast element from the DOM after it's hidden
+  toastClone.addEventListener('hidden.bs.toast', function () {
+    toastClone.remove();
+  });
+  // sctoll to top
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
+
+const showToastInfo = function (message, title = 'Info') {
+  // Clone the template toast
+  const toastTemplate = document.querySelector('#infoToast');
   const toastClone = toastTemplate.cloneNode(true);
 
   // Add the error message

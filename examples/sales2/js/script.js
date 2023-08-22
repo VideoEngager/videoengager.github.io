@@ -397,6 +397,18 @@ const dumpTamper = function (uimode) {
   window.hljs.highlightElement(elem);
 };
 
+let endcallDebounce = false;
+const debouncedAnswer = function () {
+  if (!endcallDebounce) {
+    console.log('Calling EndChat CXBUS Command');
+    CXBus.command('WebChatService.endChat');
+    endcallDebounce = true;
+    setTimeout(function () {
+      endcallDebounce = false;
+    }, 1000);
+  }
+};
+
 /**
  * listener will triggered when agent picked video call up
  */
@@ -408,7 +420,7 @@ const setVideoCallStartedListener = function () {
     }
     if (e.data && e.data.type === 'popupClosed') {
       console.log('video popup closed');
-      CXBus.command('WebChatService.endChat');
+      debouncedAnswer();
     }
   };
   if (window.addEventListener) {

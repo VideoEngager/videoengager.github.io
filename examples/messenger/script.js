@@ -104,7 +104,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('stopSession').disabled = false;
   }
 
-  async function stopSession () {
+  async function stopSession (sendMessage = true) {
+    await PromiseGenesys('command', 'MessagingService.clearSession');
     await PromiseGenesys('command', 'Database.update', {
       messaging: {
         customAttributes: {
@@ -112,26 +113,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
-    await PromiseGenesys('command', 'MessagingService.clearSession');
+    if (sendMessage) {
+      await PromiseGenesys('command', 'MessagingService.sendMessage', {
+        message: 'Remove Video Session'
+      });
+    }
+
     // await PromiseGenesys('command', 'Messenger.close');
     controller.stop();
-
     document.getElementById('stopSession').disabled = true;
   }
 
-  async function stopSessionButton () {
-    await PromiseGenesys('command', 'MessagingService.sendMessage', {
-      message: 'Remove Video Session'
-    });
-    stopSession();
-  }
-
   document.getElementById('startSession').addEventListener('click', startSession);
-  document.getElementById('stopSession').addEventListener('click', stopSessionButton);
+  document.getElementById('stopSession').addEventListener('click', stopSession);
 
   const messageHandler = function (e) {
     if (e.data.type === 'popupClosed') {
-      stopSession();
+      stopSession(false);
     }
     if (e.data.type === 'callEnded') {
       stopSession();

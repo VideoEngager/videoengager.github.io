@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <script type="text/javascript" src="VEController.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="limitations">
+        <h2>Limitations:</h2>
+        <ul>
+            <li><strong>Web Messenger must be loaded.</strong> If the Web Messenger hasn't fully loaded, messages cannot be sent.</li>
+            <li><strong>Cannot End Calls from the Visitor's Side:</strong> Currently, we lack the implementation to define and manage the visitor's ID and the state of the smartvideo. As a result, it's not possible for visitors to initiate a call and then cancel it. The agent is required to answer and subsequently end the call.</li>
+            <li>Messenger must be opened and loaded in order to send messages and custom attributes.</li>
+            <li>We cannot terminate the interaction from visitor side: We use the same interaction each time and we cannot remove the interaction we placed</li>
+        </ul>
+    </div>
+    <div id="message">Web Messenger Loading...</div>
+        <div id="videoEngager" style="display: none;">
+        <button type="button" id="startSession" disabled>Start Video</button>
+        <button type="button" id="stopSession" disabled>Stop Video</button>
+        <div>
+            <input type="radio" id="iframe" name="displayType" value="iframe" >
+            <label for="iframe">iframe</label><br>
+
+            <input type="radio" id="popup" name="displayType" value="popup" checked>
+            <label for="popup">popup</label><br>
+        </div>
+    </div>
+    <div id="iframeHolder"></div>
+</body>
+</html>

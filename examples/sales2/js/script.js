@@ -71,27 +71,6 @@ const validateInputsFormat = function () {
   return invalidIds;
 };
 
-const checkCallEnd = async function () {
-  const sessionData = await CXBus.command('WebChatService.getSessionData');
-  const conversationId = sessionData.conversationId;
-  const jwt = sessionData.jwt;
-  // const memberId = sessionData.memberId;
-  const result = await fetch(window._genesys.widgets.webchat.transport.dataURL + '/api/v2/webchat/guest/conversations/' + conversationId + '/members', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + jwt
-    }
-  }).then(response => response.json());
-  // result is an array
-  for (const member of result.entities) {
-    if (member.role === 'AGENT' && member.state === 'DISCONNECTED') {
-      return true;
-    }
-  }
-  return false;
-};
-
 function checkInputs () {
   const inputs = document.querySelectorAll('input.form-control,#dataURL');
   const button = document.getElementById('loadGenesysLib');
@@ -451,10 +430,7 @@ const setVideoCallStartedListener = async function () {
     }
     if (e.data && e.data.type === 'popupClosed') {
       console.log('video popup closed');
-      const callEnded = await checkCallEnd();
-      if (!callEnded) {
-        CXBus.command('WebChatService.endChat');
-      }
+      CXBus.command('WebChatService.endChat');
     }
   };
   if (window.addEventListener) {

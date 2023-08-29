@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     staging: {
       envUrl: 'https://apps.mypurecloud.de',
       environment: 'prod-euc1',
-      deploymentId: '15e68cb2-896f-432a-bc67-4baa6fa6635b',
+      deploymentId: '50bce9ca-111b-4372-87ff-5f98ae8849e6',
       veUrl: 'https://staging.leadsecure.com',
       tenantId: 'oIiTR2XQIkb7p0ub'
     },
@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', function () {
     ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
   })(window, 'Genesys', config[env].envUrl + '/genesys-bootstrap/genesys.min.js', {
     environment: config[env].environment,
-    deploymentId: config[env].deploymentId
+    deploymentId: config[env].deploymentId,
+    debug: true
   });
 
   function PromiseGenesys (command, action, payload) {
@@ -63,6 +64,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
   Genesys('subscribe', 'Messenger.error', function () {
     document.getElementById('message').innerHTML = 'Messenger is not ready';
+  });
+
+  Genesys('subscribe', 'MessagingService.conversationDisconnected', function ({ data }) {
+    console.log('DICONNECTED', data);
+    stopSession(false);
+  });
+
+  Genesys('subscribe', 'MessagingService.error', function ({ data }) {
+    console.log('error', data);
+  });
+
+  Genesys('subscribe', 'MessagingService.conversationCleared', function ({ data }) {
+    console.log('conversationCleared', data);
+  });
+
+  Genesys('subscribe', 'MessagingService.readOnlyConversation', function ({ data }) {
+    console.log('readOnlyConversation', data);
+  });
+
+  Genesys('subscribe', 'MessagingService.reconnected', function () {
+    console.log('reconnected');
+  });
+
+  Genesys('subscribe', 'MessagingService.reconnecting', function () {
+    console.log('reconnecting');
+  });
+
+  Genesys('subscribe', 'MessagingService.offline', function () {
+    console.log('offline');
+  });
+  Genesys('subscribe', 'MessagingService.sessionCleared', function () {
+    console.log('sessionCleared');
+  });
+
+  Genesys('subscribe', 'MessagingService.restored', function ({ data }) {
+    console.log('restored', data);
+  });
+
+  Genesys('subscribe', 'MessagingService.historyComplete', function () {
+    console.log('historyComplete');
+  });
+
+  Genesys('subscribe', 'MessagingService.messagesUpdated', function ({ data }) {
+    console.log('messagesUpdated', data);
   });
 
   async function startSession () {
@@ -105,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function stopSession (sendMessage = true) {
-    await PromiseGenesys('command', 'MessagingService.clearSession');
+    // await PromiseGenesys('command', 'MessagingService.clearSession');
     await PromiseGenesys('command', 'Database.update', {
       messaging: {
         customAttributes: {

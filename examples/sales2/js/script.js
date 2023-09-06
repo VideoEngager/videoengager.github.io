@@ -244,7 +244,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#tenantId').value = window.localStorage.getItem('tenantId');
     document.querySelector('#dataURL').selectedIndex = window.localStorage.getItem('dataURL');
   }
-
+  checkInputs();
   // set listener for save and clear buttons
   document.querySelector('#saveConf').addEventListener('click', async function (e) {
     const unfilledInputId = requiredFieldsCheck();

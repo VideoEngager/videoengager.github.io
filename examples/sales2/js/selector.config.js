@@ -119,14 +119,14 @@ window._genesys.widgets = {
     ]
   },
   calendar: {
-    showAvailability: false,
+    showAvailability: true,
     numberOfDays: 7,
-    hideUnavailableTimeSlots: false,
+    hideUnavailableTimeSlots: true,
     calendarHours: {
-      interval: 60,
+      interval: 20,
       allDay: {
-        openTime: '08:00',
-        closeTime: '19:00'
+        openTime: '09:00',
+        closeTime: '17:00'
       }
     }
   },

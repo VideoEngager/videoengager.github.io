@@ -103,13 +103,13 @@ window._genesys.widgets = {
     ]
   },
   calendar: {
-    showAvailability: false,
-    numberOfDays: 5,
-    hideUnavailableTimeSlots: false,
+    showAvailability: true,
+    numberOfDays: 7,
+    hideUnavailableTimeSlots: true,
     calendarHours: {
-      interval: 10,
+      interval: 20,
       allDay: {
-        openTime: '09:00',
+        openTime: '00:00',
         closeTime: '23:59'
       }
     }

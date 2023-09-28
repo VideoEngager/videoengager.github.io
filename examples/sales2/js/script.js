@@ -1,6 +1,6 @@
 /* global XMLHttpRequest CXBus mdb console $ bootstrap introJs */
 const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
-const videoengagerWidgetCDN = '/examples/sales2/videoengager.widget.js';
+const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/videoengager.widget.min.js';
 const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
 const genesysEnvList = [
   'mypurecloud.com.au',

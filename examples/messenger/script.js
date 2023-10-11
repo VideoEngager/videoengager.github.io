@@ -26,7 +26,12 @@ const config = {
 document.addEventListener('DOMContentLoaded', function () {
   const urlParams = new URLSearchParams(window.location.search);
   const env = urlParams.get('env') || 'staging';
-  const { envUrl, environment, deploymentId, veUrl, tenantId } = config[env];
+  let { envUrl, environment, deploymentId, veUrl, tenantId } = config[env];
+  // update config parameters from environment variables
+  environment = urlParams.get('environment') || environment;
+  deploymentId = urlParams.get('deploymentId') || deploymentId;
+  tenantId = urlParams.get('tenantId') || tenantId;
+
   let controller;
 
   // Initialize Genesys

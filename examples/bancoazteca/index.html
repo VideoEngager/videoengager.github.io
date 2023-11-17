@@ -1,0 +1,239 @@
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="IE=11.0000" http-equiv="X-UA-Compatible">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Demo</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://videome.leadsecure.com/static/assets/libs/css/bootstrap.min.css">
+    <link href="https://videome.leadsecure.com/static/assets/libs/videoengager/css/site.css" rel="stylesheet">
+  <script>
+    
+  const globals = {
+    window: window,
+    document: document,
+    node: "tdWebchat",
+    props:{ flowId: "2dc02f8b092b4d2aa9fe66b711f94947", accountId: "", region: "td-us-1" },
+    configs: {emojiPicker: false, enableUserInput: true }
+  };
+  const getGuid = function() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+    }
+    return ( s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4() );
+  };
+  const stop = function() {
+    chatIframe.innerHTML = '';
+  };
+  const start = function(interactionId, veUrl, flowId) {
+    const iframeInstance = document.createElement('iframe');
+    iframeInstance.width = "100%";
+    iframeInstance.height = "100%";
+    interactionId = interactionId ? interactionId : getGuid();
+    const homeURL = veUrl + '/static/assets/integrations/td/';
+    iframeInstance.src = homeURL + 'td_chat_runner.html' + '?interactionId='+interactionId+'&flowId='+flowId;
+    chatIframe.insertBefore(iframeInstance, chatIframe.firstChild);
+    chatIframe.style.display = 'block';
+    chatIframe.style.background = 'gray';
+  };
+
+    let iframeHolder = null;
+    window.addEventListener("load", function () {
+        const chatIframe = document.getElementById('chatIframe');
+        iframeHolder = document.getElementById("myVideoHolder");
+        let el = document.getElementById('divdeEspera');
+        el.style.display = 'none';
+
+        el = document.getElementById('myVideoHolder');
+        el.style.display = 'none';
+        
+        let startvideo = document.getElementById('startVideoCall');
+        startvideo.style.display = 'block';
+        startvideo.onclick = function () {
+            if (!interactionId) {
+                interactionId = getGuid();
+            }
+            document.getElementById('startVideoCall').style.display = 'none';
+            startVideoChat(interactionId);	
+        }
+        el = document.getElementById('closeVideoButton');
+        el.onclick = function () {
+            closeIframeOrPopup();
+            document.getElementById('startVideoCall').style.display = 'block';
+        }
+    });
+
+    var startVideoChat = function(interactionId) {
+        start(interactionId, parameters[env].videoengagerUrl, parameters[env].flowId);
+        const veUrl = parameters[env].videoengagerUrl;
+        const TENANT_ID = parameters[env].tennantId;
+        console.log("InteractionId :", interactionId);
+        var left = (screen.width / 2) - (770 / 2);
+        var top = (screen.height / 2) - (450 / 2);
+        var str = {
+            "video_on": true, 
+            "transferId": interactionId, 
+            "hideChat": true, 
+            "type": "initial", 
+            "defaultGroup": "floor", 
+            "view_widget": "4", 
+            "offline": true, 
+            "aa": true, 
+            "skip_private": true,
+            "inichat": "false"
+        };
+
+        var encodedString = window.btoa(JSON.stringify(str));
+        var homeURL = veUrl + '/static/';
+        var url = homeURL + 'popup.html?tennantId=' + window.btoa(TENANT_ID) + 
+            '&params=' + encodedString;
+        
+
+        iframeInstance = document.createElement('iframe');
+        iframeInstance.width = "100%"
+        iframeInstance.height = "100%"
+        iframeInstance.id = "videoengageriframe"
+        iframeInstance.allow = "microphone; camera"
+        iframeInstance.src = url;
+        iframeHolder.insertBefore(iframeInstance, iframeHolder.firstChild);
+        iframeHolder.style.display = 'block';
+    };
+    var closeIframeOrPopup = function(){
+        stop();
+        interactionId = null;
+        if (iframeHolder.getElementsByTagName('iframe')[0]) {
+            iframeHolder.removeChild(iframeHolder.getElementsByTagName('iframe')[0]);
+        }
+        iframeHolder.style.display = 'none';
+
+    }
+</script>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const env = urlParams.get('env') || 'dev';
+let interactionId = urlParams.get('interactionId') || getGuid();
+
+    const parameters = {
+        staging: {
+          videoengagerUrl: 'https://staging.leadsecure.com',
+          tennantId: 'oIiTR2XQIkb7p0ub',
+          environment: 'talkdesk',
+          flowId: '7aa2278ea4714e73be0dc1090a70c292'
+        },
+        dev: {
+          videoengagerUrl: 'https://dev.videoengager.com',
+          tennantId: 'rSWsoSswRy9yCzOI',
+          environment: 'talkdesk',
+          flowId: '2dc02f8b092b4d2aa9fe66b711f94947'
+
+        },
+        prod: {
+          videoengagerUrl: 'https://videome.leadsecure.com',
+          tennantId: 'Xh6at3QenNopCTcP',
+          environment: 'talkdesk',
+          flowId: 'c2a25a3a17fa43ba9c28aab62c9862fd'
+        },
+        local: {
+          videoengagerUrl: 'http://localhost:9000',
+          tennantId: 'test_tenant',
+          environment: 'talkdesk'
+        }
+      };
+
+// development
+</script>
+<style>
+    .fas {
+        color: white;
+    margin: -15px;
+    }
+
+        .form-outline,
+        .form-select {
+            width: 350px;
+        }
+    .fixed {
+        position: fixed;
+        left: 2.1875rem;
+        bottom: 2.1875rem;
+        z-index: 1030;
+        display: flex;
+        flex-flow: column-reverse nowrap;
+        align-items: center;
+        padding: 0.9375rem 20px 20px;
+        margin-bottom: 0;
+        height: auto;
+        overflow: hidden;
+    }
+</style>
+</head>
+
+<body style="
+background: url(./background.png);
+background-size: cover;
+">
+    <div id="myVideoHolder">
+        <div id="closeVideoButtonHolder">
+            <img class="button" id="closeVideoButton" src="https://videome.leadsecure.com/static/assets/libs/videoengager/img/close.png">
+        </div>
+    </div>
+    <div id="startStopButtons">
+        <div class="fixed">
+            <a id="startVideoCall" class="btn btn-primary btn-floating btn-lg"
+                style="background-color: #3659f4; display: none;">
+                <i class="fas fa-video"></i>
+            </a>
+
+            <a id="stopVideoCall" class="btn btn-primary btn-floating btn-lg"
+                style="background-color: #3662f4; display: none !important;">
+                <i class="fas fa-stop"></i>
+            </a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="align-items-center justify-content-center">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+                        <div class="roundElement textoBlanco botonVideoLlamada" id="divdeEspera"
+                            style="width: 300px; height: 140px; LINE-HEIGHT:10px;">
+                            <img id="imgEspera" src="https://videome.leadsecure.com/static/assets/libs/videoengager/img/ajax-loader.gif"
+                                style="top: 60px; position:relative;">
+                        </div>
+                    
+    </div>
+    <div class="container body-content">
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <!-- <label for="displayName">Display Name</label> -->
+                    <input type="hidden" class="form-control" id="displayName" placeholder="Display Name"
+                        value="Customer 4">
+                </div>
+                <div id="error-holder" class="alert alert-danger" role="alert" style="display: none;"></div>
+                <button id="clickButton" style="display:none ;">Hidden Video Button</button>
+            </div>
+        </div>
+    </div>
+    <div id="chatIframe"></div>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js"></script>
+
+    <script src="https://videome.leadsecure.com/static/assets/libs/js/popper.min.js"></script>
+
+</body>
+
+</html>

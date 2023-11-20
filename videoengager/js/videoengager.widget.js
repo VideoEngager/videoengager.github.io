@@ -680,6 +680,7 @@ class VideoEngager {
         .done(function (e) {
           console.log('WebChatService started Chat');
         }).fail(function (e) {
+          window.dispatchEvent(new CustomEvent('VideoEngagerError', { message: 'WebChatService failed to start chat', error: e }));
           console.error('WebChatService failed to start chat: ', e);
           closeIframeOrPopup();
         });

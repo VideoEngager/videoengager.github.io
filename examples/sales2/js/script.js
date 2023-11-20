@@ -345,7 +345,42 @@ const dumpTamper = function (uimode) {
     CXBus.subscribe('WebChatService.restored', function () {
       $('#startVideoCall').removeClass('spinner');
     });
-    document.body.appendChild(fixedButton);`;
+    document.body.appendChild(fixedButton);
+    const setVideoCallStartedListener = function () {
+      let endcallDebounce = false;
+      const debouncedAnswer = function () {
+        if (!endcallDebounce) {
+          console.log('Calling EndChat CXBUS Command');
+          CXBus.command('WebChatService.endChat');
+          endcallDebounce = true;
+          setTimeout(function () {
+            endcallDebounce = false;
+          }, 1000);
+        }
+      };
+      const messageHandler = function (e) {
+        console.log('messageHandler', e.data);
+        if (e.data && e.data.type === 'CallStarted') {
+          console.log('video call started');
+        }
+        if (e.data && e.data.type === 'popupClosed') {
+          console.log('video popup closed');
+          debouncedAnswer();
+        }
+      };
+      if (window.addEventListener) {
+        window.addEventListener('message', messageHandler, false);
+        window.addEventListener('VideoEngagerError', debouncedAnswer);
+      } else {
+        window.attachEvent('onmessage', messageHandler);
+        window.attachEvent('VideoEngagerError', debouncedAnswer);
+      }
+      window.addEventListener('VideoEngagerError', function () {
+        debouncedAnswer();
+      })
+    };
+    setVideoCallStartedListener();
+    `;
   }
   const template = `// ==UserScript==
   // @name         Videoengager Tampermonkey Script

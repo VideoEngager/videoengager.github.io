@@ -16,7 +16,7 @@
     <link href="https://unpkg.com/intro.js/introjs.css" rel="stylesheet" />
 
     <script type="text/javascript" src="./js/script.js"></script>
-
+    <link rel="stylesheet" href="./style.css" />
     <style>
     .github-btn-container {
         display: flex;
@@ -183,18 +183,10 @@
                 <div id="startStopButtons">
                     <!-- singlebutton mode button -->
                     <div class="fixed">
-                        <a id="startVideoCall" class="btn btn-primary btn-floating btn-lg"
-                            style="background-color: #3659f4; display: none;">
-                            <i class="fas fa-video"></i>
-                        </a>
-
-                        <a id="stopVideoCall" class="btn btn-primary btn-floating btn-lg"
-                            style="background-color: #3662f4; display: none !important;">
-                            <i class="fas fa-stop"></i>
-                        </a>
+                        <div  id="startVideoCall" class="ve-floating-button" style="display: none;"></div>
+                        <div  id="stopVideoCall" class="ve-floating-button" style="display: none !important;"></div>
                     </div>
                 </div>
-
                 <p class="note note-primary">
                     Please use your Genesys Cloud and VideoEngager <strong>configuration parameters</strong> here.
                 </p>

@@ -328,12 +328,23 @@ const dumpTamper = function (uimode) {
   ` + config;
   let singlebutton = '';
   if (uimode === 'singlebutton') {
-    singlebutton = `    // insert fixed button
-    var fixedButton = document.createElement('button');
-    fixedButton.style.cssText = 'position: fixed;width: 100px;height: 50px;z-index: 100;bottom: 10px;right: 10px;';
+    singlebutton = `
+    var fixedButton = document.createElement('div');
     fixedButton.id = "startVideoCall";
-    fixedButton.innerText = "Start Video Call";
-    fixedButton.addEventListener("click", function () {CXBus.command('VideoEngager.startVideoEngager');});
+    fixedButton.className = "ve-floating-button";
+    fixedButton.addEventListener('click', function () {
+      CXBus.command('VideoEngager.startVideoEngager');
+      $('#startVideoCall').addClass('spinner');
+    });
+    CXBus.subscribe('WebChatService.ended', function () {
+      $('#startVideoCall').removeClass('spinner');
+    });
+    CXBus.subscribe('WebChatService.started', function () {
+      $('#startVideoCall').addClass('spinner');
+    });
+    CXBus.subscribe('WebChatService.restored', function () {
+      $('#startVideoCall').removeClass('spinner');
+    });
     document.body.appendChild(fixedButton);`;
   }
   const template = `// ==UserScript==
@@ -373,15 +384,15 @@ const dumpTamper = function (uimode) {
       });
     };
 
-    ${singlebutton}
-
     const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
     const videoengagerWidget = 'https://videoengager.github.io/videoengager/js/videoengager.widget.js';
     const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
-  
+    const buttonStyle = 'https://videoengager.github.io/examples/sales2/style.css';
+
     // styling files are loaded
     loadCSS('https://videoengager.github.io/widgets.min.css');
     loadCSS(videoengagerWidgetCSSCDN);
+    loadCSS(buttonStyle);
     // videoengager library
     // 1- load cxbus
     await loadJS(widgetBaseUrl + 'cxbus.min.js');
@@ -391,6 +402,7 @@ const dumpTamper = function (uimode) {
     // 3- load config
     ${config}
     CXBus.loadPlugin('widgets-core');
+    ${singlebutton}
   })();`;
   const elem = document.getElementById('tampermonkeydump');
   elem.innerHTML = template;
@@ -493,7 +505,7 @@ const setUIHandlers = function () {
   document.querySelector('#startVideoCall').addEventListener('click', function () {
     CXBus.command('VideoEngager.startVideoEngager');
     // document.getElementById('stopVideoCall').style.display = 'block';
-    $('.fa-video').addClass('fa-spin');
+    $('#startVideoCall').addClass('spinner');
   });
   document.querySelector('#stopVideoCall').addEventListener('click', function () {
     CXBus.command('VideoEngager.endCall');
@@ -502,20 +514,20 @@ const setUIHandlers = function () {
   CXBus.subscribe('WebChatService.ended', function () {
     console.log('Interaction Ended');
     document.getElementById('stopVideoCall').style.display = 'none';
-    $('.fa-video').removeClass('fa-spin');
+    $('#startVideoCall').removeClass('spinner');
   });
 
   CXBus.subscribe('WebChatService.started', function () {
     console.log('Interaction started');
     // document.getElementById('stopVideoCall').style.display = 'block';
-    $('.fa-video').addClass('fa-spin');
+    $('#startVideoCall').addClass('spinner');
   });
 
   CXBus.subscribe('WebChatService.restored', function (e) {
     console.error('Chat restored, cleaning it' + JSON.stringify(e));
     CXBus.command('WebChatService.endChat');
     document.getElementById('stopVideoCall').style.display = 'none';
-    $('.fa-video').removeClass('fa-spin');
+    $('#startVideoCall').removeClass('spinner');
   });
 
   CXBus.subscribe('WebChatService.error', function (e) {

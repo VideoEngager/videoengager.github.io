@@ -614,8 +614,10 @@ class VideoEngager {
           submitButton = i18n.ChatFormSubmitAudio;
         }
       }
-      document.getElementsByClassName('cx-title')[0].innerHTML = title;
-      document.getElementsByClassName('cx-submit')[0].innerHTML = submitButton;
+      const cxTitleElement = document.querySelector('.cx-title');
+      const cxSubmitElement = document.querySelector('.cx-submit');
+      cxTitleElement && (cxTitleElement.innerHTML = title);
+      cxSubmitElement && (cxSubmitElement.innerHTML = submitButton);
     };
 
     // terminate call

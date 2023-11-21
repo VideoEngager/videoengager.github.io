@@ -1,0 +1,115 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content="IE=11.0000" http-equiv="X-UA-Compatible">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liverpool Cobrowse & Click2Video Demo</title>
+    <link href="https://videome.leadsecure.com/static/assets/libs/videoengager/css/site.css" rel="stylesheet">
+<style>
+.ve-floating-button {
+    width: 2.812rem;
+    height: 2.812rem;
+    background-color: #3659f4;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 1000;
+    margin: 5px;
+}
+
+.ve-floating-button-before::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-image: url('https://videoengager.github.io/examples/sales2/camera.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: invert(100%);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.ve-floating-button-cobrowse-before::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-image: url('https://videome.leadsecure.com/static/assets/libs/cobrowse/cobrowse.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: invert(100%);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#ve-floating-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #cdcdcd;
+    padding: 5px;
+    border-radius: 10px;
+    z-index: 1000;
+}
+#myVideoHolder {
+    display: block;
+    left: 0;
+    top: 0;
+    width: calc(100% - 4px);
+    padding-bottom: 50px;
+    background: gray;
+    height: calc(100% - 50px);
+}
+</style>
+<script src="./script.js"></script>
+</head>
+<body style="background: url(./background.png); background-size: cover;">
+    <div id="myVideoHolder">
+        <div id="closeVideoButtonHolder">
+            <img class="button" id="closeVideoButton" src="https://videome.leadsecure.com/static/assets/libs/videoengager/img/close.png">
+        </div>
+    </div>
+    <div id="ve-floating-button" class="floating-btn" style="z-index:1000">
+        <div id="startVideoCall" class="ve-floating-button ve-floating-button-before" style="display: none;"></div>
+        <div class="ve-floating-button ve-floating-button-cobrowse-before" alt="Cobrowsew Icon" class="icon" id="cobrowseIcon"></div>
+        <div class="expandable-content" style="display: none;">
+            <button id="stop-cobrowse">Stop Cobrowse</button>
+            <div id="interaction-id"></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="roundElement textoBlanco botonVideoLlamada" id="divdeEspera"
+            style="width: 300px; height: 140px; LINE-HEIGHT:10px;">
+            <img id="imgEspera" src="https://videome.leadsecure.com/static/assets/libs/videoengager/img/ajax-loader.gif"
+                style="top: 60px; position:relative;">
+        </div>
+    </div>
+    <div class="container body-content">
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <input type="hidden" class="form-control" id="displayName" placeholder="Display Name"
+                        value="Customer 4">
+                </div>
+                <div id="error-holder" class="alert alert-danger" role="alert" style="display: none;"></div>
+                <button id="clickButton" style="display:none ;">Hidden Video Button</button>
+            </div>
+        </div>
+    </div>
+    <div id="chatIframe"></div>
+</body>
+</html>

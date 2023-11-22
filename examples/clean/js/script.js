@@ -3,7 +3,7 @@ const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
 const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/1.02/videoengager.widget.js';
 const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
 
-const genesysEnvList = [
+let genesysEnvList = [
   'mypurecloud.com.au',
   'mypurecloud.com',
   'use2.us-gov-pure.cloud',
@@ -17,10 +17,51 @@ const genesysEnvList = [
   'mypurecloud.jp'
 ];
 
+/**
+ * Asynchronously retrieves the environment configuration for Genesys Cloud.
+ * Fetches a JavaScript file, parses its content, and extracts the necessary data.
+ * @returns {Promise<void>}
+ */
+async function retrieveEnvironmentList () {
+  try {
+    // Check if eval is available in the environment
+    if (typeof eval === 'undefined') {
+      throw new Error('eval is not defined');
+    }
+
+    // Fetch the JavaScript file from the CDN
+    const response = await fetch('https://cdn.jsdelivr.net/gh/MyPureCloud/platform-client-sdk-javascript@latest/build/src/purecloud-platform-client-v2/PureCloudRegionHosts.js');
+
+    // Check if the response is successful
+    if (!response.ok) {
+      throw new Error('Failed to retrieve Genesys object');
+    }
+
+    // Retrieve the text content of the response
+    const text = await response.text();
+
+    // Format the text to be a valid JavaScript object string
+    const objectString = text.replace('export default', '').replace(';', '');
+
+    // Use eval to parse the string into a JavaScript object
+    const parsedData = eval(`"use strict";(${objectString})`);
+
+    // Extract the values from the parsed object
+    const newData = Object.values(parsedData);
+
+    // Assign the extracted data to a global variable (consider avoiding global variables)
+    genesysEnvList = newData;
+  } catch (e) {
+    console.error('Error retrieving Genesys environment object', e);
+  }
+}
+
 /** *  MAIN FUNCTION * **/
 
 // on document ready
 document.addEventListener('DOMContentLoaded', async function (e) {
+  // [UI] fill environment dropdown
+  await retrieveEnvironmentList();
   // [UI] fill genesys url dropdown
   fillDataURLDropdown();
   // [UI] set quick environment configuration

@@ -56,7 +56,7 @@
 }
 
 #stopVideoCall::before {
-  background-image: url('https://uxwing.com/wp-content/themes/uxwing/download/checkmark-cross/close-icon.png');
+  background-image: url('https://videoengager.github.io/videoengager/uilib/close-icon.png');
 }
 
 /* spin animation */
@@ -93,7 +93,7 @@
 }
 
 #ve-loading-icon {
-    background-image: url(http://localhost/videoengager/img/ajax-loader.gif);
+    background-image: url(https://videoengager.github.io/videoengager/img/ajax-loader.gif);
     margin: 10px;
     background-repeat: no-repeat;
     width: 33px;
@@ -106,7 +106,7 @@
 }
 
 .copy-btn {
-    background-image: url(http://localhost/videoengager/uilib/copyButton.png);
+    background-image: url(https://videoengager.github.io/videoengager/uilib/copyButton.png);
     background-size: contain;
     color: white;
     padding: 1px 10px;

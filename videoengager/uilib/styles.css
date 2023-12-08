@@ -1,0 +1,272 @@
+.ve-floating-button {
+  width: 2.812rem;
+  height: 2.812rem;
+  background-color: #3659f4;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  z-index: 1000;
+  margin: 5px;
+}
+
+.ve-floating-button-before::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-image: url('https://videoengager.github.io/examples/sales2/camera.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: invert(100%);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.ve-floating-button-cobrowse-before::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-image: url('https://videome.leadsecure.com/static/assets/libs/cobrowse/cobrowse.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: invert(100%);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#ve-floating-button {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #cdcdcd;
+  padding: 5px;
+  border-radius: 10px;
+  z-index: 1000;
+}
+
+#stopVideoCall::before {
+  background-image: url('https://uxwing.com/wp-content/themes/uxwing/download/checkmark-cross/close-icon.png');
+}
+
+/* spin animation */
+@keyframes ve-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ve-spinner {
+  animation: ve-spin 2s linear infinite;
+}
+
+/*interaction id */
+.interaction-container {
+    position: relative;
+    width: 150px; /* Initial width */
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    padding: 10px;
+    transition: width 0.3s ease-in-out;
+}
+
+#interaction-id {
+    font-size: 15px;
+    color: red;
+    font-family: inherit;
+    font-weight: bold;
+    width: 60px;
+}
+
+.wrapper-pin {
+    margin-top: 5px;
+}
+
+#ve-loading-icon {
+    background-image: url(http://localhost/videoengager/img/ajax-loader.gif);
+    margin: 10px;
+    background-repeat: no-repeat;
+    width: 33px;
+    height: 33px;
+    transition: transform 0.1s, opacity 0.1s;
+}
+
+#interaction-type {
+    margin-right: 5px;
+}
+
+.copy-btn {
+    background-image: url(http://localhost/videoengager/uilib/copyButton.png);
+    background-size: contain;
+    color: white;
+    padding: 1px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-left: 10px;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    display: inline;
+    transition: transform 0.1s, opacity 0.1s;
+}
+.copy-btn:active {
+    transform: scale(0.95);  
+    opacity: 0.7;         
+}
+
+.copy-btn:hover {
+    background-color: #dff0ff87;
+}
+
+.tooltip {
+    display: none; /* Initially hidden */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    padding: 5px;
+    background-color: black;
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.interaction-container:hover {
+    width: 300px; /* Expanded width */
+}
+
+.interaction-container:hover .copy-btn,
+.interaction-container:hover .tooltip {
+    display: block; /* Show on hover */
+}
+
+.interaction-container:hover .tooltip {
+    z-index: 1;
+}
+
+.copy-success {
+    color: green;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+/* toast */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #3399cc;
+    color: white;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+}
+
+/* Show the toast when visible */
+.toast.show {
+    visibility: visible; 
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Animations to fade the toast in and out */
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;} 
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;} 
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+/* cobrowse */
+.cb {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.floating-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #cdcdcd;
+  border-radius: 50%;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.expandable-content {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+#close-btn {
+  font-size: 10px;
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#ve-stop-cobrowse {
+  background-color: #3399cc;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+#ve-stop-cobrowse:hover {
+  background-color: #246c91;
+}
+
+#ve-stop-cobrowse:active {
+  background-color: limegreen;
+}
+
+.floating-btn .icon {
+  width: 30px;
+  height: 30px;
+  fill: rgb(126, 126, 126);
+}
+
+#ve-start-cobrowse {
+  cursor: pointer;
+}

@@ -190,7 +190,7 @@ const UIHandler = function (options = {}) {
 
   const click2videoElement = `
      <div id="startVideoCall" class="ve-floating-button ve-floating-button-before"></div>
-     <div id="stopVideoCall" style="display: none; background: red" class="ve-floating-button ve-floating-button-before"></div>
+     <div id="stopVideoCall" style="display: none;" class="ve-floating-button-before"></div>
      <div id="chatIframe"></div>`;
 
   const veCobrowseElement = `

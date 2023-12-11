@@ -98,11 +98,11 @@
 
 #interaction-id {
     font-size: 15px;
-    color: red;
+    color: #001789;
     font-family: inherit;
     font-weight: bold;
-    width: 60px;
-}
+    width: 86px;
+  }
 
 .wrapper-pin {
     margin-top: 5px;

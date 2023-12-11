@@ -223,9 +223,13 @@ const UIHandler = function (options = {}) {
       .catch(err => console.error('Error in copying text: ', err));
   }
 
-  function toggleCobrowseExpandableContent () {
-    const content = document.querySelector('.expandable-content');
-    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+  function setLoadingIcon () {
+    closeExpandableContent();
+    document.getElementById('ve-floating-button').style.display = 'block';
+    document.querySelector('.expandable-content').style.display = 'block';
+    Array.from(document.getElementsByClassName('ve-floating-button')).forEach((element, index, array) => {
+      element.style.display = 'none';
+    });
   }
 
   function setExpandableContent ({ interactionId, interactionType }) {
@@ -235,7 +239,7 @@ const UIHandler = function (options = {}) {
     Array.from(document.getElementsByClassName('ve-floating-button')).forEach((element, index, array) => {
       element.style.display = 'none';
     });
-
+    document.getElementById('ve-floating-button').style.display = 'block';
     document.getElementById('interaction-id').value = interactionId;
     document.getElementById('interaction-type').textContent = interactionType;
 
@@ -245,6 +249,7 @@ const UIHandler = function (options = {}) {
   }
 
   function closeExpandableContent () {
+    document.getElementById('ve-floating-button').style.display = 'block';
     document.getElementById('interaction-id').value = '';
     document.getElementById('interaction-type').textContent = '';
     document.querySelector('.expandable-content').style.display = 'none';
@@ -260,10 +265,16 @@ const UIHandler = function (options = {}) {
     });
   }
 
+  function setCobrowseStarted () {
+    // hide UI
+    document.getElementById('ve-floating-button').style.display = 'none';
+  }
+
   return {
-    toggleCobrowseExpandableContent,
+    setLoadingIcon,
     setExpandableContent,
     closeExpandableContent,
+    setCobrowseStarted,
     startCobrowseButton: document.getElementById('ve-start-cobrowse'),
     stopCobrowseButton: document.getElementById('ve-stop-cobrowse'),
     closeVideoButton: document.getElementById('closeVideoButton'),

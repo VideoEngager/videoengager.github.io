@@ -59,34 +59,6 @@ class PopupManager {
   }
 }
 
-const showVENotification = function (message) {
-  const toast = document.createElement('div');
-  toast.textContent = message;
-  toast.className = 'toast';
-
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.className = 'toast show';
-  }, 100);
-
-  setTimeout(() => {
-    toast.className = toast.className.replace('show', '');
-    setTimeout(() => {
-      document.body.removeChild(toast);
-    }, 500);
-  }, 3000);
-};
-
-const getGuid = function () {
-  function s4 () {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return (s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4());
-};
-
 const requireAsync = function (url) {
   return new Promise((resolve, reject) => {
     const re = /(?:\.([^.]+))?$/;
@@ -270,7 +242,27 @@ const UIHandler = function (options = {}) {
     document.getElementById('ve-floating-button').style.display = 'none';
   }
 
+  const showVENotification = function (message) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.className = 'toast';
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.className = 'toast show';
+    }, 100);
+
+    setTimeout(() => {
+      toast.className = toast.className.replace('show', '');
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 500);
+    }, 3000);
+  };
+
   return {
+    showVENotification,
     setLoadingIcon,
     setExpandableContent,
     closeExpandableContent,

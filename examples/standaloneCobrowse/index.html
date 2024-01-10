@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="IE=11.0000" http-equiv="X-UA-Compatible">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="GENERATOR" content="MSHTML 11.00.9600.18098">
+    <title>click 2 cobrowse</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="/videoengager/css/site.css" rel="stylesheet">
+    <link href="https://videoengager.github.io/videoengager/uilib/styles.css" rel="stylesheet">
+    <script type="text/javascript"  src = 'https://videoengager.github.io/videoengager/uilib/helpers.js'></script>
+    <script type="text/javascript" 	src="https://code.jquery.com/jquery-3.5.0.js"></script>	
+    <script type="text/javascript"  src = '/videoengager/js/videoengager.widget.js'></script>
+    <script type="text/javascript"  src = 'https://videoengager.github.io/videoengager/uilib/veCobrowse.js'></script>
+    <script type="text/javascript"  src = './scripts.js'></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="align-items-center justify-content-center"></div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-12 col-md-6" style=" display: flex; justify-content: center; ">
+                <form action="" id="form" style="display: none;">
+                    <label for="fname">First name:</label><br>
+                    <input type="text" id="fname" name="fname" value="John"><br>
+                    <label for="lname">Last name(confidential):</label><br>
+                    <input type="text" id="lname" name="lname" value="Doe"><br>
+                    <label for="ccn">Credit Card Number:</label><br>
+                    <input id="ccn" type="tel" inputmode="numeric" pattern="[0-9\s]{13,19}" autocomplete="cc-number" maxlength="19" placeholder="xxxx xxxx xxxx xxxx"><br>
+                    <label for="pass">Password:</label><br>
+                    <input type="password" id="pass" name="pass" value="some pass"><br><br>
+                    <input type="submit" value="Submit">
+                  </form>
+                <img class="logo" id="videoengagerIMG" style=" max-width: 100%; " src="/videoengager/img/ve.svg">
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="row"></div>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <input type="hidden" class="form-control" id="displayName" placeholder="Display Name" value="Customer 4">
+                </div>
+                <div id="error-holder" class="alert alert-danger" role="alert" style="display: none;"></div>
+                <button id="clickButton" style="display:none ;">Hidden Video Button</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+    <script type="text/javascript"  src = '/widgets.min.js'></script>
+    <link id="genesys-widgets-styles" href="/widgets.min.css" type="text/css" rel="stylesheet"/>
+</body>
+</html>

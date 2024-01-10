@@ -18,14 +18,26 @@
     TIMEOUT: 10000
   };
   const veCobrowse = window.veCobrowse;
+  const errorHandler = function (error, state) {
+    veCobrowse.settings = null;
+    veCobrowse.error = error;
+    veCobrowse.initialized = false;
+    veCobrowse.errorState = state;
+    veCobrowse.listener.error(error, state);
+    return veCobrowse;
+  };
   async function init (veUrl, tenantId, listener) {
     async function getSettings (veUrl, tenantId) {
-      const response = await fetch(`${veUrl}/api/brokerages/settingsFindByTennantId/${tenantId}`, {
-        method: 'GET',
-        accept: 'application/json'
-      });
-      const result = await response.json();
-      return result;
+      try {
+        const response = await fetch(`${veUrl}/api/brokerages/settingsFindByTennantId/${tenantId}`, {
+          method: 'GET',
+          accept: 'application/json'
+        });
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        return errorHandler(error, 'getSettings');
+      }
     }
 
     try {
@@ -41,7 +53,7 @@
         console.log('veCobrowse: init successful not enabled, exiting: ', isEnabled());
         return veCobrowse;
       }
-      CobrowseIO.license = veCobrowse.settings.cobrowse?.license;
+      CobrowseIO.license = veCobrowse?.settings?.cobrowse?.license;
       CobrowseIO.registration = true;
       await CobrowseIO.client();
       if (CobrowseIO.currentSession) {
@@ -49,67 +61,71 @@
       }
       return veCobrowse;
     } catch (error) {
-      veCobrowse.settings = null;
-      veCobrowse.error = error;
-      veCobrowse.initialized = false;
-      console.error('veCobrowse: init error: ', error.toString());
-      return veCobrowse;
+      return errorHandler(error, 'init');
     }
   }
 
   async function createCobrowseVeInteraction () {
-    if (!veCobrowse.initialized || !veCobrowse.isEnabled()) {
-      console.error('createCobrowseVeInteraction: cobrowse is not initialized or enabled: ', veCobrowse);
-      return null;
-    }
-    await createCobrowseSession();
-
-    const options = {
-      type: 'COBROWSE',
-      cobrowseData: {
-        code: veCobrowse.session.code(),
-        session: veCobrowse.session.id()
+    try {
+      if (!veCobrowse.initialized || !veCobrowse.isEnabled()) {
+        console.error('createCobrowseVeInteraction: cobrowse is not initialized or enabled: ', veCobrowse);
+        return null;
       }
-    };
-    const response = await fetch(`${veCobrowse.veUrl}/api/interactions/createByVisitor/${veCobrowse.tenantId}`, {
-      method: 'POST',
-      accept: 'application/json',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(options)
-    });
-    const interaction = await response.json();
-    veCobrowse.veInteractionId = interaction.interactionId;
-    return interaction;
+      await createCobrowseSession();
+
+      const options = {
+        type: 'COBROWSE',
+        cobrowseData: {
+          code: veCobrowse.session.code(),
+          session: veCobrowse.session.id()
+        }
+      };
+      const response = await fetch(`${veCobrowse.veUrl}/api/interactions/createByVisitor/${veCobrowse.tenantId}`, {
+        method: 'POST',
+        accept: 'application/json',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(options)
+      });
+      const interaction = await response.json();
+      veCobrowse.veInteractionId = interaction.interactionId;
+      return interaction;
+    } catch (error) {
+      return errorHandler(error, 'createCobrowseVeInteraction');
+    }
   }
 
   async function createCobrowseSession () {
-    await CobrowseIO.start();
-    if (!CobrowseIO.currentSession) {
-      veCobrowse.session = await CobrowseIO.createSession();
-      veCobrowse.isRestored = false;
-    } else {
-      veCobrowse.session = CobrowseIO.currentSession;
-      veCobrowse.isRestored = true;
+    try {
+      await CobrowseIO.start();
+      if (!CobrowseIO.currentSession) {
+        veCobrowse.session = await CobrowseIO.createSession();
+        veCobrowse.isRestored = false;
+      } else {
+        veCobrowse.session = CobrowseIO.currentSession;
+        veCobrowse.isRestored = true;
+      }
+      CobrowseIO.on('session.ended', session => {
+        console.log('A session was ended', session);
+        if (veCobrowse.listener) {
+          veCobrowse.listener.on('session.ended', { code: session.code(), id: session.id() });
+          veCobrowse.session = null;
+          veCobrowse.veInteractionId = null;
+        }
+      });
+      CobrowseIO.on('session.updated', session => {
+        console.log('A session was started', session);
+        if (veCobrowse.listener && session.state() === 'active') {
+          veCobrowse.listener.on('session.started', { code: session.code(), id: session.id() });
+        }
+        if (veCobrowse.listener && session.state() === 'authorizing') {
+          veCobrowse.listener.on('session.authorizing', { code: session.code(), id: session.id() });
+        }
+      });
+    } catch (error) {
+      return errorHandler(error, 'createCobrowseSession');
     }
-    CobrowseIO.on('session.ended', session => {
-      console.log('A session was ended', session);
-      if (veCobrowse.listener) {
-        veCobrowse.listener.on('session.ended', { code: session.code(), id: session.id() });
-        veCobrowse.session = null;
-        veCobrowse.veInteractionId = null;
-      }
-    });
-    CobrowseIO.on('session.updated', session => {
-      console.log('A session was started', session);
-      if (veCobrowse.listener && session.state() === 'active') {
-        veCobrowse.listener.on('session.started', { code: session.code(), id: session.id() });
-      }
-      if (veCobrowse.listener && session.state() === 'authorizing') {
-        veCobrowse.listener.on('session.authorizing', { code: session.code(), id: session.id() });
-      }
-    });
   }
 
   function isEnabled () {

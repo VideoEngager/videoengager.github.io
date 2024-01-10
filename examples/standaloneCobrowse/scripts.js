@@ -33,8 +33,11 @@
     // set ui with ui handler
     const UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });
     // setup ve cobrowse
-    await veCobrowse.init('veUrl', 'tenantId', {
+    await veCobrowse.init(veUrl, tenantId, {
       on: function (event, data) {
+        const { sessionCode, id: sessionId } = data;
+        console.log('pin: ', sessionCode, ' id: ', sessionId);
+
         if (event === 'session.ended') {
           UI.setCobrowseEnded();
           document.querySelector('#form').style.display = 'none';

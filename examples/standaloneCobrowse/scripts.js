@@ -112,7 +112,7 @@
 
   const loadScriptAndExecuteMain = function () {
     const script = document.createElement('script');
-    script.src = 'http://localhost/videoengager/uilib/helpers.js';
+    script.src = 'https:///videoengager.github.io/videoengager/uilib/helpers.js';
     script.onload = function () {
       main();
     };

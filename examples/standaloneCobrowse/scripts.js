@@ -26,6 +26,27 @@
     }
   };
 
+  const showForSeconds = function (selector, message, seconds) {
+    try {
+      const element = document.querySelector(selector);
+      element.innerHTML = message;
+      element.style.display = 'block';
+      setTimeout(function () {
+        element.style.display = 'none';
+      }, seconds * 1000);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const showInfoMessage = function (message) {
+    showForSeconds('#info-message', message, 3);
+  };
+
+  const showErrorMessage = function (message) {
+    showForSeconds('#error-message', message, 3);
+  };
+
   /**
     * Helper function to show or hide input form to demonstrate cobrowse
    */
@@ -44,111 +65,120 @@
     * Main function to initialize cobrowse
   */
   const main = async function () {
-    if (!window.veCobrowse) {
-      console.error('veCobrowse is not defined');
-      return;
-    }
-    if (veCobrowse.initialized) {
-      console.error('veCobrowse is already initialized');
-      return;
-    }
-    // get config from #tenantId and #veUrl
-    const veUrl = document.querySelector('#veUrl').value;
-    const tenantId = document.querySelector('#tenantId').value;
-    // VEHelpers provides UI do demo cobrowse
-    await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
-    await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/veCobrowse.js');
-    await VEHelpers.documentLoaded();
-    // set ui with ui handler
-    const UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });
-    // setup ve cobrowse
-    await veCobrowse.init(veUrl, tenantId, {
-      initialized: function () {
-        setState('Cobrowse is initialized!');
-      },
-      on: function (event, data) {
-        if (event === 'session.created') {
-          setState('Cobrowse is session Created!');
-          return;
-        }
-        // you will have sessionCode and sessionId
-        // on session.started and session.authorizing and session.ended events
-        const { sessionCode, id: sessionId } = data;
-        console.log('pin: ', sessionCode, ' id: ', sessionId);
+    try {
+      if (!window.veCobrowse) {
+        console.error('veCobrowse is not defined');
+        return;
+      }
+      if (veCobrowse.initialized) {
+        console.error('veCobrowse is already initialized');
+        return;
+      }
+      // get config from #tenantId and #veUrl
+      const veUrl = document.querySelector('#veUrl').value;
+      const tenantId = document.querySelector('#tenantId').value;
+      // VEHelpers provides UI do demo cobrowse
+      await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
+      await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/veCobrowse.js');
+      await VEHelpers.documentLoaded();
+      // set ui with ui handler
+      const UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });
+      // setup ve cobrowse
+      await veCobrowse.init(veUrl, tenantId, {
+        initialized: function () {
+          setState('Cobrowse is initialized!');
+        },
+        on: function (event, data) {
+          if (event === 'session.created') {
+            setState('Cobrowse is session Created!');
+            return;
+          }
+          // you will have sessionCode and sessionId
+          // on session.started and session.authorizing and session.ended events
+          const { sessionCode, id: sessionId } = data;
+          console.log('pin: ', sessionCode, ' id: ', sessionId);
 
-        if (event === 'session.ended') {
-          UI.setCobrowseEnded();
-          document.querySelector('#form').style.display = 'none';
-          setState('CoBrose session is Ended! But cobrose is still initialized...');
+          if (event === 'session.ended') {
+            UI.setCobrowseEnded();
+            document.querySelector('#form').style.display = 'none';
+            setState('CoBrose session is Ended! But cobrose is still initialized...');
+          }
+          if (event === 'session.started') {
+            UI.setCobrowseStarted();
+            document.querySelector('#form').style.display = 'block';
+            setState('CoBrowse Started!');
+          }
+          if (event === 'session.authorizing') {
+            setState('Waiting for authorization!');
+          }
+        },
+        error: function (error, state) {
+          console.error('veCobrowse: error while ', state, ': ', error.toString());
+          switch (state) {
+            case 'createCobrowseSession':
+              UI.showVENotification('Error: Cannot Create Session!');
+              break;
+            case 'startCobrowse':
+              UI.showVENotification('Error: Cannot Start Cobrowse');
+              break;
+            case 'stopCobrowse':
+              UI.showVENotification('Error: Cobrowse is not stopped!');
+              break;
+            case 'init':
+              document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
+              UI.showVENotification('Error: Cannot initialize cobrowse! Check your settings.');
+              break;
+            case 'getSettings':
+              document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
+              UI.showVENotification('Error: Cannot get settings! Check your parameters.');
+              break;
+            default:
+              UI.showVENotification('Error');
+              break;
+          }
         }
-        if (event === 'session.started') {
-          UI.setCobrowseStarted();
-          document.querySelector('#form').style.display = 'block';
-          setState('CoBrowse Started!');
-        }
-        if (event === 'session.authorizing') {
-          setState('Waiting for authorization!');
-        }
-      },
-      error: function (error, state) {
-        console.error('veCobrowse: error while ', state, ': ', error.toString());
-        switch (state) {
-          case 'createCobrowseSession':
-            UI.showVENotification('Error: Cannot Create Session!');
-            break;
-          case 'startCobrowse':
-            UI.showVENotification('Error: Cannot Start Cobrowse');
-            break;
-          case 'stopCobrowse':
-            UI.showVENotification('Error: Cobrowse is not stopped!');
-            break;
-          case 'init':
-            document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
-            UI.showVENotification('Error: Cannot initialize cobrowse! Check your settings.');
-            break;
-          case 'getSettings':
-            document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
-            UI.showVENotification('Error: Cannot get settings! Check your parameters.');
-            break;
-          default:
-            UI.showVENotification('Error');
-            break;
-        }
+      });
+      if (!veCobrowse.isEnabled()) {
+        console.info('cobrowse is not enabled for tenant: ', tenantId);
+        return;
       }
-    });
-    if (!veCobrowse.isEnabled()) {
-      console.info('cobrowse is not enabled for tenant: ', tenantId);
-      return;
-    }
-    if (veCobrowse.session) {
-      UI.setExpandableContent({ interactionId: veCobrowse.session.id(), interactionType: 'ID' });
-    }
-    // click button to create cobrowse session
-    UI.startCobrowseButton.addEventListener('click', async function () {
-      try {
-        if (!veCobrowse.isEnabled()) {
-          console.error('cobrowse is not enabled');
-          UI.showVENotification('Cobrowse is not enabled!');
-          return;
+      if (veCobrowse.session) {
+        UI.setExpandableContent({ interactionId: veCobrowse.session.id(), interactionType: 'ID' });
+      }
+      // click button to create cobrowse session
+      UI.startCobrowseButton.addEventListener('click', async function () {
+        try {
+          if (!veCobrowse.isEnabled()) {
+            console.error('cobrowse is not enabled');
+            UI.showVENotification('Cobrowse is not enabled!');
+            return;
+          }
+          if (UI.isCobrowseStarted()) {
+            UI.setCobrowseEnded();
+            UI.setExpandableContent({ interactionId: '', interactionType: '' });
+            await veCobrowse.stop();
+          } else {
+            UI.expandCobrowse();
+            await veCobrowse.createCobrowseVeInteraction();
+            UI.setExpandableContent({ interactionId: veCobrowse.session.code(), interactionType: 'PIN' });
+          }
+        } catch (e) {
+          UI.showVENotification('Cobrowse is not loaded!');
+          UI.closeExpandableContent();
         }
-        if (UI.isCobrowseStarted()) {
-          UI.setCobrowseEnded();
-          UI.setExpandableContent({ interactionId: '', interactionType: '' });
+      });
+      // click button to stop cobrose session
+      UI.stopCobrowseButton.addEventListener('click', async function () {
+        try {
           await veCobrowse.stop();
-        } else {
-          UI.expandCobrowse();
-          await veCobrowse.createCobrowseVeInteraction();
-          UI.setExpandableContent({ interactionId: veCobrowse.session.code(), interactionType: 'PIN' });
+        } catch (e) {
+         console.error(e);
         }
+      });
       } catch (e) {
-        UI.showVENotification('Cobrowse is not loaded!');
-        UI.closeExpandableContent();
+        console.error(e);
+        showErrorMessage('Cannot initialize cobrowse!');
       }
-    });
-    // click button to stop cobrose session
-    UI.stopCobrowseButton.addEventListener('click', async function () {
-      await veCobrowse.stop();
-    });
   };
 
   const loadScriptAndExecuteMain = function () {
@@ -159,7 +189,6 @@
     };
     document.head.appendChild(script);
   };
-  loadScriptAndExecuteMain();
 
   /** UI CODE **/
   // --- AUTO RECONNECT ---
@@ -177,6 +206,8 @@
     const lname = urlParams.get('lname');
     if (fname || lname) {
       setState(`Hello ${fname} ${lname}`);
+      document.querySelector('#fname').value = fname;
+      document.querySelector('#lname').value = lname;
     }
 
     const tenantId = urlParams.get('tenantId');
@@ -192,6 +223,7 @@
       const url = `/examples/standaloneCobrowse/index.html?fname=${document.querySelector('#fname').value}&lname=${document.querySelector('#lname').value}&tenantId=${document.querySelector('#tenantId').value}&veUrl=${document.querySelector('#veUrl').value}`;
       window.location.href = url;
     });
+    showInfoMessage('Your page is reloaded!');
   };
   // --- VALIDATION ---
   const validateInputListerenrs = function () {
@@ -220,41 +252,63 @@
   // --- LOCAL STORAGE ---
   const localStorageListeners = function () {
     document.querySelector('#saveToLocalStorage').addEventListener('click', function () {
-      // store values #tenantId and #veUrl to localStorage
-      const data = {
-        tenantId: document.querySelector('#tenantId').value,
-        veUrl: document.querySelector('#veUrl').value
-      };
-      window.localStorage.setItem('data', JSON.stringify(data));
+      try {
+        // store values #tenantId and #veUrl to localStorage
+        const data = {
+          tenantId: document.querySelector('#tenantId').value,
+          veUrl: document.querySelector('#veUrl').value
+        };
+        window.localStorage.setItem('data', JSON.stringify(data));
+        showInfoMessage('Data is saved to localStorage');
+      } catch (e) {
+        console.error(e);
+        showErrorMessage('Cannot save data to localStorage');
+      }
     });
     document.querySelector('#clearData').addEventListener('click', function () {
-      // clear localStorage
-      window.localStorage.clear();
-      // clear inputs
-      document.querySelector('#tenantId').value = '';
-      document.querySelector('#veUrl').value = '';
-      const initializeButton = document.querySelector('#initializeCoBrowse');
-      initializeButton.disabled = true;
+      try {
+        // clear localStorage
+        window.localStorage.clear();
+        // clear inputs
+        document.querySelector('#tenantId').value = '';
+        document.querySelector('#veUrl').value = '';
+        const initializeButton = document.querySelector('#initializeCoBrowse');
+        initializeButton.disabled = true;
+        showInfoMessage('Data is cleared from localStorage');
+      } catch (e) {
+        console.error(e);
+        showErrorMessage('Cannot clear data from localStorage');
+      }
     });
-    // load values from localStorage
-    const data = window.localStorage.getItem('data');
-    if (data) {
-      const { tenantId, veUrl } = JSON.parse(data);
-      document.querySelector('#tenantId').value = tenantId;
-      document.querySelector('#veUrl').value = veUrl;
+    try {
+      // load values from localStorage
+      const data = window.localStorage.getItem('data');
+      if (data) {
+        const { tenantId, veUrl } = JSON.parse(data);
+        document.querySelector('#tenantId').value = tenantId;
+        document.querySelector('#veUrl').value = veUrl;
+      }
+    } catch (e) {
+      console.error(e);
+      showErrorMessage('Cannot load data from localStorage');
     }
   };
 
   // --- TAMPERMONKEY ---
   const tampermonkeyListeners = async function () {
     document.querySelector('#tampermonkeyDump').addEventListener('click', async function () {
-      // get file from ./cobrosedemo.txt
-      const response = await fetch('/examples/standaloneCobrowse/cobrowsedemo.txt');
-      let text = await response.text();
-      text = text.replace(/\$\{veUrl\}/g, document.querySelector('#veUrl').value);
-      text = text.replace(/\$\{tenantId\}/g, document.querySelector('#tenantId').value);
-      document.querySelector('#dumpContainer').style.display = 'block';
-      document.querySelector('#jsondump').innerHTML = text;
+      try {
+        // get file from ./cobrosedemo.txt
+        const response = await fetch('/examples/standaloneCobrowse/cobrowsedemo.txt');
+        let text = await response.text();
+        text = text.replace(/\$\{veUrl\}/g, document.querySelector('#veUrl').value);
+        text = text.replace(/\$\{tenantId\}/g, document.querySelector('#tenantId').value);
+        document.querySelector('#dumpContainer').style.display = 'block';
+        document.querySelector('#jsondump').innerHTML = text;
+      } catch (e) {
+        console.error(e);
+        showErrorMessage('Cannot load file');
+      }
       // download file
       document.querySelector('#download').addEventListener('click', function () {
         const element = document.createElement('a');
@@ -270,6 +324,7 @@
   };
 
   document.addEventListener('DOMContentLoaded', function () {
+    loadScriptAndExecuteMain();
     autoInitOnFormSubmit();
     localStorageListeners();
     validateInputListerenrs();

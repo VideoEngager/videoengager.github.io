@@ -1,0 +1,116 @@
+// ==UserScript==
+// @name         cobrowse demo
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  cobrowse demo
+// @author       You
+// @match        https://www.videoengager.com/*
+// @grant        none
+// ==/UserScript==
+(async function () {
+  const main = async function () {
+    // get config from #tenantId and #veUrl
+    const veUrl = `${veUrl}`;
+    const tenantId = `${tenantId}`;
+    // VEHelpers provides UI do demo cobrowse
+    await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
+    await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/veCobrowse.js');
+    await VEHelpers.documentLoaded();
+    // set ui with ui handler
+    const UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });
+    // setup ve cobrowse
+    await veCobrowse.init(veUrl, tenantId, {
+      initialized: function () {
+        // initialized
+      },
+      on: function (event, data) {
+        if (event === 'session.created') {
+          // session created
+          return;
+        }
+        // you will have sessionCode and sessionId
+        // on session.started and session.authorizing and session.ended events
+        const { sessionCode, id: sessionId } = data;
+        console.log('pin: ', sessionCode, ' id: ', sessionId);
+
+        if (event === 'session.ended') {
+          UI.setCobrowseEnded();
+        }
+        if (event === 'session.started') {
+          UI.setCobrowseStarted();
+        }
+        if (event === 'session.authorizing') {
+          // waiting for authorization
+        }
+      },
+      error: function (error, state) {
+        console.error('veCobrowse: error while ', state, ': ', error.toString());
+        switch (state) {
+          case 'createCobrowseSession':
+            UI.showVENotification('Error: Cannot Create Session!');
+            break;
+          case 'startCobrowse':
+            UI.showVENotification('Error: Cannot Start Cobrowse');
+            break;
+          case 'stopCobrowse':
+            UI.showVENotification('Error: Cobrowse is not stopped!');
+            break;
+          case 'init':
+            document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
+            UI.showVENotification('Error: Cannot initialize cobrowse! Check your settings.');
+            break;
+          case 'getSettings':
+            document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
+            UI.showVENotification('Error: Cannot get settings! Check your parameters.');
+            break;
+          default:
+            UI.showVENotification('Error');
+            break;
+        }
+      }
+    });
+    if (!veCobrowse.isEnabled()) {
+      console.info('cobrowse is not enabled for tenant: ', tenantId);
+      return;
+    }
+    if (veCobrowse.session) {
+      UI.setExpandableContent({ interactionId: veCobrowse.session.id(), interactionType: 'ID' });
+    }
+    // click button to create cobrowse session
+    UI.startCobrowseButton.addEventListener('click', async function () {
+      try {
+        if (!veCobrowse.isEnabled()) {
+          console.error('cobrowse is not enabled');
+          UI.showVENotification('Cobrowse is not enabled!');
+          return;
+        }
+        if (UI.isCobrowseStarted()) {
+          UI.setCobrowseEnded();
+          UI.setExpandableContent({ interactionId: '', interactionType: '' });
+          await veCobrowse.stop();
+        } else {
+          UI.expandCobrowse();
+          await veCobrowse.createCobrowseVeInteraction();
+          UI.setExpandableContent({ interactionId: veCobrowse.session.code(), interactionType: 'PIN' });
+        }
+      } catch (e) {
+        UI.showVENotification('Cobrowse is not loaded!');
+        UI.closeExpandableContent();
+      }
+    });
+    // click button to stop cobrose session
+    UI.stopCobrowseButton.addEventListener('click', async function () {
+      await veCobrowse.stop();
+    });
+  };
+
+  const loadScriptAndExecuteMain = function () {
+    const script = document.createElement('script');
+    script.src = 'https://videoengager.github.io/videoengager/uilib/helpers.js';
+    script.onload = function () {
+      main();
+    };
+    document.head.appendChild(script);
+  };
+  loadScriptAndExecuteMain();
+})();

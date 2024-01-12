@@ -2,69 +2,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta content="IE=11.0000" http-equiv="X-UA-Compatible">
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="GENERATOR" content="MSHTML 11.00.9600.18098">
-    <title>click 2 cobrowse</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link href="/videoengager/css/site.css" rel="stylesheet">
-    <link href="https://videoengager.github.io/videoengager/uilib/styles.css" rel="stylesheet">
+    <title>standalone cobrowse demo</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
     <script type="text/javascript"  src = 'https://videoengager.github.io/videoengager/uilib/helpers.js'></script>
-    <script type="text/javascript" 	src="https://code.jquery.com/jquery-3.5.0.js"></script>	
-    <script type="text/javascript"  src = '/videoengager/js/videoengager.widget.js'></script>
     <script type="text/javascript"  src = 'https://videoengager.github.io/videoengager/uilib/veCobrowse.js'></script>
     <script type="text/javascript"  src = './scripts.js'></script>
+    <style>
+        .form-label {
+            font-weight: bold;
+        }
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
+            color: white;
+        }
+        .hero-image {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+        }
+        .form-control {
+            width: 300px;
+        }
+        .navbar-nav .nav-item a[href*="github.com"] {
+            color: black;  
+        }
+        .navbar-nav .nav-item button.btn-link {
+            color: blue;  
+        }
+    </style>
 </head>
-
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="align-items-center justify-content-center"></div>
-            </div>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="#">VideoEngager Cobrowse Demo</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/standaloneCobrowse" target="_blank"><i class="fab fa-github"></i> View Source on GitHub</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-link nav-link" onclick="location.reload();"><i class="fas fa-sync-alt"></i> Refresh</button>
+                </li>
+            </ul>
         </div>
-    </div>
-    <div class="container">
-        <div class="row align-items-center justify-content-center">
-            <div class="col-12 col-md-6" style=" display: flex; justify-content: center; ">
-                <form action="" id="form" style="display: none;">
-                    <label for="fname">First name:</label><br>
-                    <input type="text" id="fname" name="fname" value="John"><br>
-                    <label for="lname">Last name(confidential):</label><br>
-                    <input type="text" id="lname" name="lname" value="Doe"><br>
-                    <label for="ccn">Credit Card Number:</label><br>
-                    <input id="ccn" type="tel" inputmode="numeric" pattern="[0-9\s]{13,19}" autocomplete="cc-number" maxlength="19" placeholder="xxxx xxxx xxxx xxxx"><br>
-                    <label for="pass">Password:</label><br>
-                    <input type="password" id="pass" name="pass" value="some pass"><br><br>
-                    <input type="submit" value="Submit">
-                  </form>
-                <img class="logo" id="videoengagerIMG" style=" max-width: 100%; " src="/videoengager/img/ve.svg">
-            </div>
-            <div class="col-12 col-md-6">
-                <div class="row"></div>
-            </div>
-        </div>
-    </div>
-    <div class="container body-content">
+    </nav>
+    
+
+    <div class="container" style="    margin-bottom: 100px;">
+        <img class="hero-image" id="videoengagerIMG" src="/videoengager/img/ve.svg">
         <div class="row">
-            <div class="col-12">
-                <div class="form-group">
-                    <input type="hidden" class="form-control" id="displayName" placeholder="Display Name" value="Customer 4">
+            <div class="col-md-6" id="explanation-text">
+                <div class="explanation-text">
+                    <p><strong>Getting Started with CoBrowse:</strong> To begin, please enter the <strong>Tenant ID</strong> and <strong>VideoEngager URL (veUrl)</strong>. These are essential for initializing CoBrowse. Once filled, click 'Initialize' to proceed.</p>
+                    <p>You have the option to save these settings to your local storage for future use. Use the 'Save to Local Storage' button for this purpose. To clear saved data, simply click the 'Clear' button.</p>
+                    <p>Additionally, you can set predefined environment parameters directly via the URL. Examples include appending <code>?env=staging</code>, <code>?env=dev</code>, or <code>?env=prod</code> to the URL for respective environment settings.</p>
                 </div>
-                <div id="error-holder" class="alert alert-danger" role="alert" style="display: none;"></div>
-                <button id="clickButton" style="display:none ;">Hidden Video Button</button>
+            </div>
+            <div class="col-md-6" id="form" style="margin-top: 20px; display: none;">
+                <p>On submit, Page will reditct to the same url with <code>tenantID</code> and <code>veUrl</code> and auto-initialize!</p>
+                <div>
+                    <div id="demo-state" style="color: green;"></div>
+                    <div class="form-input">
+                        <label for="fname" class="form-label">First name:</label>
+                        <input type="text" id="fname" name="fname" value="John" class="form-control">
+                    </div>
+                    <div class="form-input">
+                        <label for="lname" class="form-label">Last name (confidential):</label>
+                        <input type="text" id="lname" name="lname" value="Doe" class="form-control">
+                    </div>
+                    <div class="form-input">
+                        <label for="ccn" class="form-label">Credit Card Number:</label>
+                        <input id="ccn" type="tel" inputmode="numeric" pattern="[0-9\s]{13,19}" autocomplete="cc-number" maxlength="19" placeholder="xxxx xxxx xxxx xxxx" class="form-control">
+                    </div>
+                    <div class="form-input">
+                        <label for="pass" class="form-label">Password:</label>
+                        <input type="password" id="pass" name="pass" value="some pass" class="form-control">
+                    </div>
+                    <button id="submit" class="btn btn-primary btn-custom"><i class="fas fa-paper-plane"></i> Submit</button>
+                </div>                
+            </div>
+
+            <div class="col-md-6" id="demonstration_form">
+                    <div class="form-group">
+                        <label for="tenantId" class="form-label">Tenant ID:</label>
+                        <input type="text" class="form-control" id="tenantId">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="veUrl" class="form-label">VideoEngager URL:</label>
+                        <input type="text" class="form-control" id="veUrl" placeholder="https://videome.leadsecure.com">
+                    </div>
+                    <div id="error-message" style="display: none; color: red; margin-top: 10px;">
+                        Please ensure all inputs are valid.
+                    </div>
+                    <button class="btn btn-info btn-custom" id="initializeCoBrowse"><i class="fas fa-sync"></i> Initialize and Load CoBrowse</button>
+                    <div style="margin-top: 20px;">
+                        <button id="saveToLocalStorage" class="btn btn-primary btn-custom"><i class="fas fa-save"></i> Save to Local Storage</button>
+                        <button id="clearData" class="btn btn-secondary btn-custom"><i class="fas fa-eraser"></i> Clear</button>    
+                    </div>
+            </div>
+        </div>
+        <div>
+            <hr>
+            <p>Download CoBrose script with presented parameters that you can embed in your website or in a tampermonkey script</p>
+            <button id="tampermonkeyDump" class="btn btn-secondary btn-custom">Tampermonkey Script Dump</button> 
+            <div id="dumpContainer" style="display: none;">
+                <button id="download" class="btn btn-primary btn-custom">Download</button>
+                <pre>
+                    <code class="form-control" id="jsondump" class="language-javascript line-numbers" cols="80" rows="20" style=" font-size: small; overflow: scroll; width: 100%; height: 500px;"></code>
+                </pre> 
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-    crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-    crossorigin="anonymous"></script>
-    <script type="text/javascript"  src = '/widgets.min.js'></script>
-    <link id="genesys-widgets-styles" href="/widgets.min.css" type="text/css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

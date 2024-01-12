@@ -33,6 +33,9 @@
           method: 'GET',
           accept: 'application/json'
         });
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status}`);
+        }
         const result = await response.json();
         return result;
       } catch (error) {
@@ -59,6 +62,7 @@
       if (CobrowseIO.currentSession) {
         await createCobrowseSession();
       }
+      veCobrowse.listener.initialized();
       return veCobrowse;
     } catch (error) {
       return errorHandler(error, 'init');
@@ -88,6 +92,9 @@
         },
         body: JSON.stringify(options)
       });
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
       const interaction = await response.json();
       veCobrowse.veInteractionId = interaction.interactionId;
       return interaction;
@@ -123,6 +130,7 @@
           veCobrowse.listener.on('session.authorizing', { code: session.code(), id: session.id() });
         }
       });
+      veCobrowse.listener.on('session.created');
     } catch (error) {
       return errorHandler(error, 'createCobrowseSession');
     }

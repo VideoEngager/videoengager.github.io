@@ -314,6 +314,7 @@
       // download file
       document.querySelector('#download').addEventListener('click', function () {
         const element = document.createElement('a');
+        const text = document.querySelector('#jsondump').innerHTML;
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         // add dateTime to file name
         element.setAttribute('download', `cobrowsedemo-${new Date().toISOString()}.js`);

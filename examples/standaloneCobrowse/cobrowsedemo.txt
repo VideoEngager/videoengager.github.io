@@ -14,7 +14,7 @@
     const tenantId = `${tenantId}`;
     // VEHelpers provides UI do demo cobrowse
     await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
-    await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/veCobrowse.js');
+    await VEHelpers.requireAsync(`${veUrl}/static/assets/veCobrowse.js`);
     await VEHelpers.documentLoaded();
     // set ui with ui handler
     const UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });

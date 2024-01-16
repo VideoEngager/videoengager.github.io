@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 /* eslint-disable no-console */
-/* globals VEHelpers, veCobrowse */
+/* globals VEHelpers, veCobrowse, introJs */
 
 (async function () {
   const parameters = {
@@ -77,9 +77,11 @@
       // get config from #tenantId and #veUrl
       const veUrl = document.querySelector('#veUrl').value;
       const tenantId = document.querySelector('#tenantId').value;
-      // VEHelpers provides UI do demo cobrowse
+      // style for VEHelpers
       await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
-      await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/veCobrowse.js');
+      // load veCobrowse from veUrl source
+      await VEHelpers.requireAsync(`${veUrl}/static/assets/veCobrowse.js`);
+      // wait for document to be loaded
       await VEHelpers.documentLoaded();
       // set ui with ui handler
       const UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });
@@ -323,11 +325,55 @@
     });
   };
 
+  // --- INTRO JS ---
+  const introJSInit = function () {
+    introJs().setOptions({
+      dontShowAgain: true,
+      steps: [
+        { intro: 'Welcome to the VideoEngager CoBrowse demo!' },
+        {
+          element: 'a[href*="github.com"]',
+          intro: 'This is the link to the GitHub repository where you can view the source code for this VideoEngager Cobrowse Demo.'
+      },
+      {
+          element: 'button[onclick*="location.reload();"]',
+          intro: 'Click this button to refresh the current page. Useful if you need to reset the demo or reload the latest changes.'
+      },
+      {
+          element: '#demonstration_form',
+          intro: 'This section requires the Tenant ID and VideoEngager URL for initialization.'
+      },
+      {
+          element: '#initializeCoBrowse',
+          intro: 'After entering the required Tenant ID and VideoEngager URL, click this \'Initialize\' button to start the CoBrowse session.'
+      },
+      {
+        element: '.explanation-text',
+        intro: 'A demo form will appear here when cobrowse session is initialized.'
+      },
+      {
+          element: '#clearData',
+          intro: 'Use this \'Clear\' button to remove the entered parameters from the form as well as from the local storage.'
+      },
+      {
+          element: '#saveToLocalStorage',
+          intro: 'Click the \'Save to Local Storage\' button to save your entered parameters for future use.'
+      },
+      {
+          element: '#tampermonkeyDump',
+          intro: 'Click here to generate a cobrowse demo script based on the parameters you provided. This script can be used in your website or in a Tampermonkey script.'
+      }
+      ]
+    }).start();
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
     loadScriptAndExecuteMain();
     autoInitOnFormSubmit();
     localStorageListeners();
     validateInputListerenrs();
     tampermonkeyListeners();
+
+    introJSInit();
   });
 })();

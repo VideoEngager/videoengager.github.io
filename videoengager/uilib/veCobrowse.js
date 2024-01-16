@@ -23,7 +23,10 @@
     veCobrowse.error = error;
     veCobrowse.initialized = false;
     veCobrowse.errorState = state;
-    veCobrowse.listener.error(error, state);
+    // send error event if error is set
+    if (veCobrowse?.listener?.error) {
+      veCobrowse.listener.error(error, state);
+    }
     return veCobrowse;
   };
   async function init (veUrl, tenantId, listener) {
@@ -62,7 +65,9 @@
       if (CobrowseIO.currentSession) {
         await createCobrowseSession();
       }
-      veCobrowse.listener.initialized();
+      if (veCobrowse?.listener?.initialized) {
+        veCobrowse.listener.initialized();
+      }
       return veCobrowse;
     } catch (error) {
       return errorHandler(error, 'init');

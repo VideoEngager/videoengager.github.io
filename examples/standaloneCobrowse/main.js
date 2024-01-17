@@ -23,14 +23,12 @@ const eventHandler = function (event, data) {
         handleSessionCreated();
         break;
       case 'session.started':
-        window.isActiveSession = true;
         handleSessionStarted(data, window.UI);
         break;
       case 'session.authorizing':
         handleSessionAuthorizing();
         break;
       case 'session.ended':
-        window.isActiveSession = false;
         handleSessionEnded(window.UI);
         break;
       default:
@@ -98,7 +96,7 @@ const errorHandler = function (error, state) {
             }
 
             // if session is active, stop cobrowse session on button click
-            if (window.isActiveSession) {
+            if (veCobrowse.session) {
               window.UI.setCobrowseEnded();
               window.UI.setExpandableContent({ interactionId: '', interactionType: '' });
               await veCobrowse.stop();

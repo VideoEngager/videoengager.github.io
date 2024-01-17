@@ -136,7 +136,7 @@ const autoInitOnFormSubmit = function () {
     document.querySelector('#tenantId').value = tenantId;
     document.querySelector('#veUrl').value = veUrl;
     document.querySelector('#initializeCoBrowse').disabled = true;
-    main();
+    window.mainVeCobrose();
   }
 
   document.querySelector('#submit').addEventListener('click', function () {
@@ -260,11 +260,10 @@ function handleSessionCreated () {
   setState('Cobrowse is session Created!');
 }
 
-function handleSessionStarted (data) {
+function handleSessionStarted (data, UI) {
   const { sessionCode, id: sessionId } = data;
   console.log('pin: ', sessionCode, ' id: ', sessionId);
   UI.setCobrowseStarted();
-  UI.showForm();
   setState('CoBrowse Started!');
 }
 
@@ -272,9 +271,8 @@ function handleSessionAuthorizing () {
   setState('Waiting for authorization!');
 }
 
-function handleSessionEnded () {
+function handleSessionEnded (UI) {
   UI.setCobrowseEnded();
-  UI.hideForm();
   setState('CoBrose session is Ended! But cobrose is still initialized...');
 }
 
@@ -286,9 +284,10 @@ async function initializeStyles () {
 // Function to load veCobrowse
 async function loadVeCobrowse (veUrl) {
   await VEHelpers.requireAsync(`${veUrl}/static/assets/veCobrowse.js`);
+  await VEHelpers.documentLoaded();
 }
 
-function updateUIForCobrowse({ sessionEnded, sessionCode }) {
+function updateUIForCobrowse ({ sessionEnded, sessionCode }, UI) {
   if (sessionEnded) {
     UI.setCobrowseEnded();
     UI.setExpandableContent({ interactionId: '', interactionType: '' });
@@ -298,7 +297,7 @@ function updateUIForCobrowse({ sessionEnded, sessionCode }) {
   }
 }
 
-function showError(message) {
+function showError (message) {
   console.error(message);
   showToastError(message);
 }

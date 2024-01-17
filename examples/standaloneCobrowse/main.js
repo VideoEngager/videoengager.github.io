@@ -28,7 +28,7 @@ const eventHandler = function (event, data) {
       case 'session.authorizing':
         handleSessionAuthorizing();
         break;
-      case 'session.ended':;
+      case 'session.ended':
         handleSessionEnded(window.UI);
         break;
       default:

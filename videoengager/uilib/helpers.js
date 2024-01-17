@@ -255,12 +255,12 @@ window.VEHelpers = {
     const showVENotification = function (message) {
       const toast = document.createElement('div');
       toast.textContent = message;
-      toast.className = 'toast';
+      toast.className = 've-toast';
 
       document.body.appendChild(toast);
 
       setTimeout(() => {
-        toast.className = 'toast show';
+        toast.className = 've-toast show';
       }, 100);
 
       setTimeout(() => {

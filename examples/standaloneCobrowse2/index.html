@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VideoEngager Cobrowse</title>
+</head>
+<body>
+    <h1>VideoEngager Cobrowse</h1>
+    <div id="errorLog"></div>
+    <div>
+        <label for="veUrl">VideoEngager URL</label>
+        <input type="text" id="veUrl" placeholder="Enter veUrl">
+    </div>
+    <div>
+        <label for="tenantId">Tenant ID</label>
+        <input type="text" id="tenantId" placeholder="Enter Tenant ID">
+    </div>
+    <button id="initButton">Initialize veCobrowse</button>
+    <button id="startSessionButton" disabled>Start Cobrowse Session</button>
+    <button id="stopSessionButton" disabled>Stop Cobrowse Session</button>
+    <div>
+        <label for="tenantId">Pin Code</label>
+        <input type="text" id="pinCode" placeholder="Share this code with the agent" disabled>
+    </div>
+    <link type="text/css" rel="stylesheet" href="./styles.css" />
+    <!-- Set tenantId and veUrl form inputs on load based on URL's 'env' parameter (ex: index.html?env=staging) -->
+    <script type="text/javascript" src="./envParametersLoader.js"></script>
+    <script>
+        const initializeVeCobrowse = async function () {
+          const veUrl = document.getElementById('veUrl').value;
+          const tenantId = document.getElementById('tenantId').value;
+
+          const listeners = {
+            initialized: () => {
+              console.log('veCobrowse initialized');
+              document.getElementById('startSessionButton').disabled = false;
+            },
+            on: (event, data) => {
+              document.getElementById('pinCode').value = data.code;
+              console.log('veCobrowse event:', event, 'data:', JSON.stringify(data));
+            },
+            error: (error, state) => errorHandler
+          };
+          try {
+            // load veCobrowse.js from veUrl
+            await loadJsAsync(`${veUrl}/static/assets/veCobrowse.js`)
+            // initialize veCobrowse
+            await veCobrowse.init(veUrl, tenantId, listeners)
+
+            document.getElementById('initButton').disabled = true;
+            document.getElementById('startSessionButton').disabled = false;
+          } catch (e) {
+            errorHandler(e);
+          }
+        };
+
+        const startSession = async () => {
+          // start cobrowse session, this will trigger on('session.started') event and will return a pin code
+          try {
+            await veCobrowse.createCobrowseVeInteraction();
+
+            document.getElementById('startSessionButton').disabled = true;
+            document.getElementById('stopSessionButton').disabled = false;
+          } catch (e) {
+            errorHandler(e);
+          }
+        };
+
+        const stopSession = async () => {
+          // stop cobrowse session, this will trigger on('session.ended') event
+          try {
+            await veCobrowse.stop();
+
+            document.getElementById('stopSessionButton').disabled = true;
+            document.getElementById('startSessionButton').disabled = false;
+            document.getElementById('pinCode').value = '';
+          } catch (e) {
+            errorHandler(e);
+          }
+        };
+
+        // set button click listeners for init, start and stop session
+        document.getElementById('initButton').addEventListener('click', initializeVeCobrowse);
+        document.getElementById('startSessionButton').addEventListener('click', startSession);
+        document.getElementById('stopSessionButton').addEventListener('click', stopSession);
+
+        // load js file async
+        function loadJsAsync (url) {
+          return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url;
+            script.onload = resolve;
+            script.onerror = function () {
+              reject('Failed to load script: ' + url);
+            };
+            document.body.appendChild(script);
+          });
+        }
+
+        function errorHandler (error, explaination) {
+          console.error(error);
+          document.getElementById('errorLog').innerHTML += error.toString() + '<br/>';
+          document.getElementById('initButton').disabled = true;
+          document.getElementById('startSessionButton').disabled = true;
+          document.getElementById('stopSessionButton').disabled = true;
+        }
+    </script>
+</body>
+</html>

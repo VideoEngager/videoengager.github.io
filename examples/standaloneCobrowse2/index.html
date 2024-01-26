@@ -28,51 +28,36 @@
         const initializeVeCobrowse = async function () {
           const veUrl = document.getElementById('veUrl').value;
           const tenantId = document.getElementById('tenantId').value;
-
-          const listeners = {
-            initialized: () => {
-              console.log('veCobrowse initialized');
-              document.getElementById('startSessionButton').disabled = false;
-            },
-            on: (event, data) => {
-              document.getElementById('pinCode').value = data.code;
-              console.log('veCobrowse event:', event, 'data:', JSON.stringify(data));
-            },
-            error: (error, state) => errorHandler
-          };
+        
           try {
             // load veCobrowse.js from veUrl
-            await loadJsAsync(`${veUrl}/static/assets/veCobrowse.js`)
+            await loadJsAsync(`${veUrl}/static/assets/veCobrowse.js`);
+
+            // set veCobrowse.on(event) event listeners to manage UI
+            setEventHandlers();
+
             // initialize veCobrowse
-            await veCobrowse.init(veUrl, tenantId, listeners)
+            await veCobrowse.init(veUrl, tenantId);
 
             document.getElementById('initButton').disabled = true;
-            document.getElementById('startSessionButton').disabled = false;
           } catch (e) {
             errorHandler(e);
           }
         };
 
         const startSession = async () => {
-          // start cobrowse session, this will trigger on('session.started') event and will return a pin code
+          document.getElementById('startSessionButton').disabled = true;
           try {
             await veCobrowse.createCobrowseVeInteraction();
-
-            document.getElementById('startSessionButton').disabled = true;
-            document.getElementById('stopSessionButton').disabled = false;
           } catch (e) {
             errorHandler(e);
           }
         };
 
         const stopSession = async () => {
-          // stop cobrowse session, this will trigger on('session.ended') event
+          document.getElementById('stopSessionButton').disabled = true;
           try {
             await veCobrowse.stop();
-
-            document.getElementById('stopSessionButton').disabled = true;
-            document.getElementById('startSessionButton').disabled = false;
-            document.getElementById('pinCode').value = '';
           } catch (e) {
             errorHandler(e);
           }
@@ -83,6 +68,29 @@
         document.getElementById('startSessionButton').addEventListener('click', startSession);
         document.getElementById('stopSessionButton').addEventListener('click', stopSession);
 
+        function setEventHandlers () {
+            veCobrowse.on('initialized', function (data) {
+              console.log('trigered event: initialized');
+              document.getElementById('startSessionButton').disabled = false;
+            });
+            veCobrowse.on('ended', function () {
+              console.log('trigered event: ended');
+              document.getElementById('startSessionButton').disabled = false;
+              document.getElementById('pinCode').value = '';
+            });
+            veCobrowse.on('started', function (data) {
+              console.log('trigered event: started');
+            });
+            veCobrowse.on('authorizing', function (data) {
+              console.log('trigered event: authorizing');
+            });
+            veCobrowse.on('created', function (data) {
+              console.log('trigered event: created');
+              document.getElementById('stopSessionButton').disabled = false;
+              document.getElementById('pinCode').value = data.code;
+            });
+        }
+
         // load js file async
         function loadJsAsync (url) {
           return new Promise((resolve, reject) => {
@@ -90,19 +98,21 @@
             script.src = url;
             script.onload = resolve;
             script.onerror = function () {
-              reject('Failed to load script: ' + url);
+              reject(new Error('Failed to load script: ' + url));
             };
             document.body.appendChild(script);
           });
         }
 
-        function errorHandler (error, explaination) {
+        function errorHandler (error) {
+          error = error?.message;
           console.error(error);
           document.getElementById('errorLog').innerHTML += error.toString() + '<br/>';
           document.getElementById('initButton').disabled = true;
           document.getElementById('startSessionButton').disabled = true;
           document.getElementById('stopSessionButton').disabled = true;
         }
+
     </script>
 </body>
 </html>

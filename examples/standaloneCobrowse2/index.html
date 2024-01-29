@@ -31,7 +31,7 @@
         
           try {
             // load veCobrowse.js from veUrl
-            await loadJsAsync(`${veUrl}/static/assets/veCobrowse.js`);
+            await loadJsAsync(`${veUrl}/static/assets/veCobrowse.2.js`);
 
             // set veCobrowse.on(event) event listeners to manage UI
             setEventHandlers();
@@ -48,7 +48,7 @@
         const startSession = async () => {
           document.getElementById('startSessionButton').disabled = true;
           try {
-            await veCobrowse.createCobrowseVeInteraction();
+            await veCobrowse.start();
           } catch (e) {
             errorHandler(e);
           }
@@ -76,10 +76,13 @@
             veCobrowse.on('ended', function () {
               console.log('trigered event: ended');
               document.getElementById('startSessionButton').disabled = false;
+              document.getElementById('stopSessionButton').disabled = true;
               document.getElementById('pinCode').value = '';
             });
             veCobrowse.on('started', function (data) {
               console.log('trigered event: started');
+              document.getElementById('startSessionButton').disabled = true;
+              document.getElementById('stopSessionButton').disabled = false;
             });
             veCobrowse.on('authorizing', function (data) {
               console.log('trigered event: authorizing');

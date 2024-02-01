@@ -1,86 +1,87 @@
 // ==UserScript==
-// @name         cobrowse demo
+// @name         CoBrowse Demo
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  cobrowse demo
+// @version      1.0
+// @description  Demonstration of CoBrowse functionality.
 // @author       You
 // @match        https://www.videoengager.com/*
 // @grant        none
 // ==/UserScript==
-(async function () {
+
+(async function main () {
   const veUrl = `${veUrl}`;
   const tenantId = `${tenantId}`;
-  await requireAsync('https://videoengager.github.io/examples/standaloneCobrowse/veFloatingUI.js');
-  const veFloatingUI = new VeFloatingUIHandler();
 
-  const main = async function () {
-    // VEHelpers provides UI do demo cobrowse
-    await requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
-    await requireAsync(veUrl + '/static/assets/veCobrowse.2.js');
-    await veCobrowse.init(tenantId, veUrl);
-    veFloatingUI.insertVeCobrowse();
-    setEventHandlers();
-    veFloatingUI.buttons.startCobrowse.addEventListener('click', async function () {
-      try {
-        await veCobrowse.start();
-      } catch (e) {
-        veFloatingUI.showVENotification('Cobrowse is not loaded!');
-        console.error(e);
-      }
-    });
-    veFloatingUI.buttons.stopCobrowse.addEventListener('click', async function () {
-      try {
-        await veCobrowse.stop();
-      } catch (e) {
-        veFloatingUI.showVENotification(e.toString());
-        console.error(e);
-      }
-    });
-  };
-  function setEventHandlers () {
-    veCobrowse.on('initialized', function () {
-      veFloatingUI.showVENotification('Cobrowse is initialized!');
-    });
-    veCobrowse.on('ended', function () {
+  async function setupCoBrowse () {
+    try {
+      await requireAsync('https://videoengager.github.io/examples/standaloneCobrowse/veFloatingUI.js');
+      const veFloatingUI = new VeFloatingUIHandler();
+      await requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
+      await requireAsync(`${veUrl}/static/assets/veCobrowse.2.js`);
+
+      await veCobrowse.init(tenantId, veUrl);
+      veFloatingUI.insertVeCobrowse();
+      setEventHandlers(veFloatingUI);
+    } catch (error) {
+      console.error('CoBrowse setup failed:', error);
+    }
+  }
+
+  function setEventHandlers (veFloatingUI) {
+    veCobrowse.on('initialized', () => veFloatingUI.showVENotification('CoBrowse is initialized!'));
+    veCobrowse.on('ended', () => {
       veFloatingUI.closeExpandableContent();
-      veFloatingUI.showVENotification('CoBrose session is Ended!');
+      veFloatingUI.showVENotification('CoBrowse session is Ended!');
     });
-    veCobrowse.on('started', function (data) {
+    veCobrowse.on('started', (data) => {
       veFloatingUI.setCobrowseStarted();
       veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
       veFloatingUI.showVENotification('CoBrowse Started!');
     });
-    veCobrowse.on('authorizing', function () {
-      veFloatingUI.showVENotification('Waiting for authorization!');
-    });
-    veCobrowse.on('created', function (data) {
-      veFloatingUI.showVENotification('Cobrowse is session Created!');
+    veCobrowse.on('authorizing', () => veFloatingUI.showVENotification('Waiting for authorization!'));
+    veCobrowse.on('created', (data) => {
+      veFloatingUI.showVENotification('CoBrowse session Created!');
       veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
     });
+
+    veFloatingUI.buttons.startCobrowse.addEventListener('click', async () => {
+      try {
+        await veCobrowse.start();
+      } catch (error) {
+        veFloatingUI.showVENotification('CoBrowse is not loaded!');
+        console.error('Error starting CoBrowse:', error);
+      }
+    });
+
+    veFloatingUI.buttons.stopCobrowse.addEventListener('click', async () => {
+      try {
+        await veCobrowse.stop();
+      } catch (error) {
+        veFloatingUI.showVENotification(error.toString());
+        console.error('Error stopping CoBrowse:', error);
+      }
+    });
   }
-  main();
+
+  setupCoBrowse();
 })();
 
-function requireAsync (url) {
+async function requireAsync (url) {
   return new Promise((resolve, reject) => {
-    const re = /(?:\.([^.]+))?$/;
-    const ext = re.exec(url)[1];
-    console.log(ext);
-    if (ext === 'css') {
+    const fileType = url.split('.').pop();
+    if (fileType === 'css') {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.type = 'text/css';
       link.href = url;
-      link.addEventListener('load', resolve);
-      link.addEventListener('error', reject);
-      document.getElementsByTagName('head')[0].appendChild(link);
-    } else if (ext === 'js') {
+      document.head.appendChild(link);
+      link.onload = resolve;
+      link.onerror = () => reject(new Error(`Failed to load CSS: ${url}`));
+    } else if (fileType === 'js') {
       const script = document.createElement('script');
       script.src = url;
-      script.type = 'text/javascript';
-      script.addEventListener('load', resolve);
-      script.addEventListener('error', reject);
-      document.getElementsByTagName('head')[0].appendChild(script);
+      document.head.appendChild(script);
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
     } else {
       reject(new Error('Unsupported file type'));
     }

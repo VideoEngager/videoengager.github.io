@@ -18,14 +18,15 @@ const tampermonkeyPrepare = async function () {
   }
   document.querySelector('#downloadtamper').addEventListener('click', function () {
     const element = document.createElement('a');
-    const text = document.querySelector('#tampermonkeydump').innerHTML;
+    const text = document.querySelector('#tampermonkeydump').textContent;
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', `cobrowsedemo-${new Date().toISOString()}.js`);
+    element.setAttribute('download', `cobrowsedemo-${new Date().toISOString()}.txt`);
     element.style.display = 'none';
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
   });
+
   const elem = document.getElementById('tampermonkeydump');
   window.hljs.highlightElement(elem);
 };

@@ -228,7 +228,7 @@
 }
 
 /* toast */
-.toast {
+.ve-toast {
     visibility: hidden;
     min-width: 250px;
     margin-left: -125px;
@@ -245,7 +245,7 @@
 }
 
 /* Show the toast when visible */
-.toast.show {
+.ve-toast.show {
     visibility: visible; 
     -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
     animation: fadein 0.5s, fadeout 0.5s 2.5s;

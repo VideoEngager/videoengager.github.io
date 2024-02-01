@@ -227,19 +227,40 @@ window.VEHelpers = {
     }
 
     function setCobrowseStarted () {
-    // hide UI
-      document.getElementById('ve-floating-button').style.display = 'none';
+      document.getElementById('ve-start-cobrowse').classList.add('cobrowse-red');
+      document.getElementById('ve-floating-button').classList.remove('expand-start');
+      document.getElementById('ve-floating-button-middle').classList.remove('expand-middle');
+      document.getElementById('ve-floating-button-end').classList.remove('expand-end');
+      document.getElementById('ve-floating-button').classList.add('expand-start');
+    }
+
+    function setCobrowseEnded () {
+      document.getElementById('ve-start-cobrowse').classList.remove('cobrowse-red');
+      document.getElementById('ve-floating-button').classList.remove('expand-start');
+      document.getElementById('ve-floating-button-middle').classList.remove('expand-middle');
+      document.getElementById('ve-floating-button-end').classList.remove('expand-end');
+      setExpandableContent({ interactionId: '', interactionType: '' });
+    }
+
+    function expandCobrowse () {
+      document.getElementById('ve-floating-button').classList.add('expand-start');
+      document.getElementById('ve-floating-button-middle').classList.add('expand-middle');
+      document.getElementById('ve-floating-button-end').classList.add('expand-end');
+    }
+
+    function isCobrowseStarted () {
+      return document.getElementById('ve-start-cobrowse').classList.contains('cobrowse-red') || document.getElementById('ve-floating-button-middle').classList.contains('expand-middle');
     }
 
     const showVENotification = function (message) {
       const toast = document.createElement('div');
       toast.textContent = message;
-      toast.className = 'toast';
+      toast.className = 've-toast';
 
       document.body.appendChild(toast);
 
       setTimeout(() => {
-        toast.className = 'toast show';
+        toast.className = 've-toast show';
       }, 100);
 
       setTimeout(() => {
@@ -256,6 +277,9 @@ window.VEHelpers = {
       setExpandableContent,
       closeExpandableContent,
       setCobrowseStarted,
+      setCobrowseEnded,
+      isCobrowseStarted,
+      expandCobrowse,
       startCobrowseButton: document.getElementById('ve-start-cobrowse'),
       stopCobrowseButton: document.getElementById('ve-stop-cobrowse'),
       closeVideoButton: document.getElementById('closeVideoButton'),

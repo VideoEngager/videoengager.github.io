@@ -1,0 +1,88 @@
+// ==UserScript==
+// @name         cobrowse demo
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  cobrowse demo
+// @author       You
+// @match        https://www.videoengager.com/*
+// @grant        none
+// ==/UserScript==
+(async function () {
+  const veUrl = `${veUrl}`;
+  const tenantId = `${tenantId}`;
+  await requireAsync('https://videoengager.github.io/examples/standaloneCobrowse/veFloatingUI.js');
+  const veFloatingUI = new VeFloatingUIHandler();
+
+  const main = async function () {
+    // VEHelpers provides UI do demo cobrowse
+    await requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
+    await requireAsync(veUrl + '/static/assets/veCobrowse.2.js');
+    await veCobrowse.init(tenantId, veUrl);
+    veFloatingUI.insertVeCobrowse();
+    setEventHandlers();
+    veFloatingUI.buttons.startCobrowse.addEventListener('click', async function () {
+      try {
+        await veCobrowse.start();
+      } catch (e) {
+        veFloatingUI.showVENotification('Cobrowse is not loaded!');
+        console.error(e);
+      }
+    });
+    veFloatingUI.buttons.stopCobrowse.addEventListener('click', async function () {
+      try {
+        await veCobrowse.stop();
+      } catch (e) {
+        veFloatingUI.showVENotification(e.toString());
+        console.error(e);
+      }
+    });
+  };
+  function setEventHandlers () {
+    veCobrowse.on('initialized', function () {
+      veFloatingUI.showVENotification('Cobrowse is initialized!');
+    });
+    veCobrowse.on('ended', function () {
+      veFloatingUI.closeExpandableContent();
+      veFloatingUI.showVENotification('CoBrose session is Ended!');
+    });
+    veCobrowse.on('started', function (data) {
+      veFloatingUI.setCobrowseStarted();
+      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
+      veFloatingUI.showVENotification('CoBrowse Started!');
+    });
+    veCobrowse.on('authorizing', function () {
+      veFloatingUI.showVENotification('Waiting for authorization!');
+    });
+    veCobrowse.on('created', function (data) {
+      veFloatingUI.showVENotification('Cobrowse is session Created!');
+      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
+    });
+  }
+  main();
+})();
+
+function requireAsync (url) {
+  return new Promise((resolve, reject) => {
+    const re = /(?:\.([^.]+))?$/;
+    const ext = re.exec(url)[1];
+    console.log(ext);
+    if (ext === 'css') {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = url;
+      link.addEventListener('load', resolve);
+      link.addEventListener('error', reject);
+      document.getElementsByTagName('head')[0].appendChild(link);
+    } else if (ext === 'js') {
+      const script = document.createElement('script');
+      script.src = url;
+      script.type = 'text/javascript';
+      script.addEventListener('load', resolve);
+      script.addEventListener('error', reject);
+      document.getElementsByTagName('head')[0].appendChild(script);
+    } else {
+      reject(new Error('Unsupported file type'));
+    }
+  });
+}

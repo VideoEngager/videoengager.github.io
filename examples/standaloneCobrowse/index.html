@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>standalone cobrowse demo</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.css" rel="stylesheet" />
+    <script type="text/javascript" src='https://videoengager.github.io/videoengager/uilib/helpers.js'></script>
+    <!-- main page which uses veCobrowse-->
+    <script type="text/javascript" src='./main.js'></script>
+    <!-- introjs -->
+    <script type="text/javascript" src="https://unpkg.com/intro.js/intro.js"></script>
+    <link href="https://unpkg.com/intro.js/introjs.css" rel="stylesheet" />
+    <link href="https://videoengager.github.io/videoengager/uilib/styles.css" rel="stylesheet" />
+    <script type="text/javascript" src="./intro.js"></script>
+    <!-- styles -->
+    <link href="./styles.css" rel="stylesheet" />
+    <!-- set veUrl and tenantId from url parameter e.i. "?env=staging" -->
+    <script type="text/javascript" src="./envParametersLoader.js"></script>
+    <!-- form input validator -->
+    <script type="text/javascript" src="./inputValidators.js"></script>
+    <!-- save and load form values to local storage -->
+    <script type="text/javascript" src="./localStorageListeners.js"></script>
+    <script type="text/javascript" src="./veFloatingUI.js"></script>
+    <script type="text/javascript" src="./tampermonkeyCreator.js"></script>
+</head>
+  <body>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">VideoEngager Cobrowse Demo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/standaloneCobrowse" target="_blank">
+                <i class="fab fa-github"></i> View Source on GitHub </a>
+            </li>
+            <li class="nav-item">
+              <button class="btn btn-link nav-link" onclick="location.reload();">
+                <i class="fas fa-sync-alt"></i> Refresh </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container" style="    margin-bottom: 100px;">
+      <img class="hero-image" id="videoengagerIMG" src="/videoengager/img/ve.svg">
+      <p class="note note-primary"> To start to this demo, please fill tenant ID and videoengager url and click initialize button. <a data-toggle="tooltip" title="" href="https://docs.google.com/document/d/1lxk8Pojych_iHEWBj-b3_zcwrEuA6Okw_JqfuVdXvAo/edit?usp=sharing" target="_blank" data-mdb-original-title="VideoEngager Cobrowse Documentation">
+          <i class="fas fa-question-circle"></i>
+        </a>
+      </p>
+      <div class="row">
+        <div class="col-md-6" id="explanation-text">
+          <div class="explanation-text">
+            <p>
+              <strong>Getting Started with CoBrowse:</strong> To begin, please enter the <strong>Tenant ID</strong> and <strong>VideoEngager URL (veUrl)</strong>. These are essential for initializing CoBrowse. Once filled, click 'Initialize' to proceed.
+            </p>
+            <p>You have the option to save these settings to your local storage for future use. Use the 'Save to Local Storage' button for this purpose. To clear saved data, simply click the 'Clear' button.</p>
+            <p>Additionally, you can set predefined environment parameters directly via the URL. Examples include appending <code>?env=staging</code>, <code>?env=dev</code>, or <code>?env=prod</code> to the URL for respective environment settings. </p>
+          </div>
+        </div>
+        <div class="col-md-6" id="form" style="margin-top: 20px; display: none;">
+          <p>On submit, Page will reditct to the same url with <code>tenantID</code> and <code>veUrl</code> and auto-initialize! </p>
+          <div>
+            <div id="demo-state" style="color: green;"></div>
+            <div class="form-input">
+              <label for="fname" class="form-label">First name:</label>
+              <input type="text" id="fname" name="fname" value="John" class="form-control">
+            </div>
+            <div class="form-input">
+              <label for="lname" class="form-label">Last name (confidential):</label>
+              <input type="text" id="lname" name="lname" value="Doe" class="form-control">
+            </div>
+            <div class="form-input">
+              <label for="ccn" class="form-label">Credit Card Number:</label>
+              <input id="ccn" type="tel" inputmode="numeric" pattern="[0-9\s]{13,19}" autocomplete="cc-number" maxlength="19" placeholder="xxxx xxxx xxxx xxxx" class="form-control">
+            </div>
+            <div class="form-input">
+              <label for="pass" class="form-label">Password:</label>
+              <input type="password" id="pass" name="pass" value="some pass" class="form-control">
+            </div>
+            <button id="submit" class="btn btn-primary btn-custom">
+              <i class="fas fa-paper-plane"></i> Submit </button>
+          </div>
+        </div>
+        <div class="col-md-6" id="demonstration_form">
+          <p class="note note-danger"> How to learn tenant ID <a data-toggle="tooltip" title="" href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank" data-mdb-original-title="Detailed guide on SmartVideo SDK Parameters">
+              <i class="fas fa-question-circle"></i>
+            </a>
+          </p>
+          <div class="form-outline">
+            <input type="text" id="tenantId" class="form-control active" data-mdb-showcounter="false" required />
+            <label class="form-label" for="tenantId">Tenant ID</label>
+          </div>
+          <div class="form-text pb-2"> SmartVideo tenant. Retrieve your Tenant ID by selecting: Apps > SmartVideo_Settings > Tenant ID. </div>
+          <div class="form-outline">
+            <input type="text" id="veUrl" class="form-control" data-mdb-showcounter="false" value="https://videome.leadsecure.com" placeholder="https://videome.leadsecure.com" required />
+            <label class="form-label" for="veUrl">VideoEngager URL</label>
+          </div>
+          <div class="form-text pb-2"> Provide the full URL address for the VideoEngager Server. </div>
+          <div id="error-message" style="display: none; color: red; margin-top: 10px;"> Please ensure all inputs are valid. </div>
+          <div id="info-message" style="display: none; color: green; margin-top: 10px;"></div>
+          <button class="btn btn-info btn-custom" id="initializeCoBrowse">
+            <i class="fas fa-sync"></i> Initialize</button>
+          <div style="margin-top: 20px;">
+            <button id="saveToLocalStorage" class="btn btn-primary btn-custom">
+              <i class="fas fa-save"></i> Save to Local Storage </button>
+            <button id="clearData" class="btn btn-secondary btn-custom">
+              <i class="fas fa-eraser"></i> Clear </button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <hr>
+        <div>
+          <div class="accordion" id="jsonAccordeon">
+            <div class="accordion-item">
+              <div id="jsonCollapse" class="accordion-collapse collapse" aria-labelledby="jsonHeader" data-mdb-parent="#jsonAccordeon">
+                <div class="accordion-body">
+                  <pre><code class="form-control" id="jsondump" class="language-javascript line-numbers" cols="80" rows="20" style=" font-size: small; "></code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="tampermonkeyHeader">
+                <button disabled id="tampermonkeybutton" class="accordion-button collapsed" type="button" data-mdb-toggle="collapse" data-mdb-target="#tampermonkyCollapse" aria-expanded="false" aria-controls="tampermonkyCollapse"> TamperMonkey Script Download <a data-toggle="tooltip" title="TamperMonkey Help" href="https://www.tampermonkey.net/" target="_blank">
+                    <i class="fas fa-question-circle"></i>
+                  </a>
+                </button>
+              </h2>
+              <div id="tampermonkyCollapse" class="accordion-collapse collapse" aria-labelledby="tampermonkeyHeader" data-mdb-parent="#jsonAccordeon">
+                <div class="accordion-body">
+                  <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey Script</button>
+                  <pre><code class="language-javascript line-numbers" class="form-control" id="tampermonkeydump" cols="80" rows="20" style=" font-size: small; "></code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="note note-light">
+            <strong>Locked</strong> Tampermonkey script is generated after initialization button click.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div id="toastContainer" class="position-absolute top-0 end-0 p-3">
+      <!-- Toasts will be added here -->
+    </div>
+    <div id="errorToast" class="toast hide position-absolute top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-danger text-white">
+        <strong class="me-auto">Error</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body"></div>
+    </div>
+    <div id="infoToast" class="toast hide position-absolute top-0 end-0 m-3" role="info" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-info text-white">
+        <strong class="me-auto">Info</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- JS (with PopperJS for toasts) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js"></script>
+    <!-- Syntax Highlighter-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/vs2015.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+    <script>
+      // Initialize tooltips
+      $(function() {
+        $('[data-toggle="tooltip"]').tooltip()
+      });
+    </script>
+  </body>
+</html>

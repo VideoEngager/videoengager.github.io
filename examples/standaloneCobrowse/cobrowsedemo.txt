@@ -1,116 +1,89 @@
 // ==UserScript==
-// @name         cobrowse demo
+// @name         CoBrowse Demo
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  cobrowse demo
+// @version      1.0
+// @description  Demonstration of CoBrowse functionality.
 // @author       You
 // @match        https://www.videoengager.com/*
 // @grant        none
 // ==/UserScript==
-(async function () {
-  const main = async function () {
-    // get config from #tenantId and #veUrl
-    const veUrl = `${veUrl}`;
-    const tenantId = `${tenantId}`;
-    // VEHelpers provides UI do demo cobrowse
-    await VEHelpers.requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
-    await VEHelpers.requireAsync(`${veUrl}/static/assets/veCobrowse.js`);
-    await VEHelpers.documentLoaded();
-    // set ui with ui handler
-    const UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });
-    // setup ve cobrowse
-    await veCobrowse.init(veUrl, tenantId, {
-      initialized: function () {
-        // initialized
-      },
-      on: function (event, data) {
-        if (event === 'session.created') {
-          // session created
-          return;
-        }
-        // you will have sessionCode and sessionId
-        // on session.started and session.authorizing and session.ended events
-        const { sessionCode, id: sessionId } = data;
-        console.log('pin: ', sessionCode, ' id: ', sessionId);
 
-        if (event === 'session.ended') {
-          UI.setCobrowseEnded();
-        }
-        if (event === 'session.started') {
-          UI.setCobrowseStarted();
-        }
-        if (event === 'session.authorizing') {
-          // waiting for authorization
-        }
-      },
-      error: function (error, state) {
-        console.error('veCobrowse: error while ', state, ': ', error.toString());
-        switch (state) {
-          case 'createCobrowseSession':
-            UI.showVENotification('Error: Cannot Create Session!');
-            break;
-          case 'startCobrowse':
-            UI.showVENotification('Error: Cannot Start Cobrowse');
-            break;
-          case 'stopCobrowse':
-            UI.showVENotification('Error: Cobrowse is not stopped!');
-            break;
-          case 'init':
-            document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
-            UI.showVENotification('Error: Cannot initialize cobrowse! Check your settings.');
-            break;
-          case 'getSettings':
-            document.querySelector('#ve-start-cobrowse').style.backgroundColor = 'gray';
-            UI.showVENotification('Error: Cannot get settings! Check your parameters.');
-            break;
-          default:
-            UI.showVENotification('Error');
-            break;
-        }
-      }
+(async function main () {
+  const veUrl = `${veUrl}`;
+  const tenantId = `${tenantId}`;
+
+  async function setupCoBrowse () {
+    try {
+      await requireAsync('https://videoengager.github.io/examples/standaloneCobrowse/veFloatingUI.js');
+      const veFloatingUI = new VeFloatingUIHandler();
+      await requireAsync('https://videoengager.github.io/videoengager/uilib/styles.css');
+      await requireAsync(`${veUrl}/static/assets/veCobrowse.2.js`);
+
+      await veCobrowse.init(tenantId, veUrl);
+      veFloatingUI.insertVeCobrowse();
+      setEventHandlers(veFloatingUI);
+    } catch (error) {
+      console.error('CoBrowse setup failed:', error);
+    }
+  }
+
+  function setEventHandlers (veFloatingUI) {
+    veCobrowse.on('initialized', () => veFloatingUI.showVENotification('CoBrowse is initialized!'));
+    veCobrowse.on('ended', () => {
+      veFloatingUI.closeExpandableContent();
+      veFloatingUI.showVENotification('CoBrowse session is Ended!');
     });
-    if (!veCobrowse.isEnabled()) {
-      console.info('cobrowse is not enabled for tenant: ', tenantId);
-      return;
-    }
-    if (veCobrowse.session) {
-      UI.setExpandableContent({ interactionId: veCobrowse.session.id(), interactionType: 'ID' });
-    }
-    // click button to create cobrowse session
-    UI.startCobrowseButton.addEventListener('click', async function () {
+    veCobrowse.on('started', (data) => {
+      veFloatingUI.setCobrowseStarted();
+      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
+      veFloatingUI.showVENotification('CoBrowse Started!');
+    });
+    veCobrowse.on('authorizing', () => veFloatingUI.showVENotification('Waiting for authorization!'));
+    veCobrowse.on('created', (data) => {
+      veFloatingUI.showVENotification('CoBrowse session Created!');
+      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
+    });
+
+    veFloatingUI.buttons.startCobrowse.addEventListener('click', async () => {
       try {
-        if (!veCobrowse.isEnabled()) {
-          console.error('cobrowse is not enabled');
-          UI.showVENotification('Cobrowse is not enabled!');
-          return;
-        }
-        if (UI.isCobrowseStarted()) {
-          UI.setCobrowseEnded();
-          UI.setExpandableContent({ interactionId: '', interactionType: '' });
-          await veCobrowse.stop();
-        } else {
-          UI.expandCobrowse();
-          await veCobrowse.createCobrowseVeInteraction();
-          UI.setExpandableContent({ interactionId: veCobrowse.session.code(), interactionType: 'PIN' });
-        }
-      } catch (e) {
-        UI.showVENotification('Cobrowse is not loaded!');
-        UI.closeExpandableContent();
+        await veCobrowse.start();
+      } catch (error) {
+        veFloatingUI.showVENotification('CoBrowse is not loaded!');
+        console.error('Error starting CoBrowse:', error);
       }
     });
-    // click button to stop cobrose session
-    UI.stopCobrowseButton.addEventListener('click', async function () {
-      await veCobrowse.stop();
-    });
-  };
 
-  const loadScriptAndExecuteMain = function () {
-    const script = document.createElement('script');
-    script.src = 'https://videoengager.github.io/videoengager/uilib/helpers.js';
-    script.onload = function () {
-      main();
-    };
-    document.head.appendChild(script);
-  };
-  loadScriptAndExecuteMain();
+    veFloatingUI.buttons.stopCobrowse.addEventListener('click', async () => {
+      try {
+        await veCobrowse.stop();
+      } catch (error) {
+        veFloatingUI.showVENotification(error.toString());
+        console.error('Error stopping CoBrowse:', error);
+      }
+    });
+  }
+
+  setupCoBrowse();
 })();
+
+async function requireAsync (url) {
+  return new Promise((resolve, reject) => {
+    const fileType = url.split('.').pop();
+    if (fileType === 'css') {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = url;
+      document.head.appendChild(link);
+      link.onload = resolve;
+      link.onerror = () => reject(new Error(`Failed to load CSS: ${url}`));
+    } else if (fileType === 'js') {
+      const script = document.createElement('script');
+      script.src = url;
+      document.head.appendChild(script);
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+    } else {
+      reject(new Error('Unsupported file type'));
+    }
+  });
+}

@@ -1,151 +1,95 @@
-/* eslint-disable indent */
-/* eslint-disable no-console */
-/* globals VEHelpers, veCobrowse, showToastError, setState, showErrorMessage, tampermonkeyPrepare */
+window.addEventListener('DOMContentLoaded', async function () {
+  const veFloatingUI = new VeFloatingUIHandler();
 
-// ----- COBROWSE EVENT LISTENERS DEFINITIONS -----
-/**
- * Handler for "cobrowse intialized" event
- */
-const onInitialized = function () {
-    setState('Cobrowse is initialized!');
-    tampermonkeyPrepare();
-  };
-
-/**
- * Handler for session created event
- * @param {string} session
- * @param {JSON} data
- */
-const eventHandler = function (event, data) {
-    console.log('eventHandler', event, 'data:', JSON.stringify(data));
-    switch (event) {
-      case 'session.created':
-        handleSessionCreated();
-        break;
-      case 'session.started':
-        handleSessionStarted(data, window.UI);
-        break;
-      case 'session.authorizing':
-        handleSessionAuthorizing();
-        break;
-      case 'session.ended':
-        handleSessionEnded(window.UI);
-        break;
-      default:
-        console.log('Unhandled event:', event, 'data:', JSON.stringify(data));
-        break;
+  window.mainVeCobrose = async function () {
+    const veUrl = document.querySelector('#veUrl').value;
+    const tenantId = document.querySelector('#tenantId').value;
+    veFloatingUI.insertVeCobrowse();
+    document.querySelector('#initializeCoBrowse').disabled = true;
+    try {
+      await loadJsAsync(`${veUrl}/static/assets/veCobrowse.2.js`);
+      await veCobrowse.init(tenantId, veUrl);
+      setEventHandlers();
+    } catch (e) {
+      console.error(e);
+      showToast('Cannot initialize cobrowse!');
     }
+    veFloatingUI.buttons.startCobrowse.addEventListener('click', async function () {
+      try {
+        await veCobrowse.start();
+      } catch (e) {
+        showToast('Cobrowse is not loaded!');
+        console.error(e);
+        veFloatingUI.closeExpandableContent();
+      }
+    });
+    veFloatingUI.buttons.stopCobrowse.addEventListener('click', async function () {
+      try {
+        await veCobrowse.stop();
+      } catch (e) {
+        showToast(e.toString());
+        console.error(e);
+      }
+    });
   };
 
-/**
- * Handler for session created event
- * @param {string} session
- * @param {JSON} data
- * @returns {Promise<void>}
-*/
-const errorHandler = function (error, state) {
-  console.error('veCobrowse: error while ', state, ': ', error.toString());
-  // possible states: createCobrowseSession, startCobrowse, stopCobrowse, init, getSettings
-  showToastError('Error while ' + state + ': ' + error.toString());
-};
-
-(async function () {
-    // ----- MAIN FUNCTIONS, INITILIZE AND MANAGE COBROWSE -----
-    window.mainVeCobrose = async function () {
-        // 1- get required parameters from input fields
-        const veUrl = document.querySelector('#veUrl').value;
-        const tenantId = document.querySelector('#tenantId').value;
-
-      try {
-        if (window?.veCobrowse?.initialized) {
-          console.error('veCobrowse is already initialized');
-          showToastError('Cobrowse is already initialized!');
-          return;
-        }
-
-        // 2- load veCobrowse.js using veUrl
-        await loadVeCobrowse(veUrl);
-
-        // demo floating button to start cobrowse with ui handlers
-        window.UI = VEHelpers.UIHandler({ click2video: false, veCobrowse: true, veIframe: false });
-
-        const listener = {
-          initialized: onInitialized,
-          on: eventHandler,
-          error: errorHandler
-        };
-
-        // 3- initialize cobrowse
-        await veCobrowse.init(veUrl, tenantId, listener);
-        if (!veCobrowse.isEnabled()) {
-          console.info('cobrowse is not enabled for tenant: ', tenantId);
-          return;
-        }
-        if (veCobrowse.session) {
-          // set floating button expandable content with pin
-          window.UI.setExpandableContent({ interactionId: veCobrowse.session.id(), interactionType: 'ID' });
-        }
-        // 4- start or stop cobrowse session on button click
-        // set click listener for floating button to create cobrowse session
-        window.UI.startCobrowseButton.addEventListener('click', async function () {
-          try {
-            if (!veCobrowse.isEnabled()) {
-              console.error('cobrowse is not enabled');
-              showToastError('Cobrowse is not enabled!');
-              return;
-            }
-
-            // if session is active, stop cobrowse session on button click
-            if (veCobrowse.session) {
-              window.UI.setCobrowseEnded();
-              window.UI.setExpandableContent({ interactionId: '', interactionType: '' });
-              await veCobrowse.stop();
-            } else {
-              // if session is not active, create cobrowse session on button click
-              window.UI.expandCobrowse();
-              // actual function to create cobrowse session
-              await veCobrowse.createCobrowseVeInteraction();
-              // 5- get cobrowse pin code and display it in UI
-              window.UI.setExpandableContent({ interactionId: veCobrowse.session.code(), interactionType: 'PIN' });
-            }
-          } catch (e) {
-            showToastError('Cobrowse is not loaded!');
-            window.UI.closeExpandableContent();
-          }
-        });
-        // click button to stop cobrose session
-        window.UI.stopCobrowseButton.addEventListener('click', async function () {
-          try {
-            await veCobrowse.stop();
-          } catch (e) {
-           console.error(e);
-          }
-        });
-      } catch (e) {
-        console.error(e);
-        showErrorMessage('Cannot initialize cobrowse!');
-      }
-    };
-
-    // ----- LOAD AND WAIT LIBRARIES, THEN INITIALIZE -----
-    // load required functions and init main
-    const loadScriptAndExecuteMain = function () {
-      // 2- load helpers.js to use common functions
-      const script = document.createElement('script');
-      script.src = 'https:///videoengager.github.io/videoengager/uilib/helpers.js';
-      script.onload = async function () {
-        // load scripts.js which contains UI functions that are used in this example
-        await VEHelpers.requireAsync('/examples/standaloneCobrowse/scripts.js');
-        // initializeStyles() comes from scripts.js... now load styles for helpers.js
-        await initializeStyles();
-        // 3- set button click licstener to load and init veCobrose.js with provided parameters
-        document.querySelector('#initializeCoBrowse').addEventListener('click', window.mainVeCobrose);
-      };
-      document.head.appendChild(script);
-    };
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // 1- start loading required scripts after page load
-        loadScriptAndExecuteMain();
+  function setEventHandlers () {
+    veCobrowse.on('initialized', function () {
+      showToast('Cobrowse is initialized!', 'info');
     });
-  })();
+    veCobrowse.on('ended', function () {
+      veFloatingUI.closeExpandableContent();
+      showToast('CoBrose session is Ended! But cobrose is still initialized...', 'info');
+    });
+    veCobrowse.on('started', function (data) {
+      veFloatingUI.setCobrowseStarted();
+      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
+      showToast('CoBrowse Started!', 'info');
+    });
+    veCobrowse.on('authorizing', function () {
+      showToast('Waiting for authorization!', 'info');
+    });
+    veCobrowse.on('created', function (data) {
+      showToast('Cobrowse is session Created!', 'info');
+      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
+    });
+  }
+
+  document.querySelector('#initializeCoBrowse').addEventListener('click', window.mainVeCobrose);
+});
+
+function showToast (message, type = 'error', title = '') {
+  if (!title) {
+    title = type.charAt(0).toUpperCase() + type.slice(1);
+  }
+  const toastTemplateId = `${type}Toast`;
+  const toastTemplate = document.querySelector(`#${toastTemplateId}`);
+  if (!toastTemplate) {
+    console.error('Toast template not found: ' + toastTemplateId);
+    return;
+  }
+  const toastClone = toastTemplate.cloneNode(true);
+  toastClone.querySelector('.toast-body').textContent = message;
+  toastClone.querySelector('.me-auto').textContent = title;
+  const toastContainer = document.querySelector('#toastContainer');
+  toastContainer.appendChild(toastClone);
+  const toast = new bootstrap.Toast(toastClone);
+  toast.show();
+  toastClone.addEventListener('hidden.bs.toast', function () {
+    toastClone.remove();
+  });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+function loadJsAsync (url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = resolve;
+    script.onerror = function () {
+      reject(new Error('Failed to load script: ' + url));
+    };
+    document.body.appendChild(script);
+  });
+}

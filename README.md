@@ -13,4 +13,7 @@
 8.  [Single Button Genesys Demo With Chat](https://videoengager.github.io/examples/single-button-genesys-demo.html?enableChat=true)
 9.  [Schedule Demo](https://videoengager.github.io/examples/schedule_example.html)
 10. [Genesys Selector With Callback](https://videoengager.github.io/examples/genesys-selector-wtih-callback.html)
+11. [Standalone Cobrose Demo](https://videoengager.github.io/examples/standaloneCobrowse/index.html)
+12. [Simple Cobrose Demo](https://videoengager.github.io/examples/simpleCobrowse/index.html)
+
 </div>

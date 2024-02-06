@@ -35,7 +35,6 @@
     });
     veCobrowse.on('started', (data) => {
       veFloatingUI.setCobrowseStarted();
-      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
       veFloatingUI.showVENotification('CoBrowse Started!');
     });
     veCobrowse.on('authorizing', () => veFloatingUI.showVENotification('Waiting for authorization!'));

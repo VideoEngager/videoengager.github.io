@@ -41,9 +41,8 @@ window.addEventListener('DOMContentLoaded', async function () {
       veFloatingUI.closeExpandableContent();
       showToast('CoBrose session is Ended! But cobrose is still initialized...', 'info');
     });
-    veCobrowse.on('started', function (data) {
+    veCobrowse.on('started', function () {
       veFloatingUI.setCobrowseStarted();
-      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
       showToast('CoBrowse Started!', 'info');
     });
     veCobrowse.on('authorizing', function () {
@@ -51,7 +50,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     });
     veCobrowse.on('created', function (data) {
       showToast('Cobrowse is session Created!', 'info');
-      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'ID' });
+      veFloatingUI.setExpandableContent({ interactionId: data.code, interactionType: 'PIN' });
     });
   }
 

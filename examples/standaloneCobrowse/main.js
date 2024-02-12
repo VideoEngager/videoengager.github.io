@@ -1,14 +1,28 @@
 window.addEventListener('DOMContentLoaded', async function () {
   const veFloatingUI = new VeFloatingUIHandler();
 
-  window.mainVeCobrose = async function () {
+  const initializeVeCobrowse = async function () {
     const veUrl = document.querySelector('#veUrl').value;
     const tenantId = document.querySelector('#tenantId').value;
     veFloatingUI.insertVeCobrowse();
     document.querySelector('#initializeCoBrowse').disabled = true;
     try {
-      await loadJsAsync(`${veUrl}/static/assets/veCobrowse.2.js`);
+      await loadJsAsync(`${veUrl}/static/assets/vecobrowse.min.js`);
+      // mask sensitive info
+      veCobrowse.maskSensitiveInfo(['#tenantId']);
+      // hide default session controls
+      veCobrowse.disableSessionControls();
+      // initialize cobrowse
       await veCobrowse.init(tenantId, veUrl);
+      // bypass the confirm session dialog
+      veCobrowse.setConfirmSession(() => { return true; });
+      // custom remote control dialog
+      veCobrowse.setConfirmRemoteControl(() => {
+        return new Promise((resolve) => {
+          const consentGiven = customConfirm('Do you agree to grant control of your device?');
+          resolve(consentGiven);
+        });
+      });
       setEventHandlers();
     } catch (e) {
       console.error(e);
@@ -54,7 +68,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     });
   }
 
-  document.querySelector('#initializeCoBrowse').addEventListener('click', window.mainVeCobrose);
+  document.querySelector('#initializeCoBrowse').addEventListener('click', initializeVeCobrowse);
 });
 
 function showToast (message, type = 'error', title = '') {

@@ -28,9 +28,8 @@
         const initializeVeCobrowse = async function () {
           const veUrl = document.getElementById('veUrl').value;
           const tenantId = document.getElementById('tenantId').value;
-        
           try {
-            await loadJsAsync(`${veUrl}/static/assets/veCobrowse.2.js`);
+            await loadJsAsync(`${veUrl}/static/assets/vecobrowse.min.js`);
             setEventHandlers();
             await veCobrowse.init(tenantId, veUrl);
             document.getElementById('initButton').disabled = true;
@@ -38,7 +37,6 @@
             errorHandler(e);
           }
         };
-
         const startSession = async () => {
           document.getElementById('startSessionButton').disabled = true;
           try {

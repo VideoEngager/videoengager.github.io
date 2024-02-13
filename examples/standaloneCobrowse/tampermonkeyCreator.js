@@ -7,10 +7,13 @@ const tampermonkeyPrepare = async function () {
   }
   try {
     // get file from ./cobrosedemo.txt
-    const response = await fetch('/examples/standaloneCobrowse/cobrowsedemo.txt');
+    const response = await fetch('/examples/standaloneCobrowse/cobrowseTemplate.txt');
     let text = await response.text();
     text = text.replace(/\$\{veUrl\}/g, veUrl);
     text = text.replace(/\$\{tenantId\}/g, tenantId);
+    text = text.replace(/\$\{librarySetup\}/g, window.librarySetup.toString());
+    text = text.replace(/\$\{cobrowseEventHandlers\}/g, window.cobrowseEventHandlers.toString());
+    text = text.replace(/\$\{UIEventHandlers\}/g, window.UIEventHandlers.toString());
     document.querySelector('#tampermonkeybutton').removeAttribute('disabled');
     document.querySelector('#tampermonkeydump').innerHTML = text;
   } catch (e) {
@@ -33,4 +36,18 @@ const tampermonkeyPrepare = async function () {
 
 window.addEventListener('DOMContentLoaded', async function () {
   document.querySelector('#initializeCoBrowse').addEventListener('click', tampermonkeyPrepare);
+  document.getElementById('copyButton').addEventListener('click', function () {
+    const textToCopy = document.getElementById('tampermonkeydump').textContent;
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = textToCopy;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempTextArea);
+    const copyButton = document.getElementById('copyButton');
+    copyButton.classList.add('blink');
+    setTimeout(function () {
+      copyButton.classList.remove('blink');
+    }, 400);
+  });
 });

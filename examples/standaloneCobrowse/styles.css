@@ -52,3 +52,12 @@ body {
 .toast {
     position: relative !important;
 }
+@keyframes blink {
+  0% { background-color: #1266f1; }
+  50% { background-color: #1268f17a; }
+  100% { background-color: #1266f1; }
+}
+
+.blink {
+  animation: blink 200ms linear infinite;
+}

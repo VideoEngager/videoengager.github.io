@@ -27,7 +27,7 @@
     <!-- save and load form values to local storage -->
     <script type="text/javascript" src="./localStorageListeners.js"></script>
     <script type="text/javascript" src="./veFloatingUI.js"></script>
-    <script type="text/javascript" src="./customConfirm.js"></script>
+    <script type="text/javascript" src="./ConsentDialogUI.js"></script>
     <script type="text/javascript" src="./tampermonkeyCreator.js"></script>
 </head>
   <body>
@@ -139,6 +139,7 @@
               <div id="tampermonkyCollapse" class="accordion-collapse collapse" aria-labelledby="tampermonkeyHeader" data-mdb-parent="#jsonAccordeon">
                 <div class="accordion-body">
                   <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey Script</button>
+                  <button id="copyButton" class="btn btn-primary m-2">Copy To Clipboard</button>
                   <pre><code class="language-javascript line-numbers" class="form-control" id="tampermonkeydump" cols="80" rows="20" style=" font-size: small; "></code></pre>
                 </div>
               </div>

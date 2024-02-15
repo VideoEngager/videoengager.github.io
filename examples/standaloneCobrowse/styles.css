@@ -61,3 +61,7 @@ body {
 .blink {
   animation: blink 200ms linear infinite;
 }
+
+#saveToLocalStorage {
+    margin-left: 10px;
+}

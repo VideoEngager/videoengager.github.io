@@ -11,7 +11,7 @@
 (async function main () {
   const veUrl = '${veUrl}';
   const tenantId = '${tenantId}';
-  const librarySetup = ${librarySetup};
+  const cobrowseSetup = ${cobrowseSetup};
   const cobrowseEventHandlers = ${cobrowseEventHandlers};
   const UIEventHandlers = ${UIEventHandlers};
 

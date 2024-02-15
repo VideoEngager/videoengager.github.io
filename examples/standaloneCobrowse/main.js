@@ -4,7 +4,7 @@
 window.addEventListener('DOMContentLoaded', async function () {
   const veFloatingUI = new VeFloatingUIHandler();
 
-  const librarySetup = async function (tenantId, veUrl) {
+  const cobrowseSetup = async function (tenantId, veUrl) {
     try {
       // load library
       await addJsByUrl(`${veUrl}/static/assets/vecobrowse.min.js`);
@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', async function () {
       veCobrowse.setConfirmSession(() => { return true; });
       // custom remote control dialog
       veCobrowse.setConfirmRemoteControl(() => {
-        return new Consent().show('Remote Control Request', 'Do you want to allow remote control by ' + CobrowseIO.currentSession.agent().name + '?');
+        return new Consent().show('Remote Control Request', 'Do you want to allow remote control of your browser?');
       });
     } catch (e) {
       console.error(e);
@@ -66,7 +66,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     });
   };
 
-  window.librarySetup = librarySetup;
+  window.cobrowseSetup = cobrowseSetup;
   window.cobrowseEventHandlers = cobrowseEventHandlers;
   window.UIEventHandlers = UIEventHandlers;
 
@@ -76,7 +76,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     veFloatingUI.insertVeCobrowse();
     document.querySelector('#initializeCoBrowse').disabled = true;
 
-    await librarySetup(tenantId, veUrl);
+    await cobrowseSetup(tenantId, veUrl);
     cobrowseEventHandlers();
     UIEventHandlers();
   };

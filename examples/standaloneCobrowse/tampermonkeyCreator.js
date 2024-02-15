@@ -7,11 +7,11 @@ const tampermonkeyPrepare = async function () {
   }
   try {
     // get file from ./cobrosedemo.txt
-    const response = await fetch('/examples/standaloneCobrowse/cobrowseTemplate.txt');
+    const response = await fetch('/examples/standaloneCobrowse/tampermonkeyTemplate.txt');
     let text = await response.text();
     text = text.replace(/\$\{veUrl\}/g, veUrl);
     text = text.replace(/\$\{tenantId\}/g, tenantId);
-    text = text.replace(/\$\{librarySetup\}/g, window.librarySetup.toString());
+    text = text.replace(/\$\{cobrowseSetup\}/g, window.cobrowseSetup.toString());
     text = text.replace(/\$\{cobrowseEventHandlers\}/g, window.cobrowseEventHandlers.toString());
     text = text.replace(/\$\{UIEventHandlers\}/g, window.UIEventHandlers.toString());
     document.querySelector('#tampermonkeybutton').removeAttribute('disabled');

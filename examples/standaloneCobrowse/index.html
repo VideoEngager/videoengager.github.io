@@ -27,7 +27,7 @@
     <!-- save and load form values to local storage -->
     <script type="text/javascript" src="./localStorageListeners.js"></script>
     <script type="text/javascript" src="./veFloatingUI.js"></script>
-    <script type="text/javascript" src="./customConfirm.js"></script>
+    <script type="text/javascript" src="./ConsentDialogUI.js"></script>
     <script type="text/javascript" src="./tampermonkeyCreator.js"></script>
 </head>
   <body>
@@ -53,7 +53,7 @@
     </nav>
     <div class="container" style="    margin-bottom: 100px;">
       <img class="hero-image" id="videoengagerIMG" src="/videoengager/img/ve.svg">
-      <p class="note note-primary"> To start to this demo, please fill tenant ID and videoengager url and click initialize button. <a data-toggle="tooltip" title="" href="https://docs.google.com/document/d/1lxk8Pojych_iHEWBj-b3_zcwrEuA6Okw_JqfuVdXvAo/edit?usp=sharing" target="_blank" data-mdb-original-title="VideoEngager Cobrowse Documentation">
+      <p class="note note-primary"> To start to this demo, please fill tenant ID and videoengager url and click initialize button. <a data-toggle="tooltip" title="" href="https://help.videoengager.com/hc/en-us/articles/24062310023437-Videoengager-Cobrowse-API-guide" target="_blank" data-mdb-original-title="VideoEngager Cobrowse Documentation">
           <i class="fas fa-question-circle"></i>
         </a>
       </p>
@@ -64,9 +64,8 @@
               <strong>Getting Started with CoBrowse:</strong> To begin, please enter the <strong>Tenant ID</strong> and <strong>VideoEngager URL (veUrl)</strong>. These are essential for initializing CoBrowse. Once filled, click 'Initialize' to proceed.
             </p>
             <p>You have the option to save these settings to your local storage for future use. Use the 'Save to Local Storage' button for this purpose. To clear saved data, simply click the 'Clear' button.</p>
-            <p>Additionally, you can set predefined environment parameters directly via the URL. Examples include appending <code>?env=staging</code>, <code>?env=dev</code>, or <code>?env=prod</code> to the URL for respective environment settings. </p>
-          </div>
         </div>
+      </div>
         <div class="col-md-6" id="form" style="margin-top: 20px; display: none;">
           <p>On submit, Page will reditct to the same url with <code>tenantID</code> and <code>veUrl</code> and auto-initialize! </p>
           <div>
@@ -92,7 +91,7 @@
           </div>
         </div>
         <div class="col-md-6" id="demonstration_form">
-          <p class="note note-danger"> How to learn tenant ID <a data-toggle="tooltip" title="" href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank" data-mdb-original-title="Detailed guide on SmartVideo SDK Parameters">
+          <p class="note note-danger"> How to obtain your tenant ID <a data-toggle="tooltip" title="" href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank" data-mdb-original-title="Detailed guide on SmartVideo SDK Parameters">
               <i class="fas fa-question-circle"></i>
             </a>
           </p>
@@ -110,12 +109,10 @@
           <div id="info-message" style="display: none; color: green; margin-top: 10px;"></div>
           <button class="btn btn-info btn-custom" id="initializeCoBrowse">
             <i class="fas fa-sync"></i> Initialize</button>
-          <div style="margin-top: 20px;">
-            <button id="saveToLocalStorage" class="btn btn-primary btn-custom">
-              <i class="fas fa-save"></i> Save to Local Storage </button>
-            <button id="clearData" class="btn btn-secondary btn-custom">
-              <i class="fas fa-eraser"></i> Clear </button>
-          </div>
+          <button id="saveToLocalStorage" class="btn btn-primary btn-custom">
+            <i class="fas fa-save"></i> Save to Local Storage </button>
+          <button id="clearData" class="btn btn-secondary btn-custom">
+            <i class="fas fa-eraser"></i> Clear </button>
         </div>
       </div>
       <div>
@@ -139,6 +136,7 @@
               <div id="tampermonkyCollapse" class="accordion-collapse collapse" aria-labelledby="tampermonkeyHeader" data-mdb-parent="#jsonAccordeon">
                 <div class="accordion-body">
                   <button id="downloadtamper" class="btn btn-primary m-2">Download TamperMonkey Script</button>
+                  <button id="copyButton" class="btn btn-primary m-2">Copy To Clipboard</button>
                   <pre><code class="language-javascript line-numbers" class="form-control" id="tampermonkeydump" cols="80" rows="20" style=" font-size: small; "></code></pre>
                 </div>
               </div>

@@ -1,0 +1,59 @@
+// ==UserScript==
+// @name         VideoEngager Cobrowse Demo
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Demonstration of Cobrowse functionality
+// @author       You
+// @match        https://www.videoengager.com/*
+// @grant        none
+// ==/UserScript==
+
+(async function main () {
+  const veUrl = '${veUrl}';
+  const tenantId = '${tenantId}';
+  const cobrowseSetup = ${cobrowseSetup};
+  const cobrowseEventHandlers = ${cobrowseEventHandlers};
+  const UIEventHandlers = ${UIEventHandlers};
+
+  async function LoadUILib () {
+    try {
+      await addJsByUrl('http://localhost/examples/standaloneCobrowse/ConsentDialogUI.js');
+      await addJsByUrl('https://videoengager.github.io/examples/standaloneCobrowse/veFloatingUI.js');
+      await addCssByUrl('https://videoengager.github.io/videoengager/uilib/styles.css');
+    } catch (error) {
+      console.error('CoBrowse setup failed:', error);
+    }
+  }
+
+  await LoadUILib();
+  const veFloatingUI = new VeFloatingUIHandler();
+  veFloatingUI.insertVeCobrowse();
+  function showToast (text) {
+     veFloatingUI.showVENotification(text);
+  }
+
+  await cobrowseSetup(tenantId, veUrl);
+  cobrowseEventHandlers();
+  UIEventHandlers();
+})();
+
+function addJsByUrl (url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+    document.body.appendChild(script);
+  });
+}
+
+function addCssByUrl (url) {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    link.onload = () => resolve(url);
+    link.onerror = () => reject(`Failed to load CSS file: ${url}`);
+    document.head.appendChild(link);
+  });
+}

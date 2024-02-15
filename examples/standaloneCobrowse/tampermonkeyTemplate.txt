@@ -32,7 +32,7 @@
      veFloatingUI.showVENotification(text);
   }
 
-  await librarySetup(tenantId, veUrl);
+  await cobrowseSetup(tenantId, veUrl);
   cobrowseEventHandlers();
   UIEventHandlers();
 })();

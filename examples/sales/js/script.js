@@ -1,8 +1,7 @@
-/* global XMLHttpRequest CXBus mdb $ */
+/* global XMLHttpRequest CXBus mdb console $ bootstrap introJs */
 const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
-const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/1.02/videoengager.widget.js';
+const videoengagerWidgetCDN = 'https://cdn.videoengager.com/videoengager/js/videoengager.widget.min.js';
 const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
-const BOOTSTRAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js';
 let genesysEnvList = [
   'mypurecloud.com.au',
   'mypurecloud.com',
@@ -54,6 +53,62 @@ async function retrieveEnvironmentList () {
     console.error('Error retrieving Genesys environment object', e);
   }
 }
+const requiredFieldsCheck = function () {
+  let unfilledInputId;
+
+  document.querySelectorAll('input.form-control,#dataURL').forEach(input => {
+    if (!input.value && !unfilledInputId) {
+      unfilledInputId = input.id;
+    }
+  });
+
+  return unfilledInputId;
+};
+
+const validateInputsFormat = function () {
+  const urlRegex = /^(https?):\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+  const regex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  const orgGuidElement = document.getElementById('orgGuid');
+  const deploymentIdElement = document.getElementById('deploymentKey');
+  const veUrlElement = document.getElementById('veUrl');
+
+  const orgGuidValid = regex.test(orgGuidElement.value);
+  const deploymentIdValid = regex.test(deploymentIdElement.value);
+
+  const invalidIds = [];
+
+  if (!orgGuidValid) {
+    invalidIds.push(orgGuidElement.id);
+  }
+
+  if (!deploymentIdValid) {
+    invalidIds.push(deploymentIdElement.id);
+  }
+
+  if (!urlRegex.test(veUrlElement.value)) {
+    invalidIds.push(veUrlElement.id);
+  }
+
+  return invalidIds;
+};
+
+function checkInputs () {
+  const inputs = document.querySelectorAll('input.form-control,#dataURL');
+  const button = document.getElementById('loadGenesysLib');
+
+  let allInputsFilled = true;
+
+  inputs.forEach(input => {
+    if (input.value.trim() === '') {
+      input.classList.add('input-error');
+      allInputsFilled = false;
+    } else {
+      input.classList.remove('input-error');
+    }
+  });
+
+  button.disabled = !allInputsFilled;
+}
 
 /** *  MAIN FUNCTION * **/
 
@@ -84,6 +139,22 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
   // load genesys library on button click (genesys library will run on load)
   document.querySelector('#loadGenesysLib').addEventListener('click', async function (e) {
+    const unfilledInputId = requiredFieldsCheck();
+    if (unfilledInputId) {
+      showToastError(`Field corresponding to selector #${unfilledInputId} is empty!`, 'Please fill all the inputs!');
+      return;
+    }
+    const invalidIds = validateInputsFormat();
+    if (invalidIds.length > 0) {
+      showToastError(`Field corresponding to selector #${invalidIds.join(', #')} is invalid!`, 'Please check the inputs!');
+      return;
+    }
+
+    // disable all inputs
+    document.querySelectorAll('input.form-control,#dataURL').forEach(input => {
+      input.setAttribute('disabled', true);
+    });
+
     const uimode = document.querySelector('input[name="ui_mode"]:checked').value;
     // apply demo mode configurations
     await loadJS('./js/' + uimode + '.config.js');
@@ -102,12 +173,57 @@ document.addEventListener('DOMContentLoaded', async function (e) {
     $('#tampermonkeybutton').attr('disabled', false);
 
     document.querySelector('#downloadjson').addEventListener('click', async function (e) {
-      download('jsonScript.js', document.getElementById('jsondump').value);
+      const content = document.getElementById('jsondump').textContent || document.getElementById('jsondump').innerText;
+      download(new Date().getTime() + 'widgetconfig.js', content);
     });
     document.querySelector('#downloadtamper').addEventListener('click', async function (e) {
-      download('tampermonkey.js', document.getElementById('tempermonkeydump').value);
+      const content = document.getElementById('tampermonkeydump').textContent || document.getElementById('tampermonkeydump').innerText;
+      download(new Date().getTime() + 'tampermonkey.js', content);
     });
   });
+  document.getElementById('refreshPage').addEventListener('click', function () {
+    window.location.reload();
+  });
+  checkInputs();
+  // Check the inputs every time they change
+  $('input.form-control,#dataURL').on('input', function () {
+    checkInputs();
+  });
+
+  introJs().setOptions({
+    dontShowAgain: true,
+    steps: [
+      {
+        intro: "Welcome to the VideoEngager Genesys Widget Demo! Let's take a quick tour."
+      },
+      {
+        element: '#collapseOne',
+        intro: 'Configuring SDKs: All fields are required and are specific to your organization. Visit <a href="https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-SmartVideo-SDKs" target="_blank">help</a> for more information.',
+        position: 'right'
+      },
+      {
+        element: '#saveConf',
+        intro: 'Once all the fields are completed, save them locally so that the settings can be reused the next time you load the page.'
+      },
+      {
+        element: '#ui_mode',
+        intro: 'Choose the preferred UI mode for the demonstration.'
+      },
+      {
+        element: '#loadGenesysLib',
+        intro: 'Once the UI mode is selected, click <b>Load Widget</b> to load SmartVideo and Genesys libraries. The page is now ready for demonstrations.'
+      },
+      {
+        element: '#refreshPage',
+        intro: 'To change the UI mode or parameters, the page must be reloaded by pressing the <b>Refresh</b> button.'
+      },
+
+      {
+        element: '#jsonAccordeon',
+        intro: 'Users have the option to download the demo configuration or the Tampermonkey script, both ready for use on customer pages. Additional information is available through the provided help links.'
+      }
+    ]
+  }).start();
 });
 
 /** *  HELPER FUNCTIONS * **/
@@ -118,6 +234,7 @@ const fillDataURLDropdown = function () {
     option.value = 'https://api.' + env;
     option.text = env;
     document.querySelector('#dataURL').appendChild(option);
+    document.querySelector('#dataURL').selectedIndex = -1;
   }
 };
 
@@ -150,7 +267,6 @@ const loadJSON = function (path) {
 const fillEnvironmentParameters = async function () {
   const urlParams = new URLSearchParams(window.location.search);
   const envPath = urlParams.get('env'); // environment parameter EX: prod, staging, dev
-
   if (envPath) {
     const envConfig = await loadJSON('./config/' + envPath + '.json');
     document.querySelector('#targetAddress').value = envConfig.en.targetAddress;
@@ -159,7 +275,6 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = envConfig.en.veUrl;
     document.querySelector('#tenantId').value = envConfig.en.tenantId;
     document.querySelector('#dataURL').selectedIndex = genesysEnvList.indexOf(envConfig.en.dataURL.substring(12));
-    $('#collapseOne').removeClass('show');
   } else if (window.localStorage && window.localStorage.getItem('envConf') === 'true') {
     document.querySelector('#targetAddress').value = window.localStorage.getItem('targetAddress');
     document.querySelector('#orgGuid').value = window.localStorage.getItem('orgGuid');
@@ -167,11 +282,20 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = window.localStorage.getItem('veUrl');
     document.querySelector('#tenantId').value = window.localStorage.getItem('tenantId');
     document.querySelector('#dataURL').selectedIndex = window.localStorage.getItem('dataURL');
-    $('#collapseOne').removeClass('show');
   }
-
+  checkInputs();
   // set listener for save and clear buttons
   document.querySelector('#saveConf').addEventListener('click', async function (e) {
+    const unfilledInputId = requiredFieldsCheck();
+    if (unfilledInputId) {
+      showToastError(`Field corresponding to selector #${unfilledInputId} is empty!`, 'Please fill all the inputs!');
+      return;
+    }
+    const invalidIds = validateInputsFormat();
+    if (invalidIds.length > 0) {
+      showToastError(`Field corresponding to selector #${invalidIds.join(', #')} is invalid!`, 'Please check the inputs!');
+      return;
+    }
     window.localStorage.setItem('envConf', 'true');
     window.localStorage.setItem('targetAddress', document.querySelector('#targetAddress').value);
     window.localStorage.setItem('orgGuid', document.querySelector('#orgGuid').value);
@@ -196,6 +320,7 @@ const fillEnvironmentParameters = async function () {
     document.querySelector('#veUrl').value = '';
     document.querySelector('#tenantId').value = '';
     document.querySelector('#dataURL').selectedIndex = '-1';
+    checkInputs();
   });
 
   document.querySelectorAll('.form-outline').forEach((formOutline) => {
@@ -242,19 +367,65 @@ const dumpTamper = function (uimode) {
   ` + config;
   let singlebutton = '';
   if (uimode === 'singlebutton') {
-    singlebutton = `    // insert fixed button
-    var fixedButton = document.createElement('button');
-    fixedButton.style.cssText = 'position: fixed;width: 100px;height: 50px;z-index: 100;bottom: 10px;right: 10px;';
+    singlebutton = `
+    var fixedButton = document.createElement('div');
     fixedButton.id = "startVideoCall";
-    fixedButton.innerText = "Start Video Call";
-    fixedButton.addEventListener("click", function () {CXBus.command('VideoEngager.startVideoEngager');});
-    document.body.appendChild(fixedButton);`;
+    fixedButton.className = "ve-floating-button";
+    fixedButton.addEventListener('click', function () {
+      CXBus.command('VideoEngager.startVideoEngager');
+      $('#startVideoCall').addClass('spinner');
+    });
+    CXBus.subscribe('WebChatService.ended', function () {
+      $('#startVideoCall').removeClass('spinner');
+    });
+    CXBus.subscribe('WebChatService.started', function () {
+      $('#startVideoCall').addClass('spinner');
+    });
+    CXBus.subscribe('WebChatService.restored', function () {
+      $('#startVideoCall').removeClass('spinner');
+    });
+    document.body.appendChild(fixedButton);
+    const setVideoCallStartedListener = function () {
+      let endcallDebounce = false;
+      const debouncedAnswer = function () {
+        if (!endcallDebounce) {
+          console.log('Calling EndChat CXBUS Command');
+          CXBus.command('WebChatService.endChat');
+          endcallDebounce = true;
+          setTimeout(function () {
+            endcallDebounce = false;
+          }, 1000);
+        }
+      };
+      const messageHandler = function (e) {
+        console.log('messageHandler', e.data);
+        if (e.data && e.data.type === 'CallStarted') {
+          console.log('video call started');
+        }
+        if (e.data && e.data.type === 'popupClosed') {
+          console.log('video popup closed');
+          debouncedAnswer();
+        }
+      };
+      if (window.addEventListener) {
+        window.addEventListener('message', messageHandler, false);
+        window.addEventListener('VideoEngagerError', debouncedAnswer);
+      } else {
+        window.attachEvent('onmessage', messageHandler);
+        window.attachEvent('VideoEngagerError', debouncedAnswer);
+      }
+      window.addEventListener('VideoEngagerError', function () {
+        debouncedAnswer();
+      })
+    };
+    setVideoCallStartedListener();
+    `;
   }
   const template = `// ==UserScript==
-  // @name         callback staging
+  // @name         Videoengager Tampermonkey Script
   // @namespace    http://tampermonkey.net/
   // @version      0.1
-  // @description  try to take over the world!
+  // @description  Genesys Widget Demo
   // @author       You
   // @match        https://www.videoengager.com/
   // @icon         https://www.google.com/s2/favicons?domain=videoengager.com
@@ -287,15 +458,15 @@ const dumpTamper = function (uimode) {
       });
     };
 
-    ${singlebutton}
-
     const widgetBaseUrl = 'https://apps.mypurecloud.de/widgets/9.0/';
     const videoengagerWidget = 'https://videoengager.github.io/videoengager/js/videoengager.widget.js';
     const videoengagerWidgetCSSCDN = 'https://cdn.videoengager.com/examples/css/genesys-selector-wtih-callback.css';
-  
+    const buttonStyle = 'https://videoengager.github.io/examples/sales2/style.css';
+
     // styling files are loaded
     loadCSS('https://videoengager.github.io/widgets.min.css');
     loadCSS(videoengagerWidgetCSSCDN);
+    loadCSS(buttonStyle);
     // videoengager library
     // 1- load cxbus
     await loadJS(widgetBaseUrl + 'cxbus.min.js');
@@ -305,10 +476,23 @@ const dumpTamper = function (uimode) {
     // 3- load config
     ${config}
     CXBus.loadPlugin('widgets-core');
+    ${singlebutton}
   })();`;
-  const elem = document.getElementById('tempermonkeydump');
+  const elem = document.getElementById('tampermonkeydump');
   elem.innerHTML = template;
   window.hljs.highlightElement(elem);
+};
+
+let endcallDebounce = false;
+const debouncedAnswer = function () {
+  if (!endcallDebounce) {
+    console.log('Calling EndChat CXBUS Command');
+    CXBus.command('WebChatService.endChat');
+    endcallDebounce = true;
+    setTimeout(function () {
+      endcallDebounce = false;
+    }, 1000);
+  }
 };
 
 /**
@@ -322,7 +506,7 @@ const setVideoCallStartedListener = function () {
     }
     if (e.data && e.data.type === 'popupClosed') {
       console.log('video popup closed');
-      CXBus.command('WebChatService.endChat');
+      debouncedAnswer();
     }
   };
   if (window.addEventListener) {
@@ -332,23 +516,52 @@ const setVideoCallStartedListener = function () {
   }
 };
 
-/**
- * set given genesys keys and videoengager parameters if exist
- * @param {object} config
- * @returns
- */
+const sanitizeInput = (selector) => {
+  const element = document.querySelector(selector);
+  if (element && typeof element.value === 'string') {
+    return element.value.trim(); // Remove leading and trailing spaces.
+  }
+  return ''; // Default fallback.
+};
+
+const showToastError = function (message, title = 'Error') {
+  // Clone the template toast
+  const toastTemplate = document.querySelector('#errorToast');
+  const toastClone = toastTemplate.cloneNode(true);
+
+  // Add the error message
+  toastClone.querySelector('.toast-body').textContent = message;
+  toastClone.querySelector('.me-auto').textContent = title;
+
+  // Append the cloned toast to the toast container
+  const toastContainer = document.querySelector('#toastContainer');
+  toastContainer.appendChild(toastClone);
+
+  // Use Bootstrap's toast API to show the toast
+  const toast = new bootstrap.Toast(toastClone);
+  toast.show();
+
+  // Remove the toast element from the DOM after it's hidden
+  toastClone.addEventListener('hidden.bs.toast', function () {
+    toastClone.remove();
+  });
+  // sctoll to top
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
+
 const setConfig = async function (uimode) {
-  // tenant ID
-  window._genesys.widgets.videoengager.tenantId = document.querySelector('#tenantId').value;
-  window._genesys.widgets.videoengager.veUrl = document.querySelector('#veUrl').value;
-  window._genesys.widgets.webchat.transport.dataURL = document.querySelector('#dataURL').value;
-  window._genesys.widgets.webchat.transport.deploymentKey = document.querySelector('#deploymentKey').value;
-  window._genesys.widgets.webchat.transport.orgGuid = document.querySelector('#orgGuid').value;
-  window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = document.querySelector('#targetAddress').value;
+  window._genesys.widgets.videoengager.tenantId = sanitizeInput('#tenantId');
+  window._genesys.widgets.videoengager.veUrl = sanitizeInput('#veUrl');
+  window._genesys.widgets.webchat.transport.dataURL = sanitizeInput('#dataURL');
+  window._genesys.widgets.webchat.transport.deploymentKey = sanitizeInput('#deploymentKey');
+  window._genesys.widgets.webchat.transport.orgGuid = sanitizeInput('#orgGuid');
+  window._genesys.widgets.webchat.transport.interactionData.routing.targetAddress = sanitizeInput('#targetAddress');
+
   if (uimode !== 'singlebutton') {
-    window._genesys.widgets.callback.dataURL = document.querySelector('#veUrl').value + '/api/genesys/callback';
-    window._genesys.widgets.callback.ewt.queue = document.querySelector('#targetAddress').value;
-    window._genesys.widgets.callback.userData.environment = document.querySelector('#dataURL').value;
+    window._genesys.widgets.callback.dataURL = `${sanitizeInput('#veUrl')}/api/genesys/callback`;
+    window._genesys.widgets.callback.ewt.queue = sanitizeInput('#targetAddress');
+    window._genesys.widgets.callback.userData.environment = sanitizeInput('#dataURL');
   }
 };
 
@@ -366,7 +579,7 @@ const setUIHandlers = function () {
   document.querySelector('#startVideoCall').addEventListener('click', function () {
     CXBus.command('VideoEngager.startVideoEngager');
     // document.getElementById('stopVideoCall').style.display = 'block';
-    $('.fa-video').addClass('fa-spin');
+    $('#startVideoCall').addClass('spinner');
   });
   document.querySelector('#stopVideoCall').addEventListener('click', function () {
     CXBus.command('VideoEngager.endCall');
@@ -375,25 +588,31 @@ const setUIHandlers = function () {
   CXBus.subscribe('WebChatService.ended', function () {
     console.log('Interaction Ended');
     document.getElementById('stopVideoCall').style.display = 'none';
-    $('.fa-video').removeClass('fa-spin');
+    $('#startVideoCall').removeClass('spinner');
   });
 
   CXBus.subscribe('WebChatService.started', function () {
     console.log('Interaction started');
     // document.getElementById('stopVideoCall').style.display = 'block';
-    $('.fa-video').addClass('fa-spin');
+    $('#startVideoCall').addClass('spinner');
   });
 
   CXBus.subscribe('WebChatService.restored', function (e) {
     console.error('Chat restored, cleaning it' + JSON.stringify(e));
     CXBus.command('WebChatService.endChat');
     document.getElementById('stopVideoCall').style.display = 'none';
-    $('.fa-video').removeClass('fa-spin');
+    $('#startVideoCall').removeClass('spinner');
   });
 
   CXBus.subscribe('WebChatService.error', function (e) {
     // Log the error and continue
     console.error('WebService error' + JSON.stringify(e));
+    showToastError(e?.data?.errors[0]?.response?.responseJSON?.message);
+  });
+
+  // custom videoengager error
+  CXBus.subscribe('VideoEngager.error', function (e) {
+    e?.data?.data?.responseJSON?.error && showToastError(e?.data?.data?.responseJSON?.error, 'Callback Error');
   });
 
   setVideoCallStartedListener();

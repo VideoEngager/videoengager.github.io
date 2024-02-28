@@ -24,9 +24,9 @@ window._genesys.widgets = {
     extraAgentMessage: '**This is a VideoEngager Video Call!!!**',
     webChatFormData: {
       nickname: 'Visitor',
-      firstname: 'Duty Free',
-      lastname: 'Visitor',
-      subject: 'Duty Free Demo',
+      firstname: 'Anonymous Customer',
+      lastname: '',
+      subject: 'Genesys Widget Demo',
       userData: {}
     },
     i18n: {

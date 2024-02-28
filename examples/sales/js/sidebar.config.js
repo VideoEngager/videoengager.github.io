@@ -70,7 +70,15 @@ window._genesys.widgets = {
     expandOnHover: true,
     channels: [
       {
-        clickCommand: 'VideoEngager.startVideoEngager',
+        enable: true,
+        clickCommand: 'VideoEngager.startAudio',
+        readyEvent: 'VideoEngager.ready',
+        displayName: 'Audio Call',
+        i18n: 'VideoTitle',
+        icon: 'call-outgoing'
+      },
+      {
+        clickCommand: 'VideoEngager.startVideo',
         readyEvent: 'VideoEngager.ready',
         displayName: 'Video Chat',
         i18n: 'VideoTitle',
@@ -95,13 +103,13 @@ window._genesys.widgets = {
     ]
   },
   calendar: {
-    showAvailability: false,
-    numberOfDays: 5,
-    hideUnavailableTimeSlots: false,
+    showAvailability: true,
+    numberOfDays: 7,
+    hideUnavailableTimeSlots: true,
     calendarHours: {
-      interval: 10,
+      interval: 20,
       allDay: {
-        openTime: '09:00',
+        openTime: '00:00',
         closeTime: '23:59'
       }
     }

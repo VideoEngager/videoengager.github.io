@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>VideoEngager - Kiosk Demo</title>
+    <link href="./css/styles.css" type="text/css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./config/conf.js" defer></script>
+    <script src="https://cdn.videoengager.com/videoengager/js/1.02/videoengager.widget.js" defer></script>
+    <script type="text/javascript" src="./js/kiosk.js"></script>
+</head>
+
+<body class="container-body" style="
+    padding-bottom: 0px;
+    padding-top: 0px;
+
+">
+    <div id="closeVideoButtonContainer" style="display: none;">
+        <button id="closeVideoButton">
+            <svg focusable="false" viewBox="0 0 24 24" style="width: 100%;height:100%;fill:white;">
+                <path
+                    d="m4.51 15.48 2-1.59c.48-.38.76-.96.76-1.57v-2.6c3.02-.98 6.29-.99 9.32 0v2.61c0 .61.28 1.19.76 1.57l1.99 1.58c.8.63 1.94.57 2.66-.15l1.22-1.22c.8-.8.8-2.13-.05-2.88-6.41-5.66-16.07-5.66-22.48 0-.85.75-.85 2.08-.05 2.88l1.22 1.22c.71.72 1.85.78 2.65.15z">
+                </path>
+            </svg>
+        </button>
+    </div>
+    <div id="oncall-screen" style="display: none;">
+
+        <div id="myVideoHolder"></div>
+        <button id="cancel-button-loading" style="display: none;">
+            <svg focusable="false" viewBox="0 0 24 24" style="width: 100%;height:100%;fill:white;">
+                <path
+                    d="m4.51 15.48 2-1.59c.48-.38.76-.96.76-1.57v-2.6c3.02-.98 6.29-.99 9.32 0v2.61c0 .61.28 1.19.76 1.57l1.99 1.58c.8.63 1.94.57 2.66-.15l1.22-1.22c.8-.8.8-2.13-.05-2.88-6.41-5.66-16.07-5.66-22.48 0-.85.75-.85 2.08-.05 2.88l1.22 1.22c.71.72 1.85.78 2.65.15z">
+                </path>
+            </svg>
+        </button>
+        <div id="carousel" class="carousel slide" data-interval="5000" data-wrap="true" data-pause="false"
+            data-ride="carousel" style="top:0px;">
+            <div class="carousel-inner" id="carousel-inner">
+                <div id="carousel-item-1" class="carousel-item active">
+                    <div id="loadingScreen">
+                        <div class="loader1"></div>
+                        <div class="loader2"></div>
+                        <p id="loadingText"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="error-text" style="display: none;"></div>
+    <div id="initial-screen" style="display: none;
+
+    object-fit: cover;
+    background-size: cover;
+    justify-content: center;
+    align-items: center;
+">
+        <div class="text-center" id="buttonContainer">
+            <button id="StartVideoCall"
+                style="border-radius: 999999px;overflow: hidden;padding: 20px;background: #005287;
+                color: white;border: none;aspect-ratio: 1/1; max-width: 200px; display:flex;flex-direction: column;justify-content: center;align-items: center;">
+                <img src="https://staging.leadsecure.com/nextjs/favicon-white.svg"
+                    alt="logo" style="width: 60%;user-select: none;">
+                <span id="connectButton" style="user-select: none;">
+
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div id="errorModal" class="modal fade">
+        <div role="document" class="modal-custom" tabindex="-1" aria-hidden="true">
+            <div class="modal-content-custom">
+                <div class="modal-header">
+                    <div style="width: 100px;height:100px;">
+                        <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"
+                            data-testid="ErrorOutlineRoundedIcon" fill="white">
+                            <path
+                                d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h5 class="modal-title" id="modalTitle">Error</h5>
+
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer-custom">
+                    <button type="button" class="error-button" data-dismiss="modal" aria-label="Close">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

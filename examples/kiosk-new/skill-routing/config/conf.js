@@ -1,12 +1,12 @@
 window.GENESYS_CONFIG = {
   en: {
-    organizationId: '639292ca-14a2-400b-8670-1f545d8aa860',
-    deploymentId: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
-    videoengagerUrl: 'https://staging.leadsecure.com',
-    tennantId: 'oIiTR2XQIkb7p0ub',
-    environment: 'https://api.mypurecloud.de',
-    queue: 'skill_based', // change this to the queue name you want to use
-    language: 'English' // set language skill if needed
+    organizationId: '327d10eb-0826-42cd-89b1-353ec67d33f8',
+    deploymentId: 'c2eaaa5c-d755-4e51-9136-b5ee86b92af3',
+    videoengagerUrl: 'https://dev.videoengager.com',
+    tennantId: 'test_tenant',
+    environment: 'https://api.mypurecloud.com.au',
+    queue: 'video', // change this to the queue name you want to use
+    // language: 'English' // set language skill if needed
     // skills: ['Test','Support','Test123'] // set skills if needed
   },
   de: {

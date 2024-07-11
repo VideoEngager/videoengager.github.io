@@ -249,7 +249,7 @@ const loadGenesysWidget = function () {
       CXBus.command('VideoEngager.endCall');
       setInitialScreen();
     });
-
+/*
     $('#closeVideoButtonHolder').on('click', function (e) {
       try {
         // click position minus header offset 52
@@ -258,7 +258,7 @@ const loadGenesysWidget = function () {
         console.log('click cannot be transferred this time', e.pageX, e.pageY);
       }
     });
-
+*/
     CXBus.subscribe('WebChatService.ended', function () {
       console.log('Interaction Ended');
       setInitialScreen();
@@ -387,8 +387,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
     console.log('messageHandler', e.data);
     if (e.data && e.data.type === 'CallStarted') {
       $('#loadingScreen,#carousel').hide();
-      $('#closeVideoButtonHolder').show();
-      $('#closeVideoButtonHolder').focus();
+      // $('#closeVideoButtonHolder').show();
+      // $('#closeVideoButtonHolder').focus();
       $('#myVideoHolder').css('height', '100%');
 
       callTimeout.cancel();

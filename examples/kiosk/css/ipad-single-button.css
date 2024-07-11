@@ -99,13 +99,11 @@
 .header-css {
   background: rgb(41, 38, 48) !important;
   width: 100%;
-  position: fixed;
   top: 0px;
   left: 0px;
   right: 0px;
   display: flex;
   padding: 10px;
-  padding-bottom: 20px;
   height: 50px;
   justify-content: center;
   z-index: 502;
@@ -398,10 +396,11 @@
   overflow: hidden;
   max-height: 100vh;
   padding-bottom: 50px;
-  padding-top: 50px;
   background: royalblue;
+  display: flex;
+  flex-direction: column;
 }
-
+/*
 #closeVideoButtonHolder {
   z-index: 499;
   pointer-events: none;
@@ -409,7 +408,7 @@
     width: 100%;
     height: 100%;
 }
-
+*/
 .loader1 {
   height: 25vh;
   width: 25vh;

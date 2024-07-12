@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* global fetch */
+/* global fetch alert */
 const PopupManager = function () {
   const left = (window.screen.width / 2) - (770 / 2);
   const top = (window.screen.height / 2) - (450 / 2);
@@ -79,7 +79,13 @@ class VideoEngager {
         YourMeetingURL: 'Your Meeting URL',
         CopyURL: 'Copy URL',
         DownloadICX: 'Download .ics',
-        JoinVideoMeeting: 'Join Video Meeting'
+        JoinVideoMeeting: 'Join Video Meeting',
+        PhoneNumberError: 'Please enter a valid phone number.',
+        CancelSchedule: 'Cancel Schedule',
+        TenantError: 'Configuration error. Wrong Tenant ID.',
+        BrokerageError: 'Server error. Please contact support.',
+        GenesysCallbackError: 'Configuration error. Scheduled meeting is not allowed.',
+        GenesysObjectError: 'Configuration error. Scheduled meeting configuration does not exist.'
       }
     };
     let selectedLang;
@@ -217,8 +223,8 @@ class VideoEngager {
       QuerySelector('.cx-confirmation-wrapper').innerHTML += '<div id="downloadLinkHolder"></div>';
       QuerySelector('#downloadLinkHolder').append(element);
       let downloadLinkHolderText = '<a class="cx-btn cx-btn-default abutton" target="_blank" href="' + createGoogleCalendarEvent(icsCalendarData) + '">' + i18n.AddGoogleCalendar + '</a>';
-      downloadLinkHolderText += '<a style=" background-color: transparent; border: 0; " class="cx-btn cx-btn-default abutton" target="_blank" href="' + callback.videoengager.meetingUrl + '">' + i18n.JoinVideoMeeting + '</a>';
-      downloadLinkHolderText += '<a style=" background-color: #d64040; border: 0; " class="cx-btn cx-btn-default abutton" id="endcallback">Cancel Schedule</a>';
+      downloadLinkHolderText += '<a class="cx-btn cx-btn-default abutton" target="_blank" href="' + callback.videoengager.meetingUrl + '">' + i18n.JoinVideoMeeting + '</a>';
+      downloadLinkHolderText += '<a style=" background-color: #d64040; border: 0; " class="cx-btn cx-btn-default abutton" id="endcallback">' + i18n.CancelSchedule + '</a>';
       QuerySelector('#downloadLinkHolder').innerHTML += downloadLinkHolderText;
       QuerySelector('#copyURL').addEventListener('click', function (e) {
         e.preventDefault();
@@ -284,6 +290,46 @@ class VideoEngager {
           style: {}
         };
       }
+    };
+
+    const updateCalendarJson = async function () {
+      const enableCalendarAPI = window._genesys.widgets.videoengager && window._genesys.widgets.videoengager.enableCalendarAPI;
+      if (!enableCalendarAPI) {
+        return;
+      }
+      const handleError = function (msg) {
+        const Common = window._genesys.widgets.common;
+        if (!Common) {
+          return;
+        }
+        Common.showAlert(QuerySelector('.cx-widget.cx-callback'), { text: `Error on getting calendar Json\n${msg} \ntenantId: ` + TENANT_ID + '\n', buttonText: 'Ok' });
+      };
+      // load calendar data
+      try {
+        const url = window._genesys.widgets.videoengager.veUrl + '/api/genesys/callback/' + TENANT_ID + '/calendar';
+        const response = await fetch(url, {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: 'GET'
+        });
+        if (!response.ok) {
+          // check if the status code is a 400 error
+          const errorMessage = `There was a ${response.status} error`;
+          console.error(errorMessage);
+          handleError(errorMessage);
+          return;
+        }
+        const data = await response.json();
+        // set calendar configuration calendar with the data
+        window._genesys.widgets.calendar = JSON.parse(data);
+        window.CXBus.command('Calendar.configure', window._genesys.widgets.calendar);
+      } catch (error) {
+        handleError(error.toString());
+        console.error(error.toString());
+      }
+      return false;
     };
 
     const checkExistingCallback = function () {
@@ -367,6 +413,7 @@ class VideoEngager {
       console.log('on init extension VideoEngager');
       init();
       oVideoEngager = CXBus.registerPlugin('VideoEngager');
+      oVideoEngager.publish('ready');
       oVideoEngager.registerCommand('startVideo', function (e) {
         // videochat channel is selected
         console.log('startVideoTriggered');
@@ -415,6 +462,7 @@ class VideoEngager {
       });
 
       oVideoEngager.subscribe('Callback.opened', function (e) {
+        updateCalendarJson();
         QuerySelector('#cx_form_callback_subject').style.display = 'none';
         QuerySelector('label[for="cx_form_callback_subject"]').style.display = 'none';
 
@@ -423,7 +471,21 @@ class VideoEngager {
         QuerySelector('#cx_form_callback_phone_number').value = window._genesys.widgets.videoengager.dialCountryCode || '';
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
           if (e.data.responseJSON && e.data.responseJSON.message) {
-            QuerySelector('#cx_callback_information').innerText = JSON.stringify(e.data.responseJSON.message);
+            if (e.data.responseJSON.message === 'A caller id number cannot be parsed as a phone address') {
+              QuerySelector('#cx_callback_information').innerText = i18n.PhoneNumberError;
+            }
+            if (e.data.responseJSON.message === 'genesys object does not exist') {
+              QuerySelector('#cx_callback_information').innerText = i18n.GenesysObjectError;
+            }
+            if (e.data.responseJSON.message === 'genesys callback feature is not enabled') {
+              QuerySelector('#cx_callback_information').innerText = i18n.GenesysCallbackError;
+            }
+            if (e.data.responseJSON.message === 'brokerage or user object does not exist') {
+              QuerySelector('#cx_callback_information').innerText = i18n.BrokerageError;
+            }
+            if (e.data.responseJSON.message === 'tenantId not found') {
+              QuerySelector('#cx_callback_information').innerText = i18n.TenantError;
+            }
           }
         });
 
@@ -467,6 +529,8 @@ class VideoEngager {
         }
       });
 
+      oVideoEngager.ready();
+
       oVideoEngager.subscribe('WebChatService.ready', function (oCXBus) {
         console.log('[CXW] Widget bus has been initialized!');
         oVideoEngager.command('WebChatService.registerPreProcessor', {
@@ -500,14 +564,12 @@ class VideoEngager {
             console.error('failed to regsiter preprocessor');
           });
       });
-
+      /*
       CXBus.subscribe('WebChatService.restored', function (e) {
         console.log('Chat restored', e);
-        /**
-         * 1 - check if it is a video call from comparing visitor id
-         * 2 - recover popup if exist
-         * 3 - recover visitor id
-         */
+        // * 1 - check if it is a video call from comparing visitor id
+        // * 2 - recover popup if exist
+        // * 3 - recover visitor id
         // get current session's interactionId
         CXBus.command('WebChatService.getSessionData').done(function (sessionData) {
           console.log('WebChatService.getSessionData', sessionData);
@@ -551,6 +613,7 @@ class VideoEngager {
             });
         });
       });
+      */
 
       oVideoEngager.ready();
       oVideoEngager.publish('ready');
@@ -620,7 +683,6 @@ class VideoEngager {
       cxSubmitElement && (cxSubmitElement.innerHTML = submitButton);
     };
 
-    // terminate call
     this.terminateInteraction = function () {
       closeIframeOrPopup();
       this.terminateWebChatInteraction();
@@ -629,6 +691,9 @@ class VideoEngager {
     const sendInteractionMessage = function (interactionId) {
       if (platform === 'purecloud') {
         const message = { interactionId: interactionId };
+        if (!startWithVideo) {
+          message.audioOnly = true;
+        }
         // oVideoEngager.command('WebChatService.sendFilteredMessage',{message:JSON.stringify(message), regex: /[a-zA-Z]/})
         oVideoEngager.command('WebChatService.sendMessage', { message: JSON.stringify(message) })
           .done(function (e) {
@@ -709,7 +774,7 @@ class VideoEngager {
         iframeInstance.width = '100%';
         iframeInstance.height = '100%';
         iframeInstance.id = 'videoengageriframe';
-        iframeInstance.allow = 'microphone; camera; autoplay; fullscreen;';
+        iframeInstance.allow = 'microphone; camera; autoplay; fullscreen; display-capture; geolocation';
         iframeInstance.src = url;
         iframeHolder.querySelectorAll('iframe').forEach(e => e.remove());
         iframeHolder.insertBefore(iframeInstance, iframeHolder.firstChild);

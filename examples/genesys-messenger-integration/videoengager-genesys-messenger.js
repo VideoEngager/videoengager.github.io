@@ -142,6 +142,7 @@ class VideoEngagerWidget {
       self.startGenesysVideoSession();
     });
     this.endBtn.addEventListener('click', () => {
+      console.log('VideoEngagerWidget: endBtn clicked');
       self.stopGenesysVideoSession();
     });
     this.minimizeBtn.addEventListener('click', function () {
@@ -162,9 +163,11 @@ class VideoEngagerWidget {
     };
     window.addEventListener('message', async (e) => {
       if (e.data.type === 'popupClosed') {
+        console.log('VideoEngagerWidget: popupClosed');
         await self.stopGenesysVideoSession();
       }
       if (e.data.type === 'callEnded') {
+        console.log('VideoEngagerWidget: callEnded');
         await self.stopGenesysVideoSession();
       }
     });
@@ -204,6 +207,11 @@ class VideoEngagerWidget {
    * @returns {Promise<void>} A promise that resolves when the session is stopped.
    */
   async stopGenesysVideoSession (sendMessage = true) {
+    if (this.stoppingGenesysVideoSession) {
+      console.error('VideoEngagerWidget: already stopping video session');
+      return;
+    }
+    this.stoppingGenesysVideoSession = true;
     await PromiseGenesys('command', 'Database.update', {
       messaging: {
         customAttributes: {
@@ -211,6 +219,7 @@ class VideoEngagerWidget {
         }
       }
     });
+    await new Promise(resolve => setTimeout(resolve, 300)); // wait for the database update to take effect
 
     if (sendMessage) {
       await PromiseGenesys('command', 'MessagingService.sendMessage', {
@@ -219,6 +228,7 @@ class VideoEngagerWidget {
     }
 
     this.stopVideo();
+    this.stoppingGenesysVideoSession = false;
   }
 
   /**
@@ -309,6 +319,11 @@ class VideoEngagerWidget {
       return;
     }
 
+    if (this.startingGenesysVideoSession) {
+      console.error('VideoEngagerWidget: already stopping video session');
+      return;
+    }
+    this.startingGenesysVideoSession = true;
     const interactionId = this.prepareVideoCall();
     // ve-launcher
     // await PromiseGenesys('command', 'Messenger.open', {})
@@ -319,6 +334,7 @@ class VideoEngagerWidget {
     // await new Promise(resolve => setTimeout(resolve, 600));
     await sendStartVideoSessionMessage(interactionId);
     this.startVideo();
+    this.startingGenesysVideoSession = false;
   }
 
   /**
@@ -327,12 +343,6 @@ class VideoEngagerWidget {
    * @returns {string|null} The interaction ID or null if the session is already ongoing.
    */
   startVideo () {
-    if (this.iframeInstance) {
-      console.log('VideoEngagerWidget: already have opened video call');
-      this.showWidget();
-      return;
-    }
-
     let str = {
       sessionId: this.interactionId,
       hideChat: true,
@@ -417,13 +427,14 @@ function PromiseGenesys (command, action, payload) {
  */
 async function sendStartVideoSessionMessage (interactionId) {
   try {
-    await PromiseGenesys('command', 'Database.set', {
+    await PromiseGenesys('command', 'Database.update', {
       messaging: {
         customAttributes: {
           'context.veVisitorId': interactionId
         }
       }
     });
+    await new Promise(resolve => setTimeout(resolve, 300)); // wait for the database update to take effect
     await PromiseGenesys('command', 'MessagingService.sendMessage', {
       message: 'Start Video Session'
     });

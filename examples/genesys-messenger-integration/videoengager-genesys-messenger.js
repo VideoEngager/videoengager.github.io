@@ -24,6 +24,7 @@ class VideoEngagerWidget {
    * @param {string} options.deploymentId - The deployment ID.
    * @param {string} options.envUrl - The environment URL.
    * @param {boolean} [options.debug=false] - Enable debug mode.
+   * @param {boolean} [options.audioOnly=false] - Whether to start the call with audio only.
    * @returns {VideoEngagerWidget} An instance of VideoEngagerWidget.
    */
   static initializeVeGensysMessaging ({
@@ -34,7 +35,8 @@ class VideoEngagerWidget {
     environment,
     deploymentId,
     envUrl,
-    debug = false
+    debug = false,
+    audioOnly = false
   } = {}) {
     loadGenesysWidget(window, 'Genesys', `${envUrl}/genesys-bootstrap/genesys.min.js`, {
       deploymentId,
@@ -46,7 +48,8 @@ class VideoEngagerWidget {
       TENANT_ID,
       veUrl,
       customAttributes,
-      autoAccept
+      autoAccept,
+      audioOnly
     });
 
     return videoEngagerInstance;
@@ -60,7 +63,7 @@ class VideoEngagerWidget {
    * @param {Object} options.customAttributes - Custom attributes for the session.
    * @param {boolean} options.autoAccept - Whether to auto-accept the call.
    */
-  constructor ({ TENANT_ID, veUrl, customAttributes, autoAccept } = {}) {
+  constructor ({ TENANT_ID, veUrl, customAttributes, autoAccept, audioOnly } = {}) {
     /**
      * @private
      */
@@ -93,6 +96,10 @@ class VideoEngagerWidget {
     injectStyles();
     // Call the function to inject the HTML
     const { windowContent, windowDiv, launcherBtn, endBtn, minimizeBtn } = safelyInjectHtml();
+    /**
+     * @private
+     */
+    this.startWithVideo = !audioOnly;
     /**
      * @private
      */

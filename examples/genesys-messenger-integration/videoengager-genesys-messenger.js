@@ -171,8 +171,19 @@ class VideoEngagerWidget {
     window.Genesys('subscribe', 'Launcher.ready', function () {
       self.showLauncher();
     });
+    // this will be triggerred only if disconnect is initiated by agent or flow
+    window.Genesys('subscribe', 'MessagingService.conversationDisconnected', (e) => {
+      console.log('VideoEngagerWidget: conversationDisconnected', e);
+      self.stopGenesysVideoSession(false);
+    });
+    // this will be triggerred only if disconnect if conversation is ended (in read only mode)
+    window.Genesys('subscribe', 'MessagingService.readOnlyConversation', function (e) {
+      console.log('VideoEngagerWidget: readOnlyConversation', e);
+      self.stopGenesysVideoSession(false);
+    });
 
-    window.Genesys('subscribe', 'MessagingService.conversationDisconnected', () => {
+    window.Genesys('subscribe', 'MessagingService.conversationCleared', function (e) {
+      console.log('VideoEngagerWidget: conversationCleared', e);
       self.stopGenesysVideoSession(false);
     });
     window.Genesys('subscribe', 'GenesysVendors.ready', () => {

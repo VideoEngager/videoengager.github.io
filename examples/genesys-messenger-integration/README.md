@@ -17,7 +17,6 @@ This code integrates VideoEngager's video capabilities with the Genesys Messenge
   - [Responsive Design and Interactivity](#responsive-design-and-interactivity)
   - [Error Handling and Debugging](#error-handling-and-debugging)
 - [How to Use with Tampermonkey](#how-to-use-with-tampermonkey)
-- [To Do / Roadmap](#to-do--roadmap)
 - [License](#license)
 
 ## Features
@@ -40,13 +39,14 @@ This code integrates VideoEngager's video capabilities with the Genesys Messenge
 #### Manual Setup
 
 1. Clone this repository.
-2. Include the JavaScript file in your web project.
-3. Initialize the widget using the provided configuration options.
+2. Include the JavaScript file `videoengager-genesys-messenger.js` in your web project
+3. After including the script, add the code from [Usage](#usage) section to initialize the widget.
 
 #### Tampermonkey Setup
 
 1. Install the [Tampermonkey extension](https://www.tampermonkey.net/) in your browser.
-2. Create a new script in Tampermonkey, paste the provided JavaScript code, and save it.
+2. Create a new script in Tampermonkey, paste the provided JavaScript code from `videoengager-genesys-messenger.js`.
+3. After pasting the code, add the code from [Usage](#usage) section to initialize the widget.
 
 ### Usage
 
@@ -83,7 +83,7 @@ The widget's initialization is handled by the static method `initializeVeGensysM
 
 4. **Event Listeners**: Event listeners are registered for both UI interactions and Genesys events:
    - **UI Events**: Handlers are set up for the launcher button, end button, and minimize button to control the video session.
-   - **Window Events**: Listeners for `beforeunload` and `message` events are registered to manage session cleanup and communication with the Genesys Messenger.
+   - **Window Events**: Listeners for `beforeunload` and `message` events are registered to manage session cleanup and communication with VideoEngager Call Widget.
    - **Genesys Events**: Subscriptions to Genesys Messenger events like `Launcher.ready`, `MessagingService.conversationDisconnected`, and `GenesysVendors.ready` are established to react to state changes in the Genesys environment.
 
 ### Video Session Management
@@ -123,41 +123,6 @@ The widget's initialization is handled by the static method `initializeVeGensysM
 3. **Running the Widget**:
    - The widget will appear as a launcher button on your website.
    - Click the launcher to start a video session or use the end button to terminate the call.
-
-
-## To Do / Roadmap
-
-- **Enhanced Error Handling**:
-  - Improve error reporting and handling, particularly around network failures and Genesys API interactions.
-  - Implement retry logic for failed API calls with exponential backoff.
-
-- **Unit and Integration Testing**:
-  - Develop comprehensive unit tests for core functions such as `startGenesysVideoSession`, `stopGenesysVideoSession`, and `PromiseGenesys`.
-  - Implement end-to-end integration tests to ensure seamless interaction with the Genesys Messenger.
-
-- **Advanced Customization Options**:
-  - Introduce additional customization options for the widget's UI elements, such as themes, colors, and button styles.
-  - Allow dynamic configuration of custom attributes at runtime without requiring a full reinitialization.
-
-- **Performance Optimization**:
-  - Optimize the widget's loading time by asynchronously loading dependencies and minimizing the number of external requests.
-  - Reduce the widget's footprint by leveraging tree-shaking and other modern JavaScript optimization techniques.
-
-- **Mobile Experience Enhancements**:
-  - Refine the mobile experience by improving touch interactions, such as swipe gestures for minimizing or closing the widget.
-  - Explore adding support for video call quality adjustments based on network conditions.
-
-- **Localization and Internationalization**:
-  - Add support for multiple languages within the widget.
-  - Allow the widget's text and messages to be easily customized and localized.
-
-- **Documentation and Examples**:
-  - Expand the documentation to include detailed examples of various configurations and customizations.
-  - Create a series of tutorials or how-to guides that demonstrate the widget's capabilities in different scenarios.
-
-- **User Feedback and Analytics**:
-  - Integrate analytics to track user interactions with the widget and gather insights for further improvements.
-  - Add a feedback mechanism within the widget to collect user opinions and suggestions.
 
 
 ## License

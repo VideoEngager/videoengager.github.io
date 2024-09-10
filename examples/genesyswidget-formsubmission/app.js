@@ -1,4 +1,4 @@
-// Function to transform input data to uppercase and map form data to library format
+// Function to transform form input fields from the web page to the required properties for the VideoEngager widget
 function transformInputData(formData) {
     // Clean the previous form data for the webChatFormData in the VideoEngager widget.
     Object.keys(window._genesys.widgets.videoengager.webChatFormData).forEach(
@@ -33,7 +33,7 @@ function transformInputData(formData) {
     // Mapping specific fields into userData for extended metadata (like phone number, subject).
     Object.keys(mappingUserData).forEach(key => {
       if (formData.get(key)) {  // Check if the form field exists.
-        window._genesys.widgets.videoengager.webChatFormData.userData[mapping[key]] = formData.get(key);
+        window._genesys.widgets.videoengager.webChatFormData.userData[mappingUserData[key]] = formData.get(key);
       }
     });
 }

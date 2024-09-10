@@ -65,6 +65,8 @@ To get started, you’ll need to set up your Genesys and VideoEngager configurat
 
 #### Required Fields for Tenant Setup:
 
+Check for a detailed explanation VideoeEngager [How to obtain my Genesys Cloud Parameters, required to setup VideoEngager SDKs](https://help.videoengager.com/hc/en-us/articles/360061175891-How-to-obtain-my-Genesys-Cloud-Parameters-required-to-setup-VideoEngager-SDKs)
+
 You must configure the following fields specific to your tenant:
 
 - **tenantId**: Your VideoEngager Tenant ID.

@@ -1,6 +1,4 @@
-Sure! Here’s a `README.md` file that explains how to set up and run your HTML, `app.js`, and `config.js` files:
 
----
 
 # VideoEngager Integration Example
 

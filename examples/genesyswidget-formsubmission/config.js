@@ -15,7 +15,7 @@ window._genesys.widgets = {
     callHolder: '', // provides a place/div/ where the VideoEngager widget should be inserted. Otherwise, popup winddow will be open.
     platform: 'purecloud', // one of 'engage'     or 'purecloud'
     tenantId: '', // VideoEngager Tenant ID. Find this in Apps > SmartVideo_Settings > Tenant ID.
-    veUrl: 'https://prod.leadsecure.com', // VideoEngager api base url
+    veUrl: 'https://videome.leadsecure.com', // VideoEngager api base url
     audioOnly: false, // start the VideoEngager call with audioOnly (without video)
     autoAccept: true, // during the call negotiation - automatically enter the call
     enablePrecall: false, // start the VideoEngager session with precall window - the visitor could select their camera/microphone settings

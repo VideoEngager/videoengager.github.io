@@ -55,8 +55,8 @@ This file configures the Genesys widgets and VideoEngager with necessary setting
 
 1. **Clone or Download the Project**:
    ```
-   git clone https://github.com/your-repo/videoengager-integration
-   cd videoengager-integration
+   git clone https://github.com/VideoEngager/videoengager.github.io.git
+   cd videoengager.github.io.git/examples/genesyswidget-formsubmission
    ```
 
 ### 2. **Configure Your Settings**

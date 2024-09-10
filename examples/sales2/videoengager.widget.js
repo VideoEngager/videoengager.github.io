@@ -21,6 +21,7 @@ class VideoEngager {
     let submitButton;
     let customAttributes;
     let callback = null;
+    let _$;
     const i18nDefault = {
       en: {
         ChatFormSubmitVideo: 'Start Video',
@@ -340,6 +341,7 @@ class VideoEngager {
 
     this.initExtension = function ($, CXBus, Common) {
       console.log('on init extension VideoEngager');
+      _$ = $;
       init();
       oVideoEngager = CXBus.registerPlugin('VideoEngager');
       oVideoEngager.publish('ready');
@@ -399,7 +401,6 @@ class VideoEngager {
         // authenticate
         QuerySelector('#cx_form_callback_phone_number').value = window._genesys.widgets.videoengager.dialCountryCode || '';
         oVideoEngager.subscribe('CallbackService.scheduleError', function (e) {
-          oVideoEngager.publish('error', e);
           if (e.data.responseJSON && e.data.responseJSON.message) {
             if (e.data.responseJSON.message === 'A caller id number cannot be parsed as a phone address') {
               QuerySelector('#cx_callback_information').innerText = i18n.PhoneNumberError;
@@ -517,7 +518,15 @@ class VideoEngager {
         .done(function (e2) {
           // form opened
           document.getElementsByClassName('cx-submit')[0].addEventListener('click', function () {
+            const Common = window._genesys.widgets.common;
+            if (!Common) {
+              return;
+            }
             startVideoChat();
+            if (!Common.validateForm(_$('.cx-form'))) {
+              Common.error('Required information is missing in the webform!');
+              closeIframeOrPopup(false);            
+            }
           });
           localizeChatForm();
         });
@@ -689,8 +698,10 @@ class VideoEngager {
       popupinstance.focus();
     };
 
-    const closeIframeOrPopup = function () {
-      interactionId = null;
+    const closeIframeOrPopup = function (nullisfyInstance = true) {
+      if (nullisfyInstance) {
+        interactionId = null;
+      }
       if (!iframeHolder) {
         if (popupinstance) {
           popupinstance.close();

@@ -139,4 +139,49 @@ document.addEventListener('DOMContentLoaded', function () {
       stopSession();
     }
   }, false);
-});
+  const wrapper = document.getElementById('iframeHolder');
+   const moveHandle = document.getElementById('move-handle');
+    const resizeHandle = document.getElementById('resize-handle');
+
+    // Drag functionality
+    moveHandle.onmousedown = function(e) {
+        e = e || window.event;
+        e.preventDefault();
+        let pos3 = e.clientX;
+        let pos4 = e.clientY;
+
+        document.onmousemove = function(e) {
+            e = e || window.event;
+            e.preventDefault();
+            let pos1 = pos3 - e.clientX;
+            let pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            wrapper.style.top = (wrapper.offsetTop - pos2) + "px";
+            wrapper.style.left = (wrapper.offsetLeft - pos1) + "px";
+        };
+
+        document.onmouseup = function() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        };
+    };
+
+    // Resize functionality
+    resizeHandle.onmousedown = function(e) {
+        e.preventDefault();
+        document.onmousemove = function(e) {
+            e.preventDefault();
+            const width = wrapper.offsetWidth + (e.clientX - resizeHandle.getBoundingClientRect().right);
+            const height = wrapper.offsetHeight + (e.clientY - resizeHandle.getBoundingClientRect().bottom);
+            wrapper.style.width = width + "px";
+            wrapper.style.height = height + "px";
+        };
+
+        document.onmouseup = function() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        };
+    };
+
+  });

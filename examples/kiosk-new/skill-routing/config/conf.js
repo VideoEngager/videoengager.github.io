@@ -25,13 +25,13 @@ window.GENESYS_CONFIG = {
  *  Carousel items for the carousel component while the page is in loading state
  */
 window.CAROUSEL_ITEMS = [
-  { src: 'https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-4-768x392.jpg' },
-  { src: 'https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-3-768x392.jpg' },
-  { src: 'https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-2-768x576.png' },
+  { src: 'img/roocop.webp' },
+  { src: 'img/warm.webp' },
+  { src: 'img/carribeanbateries.webp' },
   { src: 'https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-1-768x392.jpg' }
 ];
 /**
  *  @description
  * Background image for the page while the page is in Initial State
  */
-window.BACKGROUND_IMAGE = 'https://news.vanderbilt.edu/manage/wp-content/uploads/Cox-Enterprises.jpeg';
+window.BACKGROUND_IMAGE = 'img/carribeanbateries.webp';

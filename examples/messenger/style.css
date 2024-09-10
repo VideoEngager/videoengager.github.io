@@ -59,19 +59,16 @@ label {
     margin-right: 10px;
 }
 
-#iframeHolder {
-    position: relative;
-    width: 100%;
-    height: calc(100% - 50px);    margin-top: 20px;
-    background-color: #e0e0e0;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #888;
-    font-style: italic;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+#iframeHolder 
+{
+    width: 300px;
+    height: 200px;
+    resize: both;
+    overflow: auto;
+    border: 1px solid black;
+    position: absolute; /* Important for dragging */
+    top: 50px;
+    left: 50px;
 }
 
 #limitations {
@@ -108,4 +105,29 @@ button:disabled {
 
 button:disabled:hover {
     background-color: #c0c0c0; /* Ensure hover doesn't change the color */
+}
+iframe {
+    width: 100%;
+    height: calc(100% - 20px); /* Adjust height to account for the move handle */
+    display: block;
+}
+
+#move-handle {
+    width: 100%;
+    height: 20px;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    cursor: move; /* Visual cue for dragging */
+    line-height: 20px; /* Center the text vertically */
+}
+
+#resize-handle {
+    width: 40px;
+    height: 40px;
+    background-color: red;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
 }

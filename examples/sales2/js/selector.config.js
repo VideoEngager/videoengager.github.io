@@ -27,6 +27,100 @@ window._genesys.widgets = {
     useWebChatForm: true, // start VideoEngager session with/without registration form
     // in case of useWebChatForm == false, pass the following data to conversation initialization - visible for agent
     extraAgentMessage: '**This is a VideoEngager Video Call!!!**',
+"validateWhileTyping": true,
+form: {
+      wrapper: '<table></table>',
+      inputs: [
+        {
+          id: 'cx_webchat_form_firstname',
+          name: 'firstname',
+          type: 'text',
+          maxlength: '100',
+          placeholder: '@i18n:webchat.ChatFormPlaceholderFirstName',
+          label: '@i18n:webchat.ChatFormFirstName',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const firstName = input.val();
+              const regex = /^[A-Za-z]+$/;
+              if (!regex.test(firstName) || firstName.length < 1) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }
+        },
+        {
+          id: 'cx_webchat_form_lastname',
+          name: 'lastname',
+          type: 'text',
+          maxlength: '100',
+          placeholder: '@i18n:webchat.ChatFormPlaceholderLastName',
+          label: '@i18n:webchat.ChatFormLastName',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const lastName = input.val();
+              const regex = /^[A-Za-z]+$/;
+              if (!regex.test(lastName) || lastName.length < 1) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }     
+        },
+        {
+          id: 'cx_webchat_form_email',
+          name: 'email',
+          type: 'text',
+          maxlength: '100',
+          placeholder: '@i18n:webchat.ChatFormPlaceholderEmail',
+          label: '@i18n:webchat.ChatFormEmail',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const email = input.val();
+              const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!regex.test(email)) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }              
+        },
+        {
+          id: 'cx_webchat_form_account_number',
+          name: 'customField1',
+          type: 'text',
+          maxlength: '100',
+          placeholder: 'Required',
+          label: 'Account Number',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const accountNumber = input.val();
+              // Example only regex requiring at least 8 alphanumeric chars
+              const regex = /^[A-Za-z0-9]{8}$/;
+              if (!regex.test(accountNumber)) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }              
+        },
+        {
+          id: 'cx_webchat_form_subject',
+          name: 'customField2',
+          type: 'text',
+          maxlength: '100',
+          placeholder: 'Required',
+          label: 'Subject'
+        }
+],},
     webChatFormData: {
       nickname: 'Visitor',
       firstname: 'Duty Free',
@@ -50,6 +144,102 @@ window._genesys.widgets = {
     }
   },
   webchat: {
+    form: {
+      wrapper: '<table></table>',
+      inputs: [
+        {
+          id: 'cx_webchat_form_firstname',
+          name: 'firstname',
+          type: 'text',
+          maxlength: '100',
+          placeholder: '@i18n:webchat.ChatFormPlaceholderFirstName',
+          label: '@i18n:webchat.ChatFormFirstName',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const firstName = input.val();
+              const regex = /^[A-Za-z]+$/;
+              if (!regex.test(firstName) || firstName.length < 1) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }
+        },
+        {
+          id: 'cx_webchat_form_lastname',
+          name: 'lastname',
+          type: 'text',
+          maxlength: '100',
+          placeholder: '@i18n:webchat.ChatFormPlaceholderLastName',
+          label: '@i18n:webchat.ChatFormLastName',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const lastName = input.val();
+              const regex = /^[A-Za-z]+$/;
+              if (!regex.test(lastName) || lastName.length < 1) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }     
+        },
+        {
+          id: 'cx_webchat_form_email',
+          name: 'email',
+          type: 'text',
+          maxlength: '100',
+          placeholder: '@i18n:webchat.ChatFormPlaceholderEmail',
+          label: '@i18n:webchat.ChatFormEmail',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const email = input.val();
+              const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!regex.test(email)) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }              
+        },
+        {
+          id: 'cx_webchat_form_account_number',
+          name: 'customField1',
+          type: 'text',
+          maxlength: '100',
+          placeholder: 'Required',
+          label: 'Account Number',
+          validate: function (event, form, input, label, $, CXBus, Common) {
+            if (input && input.val()) {
+              const accountNumber = input.val();
+              // Example only regex requiring at least 8 alphanumeric chars
+              const regex = /^[A-Za-z0-9]{8}$/;
+              if (!regex.test(accountNumber)) {
+                return false;
+              }
+              return true;
+            } else {
+              return false;
+            }
+          }              
+        },
+        {
+          id: 'cx_webchat_form_subject',
+          name: 'customField2',
+          type: 'text',
+          maxlength: '100',
+          placeholder: 'Required',
+          label: 'Subject'
+        }
+],},
+    chatButton: {
+      enabled: false, // (boolean) Enable/disable chat button on screen.
+    },
     transport: {
       type: 'purecloud-v2-sockets',
       dataURL: '',

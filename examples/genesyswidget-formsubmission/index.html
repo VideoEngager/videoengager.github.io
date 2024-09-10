@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Example with Audio and Video Buttons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        .mic-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .video-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .disabled {
+            background-color: red;
+        }
+
+        form {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        input[type="submit"]:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+    <!-- Load external JavaScript file -->
+    <script src="app.js"></script>
+</head>
+<body>
+
+    <h1>Forms Example with Audio and Video Buttons</h1>
+
+    <!-- Audio and Video buttons -->
+    <button id="audioBtn" class="button mic-button"><i class="fas fa-microphone"></i> Audio</button>
+    <button id="videoBtn" class="button video-button"><i class="fas fa-video"></i> Video</button>
+
+    <!-- First form for Audio -->
+    <form id="form1" class="hidden" action="/start-audio" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <input type="submit" value="Start Audio" disabled>
+    </form>
+
+    <!-- Second form for Video -->
+    <form id="form2" class="hidden" action="/start-video" method="POST">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required>
+
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required>
+
+        <label for="email2">Email:</label>
+        <input type="email" id="email2" name="email2" required>
+
+        <label for="phone">Phone:</label>
+        <input type="tel" id="phone" name="phone" required>
+
+        <label for="subject">Subject:</label>
+        <input type="text" id="subject" name="subject" required>
+
+        <label for="productId">Product ID:</label>
+        <input type="text" id="productId" name="productId" required>
+
+        <input type="submit" value="Start Video" disabled>
+    </form>
+
+</body>
+</html>

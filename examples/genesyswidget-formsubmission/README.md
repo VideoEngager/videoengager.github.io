@@ -59,16 +59,42 @@ This file configures the Genesys widgets and VideoEngager with necessary setting
    cd videoengager-integration
    ```
 
-2. **Set Up Configuration**:
-   - Open the `config.js` file and add your Genesys and VideoEngager configuration details.
-   - Example:
-     ```javascript
-     CXBus.configure({
-       debug: true,
-       pluginsPath: 'https://apps.mypurecloud.com/widgets/9.0/plugins/',
-       ... // Add your specific configuration details
-     });
-     ```
+### 2. **Configure Your Settings**
+
+To get started, you’ll need to set up your Genesys and VideoEngager configurations in the `config.js` file. Please follow the steps below to ensure the settings are properly customized for your organization.
+
+#### Required Fields for Tenant Setup:
+
+You must configure the following fields specific to your tenant:
+
+- **tenantId**: Your VideoEngager Tenant ID.
+- **deploymentKey**: The Widget Deployment Key from Genesys.
+- **orgGuid**: The Organization ID from Genesys Cloud.
+- **targetAddress**: The Queue Name for routing interactions.
+
+#### Example Configuration:
+
+```javascript
+window._genesys.widgets = {
+  videoengager: {
+    tenantId: '', // VideoEngager Tenant ID. Find this in Apps > SmartVideo_Settings > Tenant ID.
+  }
+};
+
+window._genesys.widgets = {
+  webchat: {
+    transport: {
+      deploymentKey: '', // Widget Deployment Key. Find this in Genesys Cloud: Admin > Contact Center > Widgets > Deployment Key.
+      orgGuid: '', // Organization ID. Find this in Genesys Cloud: Admin > Account Settings > Organization Settings > Advanced > Organization ID.
+      interactionData: {
+        routing: {
+          targetAddress: '' // Queue Name. Enter the name of the ACD queue in Genesys Cloud.
+        }
+      }
+    }
+  }
+};
+```
 
 3. **Start a Local Web Server**:
    - Using Python:

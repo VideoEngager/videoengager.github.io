@@ -14,8 +14,8 @@ window._genesys.widgets = {
   videoengager: {
     callHolder: '', // provides a place/div/ where the VideoEngager widget should be inserted. Otherwise, popup winddow will be open.
     platform: 'purecloud', // one of 'engage'     or 'purecloud'
-    tenantId: 'oIiTR2XQIkb7p0ub', // VideoEngager tenantId
-    veUrl: 'https://staging.leadsecure.com', // VideoEngager api base url
+    tenantId: '', // VideoEngager Tenant ID. Find this in Apps > SmartVideo_Settings > Tenant ID.
+    veUrl: 'https://prod.leadsecure.com', // VideoEngager api base url
     audioOnly: false, // start the VideoEngager call with audioOnly (without video)
     autoAccept: true, // during the call negotiation - automatically enter the call
     enablePrecall: false, // start the VideoEngager session with precall window - the visitor could select their camera/microphone settings
@@ -42,14 +42,14 @@ window._genesys.widgets = {
     confirmFormCloseEnabled: false,
     transport: {
       type: 'purecloud-v2-sockets',
-      dataURL: 'https://api.mypurecloud.de',
-      deploymentKey: '1b4b1124-b51c-4c38-899f-3a90066c76cf',
-      orgGuid: '639292ca-14a2-400b-8670-1f545d8aa860',
+      dataURL: 'https://api.mypurecloud.com',
+      deploymentKey: '', // Widget Deployment Key. Find this in Genesys Cloud: Admin > Contact Center > Widgets > Deployment Key.
+      orgGuid: '', // Organization ID. Find this in Genesys Cloud: Admin > Account Settings > Organization Settings > Advanced > Organization ID.
       markdown: true,
       interactionData: {
         routing: {
           targetType: 'QUEUE',
-          targetAddress: 'Support',
+          targetAddress: '', // Queue Name. Enter the name of the ACD queue in Genesys Cloud.
           priority: 2
         }
       }

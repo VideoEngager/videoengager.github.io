@@ -19,7 +19,7 @@
     display: block;
     width: 20px;
     height: 20px;
-    background-image: url('https://videoengager.github.io/examples/sales2/camera.svg');
+    background-image: url('camera.svg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

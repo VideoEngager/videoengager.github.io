@@ -373,6 +373,7 @@ class VideoEngagerWidget {
     this.iframeHolder.querySelectorAll('iframe').forEach(e => e.remove());
     this.iframeHolder.appendChild(this.iframeInstance);
     this.iframeHolder.style.display = 'block';
+    this.iframeHolder.style.overflow = 'scroll';
     this.showWidget();
     return this.interactionId;
   }

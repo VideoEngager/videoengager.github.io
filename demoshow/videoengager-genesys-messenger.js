@@ -600,8 +600,8 @@ function registerUILogic () {
 
   function enterFullScreen (windowElement) {
     isFullScreen = true;
-    windowElement.style.width = '100vw';
-    windowElement.style.height = '100vh';
+    windowElement.style.width = '100%';
+    windowElement.style.height = '100%';
     draggie.setPosition(0, 0);
     draggie.disable();
     document.getElementsByTagName('html')[0].style.overflow = 'hidden';

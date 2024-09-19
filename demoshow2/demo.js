@@ -7,7 +7,7 @@ const config = {
   staging: {
     envUrl: 'https://apps.mypurecloud.de',
     environment: 'prod-euc1',
-    deploymentId: 'a3201abf-c4bc-4742-8bd0-b55c34ef787d', // '50bce9ca-111b-4372-87ff-5f98ae8849e6',
+    deploymentId: '50bce9ca-111b-4372-87ff-5f98ae8849e6', // 'a3201abf-c4bc-4742-8bd0-b55c34ef787d'
     veUrl: 'https://staging.leadsecure.com',
     tenantId: 'oIiTR2XQIkb7p0ub'
   },

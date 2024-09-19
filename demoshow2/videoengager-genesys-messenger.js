@@ -296,11 +296,20 @@ class VideoEngagerWidget {
         resolve();
       });
 
-      PromiseGenesys('command', 'Messenger.openConversation', {})
-        .catch(e => {
-          console.error('VideoEngagerWidget: error while opening messenger', e);
-          reject(e);
-        });
+      window.Genesys('command', 'Messenger.openConversation', {},
+        () => {
+          console.log('Messenger opened');
+          setTimeout(() => {
+            window.Genesys('command', 'MessagingService.sendMessage', {
+              message: 'Start'
+            });
+            console.log('Message sent');
+          }, 1000);
+        },
+        (error) => {
+          console.log("Couldn't open messenger.", error);
+        }
+      );
     });
   }
 
@@ -555,6 +564,7 @@ function safelyInjectHtml () {
   videoCallImg.src = 'https://staging.leadsecure.com/nextjs/favicon-white.svg';
   videoCallImg.alt = 'logo';
   videoCallImg.id = 'logoimage';
+  startVideoCallBtn.style.display = 'none';
 
   // Create the span element
   const videoCallText = document.createElement('span');

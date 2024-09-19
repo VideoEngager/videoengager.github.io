@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Live Demo</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #F5F5DC; /* Background color (light beige) */
+            color: #333333; /* Dark gray text for body content */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Styling for the text container at the top */
+        .text-container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Subheading text */
+        .text-container h3 {
+            font-size: 24px; /* Larger font for the main heading */
+            font-weight: bold;
+            margin-bottom: 15px; /* Space below the heading */
+            color: #333333; /* Dark gray for the subheading */
+        }
+
+        /* Button container to center the button below the text */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        /* Button styling */
+        .button {
+            background-color: #2A4DC6; /* Blue background for the button */
+            border-radius: 50%; /* Circular shape */
+            width: 200px; /* Fixed button size */
+            height: 200px; /* Fixed button size */
+            display: flex;
+            flex-direction: column; /* Stack icon and text vertically */
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Adds a shadow for depth */
+            position: relative;
+            overflow: hidden; /* Ensure content does not overflow out of the button */
+                        cursor: pointer;
+        }
+
+        /* Icon inside the button - Fill 66% of button's height */
+        .button img {
+            height: 46%; /* Icon height set to 66% of button's height */
+            width: auto; /* Maintain aspect ratio */
+            margin-bottom: 5px; /* Add space between icon and text */
+        }
+
+        /* Text below the icon */
+        .button span {
+            font-size: 14px; /* Adjust text size */
+            color: white; /* White text color */
+            text-align: center;
+        }
+
+        /* Footer styling */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background-color: #333333; /* Dark gray background */
+            color: white; /* White text color */
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+    </style>
+    <script type="text/javascript" src="videoengager-genesys-messenger-demo.js"></script>
+    <script type="text/javascript" src="demo.js"></script>
+</head>
+<body>
+    <!-- Text container at the top for the subheading -->
+    <div class="text-container">
+        <h3>Start video chat with a live agent!</h3>
+    </div>
+
+    <!-- Button container to center the button on the page -->
+    <div class="button-container">
+        <div class="button">
+            <!-- Video icon (replace with your actual icon) -->
+            <img src="https://staging.leadsecure.com/nextjs/favicon-white.svg" alt="video icon">
+            <!-- Text below the icon -->
+            <span>Touch Here To Begin</span>
+        </div>
+    </div>
+
+    <!-- Footer at the bottom of the page -->
+    <footer>
+        &copy; 2004 VideoEngager. All rights reserved.
+    </footer>
+</body>
+</html>

@@ -1,0 +1,153 @@
+#genesys-messenger {
+    display: none;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: royalblue;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.text-container {
+    text-align: center;
+    padding: 5vh 5vw;
+    width: 90%;
+    max-width: 100%;
+}
+
+h3 {
+    font-size: 5vw;
+    font-weight: bold;
+    margin-bottom: 2vh;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.button {
+    background-color: #0A4C8B;
+    border-radius: 50%;
+    width: 15vw;
+    height: 15vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.button img {
+    width: 40%;
+    height: 40%;
+}
+
+.button span {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.5vw;
+}
+
+#StartVideoCall {
+border-radius: 999999px;
+overflow: hidden;
+padding: 20px;
+background: rgb(0, 82, 135);
+color: white;
+border: none;
+aspect-ratio: 1 / 1;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+cursor: pointer;
+max-width: 90%;
+}
+
+@media  (orientation: portrait) {
+h3 {
+font-size: 8vw;
+}
+
+.button {
+width: 30vw;
+height: 30vw;
+}
+
+.button img {
+width: 30%;
+height: 30%;
+}
+
+.button span {
+font-size: 4vw;
+}
+
+#StartVideoCall {
+width: 30vh;
+padding: 30px;
+}
+
+#logoimage {
+width: 14vh;
+}
+
+#connectButton {
+font-size: 4vh;
+}
+
+#StartVideoCall {
+width: 36vh
+}
+}
+@media   (orientation: landscape) {
+.button {
+width: 10vw;
+height: 10vw;
+}
+
+.button img {
+width: 50%;
+height: 50%;
+}
+
+.button span {
+font-size: 1.2vw;
+}
+
+#logoimage {
+width: 18vh;
+}
+
+#connectButton {
+font-size: 4vh;
+}
+
+#StartVideoCall {
+width: 50vh
+}
+}
+
+
+#logoimage {
+user-select: none;
+vertical-align: middle;
+border-style: none;
+}
+
+
+
+#connectButton {
+user-select: none;
+padding: 0px;
+}

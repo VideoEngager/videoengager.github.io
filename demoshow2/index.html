@@ -171,6 +171,39 @@
 
 
     </style>
+    <script type="text/javascript">
+      // Function to detect if the device is Android or iOS
+      function detectMobile() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        // Check for iOS devices
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+          return "iOS";
+        }
+
+        // Check for Android devices
+        if (/android/i.test(userAgent)) {
+          return "Android";
+        }
+
+        // If neither, return false
+        return false;
+      }
+
+      // Function to redirect if detection fails
+      function checkMobileAndRedirect() {
+        const isMobile = detectMobile();
+
+        if (!isMobile) {
+          // If detection fails, redirect to a specific URL
+          window.location.href = "./unsupported.html";
+        }
+      }
+
+      // Call the function on page load
+      window.onload = checkMobileAndRedirect;
+    </script>
+
 </head>
 
 <body>

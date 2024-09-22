@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #F5F5DC;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* Styling for the container holding the text */
+        .text-container {
+            text-align: center;
+            padding: 5vh 5vw; /* Responsive padding using viewport units */
+            position: absolute;
+            top: 0;
+            width: 90%; /* Ensure the container does not exceed 90% of the screen width */
+            max-width: 100%; /* Prevent the text from overflowing */
+            margin: 0 auto; /* Center the text container */
+        }
+
+        /* Subheading for improved structure */
+        .text-container h3 {
+            color: #4B2E20;
+            font-size: 5vw; /* Responsive font size based on viewport width */
+            font-weight: bold;
+            margin-bottom: 2vh; /* Space below the heading using viewport height */
+        }
+
+        /* Button container to center the button below the text */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Button styling */
+        .button {
+            background-color: #2A4DC6; /* Blue background matching the image */
+            border-radius: 50%; /* Circular shape */
+            width: 200px; /* Fixed button size */
+            height: 200px; /* Fixed button size */
+            display: flex;
+            flex-direction: column; /* Stack icon and text vertically */
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Adds a shadow for depth */
+            position: relative;
+            overflow: hidden; /* Ensure content does not overflow out of the button */
+        }
+
+        /* Icon inside the button - Fill 66% of button's height */
+        .button img {
+            height: 56%; /* Icon height set to 66% of button's height */
+            width: auto; /* Maintain aspect ratio */
+            margin-bottom: 5px; /* Add space between icon and text */
+        }
+
+        /* Text below the icon */
+        .button span {
+            font-size: 14px; /* Adjust text size */
+            color: white; /* White text color */
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Text container at the top for the subheading -->
+    <div class="text-container">
+        <h3>Start video chat with a live agent!</h3>
+    </div>
+
+    <!-- Button container to center the button on the page -->
+    <div class="button-container">
+        <div class="button">
+            <!-- Video icon (replace with your actual icon) -->
+            <img src="https://staging.leadsecure.com/nextjs/favicon-white.svg" alt="video icon">
+            <!-- Text below the icon -->
+            <span>Touch Here To Begin</span>
+        </div>
+    </div>
+</body>
+</html>

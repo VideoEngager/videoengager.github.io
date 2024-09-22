@@ -1,4 +1,6 @@
-<html lang="en" style="height: 100%; overflow: hidden;">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,210 +10,34 @@
     <script type="text/javascript" src="demo.js"></script>
 
     <style>
-        #genesys-messenger {
-            display: none;
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-            background-color: royalblue;
+        .github-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            background-color: #262626;
             color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
+            text-transform: uppercase;
+            border: 0;
+            box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .2), 0 2px 10px 0 rgba(0, 0, 0, .1);
+            font-weight: 500;
+            padding: .625rem 1.25rem .5rem;
+            font-size: .875rem;
+            line-height: 1.5;
+            width: max-content;
+            border-radius: .25rem;
         }
 
-        .text-container {
-            text-align: center;
-            padding: 5vh 5vw;
-            width: 90%;
-            max-width: 100%;
-        }
-
-        h3 {
-            font-size: 5vw;
-            font-weight: bold;
-            margin-bottom: 2vh;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1;
-            width: 100%;
-        }
-
-        .button {
-            background-color: #0A4C8B;
-            border-radius: 50%;
-            width: 15vw;
-            height: 15vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .button img {
-            width: 40%;
-            height: 40%;
-        }
-
-        .button span {
-            display: block;
-            margin-top: 10px;
-            font-size: 1.5vw;
-        }
-
-        #StartVideoCall {
-    border-radius: 999999px;
-    overflow: hidden;
-    padding: 20px;
-    background: rgb(0, 82, 135);
-    color: white;
-    border: none;
-    aspect-ratio: 1 / 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    max-width: 90%;
-}
-
-
-
- 
-
-
-
-        @media  (orientation: portrait) {
-    h3 {
-        font-size: 8vw;
-    }
-
-    .button {
-        width: 30vw;
-        height: 30vw;
-    }
-
-    .button img {
-        width: 30%;
-        height: 30%;
-    }
-
-    .button span {
-        font-size: 4vw;
-    }
-
-    #StartVideoCall {
-        width: 30vh;
-        padding: 30px;
-    }
-
-    #logoimage {
-        width: 14vh;
-    }
-
-    #connectButton {
-        font-size: 4vh;
-    }
-
-    #StartVideoCall {
-        width: 36vh
-    }
-}
-@media   (orientation: landscape) {
-    .button {
-        width: 10vw;
-        height: 10vw;
-    }
-
-    .button img {
-        width: 50%;
-        height: 50%;
-    }
-
-    .button span {
-        font-size: 1.2vw;
-    }
-
-    #logoimage {
-        width: 18vh;
-    }
-
-    #connectButton {
-        font-size: 4vh;
-    }
-
-    #StartVideoCall {
-        width: 50vh
-    }
-}
-
-
-#logoimage {
-    user-select: none;
-    vertical-align: middle;
-    border-style: none;
-}
-
- 
-
-#connectButton {
-    user-select: none;
-    padding: 0px;
-}
-
-
-
-    </style>
-    <script type="text/javascript">
-      // Function to detect if the device is Android or iOS
-      function detectMobile() {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-        // Check for iOS devices
-        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-          return "iOS";
-        }
-
-        // Check for Android devices
-        if (/android/i.test(userAgent)) {
-          return "Android";
-        }
-
-        // If neither, return false
-        return false;
-      }
-
-      // Function to redirect if detection fails
-      function checkMobileAndRedirect() {
-        const isMobile = detectMobile();
-
-        if (!isMobile) {
-          // If detection fails, redirect to a specific URL
-          window.location.href = "./unsupported.html";
-        }
-      }
-
-      // Call the function on page load
-      window.onload = checkMobileAndRedirect;
-    </script>
-
+        </style>
 </head>
 
-<body>
-    <div class="text-container">
-        <h3>Start video chat with a live agent!</h3>
+<body class="p-4">
+    <div class="github-btn-container">
+        <a style="color: white;text-decoration: none;" href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/genesys-messenger-integration" target="_blank" class="github-source-btn btn btn-dark">
+            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" alt="GitHub" style="vertical-align: middle; margin-right: 5px;">
+            View Source on GitHub
+        </a>
     </div>
-    <div class="button-container">
-    </div>
-    <div class="text-container"></div>
+
+
 </body>
+
 </html>

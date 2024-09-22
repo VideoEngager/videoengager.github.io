@@ -95,7 +95,7 @@ class VideoEngagerWidget {
     // Call the function to inject the styles
     injectStyles();
     // Call the function to inject the HTML
-    const { windowContent, windowDiv, startVideoCallBtn, endBtn, minimizeBtn } = safelyInjectHtml();
+    const { windowContent, windowDiv, launcherBtn, endBtn, minimizeBtn } = safelyInjectHtml();
     /**
      * @private
      */
@@ -103,7 +103,7 @@ class VideoEngagerWidget {
     /**
      * @private
      */
-    this.startVideoCallBtn = startVideoCallBtn;
+    this.launcherBtn = launcherBtn;
     /**
      * @private
      */
@@ -138,7 +138,7 @@ class VideoEngagerWidget {
    */
   registerButtonsListeners () {
     const self = this;
-    this.startVideoCallBtn.addEventListener('click', () => {
+    this.launcherBtn.addEventListener('click', () => {
       self.startGenesysVideoSession();
     });
     this.endBtn.addEventListener('click', () => {
@@ -235,14 +235,14 @@ class VideoEngagerWidget {
    * Displays the launcher button.
    */
   showLauncher () {
-    this.startVideoCallBtn.style.display = 'flex';
+    this.launcherBtn.style.display = 'flex';
   }
 
   /**
    * Hides the launcher button.
    */
   hideLauncher () {
-    this.startVideoCallBtn.style.display = 'none';
+    this.launcherBtn.style.display = 'none';
   }
 
   /**
@@ -250,7 +250,7 @@ class VideoEngagerWidget {
    */
   showWidget () {
     this.movableWindow.style.display = 'flex';
-    this.startVideoCallBtn.style.display = 'none';
+    this.launcherBtn.style.display = 'none';
   }
 
   /**
@@ -258,7 +258,7 @@ class VideoEngagerWidget {
    */
   hideWidget () {
     this.movableWindow.style.display = 'none';
-    this.startVideoCallBtn.style.display = 'flex';
+    this.launcherBtn.style.display = 'flex';
   }
 
   /**
@@ -296,20 +296,11 @@ class VideoEngagerWidget {
         resolve();
       });
 
-      window.Genesys('command', 'Messenger.openConversation', {},
-        () => {
-          console.log('Messenger opened');
-          setTimeout(() => {
-            window.Genesys('command', 'MessagingService.sendMessage', {
-              message: 'Start'
-            });
-            console.log('Message sent');
-          }, 1000);
-        },
-        (error) => {
-          console.log("Couldn't open messenger.", error);
-        }
-      );
+      PromiseGenesys('command', 'Messenger.openConversation', {})
+        .catch(e => {
+          console.error('VideoEngagerWidget: error while opening messenger', e);
+          reject(e);
+        });
     });
   }
 
@@ -382,7 +373,7 @@ class VideoEngagerWidget {
     this.iframeHolder.querySelectorAll('iframe').forEach(e => e.remove());
     this.iframeHolder.appendChild(this.iframeInstance);
     this.iframeHolder.style.display = 'block';
-    this.iframeHolder.style.overflow = 'hidden';
+    this.iframeHolder.style.overflow = 'scroll';
     this.showWidget();
     return this.interactionId;
   }
@@ -554,32 +545,30 @@ function safelyInjectHtml () {
   windowDiv.appendChild(windowHeader);
   windowDiv.appendChild(windowContent);
 
-  // Create the button element
-  const buttonContainer = document.querySelector('.button-container');
-  const startVideoCallBtn = document.createElement('button');
-  startVideoCallBtn.id = 'StartVideoCall';
+  // Create the launcher button with SVG
+  const launcherBtn = document.createElement('button');
+  launcherBtn.style.display = 'none';
+  launcherBtn.id = 've-launcher';
+  launcherBtn.setAttribute('data-state', 'inactive');
+  const launcherIndicator = document.createElement('span');
+  launcherIndicator.id = 've-active-indicator';
+  launcherIndicator.style.width = '10px';
+  launcherIndicator.style.height = '10px';
+  launcherIndicator.style.background = 'rgb(0, 123, 255)';
+  launcherIndicator.style.position = 'absolute';
+  launcherIndicator.style.top = '0px';
+  launcherIndicator.style.right = '0px';
+  launcherIndicator.style.borderRadius = '199px';
+  launcherBtn.appendChild(launcherIndicator);
 
-  // Create the image element
-  const videoCallImg = document.createElement('img');
-  videoCallImg.src = 'https://staging.leadsecure.com/nextjs/favicon-white.svg';
-  videoCallImg.alt = 'logo';
-  videoCallImg.id = 'logoimage';
-  startVideoCallBtn.style.display = 'none';
-
-  // Create the span element
-  const videoCallText = document.createElement('span');
-  videoCallText.id = 'connectButton';
-  videoCallText.textContent = 'Touch Here To Begin';
-
-  // Append the image and span to the button
-  startVideoCallBtn.appendChild(videoCallImg);
-  startVideoCallBtn.appendChild(videoCallText);
+  const launcherSvg = createSvgElement('M17 10.5V7C17 6.45 16.55 6 16 6H4C3.45 6 3 6.45 3 7V17C3 17.55 3.45 18 4 18H16C16.55 18 17 17.55 17 17V13.5L19.29 15.79C19.92 16.42 21 15.97 21 15.08V8.91C21 8.02 19.92 7.57 19.29 8.2L17 10.5Z');
+  launcherBtn.appendChild(launcherSvg);
 
   // Append the main container and launcher button to the body or a specific container
   document.body.appendChild(windowDiv);
-  buttonContainer.appendChild(startVideoCallBtn);
+  document.body.appendChild(launcherBtn);
   registerUILogic();
-  return { windowContent, windowDiv, startVideoCallBtn, endBtn, minimizeBtn };
+  return { windowContent, windowDiv, launcherBtn, endBtn, minimizeBtn };
 }
 function registerUILogic () {
   let isFullScreen = false;

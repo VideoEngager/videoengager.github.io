@@ -12,6 +12,8 @@
   * });
  *
  */
+const genesysManager = GenesysManager();
+
 class VideoEngagerWidget {
 /**
    * Initializes the Genesys messaging service and returns an instance of VideoEngagerWidget.
@@ -127,8 +129,9 @@ class VideoEngagerWidget {
      * @private
      * this indicates that gensys messenger plugin is loaded
      */
-    this.manager = new GenesysManager();
-    this.manager.initialize();
+    this.initializeMessenger().then(function () {
+      genesysManager.signal(genesysManager.SIGNALS.LIBRARIES_LOADED);
+    });
     this.GenesysVendorsReady = false;
     this.registerButtonsListeners();
     this.registerWindowListeners();
@@ -187,12 +190,17 @@ class VideoEngagerWidget {
     // this will be triggerred only if disconnect is initiated by agent or flow
     window.Genesys('subscribe', 'MessagingService.conversationDisconnected', (e) => {
       console.log('VideoEngagerWidget: conversationDisconnected', e);
-      self.stopGenesysVideoSession(false);
+      // self.stopGenesysVideoSession(false);
     });
     // this will be triggerred only if disconnect if conversation is ended (in read only mode)
     window.Genesys('subscribe', 'MessagingService.readOnlyConversation', function (e) {
       console.log('VideoEngagerWidget: readOnlyConversation', e);
-      self.stopGenesysVideoSession(false);
+      if (e?.data?.body?.readOnly === false) {
+        genesysManager.signal(genesysManager.SIGNALS.READ_ONLY_MODE, { isReadOnly: false });
+      }
+      if (Array.isArray(e?.data?.events) && e.data.events.length > 0 && e.data.events[0]?.presence?.type === 'Disconnect') {
+        genesysManager.signal(genesysManager.SIGNALS.READ_ONLY_MODE, { isReadOnly: true });
+      }
     });
 
     window.Genesys('subscribe', 'MessagingService.conversationCleared', function (e) {
@@ -214,21 +222,29 @@ class VideoEngagerWidget {
       console.error('VideoEngagerWidget: already stopping video session');
       return;
     }
+    genesysManager.signal(genesysManager.SIGNALS.VIDEO_STOPPED);
     this.stoppingGenesysVideoSession = true;
-    await PromiseGenesys('command', 'Database.update', {
-      messaging: {
-        customAttributes: {
-          'context.veVisitorId': '0'
+    try {
+      await PromiseGenesys('command', 'Database.update', {
+        messaging: {
+          customAttributes: {
+            'context.veVisitorId': '0'
+          }
         }
+      });
+      await new Promise(resolve => setTimeout(resolve, 300)); // wait for the database update to take effect
+
+      if (sendMessage) {
+        await PromiseGenesys('command', 'MessagingService.sendMessage', {
+          message: 'Remove Video Session'
+        });
       }
-    });
-    await new Promise(resolve => setTimeout(resolve, 300)); // wait for the database update to take effect
-
-    if (sendMessage) {
-      this.manager.queueMessage('Remove Video Session');
-      this.startingGenesysVideoSession = false;
+    } catch (e) {
+      console.error('Error on stop genesys video');
+      this.stopVideo();
+      this.stoppingGenesysVideoSession = false;
     }
-
+    console.log('Stoping genesys video');
     this.stopVideo();
     this.stoppingGenesysVideoSession = false;
   }
@@ -286,6 +302,27 @@ class VideoEngagerWidget {
   }
 
   /**
+   * @private
+   * Initializes the Genesys Messenger service.
+   * @returns {Promise<void>} A promise that resolves when the Messenger is ready.
+   * Trying to initialize video call (send message) before this will cause an error.
+   */
+  async initializeMessenger () {
+    return new Promise((resolve, reject) => {
+      // GenesysVendors
+      window.Genesys('subscribe', 'GenesysVendors.ready', () => {
+        resolve();
+      });
+
+      PromiseGenesys('command', 'Messenger.openConversation', {})
+        .catch(e => {
+          console.error('VideoEngagerWidget: error while opening messenger', e);
+          reject(e);
+        });
+    });
+  }
+
+  /**
    * Starts a Genesys interaction chat and video call session.
    * If a call is already ongoing, this method will show the widget.
    * @returns {Promise<void>} A promise that resolves when the session is started.
@@ -294,6 +331,7 @@ class VideoEngagerWidget {
    *
    */
   async startGenesysVideoSession () {
+    const _this = this;
     if (this.isCallOngoing) {
       this.showWidget();
       console.error('VideoEngagerWidget: Call is already ongoing');
@@ -342,17 +380,14 @@ class VideoEngagerWidget {
     // ve-launcher
     // await PromiseGenesys('command', 'Messenger.open', {})
     //   .catch(e => console.error('VideoEngagerWidget: error while opening messenger', e));
-    try {
-      await sendStartVideoSessionMessage(interactionId);
-      await this.iframeManager.waitForIframeLoad();
-    } catch (e) {
-      console.error('Error on initializatione', e);
+    genesysManager.signal(genesysManager.SIGNALS.START_SESSION_REQUESTED, { interactionId });
+    this.iframeManager.waitForIframeLoad();
+    // on ready state
+    genesysManager.setOnReadyCallback(() => {
+      console.log('GenesysManager is ready!');
       carouselManager.removeCarousel();
-      this.startingGenesysVideoSession = false;
-    }
-    // await new Promise(resolve => setTimeout(resolve, 600));
-    carouselManager.removeCarousel();
-    this.startingGenesysVideoSession = false;
+      _this.startingGenesysVideoSession = false;
+    });
   }
 
   /**
@@ -441,6 +476,11 @@ function PromiseGenesys (command, action, payload) {
     }
   });
 }
+
+async function resetConversation () {
+  return PromiseGenesys('command', 'MessagingService.resetConversation', {})
+    .catch(e => console.error('VideoEngagerWidget: error while clearing conversation', e));
+}
 /**
  * Sends a message to start a video session.
  * @param {string} interactionId - The interaction ID.
@@ -455,14 +495,18 @@ async function sendStartVideoSessionMessage (interactionId) {
       }
     });
     await new Promise(resolve => setTimeout(resolve, 300)); // wait for the database update to take effect
-    await this.videoEngagerInstance.manager.queueMessage('Start Video Session');
+    await PromiseGenesys('command', 'MessagingService.sendMessage', {
+      message: 'Start Video Session'
+    });
   } catch (e) {
     console.log('VideoEngagerWidget: error while sending start video session message', e);
 
     if (e === 'Conversation session has ended, start a new session to send a message.') {
       await PromiseGenesys('command', 'MessagingService.resetConversation', {})
         .catch(e => console.error('VideoEngagerWidget: error while clearing conversation', e));
-      await this.videoEngagerInstance.manager.queueMessage('Start Video Session');
+      await PromiseGenesys('command', 'MessagingService.sendMessage', {
+        message: 'Start Video Session'
+      });
     }
   }
 }
@@ -750,25 +794,15 @@ class IframeManager {
     }
   }
 
-  // Function to manually check if the iframe is loaded
-  checkIframeLoaded () {
-    return this.loaded || this.isIframeLoaded();
-  }
-
   // Function to wait until the iframe is loaded
   async waitForIframeLoad () {
-    if (this.checkIframeLoaded()) {
-      return Promise.resolve('Iframe is already loaded.');
-    }
-
     return new Promise((resolve, reject) => {
       this.iframe.onload = () => {
-        this.loaded = true;
+        genesysManager.signal(genesysManager.SIGNALS.IFRAME_LOADED);
         resolve('Iframe loaded successfully.');
       };
 
       this.iframe.onerror = () => {
-        this.loaded = false;
         reject(new Error('Iframe failed to load.'));
       };
     });
@@ -781,69 +815,138 @@ class IframeManager {
   }
 }
 
-let isReady = false;
-class GenesysManager {
-  constructor () {
-    this.messageQueue = [];
-    this.messagePromises = [];
-  }
+function GenesysManager () {
+  const SIGNALS = {
+    LIBRARIES_LOADED: 'LIBRARIES_LOADED',
+    IFRAME_LOADED: 'IFRAME_LOADED',
+    START_SESSION_REQUESTED: 'START_SESSION_REQUESTED',
+    VIDEO_STOPPED: 'VIDEO_STOPPED',
+    READ_ONLY_MODE: 'READ_ONLY_MODE'
+  };
 
-  // Method to queue messages and return a promise that resolves when the message is sent
-  queueMessage (message) {
-    return new Promise((resolve) => {
-      this.messageQueue.push(message);
-      console.log(`Message queued: ${message}`);
+  let SESSION_REQUESTED = false;
+  let onReadyCallback = null;
+  const STATES = {
+    INIT: 'INIT',
+    LIBRARIES_READY: 'LIBRARIES_READY',
+    IFRAME_READY: 'IFRAME_READY',
+    WAIT_READ_ONLY: 'WAIT_READ_ONLY',
+    READY: 'READY'
+  };
 
-      // Store the resolve function for the message promise
-      this.messagePromises.push(resolve);
+  let state = STATES.INIT;
+  let _interactionId = null;
+  let _isReadOnly = null;
 
-      // Attempt to send messages if ready
-      if (isReady) {
-        this.sendQueuedMessages();
-      }
-    });
-  }
+  const startVideo = async function () {
+    console.log('GenesysManager: Session was requested, sending start message');
+    await sendStartVideoSessionMessage(_interactionId);
+  };
 
-  // Method to send all queued messages if the service is ready
-  sendQueuedMessages () {
-    if (isReady) {
-      while (this.messageQueue.length > 0) {
-        const message = this.messageQueue.shift();
-        const resolveMessage = this.messagePromises.shift(); // Get the resolve function for the message
-
-        window.Genesys('command', 'MessagingService.sendMessage', {
-          message: message
-        });
-
-        console.log(`Message sent: ${message}`);
-
-        // Resolve the promise after the message is sent
-        resolveMessage();
-      }
+  const signal = async (signalValue, { interactionId, isReadOnly } = {}) => {
+    if (interactionId) {
+      _interactionId = interactionId;
     }
-  }
+    if (isReadOnly !== undefined) {
+      _isReadOnly = isReadOnly;
+    }
+    console.log(`GenesysManager: Signal received: ${signalValue}, Current state: ${state}`);
+    switch (signalValue) {
+      case SIGNALS.LIBRARIES_LOADED:
+        if (state === STATES.INIT) {
+          state = STATES.LIBRARIES_READY;
+          console.log(`GenesysManager: State changed to: ${state}`);
+        }
+        if (state === STATES.IFRAME_READY && _isReadOnly !== undefined) {
+          state = STATES.READY;
+          console.log(`GenesysManager: State changed to: ${state}`);
+          if (onReadyCallback) {
+            console.log('GenesysManager: Executing onReadyCallback');
+            onReadyCallback();
+          }
+          if (SESSION_REQUESTED) {
+            if (_isReadOnly) {
+              await resetConversation();
+            }
+            startVideo();
+          }
+        } else {
+          state = STATES.WAIT_READ_ONLY;
+          console.log(`GenesysManager: State changed to: ${state}`);
+        }
+        break;
 
-  // Method to initialize the manager and subscribe to Genesys events
-  initialize () {
-    return new Promise((resolve, reject) => {
-      window.Genesys('subscribe', 'Messenger.ready', () => {
-        window.Genesys('command', 'Messenger.openConversation', {}, () => {
-          window.Genesys('subscribe', 'MessagingService.ready', () => {
-            window.Genesys('command', 'MessagingService.startConversation', {}, () => {
-              Genesys('subscribe', 'MessagingService.readOnlyConversation', function ({ data }) {
-                Genesys('command', 'MessagingService.resetConversation', {});
-              });
+      case SIGNALS.IFRAME_LOADED:
+        if (state === STATES.INIT) {
+          state = STATES.IFRAME_READY;
+          console.log(`GenesysManager: State changed to: ${state}`);
+        }
+        if (state === STATES.LIBRARIES_READY && _isReadOnly !== undefined) {
+          state = STATES.READY;
+          console.log(`GenesysManager: State changed to: ${state}`);
+          if (onReadyCallback) {
+            console.log('GenesysManager: Executing onReadyCallback');
+            onReadyCallback();
+          }
+          if (SESSION_REQUESTED) {
+            if (_isReadOnly) {
+              await resetConversation();
+            }
+            startVideo();
+          }
+        } else {
+          state = STATES.WAIT_READ_ONLY;
+          console.log(`GenesysManager: State changed to: ${state}`);
+        }
+        break;
 
-              window.Genesys('subscribe', 'MessagingService.ready', () => {
-                isReady = true; // Set ready flag
-                console.log('Genesys is ready. Sending queued messages...');
-                this.sendQueuedMessages(); // Send messages once ready
-                resolve();
-              });
-            }, () => {});
-          });
-        });
-      });
-    });
-  }
+      case SIGNALS.START_SESSION_REQUESTED:
+        if (state === STATES.READY) {
+          if (_isReadOnly) {
+            await resetConversation();
+          }
+          startVideo();
+        } else {
+          SESSION_REQUESTED = true;
+          console.log('GenesysManager: Session requested but state is not ready, marking SESSION_REQUESTED as true');
+        }
+        break;
+
+      case SIGNALS.VIDEO_STOPPED:
+        console.log('GenesysManager: Video stopped, going back to LIBRARIES_READY');
+        state = STATES.LIBRARIES_READY;
+        break;
+
+      case SIGNALS.READ_ONLY_MODE:
+        if (state === STATES.WAIT_READ_ONLY) {
+          state = STATES.READY;
+          if (onReadyCallback) {
+            console.log('GenesysManager: Executing onReadyCallback');
+            onReadyCallback();
+          }
+          if (SESSION_REQUESTED) {
+            if (_isReadOnly) {
+              await resetConversation();
+            }
+            startVideo();
+          }
+        }
+        break;
+
+      default:
+        console.warn(`GenesysManager: Unexpected signal received: ${signalValue}`);
+    }
+  };
+
+  const setOnReadyCallback = (callback) => {
+    console.log('GenesysManager: onReadyCallback set');
+    onReadyCallback = callback;
+  };
+
+  return {
+    SIGNALS,
+    STATES,
+    signal,
+    setOnReadyCallback
+  };
 }

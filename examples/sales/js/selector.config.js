@@ -206,8 +206,20 @@ window._genesys.widgets = {
           id: 'cx_form_callback_tennantId',
           maxlength: '100',
           name: 'tennantId'
+        },
+        { // example of how to choose different queues with selection
+          type: 'select',
+          label: 'queueId',
+          id: 'cx_form_callback_queueId',
+          maxlength: '100',
+          name: 'Department',
+          options: [
+            { text: 'Support', value: 'eb7933cf-90c4-448f-bf84-d702adfad1fb' },
+            { text: 'Sales', value: 'da2d3585-4d72-487d-801b-6cbacf7e8c34' }
+          ]
         }
       ]
     }
   }
 };
+

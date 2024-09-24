@@ -190,7 +190,9 @@ class VideoEngagerWidget {
     // this will be triggerred only if disconnect is initiated by agent or flow
     window.Genesys('subscribe', 'MessagingService.conversationDisconnected', (e) => {
       console.log('VideoEngagerWidget: conversationDisconnected', e);
-      // self.stopGenesysVideoSession(false);
+      if (e?.data?.readOnly === true) {
+        self.stopGenesysVideoSession(false);
+      }
     });
     // this will be triggerred only if disconnect if conversation is ended (in read only mode)
     window.Genesys('subscribe', 'MessagingService.readOnlyConversation', function (e) {
@@ -478,8 +480,12 @@ function PromiseGenesys (command, action, payload) {
 }
 
 async function resetConversation () {
+  console.log('Resetting conversation...');
   return PromiseGenesys('command', 'MessagingService.resetConversation', {})
-    .catch(e => console.error('VideoEngagerWidget: error while clearing conversation', e));
+    .catch(e => {
+      console.error('VideoEngagerWidget: error while clearing conversation', e);
+      throw e; // Ensure error is propagated if needed
+    });
 }
 /**
  * Sends a message to start a video session.
@@ -816,6 +822,30 @@ class IframeManager {
 }
 
 function GenesysManager () {
+  const startVideo = async function () {
+    console.log('GenesysManager: Session was requested, sending start message');
+    await sendStartVideoSessionMessage(_interactionId);
+  };
+
+  const onReady = async function () {
+    state = STATES.READY;
+    console.log(`GenesysManager: State changed to: ${state}`);
+    if (onReadyCallback) {
+      console.log('GenesysManager: Executing onReadyCallback');
+      onReadyCallback();
+    }
+    if (SESSION_REQUESTED) {
+      if (_isReadOnly) {
+        try {
+          await resetConversation();
+        } catch (e) {
+          console.error('failed to reset conversation', e);
+        }
+      }
+      startVideo();
+    }
+  };
+
   const SIGNALS = {
     LIBRARIES_LOADED: 'LIBRARIES_LOADED',
     IFRAME_LOADED: 'IFRAME_LOADED',
@@ -830,24 +860,19 @@ function GenesysManager () {
     INIT: 'INIT',
     LIBRARIES_READY: 'LIBRARIES_READY',
     IFRAME_READY: 'IFRAME_READY',
-    WAIT_READ_ONLY: 'WAIT_READ_ONLY',
+    WAIT_READ_ONLY: 'WAIT_READ_ONLY', // When both iframe and libraries are loaded but _isReadOnly not defined
     READY: 'READY'
   };
 
   let state = STATES.INIT;
   let _interactionId = null;
-  let _isReadOnly = null;
-
-  const startVideo = async function () {
-    console.log('GenesysManager: Session was requested, sending start message');
-    await sendStartVideoSessionMessage(_interactionId);
-  };
+  let _isReadOnly;
 
   const signal = async (signalValue, { interactionId, isReadOnly } = {}) => {
     if (interactionId) {
       _interactionId = interactionId;
     }
-    if (isReadOnly !== undefined) {
+    if (isReadOnly != null) {
       _isReadOnly = isReadOnly;
     }
     console.log(`GenesysManager: Signal received: ${signalValue}, Current state: ${state}`);
@@ -858,19 +883,9 @@ function GenesysManager () {
           console.log(`GenesysManager: State changed to: ${state}`);
         }
         if (state === STATES.IFRAME_READY && _isReadOnly !== undefined) {
-          state = STATES.READY;
-          console.log(`GenesysManager: State changed to: ${state}`);
-          if (onReadyCallback) {
-            console.log('GenesysManager: Executing onReadyCallback');
-            onReadyCallback();
-          }
-          if (SESSION_REQUESTED) {
-            if (_isReadOnly) {
-              await resetConversation();
-            }
-            startVideo();
-          }
-        } else {
+          onReady();
+        }
+        if (state === STATES.IFRAME_READY && _isReadOnly === undefined) {
           state = STATES.WAIT_READ_ONLY;
           console.log(`GenesysManager: State changed to: ${state}`);
         }
@@ -882,19 +897,9 @@ function GenesysManager () {
           console.log(`GenesysManager: State changed to: ${state}`);
         }
         if (state === STATES.LIBRARIES_READY && _isReadOnly !== undefined) {
-          state = STATES.READY;
-          console.log(`GenesysManager: State changed to: ${state}`);
-          if (onReadyCallback) {
-            console.log('GenesysManager: Executing onReadyCallback');
-            onReadyCallback();
-          }
-          if (SESSION_REQUESTED) {
-            if (_isReadOnly) {
-              await resetConversation();
-            }
-            startVideo();
-          }
-        } else {
+          onReady();
+        }
+        if (state === STATES.LIBRARIES_READY && _isReadOnly === undefined) {
           state = STATES.WAIT_READ_ONLY;
           console.log(`GenesysManager: State changed to: ${state}`);
         }
@@ -902,10 +907,7 @@ function GenesysManager () {
 
       case SIGNALS.START_SESSION_REQUESTED:
         if (state === STATES.READY) {
-          if (_isReadOnly) {
-            await resetConversation();
-          }
-          startVideo();
+          onReady();
         } else {
           SESSION_REQUESTED = true;
           console.log('GenesysManager: Session requested but state is not ready, marking SESSION_REQUESTED as true');
@@ -919,17 +921,7 @@ function GenesysManager () {
 
       case SIGNALS.READ_ONLY_MODE:
         if (state === STATES.WAIT_READ_ONLY) {
-          state = STATES.READY;
-          if (onReadyCallback) {
-            console.log('GenesysManager: Executing onReadyCallback');
-            onReadyCallback();
-          }
-          if (SESSION_REQUESTED) {
-            if (_isReadOnly) {
-              await resetConversation();
-            }
-            startVideo();
-          }
+          onReady();
         }
         break;
 

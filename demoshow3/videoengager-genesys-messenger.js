@@ -12,8 +12,6 @@
   * });
  *
  */
-const genesysManager = GenesysManager();
-
 class VideoEngagerWidget {
 /**
    * Initializes the Genesys messaging service and returns an instance of VideoEngagerWidget.
@@ -97,7 +95,7 @@ class VideoEngagerWidget {
     // Call the function to inject the styles
     injectStyles();
     // Call the function to inject the HTML
-    const { windowContent, windowDiv, startVideoCallBtn, endBtn, minimizeBtn } = safelyInjectHtml();
+    const { windowContent, windowDiv, launcherBtn, endBtn, minimizeBtn } = safelyInjectHtml();
     /**
      * @private
      */
@@ -105,7 +103,7 @@ class VideoEngagerWidget {
     /**
      * @private
      */
-    this.startVideoCallBtn = startVideoCallBtn;
+    this.launcherBtn = launcherBtn;
     /**
      * @private
      */
@@ -129,13 +127,18 @@ class VideoEngagerWidget {
      * @private
      * this indicates that gensys messenger plugin is loaded
      */
-    this.initializeMessenger().then(function () {
-      genesysManager.signal(genesysManager.SIGNALS.LIBRARIES_LOADED);
-    });
     this.GenesysVendorsReady = false;
     this.registerButtonsListeners();
     this.registerWindowListeners();
+    this.registerGensysListeners();
     this.iframeManager = new IframeManager();
+    const self = this;
+    this.videoSessionStateMachine = new VideoSessionStateMachine({
+      initializeMessenger: self.initializeMessenger.bind(self),
+      sendStartVideoSessionMessage: sendStartVideoSessionMessage.bind(self),
+      stopGenesysVideoSession: self.stopGenesysVideoSession.bind(self)
+    });
+    self.showLauncher();
   }
 
   /**
@@ -143,16 +146,15 @@ class VideoEngagerWidget {
    */
   registerButtonsListeners () {
     const self = this;
-    this.startVideoCallBtn.addEventListener('click', () => {
+    this.launcherBtn.addEventListener('click', () => {
       self.startGenesysVideoSession();
     });
     this.endBtn.addEventListener('click', () => {
       console.log('VideoEngagerWidget: endBtn clicked');
-      self.stopGenesysVideoSession();
+      self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST');
     });
     this.minimizeBtn.addEventListener('click', function () {
       self.movableWindow.style.display = 'none';
-      self.showLauncher();
     });
   }
 
@@ -164,16 +166,16 @@ class VideoEngagerWidget {
     // terminate call on page close
     window.onbeforeunload = async () => {
       if (!this.isCallOngoing) return;
-      await self.stopGenesysVideoSession();
+      await self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST');
     };
     window.addEventListener('message', async (e) => {
       if (e.data.type === 'popupClosed') {
         console.log('VideoEngagerWidget: popupClosed');
-        await self.stopGenesysVideoSession();
+        await self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST');
       }
       if (e.data.type === 'callEnded') {
         console.log('VideoEngagerWidget: callEnded');
-        await self.stopGenesysVideoSession();
+        await self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST');
       }
     });
   }
@@ -183,34 +185,43 @@ class VideoEngagerWidget {
    */
   registerGensysListeners () {
     const self = this;
+    window.Genesys('subscribe', 'MessagingService.ready', function () {
+      self.videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
+    });
+
     window.Genesys('subscribe', 'Launcher.ready', function () {
-      self.showLauncher();
+      // self.showLauncher();
     });
     // this will be triggerred only if disconnect is initiated by agent or flow
     window.Genesys('subscribe', 'MessagingService.conversationDisconnected', (e) => {
       console.log('VideoEngagerWidget: conversationDisconnected', e);
-      if (e?.data?.readOnly === true) {
-        self.stopGenesysVideoSession(false);
-        genesysManager.signal(genesysManager.SIGNALS.READ_ONLY_MODE, { isReadOnly: true });
-      }
+      self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
     });
     // this will be triggerred only if disconnect if conversation is ended (in read only mode)
     window.Genesys('subscribe', 'MessagingService.readOnlyConversation', function (e) {
       console.log('VideoEngagerWidget: readOnlyConversation', e);
-      if (e?.data?.body?.readOnly === false) {
-        genesysManager.signal(genesysManager.SIGNALS.READ_ONLY_MODE, { isReadOnly: false });
-      }
-      if (Array.isArray(e?.data?.events) && e.data.events.length > 0 && e.data.events[0]?.presence?.type === 'Disconnect') {
-        genesysManager.signal(genesysManager.SIGNALS.READ_ONLY_MODE, { isReadOnly: true });
+      if (e?.data?.body?.readOnly === true) {
+        self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
       }
     });
 
     window.Genesys('subscribe', 'MessagingService.conversationCleared', function (e) {
       console.log('VideoEngagerWidget: conversationCleared', e);
-      self.stopGenesysVideoSession(false);
+      self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
     });
     window.Genesys('subscribe', 'GenesysVendors.ready', () => {
       self.GenesysVendorsReady = true;
+    });
+    window.Genesys('subscribe', 'Messenger.ready', () => {
+      self.GenesysVendorsReady = true;
+      self.showLauncher();
+    });
+    window.Genesys('subscribe', 'Messenger.closed', (e) => {
+      console.log('Messenger closed');
+    });
+
+    window.Genesys('subscribe', 'MessagingService.sessionCleared', (e) => {
+      console.log('MessagingService sessionCleared');
     });
   }
 
@@ -224,29 +235,22 @@ class VideoEngagerWidget {
       console.error('VideoEngagerWidget: already stopping video session');
       return;
     }
-    genesysManager.signal(genesysManager.SIGNALS.VIDEO_STOPPED);
     this.stoppingGenesysVideoSession = true;
-    try {
-      await PromiseGenesys('command', 'Database.update', {
-        messaging: {
-          customAttributes: {
-            'context.veVisitorId': '0'
-          }
+    await PromiseGenesys('command', 'Database.update', {
+      messaging: {
+        customAttributes: {
+          'context.veVisitorId': '0'
         }
-      });
-      await new Promise(resolve => setTimeout(resolve, 300)); // wait for the database update to take effect
-
-      if (sendMessage) {
-        await PromiseGenesys('command', 'MessagingService.sendMessage', {
-          message: 'Remove Video Session'
-        });
       }
-    } catch (e) {
-      console.error('Error on stop genesys video');
-      this.stopVideo();
-      this.stoppingGenesysVideoSession = false;
+    });
+    await new Promise(resolve => setTimeout(resolve, 300)); // wait for the database update to take effect
+
+    if (sendMessage) {
+      await PromiseGenesys('command', 'MessagingService.sendMessage', {
+        message: 'Remove Video Session'
+      });
     }
-    console.log('Stoping genesys video');
+
     this.stopVideo();
     this.stoppingGenesysVideoSession = false;
   }
@@ -255,14 +259,14 @@ class VideoEngagerWidget {
    * Displays the launcher button.
    */
   showLauncher () {
-    this.startVideoCallBtn.style.display = 'flex';
+    this.launcherBtn.style.display = 'flex';
   }
 
   /**
    * Hides the launcher button.
    */
   hideLauncher () {
-    this.startVideoCallBtn.style.display = 'none';
+    this.launcherBtn.style.display = 'none';
   }
 
   /**
@@ -270,7 +274,7 @@ class VideoEngagerWidget {
    */
   showWidget () {
     this.movableWindow.style.display = 'flex';
-    this.startVideoCallBtn.style.display = 'none';
+    this.launcherBtn.style.display = 'none';
   }
 
   /**
@@ -278,7 +282,7 @@ class VideoEngagerWidget {
    */
   hideWidget () {
     this.movableWindow.style.display = 'none';
-    this.startVideoCallBtn.style.display = 'flex';
+    this.launcherBtn.style.display = 'flex';
   }
 
   /**
@@ -310,45 +314,28 @@ class VideoEngagerWidget {
    * Trying to initialize video call (send message) before this will cause an error.
    */
   async initializeMessenger () {
-    const _this = this;
     return new Promise((resolve, reject) => {
-      let isMessengerOpened = false;
       // GenesysVendors
-      window.Genesys('subscribe', 'GenesysVendors.ready', () => {
-        resolve();
-      });
-
-      Genesys('subscribe', 'Messenger.ready', function () {
-        _this.registerGensysListeners();
-        if (!isMessengerOpened) {
-          genesysManager.signal(genesysManager.SIGNALS.READ_ONLY_MODE, { isReadOnly: false });
-          Genesys('command', 'Messenger.open', {}, {},
-            (e) => {
-              console.log('Messenger opened:', e);
-            },
-            (error) => {
-              reject(error);
-              console.log("Couldn't open messenger.", error);
-            }
-          );
-          Genesys('subscribe', 'MessagingService.ready', () => {
-            genesysManager.signal(genesysManager.SIGNALS.LIBRARIES_LOADED);
-          });
+      window.Genesys(
+        'subscribe',
+        'Messenger.ready',
+        (e) => {
+          resolve();
         }
-      });
+      );
+    });
+  }
 
-      Genesys('subscribe', 'Messenger.opened', function (e) {
-        isMessengerOpened = true;
-        console.log('Messenger.opened', e);
-      });
-
-      Genesys('subscribe', 'Messenger.cleared', function (e) {
-        console.log('Messenger.cleared', e);
-      });
-
-      Genesys('subscribe', 'Messenger.closed', function () {
-        console.log('Messenger.closed', e);
-      });
+  async initializeMessengerService () {
+    return new Promise((resolve, reject) => {
+      // GenesysVendors
+      window.Genesys(
+        'subscribe',
+        'MessagingService.ready',
+        (e) => {
+          resolve();
+        }
+      );
     });
   }
 
@@ -372,9 +359,16 @@ class VideoEngagerWidget {
       console.error('VideoEngagerWidget: already stopping video session');
       return;
     }
+    this.startingGenesysVideoSession = true;
     const interactionId = this.prepareVideoCall();
+    // ve-launcher
+    // await PromiseGenesys('command', 'Messenger.open', {})
+    //   .catch(e => console.error('VideoEngagerWidget: error while opening messenger', e));
+    if (!this.GenesysVendorsReady) {
+      _this.videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
+    }
+    // await new Promise(resolve => setTimeout(resolve, 600));
 
-    // start iframe load
     this.startVideo();
     const carouselSlides = [
       `
@@ -406,18 +400,28 @@ class VideoEngagerWidget {
     const carouselManager = new CarouselManager('.window-content', carouselSlides, 2500);
     carouselManager.createCarousel();
 
-    this.startingGenesysVideoSession = true;
-    // ve-launcher
-    // await PromiseGenesys('command', 'Messenger.open', {})
-    //   .catch(e => console.error('VideoEngagerWidget: error while opening messenger', e));
-    genesysManager.signal(genesysManager.SIGNALS.START_SESSION_REQUESTED, { interactionId });
-    this.iframeManager.waitForIframeLoad();
-    // on ready state
-    genesysManager.setOnReadyCallback(() => {
-      console.log('GenesysManager is ready!');
+    Promise.all([
+      this.initializeMessenger(),
+      this.iframeManager.waitForIframeLoad(),
+      this.initializeMessengerService()
+    ])
+      .then(() => {
+        this.videoSessionStateMachine.handleSignal('PRECONDITION_FULFILLED', { interactionId });
+      })
+      .catch((error) => {
+        console.error('Error fulfilling preconditions:', error);
+      });
+
+    this.videoSessionStateMachine.onSessionStarted(() => {
+      console.log('Video session started');
       carouselManager.removeCarousel();
-      _this.startingGenesysVideoSession = false;
     });
+
+    this.videoSessionStateMachine.onSessionStopped(() => {
+      console.log('Video session stopped');
+    });
+    this.videoSessionStateMachine.handleSignal('START_SESSION_REQUEST', { interactionId });
+    this.startingGenesysVideoSession = false;
   }
 
   /**
@@ -505,15 +509,6 @@ function PromiseGenesys (command, action, payload) {
       reject(e);
     }
   });
-}
-
-async function resetConversation () {
-  console.log('Resetting conversation...');
-  return PromiseGenesys('command', 'MessagingService.resetConversation', {})
-    .catch(e => {
-      console.error('VideoEngagerWidget: error while clearing conversation', e);
-      throw e; // Ensure error is propagated if needed
-    });
 }
 /**
  * Sends a message to start a video session.
@@ -640,8 +635,8 @@ function safelyInjectHtml () {
 
   // Create the button element
   const buttonContainer = document.querySelector('.button-container');
-  const startVideoCallBtn = document.createElement('button');
-  startVideoCallBtn.id = 'StartVideoCall';
+  const launcherBtn = document.createElement('button');
+  launcherBtn.id = 'StartVideoCall';
 
   // Create the image element
   const videoCallImg = document.createElement('img');
@@ -655,14 +650,14 @@ function safelyInjectHtml () {
   videoCallText.textContent = 'Touch Here To Begin';
 
   // Append the image and span to the button
-  startVideoCallBtn.appendChild(videoCallImg);
-  startVideoCallBtn.appendChild(videoCallText);
+  launcherBtn.appendChild(videoCallImg);
+  launcherBtn.appendChild(videoCallText);
 
   // Append the main container and launcher button to the body or a specific container
   document.body.appendChild(windowDiv);
-  buttonContainer.appendChild(startVideoCallBtn);
+  buttonContainer.appendChild(launcherBtn);
   registerUILogic();
-  return { windowContent, windowDiv, startVideoCallBtn, endBtn, minimizeBtn };
+  return { windowContent, windowDiv, launcherBtn, endBtn, minimizeBtn };
 }
 function registerUILogic () {
   let isFullScreen = false;
@@ -781,7 +776,6 @@ function(t,i){"object"==typeof module&&module.exports?module.exports=i(t,require
 // eslint-disable-next-line
 function(t,i){"object"==typeof module&&module.exports?module.exports=i(t,require("get-size"),require("unidragger")):t.Draggabilly=i(t,t.getSize,t.Unidragger)}("undefined"!=typeof window?window:this,(function(t,i,e){let n=t.jQuery;function o(t,i){this.element="string"==typeof t?document.querySelector(t):t,n&&(this.$element=n(this.element)),this.options={},this.option(i),this._create()}let s=o.prototype=Object.create(e.prototype);s.option=function(t){this.options={...this.options,...t}};const r=["relative","absolute","fixed"];s._create=function(){this.position={},this._getPosition(),this.startPoint={x:0,y:0},this.dragPoint={x:0,y:0},this.startPosition={...this.position};let t=getComputedStyle(this.element);r.includes(t.position)||(this.element.style.position="relative"),this.on("pointerDown",this.handlePointerDown),this.on("pointerUp",this.handlePointerUp),this.on("dragStart",this.handleDragStart),this.on("dragMove",this.handleDragMove),this.on("dragEnd",this.handleDragEnd),this.setHandles(),this.enable()},s.setHandles=function(){let{handle:t}=this.options;"string"==typeof t?this.handles=this.element.querySelectorAll(t):"object"==typeof t&&t.length?this.handles=t:t instanceof HTMLElement?this.handles=[t]:this.handles=[this.element]};const h=["dragStart","dragMove","dragEnd"];let a=s.emitEvent;function d(t,i,e){return i?(e=e||"round",Math[e](t/i)*i):t}s.emitEvent=function(i,e){if(!this.isEnabled&&h.includes(i))return;a.call(this,i,e);let n,o=t.jQuery;if(!o||!this.$element)return;let s=e;e&&e[0]instanceof Event&&([n,...s]=e);let r=o.Event(n);r.type=i,this.$element.trigger(r,s)},s._getPosition=function(){let t=getComputedStyle(this.element),i=this._getPositionCoord(t.left,"width"),e=this._getPositionCoord(t.top,"height");this.position.x=isNaN(i)?0:i,this.position.y=isNaN(e)?0:e,this._addTransformPosition(t)},s._getPositionCoord=function(t,e){if(t.includes("%")){let n=i(this.element.parentNode);return n?parseFloat(t)/100*n[e]:0}return parseInt(t,10)},s._addTransformPosition=function(t){let i=t.transform;if(!i.startsWith("matrix"))return;let e=i.split(","),n=i.startsWith("matrix3d")?12:4,o=parseInt(e[n],10),s=parseInt(e[n+1],10);this.position.x+=o,this.position.y+=s},s.handlePointerDown=function(t,i){this.isEnabled&&(this.pointerDownPointer={pageX:i.pageX,pageY:i.pageY},t.preventDefault(),document.activeElement.blur(),this.bindActivePointerEvents(t),this.element.classList.add("is-pointer-down"))},s.handleDragStart=function(){this.isEnabled&&(this._getPosition(),this.measureContainment(),this.startPosition.x=this.position.x,this.startPosition.y=this.position.y,this.setLeftTop(),this.dragPoint.x=0,this.dragPoint.y=0,this.element.classList.add("is-dragging"),this.animate())},s.measureContainment=function(){let t=this.getContainer();if(!t)return;let e=i(this.element),n=i(t),{borderLeftWidth:o,borderRightWidth:s,borderTopWidth:r,borderBottomWidth:h}=n,a=this.element.getBoundingClientRect(),d=t.getBoundingClientRect(),u=o+s,l=r+h,c=this.relativeStartPosition={x:a.left-(d.left+o),y:a.top-(d.top+r)};this.containSize={width:n.width-u-c.x-e.width,height:n.height-l-c.y-e.height}},s.getContainer=function(){let t=this.options.containment;if(t)return t instanceof HTMLElement?t:"string"==typeof t?document.querySelector(t):this.element.parentNode},s.handleDragMove=function(t,i,e){if(!this.isEnabled)return;let n=e.x,o=e.y,s=this.options.grid,r=s&&s[0],h=s&&s[1];n=d(n,r),o=d(o,h),n=this.containDrag("x",n,r),o=this.containDrag("y",o,h),n="y"==this.options.axis?0:n,o="x"==this.options.axis?0:o,this.position.x=this.startPosition.x+n,this.position.y=this.startPosition.y+o,this.dragPoint.x=n,this.dragPoint.y=o},s.containDrag=function(t,i,e){if(!this.options.containment)return i;let n="x"==t?"width":"height",o=d(-this.relativeStartPosition[t],e,"ceil"),s=this.containSize[n];return s=d(s,e,"floor"),Math.max(o,Math.min(s,i))},s.handlePointerUp=function(){this.element.classList.remove("is-pointer-down")},s.handleDragEnd=function(){this.isEnabled&&(this.element.style.transform="",this.setLeftTop(),this.element.classList.remove("is-dragging"))},s.animate=function(){this.isDragging&&(this.positionDrag(),requestAnimationFrame((()=>this.animate())))},s.setLeftTop=function(){let{x:t,y:i}=this.position;this.element.style.left=`${t}px`,this.element.style.top=`${i}px`},s.positionDrag=function(){let{x:t,y:i}=this.dragPoint;this.element.style.transform=`translate3d(${t}px, ${i}px, 0)`},s.setPosition=function(t,i){this.position.x=t,this.position.y=i,this.setLeftTop()},s.enable=function(){this.isEnabled||(this.isEnabled=!0,this.bindHandles())},s.disable=function(){this.isEnabled&&(this.isEnabled=!1,this.isDragging&&this.dragEnd(),this.unbindHandles())};const u=["transform","left","top","position"];return s.destroy=function(){this.disable(),u.forEach((t=>{this.element.style[t]=""})),this.unbindHandles(),this.$element&&this.$element.removeData("draggabilly")},s._init=function(){},n&&n.bridget&&n.bridget("draggabilly",o),o}));
 
-// Iframe manager
 class IframeManager {
   constructor () {
     this.iframe = null;
@@ -830,13 +824,13 @@ class IframeManager {
 
   // Function to wait until the iframe is loaded
   async waitForIframeLoad () {
+    const _this = this;
     return new Promise((resolve, reject) => {
-      this.iframe.onload = () => {
-        genesysManager.signal(genesysManager.SIGNALS.IFRAME_LOADED);
+      _this.iframe.onload = () => {
         resolve('Iframe loaded successfully.');
       };
 
-      this.iframe.onerror = () => {
+      _this.iframe.onerror = () => {
         reject(new Error('Iframe failed to load.'));
       };
     });
@@ -849,139 +843,85 @@ class IframeManager {
   }
 }
 
-function GenesysManager () {
-  const startVideo = async function () {
-    console.log('GenesysManager: Session was requested, sending start message');
-    await sendStartVideoSessionMessage(_interactionId);
-  };
+class VideoSessionStateMachine {
+  constructor (options) {
+    this.state = 'IDLE';
+    this.onSessionStartedCallback = () => {};
+    this.onSessionStoppedCallback = () => {};
+    this.options = options;
+    this.interactionId = null;
+  }
 
-  const onReadyStateEnter = async function () {
-    console.log(`GenesysManager: State changed to: ${state}`);
-    if (onReadyCallback) {
-      console.log('GenesysManager: Executing onReadyCallback');
-      onReadyCallback();
-    }
-    if (SESSION_REQUESTED) {
-      if (_isReadOnly) {
-        try {
-          await resetConversation();
-        } catch (e) {
-          console.error('failed to reset conversation', e);
-        }
-      }
-      startVideo();
-    }
-  };
+  onSessionStarted (callback) {
+    this.onSessionStartedCallback = callback;
+  }
 
-  const SIGNALS = {
-    LIBRARIES_LOADED: 'LIBRARIES_LOADED',
-    IFRAME_LOADED: 'IFRAME_LOADED',
-    START_SESSION_REQUESTED: 'START_SESSION_REQUESTED',
-    VIDEO_STOPPED: 'VIDEO_STOPPED',
-    READ_ONLY_MODE: 'READ_ONLY_MODE'
-  };
+  onSessionStopped (callback) {
+    this.onSessionStoppedCallback = callback;
+  }
 
-  let SESSION_REQUESTED = false;
-  let onReadyCallback = null;
-  const STATES = {
-    INIT: 'INIT',
-    LIBRARIES_READY: 'LIBRARIES_READY',
-    IFRAME_READY: 'IFRAME_READY',
-    WAIT_READ_ONLY: 'WAIT_READ_ONLY', // When both iframe and libraries are loaded but _isReadOnly not defined
-    READY: 'READY'
-  };
-
-  let state = STATES.INIT;
-  let _interactionId = null;
-  let _isReadOnly;
-
-  const signal = async (signalValue, { interactionId, isReadOnly } = {}) => {
-    if (interactionId) {
-      _interactionId = interactionId;
-    }
-    console.log(`GenesysManager: Signal received: ${signalValue}, Current state: ${state}`);
-    switch (signalValue) {
-      case SIGNALS.LIBRARIES_LOADED:
-        switch (state) {
-          case STATES.INIT:
-            state = STATES.LIBRARIES_READY;
-            console.log(`GenesysManager: State changed to: ${state}`);
-            break;
-          case STATES.IFRAME_READY :
-            if (_isReadOnly !== undefined) {
-              state = STATES.READY;
-              console.log(`GenesysManager: State changed to: ${state}`);
-              onReadyStateEnter();
-            } else {
-              state = STATES.WAIT_READ_ONLY;
-              console.log(`GenesysManager: State changed to: ${state}`);
-            }
-            break;
-          default:
-            console.log(`GenesysManager: State doesnt change: ${state}`);
-            break;
+  async handleSignal (signal, data = {}) {
+    switch (this.state) {
+      case 'IDLE':
+        if (signal === 'INITIALIZE_MESSENGER_REQUEST') {
+          this.state = 'MESSENGER_INITIALIZING';
+          try {
+            await this.options.initializeMessenger();
+            this.state = 'MESSENGER_INITIALIZED';
+          } catch (e) {
+            console.error('Failed to initialize messenger:', e);
+            this.state = 'IDLE';
+          }
+        } else if (signal === 'START_SESSION_REQUEST') {
+          console.error('Cannot start session before messenger is initialized.');
+        } else if (signal === 'STOP_SESSION_REQUEST') {
+          console.warn('No active session to stop.');
         }
         break;
 
-      case SIGNALS.IFRAME_LOADED:
-        switch (state) {
-          case STATES.INIT:
-            state = STATES.IFRAME_READY;
-            console.log(`GenesysManager: State changed to: ${state}`);
-            break;
-          case STATES.LIBRARIES_READY:
-            if (_isReadOnly !== undefined) {
-              state = STATES.READY;
-              console.log(`GenesysManager: State changed to: ${state}`);
-              onReadyStateEnter();
-            } else {
-              state = STATES.WAIT_READ_ONLY;
-              console.log(`GenesysManager: State changed to: ${state}`);
-            }
-            break;
-          default:
-            console.log(`GenesysManager: State doesnt change: ${state}`);
-            break;
+      case 'MESSENGER_INITIALIZED':
+        if (signal === 'START_SESSION_REQUEST') {
+          this.interactionId = data.interactionId; // Save interactionId
+          this.sendMessage = data.sendMessage !== false; // Save sendMessage flag
+          this.state = 'WAITING_FOR_PRECONDITION';
+        } else if (signal === 'INITIALIZE_MESSENGER_REQUEST') {
+          console.warn('Messenger is already initialized.');
+        } else if (signal === 'STOP_SESSION_REQUEST') {
+          console.warn('No active session to stop.');
+        } else if (signal === 'PRECONDITION_FULFILLED') {
+          this.state = 'STARTING_VIDEO_SESSION';
+          await this.options.sendStartVideoSessionMessage(data.interactionId);
+          this.state = 'VIDEO_SESSION_ACTIVE';
+          this.onSessionStartedCallback();
         }
         break;
 
-      case SIGNALS.START_SESSION_REQUESTED:
-        SESSION_REQUESTED = true;
-        if (state === STATES.READY) {
-          onReadyStateEnter();
+      case 'WAITING_FOR_PRECONDITION':
+        if (signal === 'PRECONDITION_FULFILLED') {
+          this.state = 'STARTING_VIDEO_SESSION';
+          await this.options.sendStartVideoSessionMessage(data.interactionId);
+          this.state = 'VIDEO_SESSION_ACTIVE';
+          this.onSessionStartedCallback();
+        } else if (signal === 'STOP_SESSION_REQUEST') {
+          console.warn('No active session to stop.');
         }
-        console.log(`GenesysManager: Session requested: ${state}`);
         break;
 
-      case SIGNALS.VIDEO_STOPPED:
-        SESSION_REQUESTED = false;
-        break;
-
-      case SIGNALS.READ_ONLY_MODE:
-        if (isReadOnly != null) {
-          _isReadOnly = isReadOnly;
-        }
-        if (state === STATES.WAIT_READ_ONLY) {
-          state = STATES.READY;
-          console.log(`GenesysManager: State changed to: ${state}`);
-          onReadyStateEnter();
+      case 'VIDEO_SESSION_ACTIVE':
+        if (signal === 'STOP_SESSION_REQUEST') {
+          this.state = 'STOPPING_VIDEO_SESSION';
+          await this.options.stopGenesysVideoSession(data.sendMessage);
+          this.state = 'MESSENGER_INITIALIZED';
+          this.onSessionStoppedCallback();
+        } else if (signal === 'START_SESSION_REQUEST') {
+          console.warn('Session is already active.');
+        } else if (signal === 'INITIALIZE_MESSENGER_REQUEST') {
+          console.warn('Cannot initialize messenger during an active session.');
         }
         break;
 
       default:
-        console.warn(`GenesysManager: Unexpected signal received: ${signalValue}`);
+        console.log('Unhandled state:', this.state);
     }
-  };
-
-  const setOnReadyCallback = (callback) => {
-    console.log('GenesysManager: onReadyCallback set');
-    onReadyCallback = callback;
-  };
-
-  return {
-    SIGNALS,
-    STATES,
-    signal,
-    setOnReadyCallback
-  };
+  }
 }

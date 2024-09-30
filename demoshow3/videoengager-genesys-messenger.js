@@ -3,7 +3,7 @@
  * @class
  * This class will load Genesys widget and after that it will initialize the Video Engager Widget.
  * @example
- * const videoEngagerInstance = VideoEngagerWidget.initializeVeGensysMessaging({
+ * const videoEngagerInstance = VideoEngagerWidget.initializeVeGenesysMessaging({
  *  TENANT_ID: 'your_tenant_id',
  * veUrl: 'https://your_ve_url',
  * environment: 'your_environment',
@@ -27,7 +27,7 @@ class VideoEngagerWidget {
    * @param {boolean} [options.audioOnly=false] - Whether to start the call with audio only.
    * @returns {VideoEngagerWidget} An instance of VideoEngagerWidget.
    */
-  static initializeVeGensysMessaging ({
+  static initializeVeGenesysMessaging ({
     TENANT_ID,
     veUrl,
     customAttributes = {},
@@ -130,7 +130,7 @@ class VideoEngagerWidget {
     this.GenesysVendorsReady = false;
     this.registerButtonsListeners();
     this.registerWindowListeners();
-    this.registerGensysListeners();
+    this.registerGenesysListeners();
     this.iframeManager = new IframeManager();
     const self = this;
     this.videoSessionStateMachine = new VideoSessionStateMachine({
@@ -181,11 +181,22 @@ class VideoEngagerWidget {
   }
 
   /**
-   * @private
+   *
    */
-  registerGensysListeners () {
+  registerGenesysListeners () {
     const self = this;
+    /*
+    window.Genesys('subscribe', 'GenesysVendors.ready', () => {
+      self.GenesysVendorsReady = true;
+    });
+    window.Genesys('subscribe', 'Messenger.ready', () => {
+      console.log('Messenger event: Messenger.ready');
+      self.GenesysVendorsReady = true;
+    });
+    */
     window.Genesys('subscribe', 'MessagingService.ready', function () {
+      console.log('Messenger event: MessagingService.ready');
+      self.GenesysVendorsReady = true;
       self.videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
     });
 
@@ -209,19 +220,32 @@ class VideoEngagerWidget {
       console.log('VideoEngagerWidget: conversationCleared', e);
       self.videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
     });
-    window.Genesys('subscribe', 'GenesysVendors.ready', () => {
-      self.GenesysVendorsReady = true;
-    });
-    window.Genesys('subscribe', 'Messenger.ready', () => {
-      self.GenesysVendorsReady = true;
-      self.showLauncher();
-    });
+
     window.Genesys('subscribe', 'Messenger.closed', (e) => {
       console.log('Messenger closed');
     });
 
     window.Genesys('subscribe', 'MessagingService.sessionCleared', (e) => {
       console.log('MessagingService sessionCleared');
+    });
+
+    Genesys('subscribe', 'MessagingService.conversationReset', function ({ data }) {
+      console.log('MessagingService event: conversationReset', data);
+    });
+
+    Genesys('subscribe', 'MessagingService.reconnected', function (data) {
+      console.log('MessagingService event: reconnected', data);
+    });
+
+    Genesys('subscribe', 'MessagingService.error', function (data) {
+      console.log('MessagingService event: error', data);
+    });
+
+    Genesys('subscribe', 'MessagingService.offline', function (data) {
+      console.log('MessagingService event: offline', data);
+    });
+    Genesys('subscribe', 'MessagingService.conversationReset', function ({ data }) {
+      console.log('MessagingService event: offline', data);
     });
   }
 
@@ -320,6 +344,7 @@ class VideoEngagerWidget {
         'subscribe',
         'Messenger.ready',
         (e) => {
+          window.Genesys('command', 'Messenger.open', {});
           resolve();
         }
       );
@@ -328,7 +353,6 @@ class VideoEngagerWidget {
 
   async initializeMessengerService () {
     return new Promise((resolve, reject) => {
-      // GenesysVendors
       window.Genesys(
         'subscribe',
         'MessagingService.ready',
@@ -540,6 +564,14 @@ async function sendStartVideoSessionMessage (interactionId) {
   }
 }
 
+/**
+ * This function loads global Genesys function
+ * @param {Object} g global window
+ * @param {String} e genesys.min.js library path
+ * @param {Object} n configuration: {deploymentId: string, environment: string, debug: boolean}
+ * @param {*} es
+ * @param {*} ys
+ */
 function loadGenesysWidget (g, e, n, es, ys) {
   g._genesysJs = e; g[e] = g[e] || function () { (g[e].q = g[e].q || []).push(arguments); };
   g[e].t = 1 * new Date(); g[e].c = es; ys = document.createElement('script'); ys.async = 1;

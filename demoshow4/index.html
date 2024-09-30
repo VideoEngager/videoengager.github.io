@@ -1,0 +1,28 @@
+<html lang="en" style="height: 100%; overflow: hidden;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Genesys Messenger Integration</title>
+    <script type="text/javascript" src="VideoSessionStateMachine.js"></script>
+    <script type="text/javascript" src="iframeManager.js"></script>
+    <script type="text/javascript" src="videoengager-genesys-messenger.js"></script>
+
+      <style>
+        #genesys-messenger {
+          display: none;
+        }
+      </style>
+</head>
+
+<body>
+    <div class="text-container">
+        <h3>Start video chat with a live agent!</h3>
+    </div>
+    <div class="button-container">
+        <button id="StartVideoCall">Start Video</button>
+        <button id="StopVideoCall" style="display: none;">Stop Video</button>
+    </div>
+    <div id="iframe-container"></div>
+</body>
+</html>

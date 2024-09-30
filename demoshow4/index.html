@@ -7,7 +7,24 @@
     <script type="text/javascript" src="videoSessionStateMachine.js"></script>
     <script type="text/javascript" src="iframeManager.js"></script>
     <script type="text/javascript" src="videoengager-genesys-messenger.js"></script>
-
+    <script type="text/javascript" charset="utf-8">
+        // Script sourced from Genesys Messenger deployment.
+        // You can remove this script and instead use the initializeGenesysIfNotRunning function
+        // found in videoengager-genesys-messenger.js, triggered on the document load event.
+        (function (g, e, n, es, ys) {
+          g['_genesysJs'] = e;
+          g[e] = g[e] || function () {
+            (g[e].q = g[e].q || []).push(arguments)
+          };
+          g[e].t = 1 * new Date();
+          g[e].c = es;
+          ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+        })(window, 'Genesys', 'https://apps.mypurecloud.de/genesys-bootstrap/genesys.min.js', {
+          environment: 'prod-euc1',
+          deploymentId: '50bce9ca-111b-4372-87ff-5f98ae8849e6',
+          debug: true
+        });
+      </script>
       <style>
         #genesys-messenger {
           display: none;

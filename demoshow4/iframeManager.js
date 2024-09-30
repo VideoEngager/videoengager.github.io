@@ -77,18 +77,25 @@ class IframeManager {
      * @returns {Promise<string>} - Resolves when loaded, rejects on error.
      */
   waitForIframeLoad () {
+    console.log('waiting for videoengager iframe load');
     if (!this.iframe) {
       return Promise.reject(new Error('Iframe is not set.'));
+    }
+
+    if (this.loaded === true) {
+      return 'Iframe loaded successfully.';
     }
 
     return new Promise((resolve, reject) => {
       this.iframe.onload = () => {
         this.loaded = true;
+        console.log('videoengager iframe loaded');
         resolve('Iframe loaded successfully.');
       };
 
-      this.iframe.onerror = () => {
+      this.iframe.onerror = (e) => {
         this.loaded = false;
+        console.log('error on  videoengager iframe load', e);
         reject(new Error('Iframe failed to load.'));
       };
     });

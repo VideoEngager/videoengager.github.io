@@ -48,6 +48,8 @@ function registerButtonListeners ({ startVideoButton, stopVideoButton, iframeCon
   stopVideoButton.addEventListener('click', () => {
     console.log('VideoEngagerWidget: endBtn clicked');
     videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST');
+    startVideoButton.style.display = 'block';
+    stopVideoButton.style.display = 'none';
   });
 }
 
@@ -57,19 +59,24 @@ function registerGenesysListeners () {
     videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
   });
 
-  window.Genesys('subscribe', 'MessagingService.conversationDisconnected', (e) => {
+  window.Genesys('subscribe', 'MessagingService.conversationDisconnected', async (e) => {
     console.log('Messenger event: conversationDisconnected', e);
-    videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
+    await videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
   });
-  window.Genesys('subscribe', 'MessagingService.readOnlyConversation', function (e) {
+
+  window.Genesys('subscribe', 'MessagingService.readOnlyConversation', async function (e) {
     console.log('Messenger event: readOnlyConversation', e);
     if (e?.data?.body?.readOnly === true) {
-      videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
+      const result = await videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
+      if (result === 'disconnectBeforeStart') {
+        Genesys('command', 'MessagingService.resetConversation', {});
+      }
     }
   });
-  window.Genesys('subscribe', 'MessagingService.conversationCleared', function (e) {
+
+  window.Genesys('subscribe', 'MessagingService.conversationCleared', async function (e) {
     console.log('Messenger event: conversationCleared', e);
-    videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
+    await videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
   });
 }
 
@@ -196,11 +203,10 @@ async function stopGenesysVideoSession (sendMessage = true) {
         message: 'Remove Video Session'
       });
     }
-
-    iframeManager.close();
   } catch (error) {
     console.error('Error stopping Genesys video session:', error);
   }
+  iframeManager.close();
 }
 
 function getGuid () {
@@ -212,8 +218,8 @@ function getGuid () {
 
 async function startGenesysVideoSession ({ startVideoButton, stopVideoButton, iframeContainer }, { TENANT_ID, veUrl }) {
   const interactionId = getGuid();
-  await videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
   startVideo({ interactionId, autoAccept: true, customAttributes: null, startWithVideo: true, iframeContainer }, { TENANT_ID, veUrl });
+  await videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
 
   Promise.all([
     onMessengerReady(),

@@ -1,4 +1,6 @@
 /* global Genesys IframeManager VideoSessionStateMachine */
+
+/* helper function to make genesys commands and subscriptions promise */
 function PromiseGenesys (action, event, dataObject = null) {
   console.log(`PromiseGenesys Action: ${action}, Event: ${event}`);
 
@@ -28,12 +30,16 @@ function PromiseGenesys (action, event, dataObject = null) {
   });
 }
 
+// resolve when messenger.ready
 async function onMessengerReady () {
   return PromiseGenesys('subscribe', 'Messenger.ready');
 }
+// genesys messenger is initialized by opening messenger
 async function initializeMessenger () {
   return PromiseGenesys('command', 'Messenger.open');
 }
+// resolve when MessagingService is ready.
+// required to send messages, get messaging events and restart conversation
 async function onMessengerServiceReady () {
   return PromiseGenesys('subscribe', 'MessagingService.ready');
 }
@@ -80,6 +86,7 @@ function registerGenesysListeners () {
   });
 }
 
+// listens iframe events
 function registerWindowListeners () {
   window.onbeforeunload = async () => {
     videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST');
@@ -96,6 +103,7 @@ function registerWindowListeners () {
   });
 }
 
+// start videoengager in iframe
 function startVideo ({ interactionId, autoAccept, customAttributes, startWithVideo, iframeContainer }, { TENANT_ID, veUrl }) {
   let str = {
     sessionId: interactionId,
@@ -247,12 +255,14 @@ async function startGenesysVideoSession ({ startVideoButton, stopVideoButton, if
   videoSessionStateMachine.handleSignal('START_SESSION_REQUEST', { interactionId });
 }
 
+// script taken from genesys messenger deployment
 function loadGenesysWidget (g, e, n, es, ys) {
   g._genesysJs = e; g[e] = g[e] || function () { (g[e].q = g[e].q || []).push(arguments); };
   g[e].t = 1 * new Date(); g[e].c = es; ys = document.createElement('script'); ys.async = 1;
   ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
 }
 
+// initialize genesys when it is not already initialized
 function initializeGenesysIfNotRunning ({ environment, deploymentId, debug, envUrl }) {
   if (typeof window.Genesys === 'undefined') {
     console.log('Genesys is not initialized, starting initialization...');

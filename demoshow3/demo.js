@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
   deploymentId = urlParams.get('deploymentId') || deploymentId;
   tenantId = urlParams.get('tenantId') || tenantId;
 
-  const videoEngagerInstance = window.VideoEngagerWidget.initializeVeGensysMessaging({
+  const videoEngagerInstance = window.VideoEngagerWidget.initializeVeGenesysMessaging({
     TENANT_ID: tenantId,
     veUrl,
     customAttributes: {},

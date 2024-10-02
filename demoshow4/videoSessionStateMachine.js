@@ -18,10 +18,10 @@ class VideoSessionStateMachine {
     console.log('State_Machine: onSessionStopped callback registered');
   }
 
-  async onStopSessionRequested (data) {
+  onStopSessionRequested (data) {
     console.log('State_Machine: Stopping video session.');
     try {
-      await this.options.stopGenesysVideoSession(data.sendMessage);
+      this.options.stopGenesysVideoSession(data.sendMessage);
       this.state = 'MESSENGER_INITIALIZED';
       console.log('State_Machine: Video session stopped. Messenger is now initialized.');
       this.onSessionStoppedCallback();
@@ -48,23 +48,6 @@ class VideoSessionStateMachine {
             console.error('State_Machine: Failed to initialize messenger:', e);
             this.state = 'IDLE';
           }
-        },
-        START_SESSION_REQUEST: () => {
-          console.error('State_Machine: Cannot start session before messenger is initialized.');
-        },
-        STOP_SESSION_REQUEST: () => {
-          console.warn('State_Machine: No active session to stop.');
-        }
-      },
-      MESSENGER_INITIALIZING: {
-        INITIALIZE_MESSENGER_REQUEST: () => {
-          console.warn('State_Machine: Messenger is already initializing.');
-        },
-        START_SESSION_REQUEST: () => {
-          console.error('State_Machine: Cannot start session before messenger is initialized.');
-        },
-        STOP_SESSION_REQUEST: () => {
-          console.warn('State_Machine: No active session to stop.');
         }
       },
       MESSENGER_INITIALIZED: {
@@ -74,13 +57,9 @@ class VideoSessionStateMachine {
           this.state = 'WAITING_FOR_PRECONDITION';
           console.log('State_Machine: Waiting for precondition to start video session.');
         },
-        INITIALIZE_MESSENGER_REQUEST: () => {
-          console.warn('State_Machine: Messenger is already initialized.');
-        },
         STOP_SESSION_REQUEST: (data) => {
           if (data?.sendMessage === false) {
-            console.log('this message sent by event before video started.');
-            return 'disconnectBeforeStart';
+            console.log('State_Machine: This message sent by event before video started.');
           } else {
             this.onStopSessionRequested(data);
           }
@@ -116,8 +95,7 @@ class VideoSessionStateMachine {
         STOP_SESSION_REQUEST: async (data) => {
           this.state = 'STOPPING_VIDEO_SESSION';
           if (data?.sendMessage === false) {
-            console.log('this message sent by event before video started.');
-            return 'disconnectBeforeStart';
+            console.log('State_Machine: This message sent by event before video started.');
           } else {
             this.onStopSessionRequested(data);
           }
@@ -128,20 +106,6 @@ class VideoSessionStateMachine {
           this.state = 'STOPPING_VIDEO_SESSION';
           console.log('State_Machine: Stopping video session.');
           this.onStopSessionRequested(data);
-        },
-        START_SESSION_REQUEST: () => {
-          console.warn('State_Machine: Session is already active.');
-        },
-        INITIALIZE_MESSENGER_REQUEST: () => {
-          console.warn('State_Machine: Cannot initialize messenger during an active session.');
-        }
-      },
-      STOPPING_VIDEO_SESSION: {
-        STOP_SESSION_REQUEST: () => {
-          console.warn('State_Machine: Already stopping video session.');
-        },
-        START_SESSION_REQUEST: () => {
-          console.warn('State_Machine: Cannot start session while stopping the current session.');
         }
       }
     };
@@ -157,4 +121,8 @@ class VideoSessionStateMachine {
       console.warn(`State_Machine: Unhandled signal '${signal}' in state '${this.state}'`);
     }
   }
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = VideoSessionStateMachine;
 }

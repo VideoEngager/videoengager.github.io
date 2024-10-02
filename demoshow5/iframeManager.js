@@ -1,4 +1,4 @@
-class IframeManager {
+export class IframeManager {
   /**
      * Initializes the IframeManager.
      * @param {HTMLElement} container - The parent element to append iframe and loading HTML. Defaults to document.body.
@@ -28,7 +28,7 @@ class IframeManager {
     const loadingHTML = options.loadingHTML || '<div>Loading...</div>';
 
     // Initially hide the iframe until it's loaded
-    this.iframe.style.display = 'none';
+    // this.iframe.style.display = 'none';
 
     // Attach load and error handlers
     this.attachLoadHandlers(loadingHTML);
@@ -153,8 +153,4 @@ class IframeManager {
       this.iframe.style.display = 'block';
     }
   }
-}
-
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports = IframeManager;
 }

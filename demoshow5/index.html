@@ -1,0 +1,43 @@
+<html lang="en" style="height: 100%; overflow: hidden;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Genesys Messenger Integration</title>
+    <script type="module" src="main.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        // Script sourced from Genesys Messenger deployment.
+        // You can remove this script and instead use the initializeGenesysIfNotRunning function
+        // found in videoengager-genesys-messenger.js, triggered on the document load event.
+        (function (g, e, n, es, ys) {
+          g['_genesysJs'] = e;
+          g[e] = g[e] || function () {
+            (g[e].q = g[e].q || []).push(arguments)
+          };
+          g[e].t = 1 * new Date();
+          g[e].c = es;
+          ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+        })(window, 'Genesys', 'https://apps.mypurecloud.de/genesys-bootstrap/genesys.min.js', {
+          environment: 'prod-euc1',
+          deploymentId: '50bce9ca-111b-4372-87ff-5f98ae8849e6',
+          debug: true
+        });
+      </script>
+      <style>
+        #genesys-messenger {
+          display: none;
+         }
+      </style>
+</head>
+
+<body>
+    <div class="text-container">
+        <h3>Start video chat with a live agent!</h3>
+    </div>
+    <div class="button-container">
+        <button id="StartVideoCall">Start Video</button>
+        <button id="StopVideoCall" style="display: none;">Stop Video</button>
+    </div>
+    <div id="iframe-container"></div>
+</body>
+</html>

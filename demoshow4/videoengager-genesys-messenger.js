@@ -60,29 +60,25 @@ function registerButtonListeners ({ startVideoButton, stopVideoButton, iframeCon
 }
 
 function registerGenesysListeners () {
-  window.Genesys('subscribe', 'MessagingService.ready', function () {
-    console.log('Messenger event: MessagingService.ready');
-    videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
+  window.Genesys('subscribe', 'Messenger.opened', async (e) => {
+    console.log('Messenger event: Messenger.opened', e);
   });
 
   window.Genesys('subscribe', 'MessagingService.conversationDisconnected', async (e) => {
     console.log('Messenger event: conversationDisconnected', e);
-    await videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
+    videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
   });
 
   window.Genesys('subscribe', 'MessagingService.readOnlyConversation', async function (e) {
     console.log('Messenger event: readOnlyConversation', e);
     if (e?.data?.body?.readOnly === true) {
-      const result = await videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
-      if (result === 'disconnectBeforeStart') {
-        Genesys('command', 'MessagingService.resetConversation', {});
-      }
+      videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
     }
   });
 
   window.Genesys('subscribe', 'MessagingService.conversationCleared', async function (e) {
     console.log('Messenger event: conversationCleared', e);
-    await videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
+    videoSessionStateMachine.handleSignal('STOP_SESSION_REQUEST', { sendMessage: false });
   });
 }
 
@@ -104,7 +100,7 @@ function registerWindowListeners () {
 }
 
 // start videoengager in iframe
-function startVideo ({ interactionId, autoAccept, customAttributes, startWithVideo, iframeContainer }, { TENANT_ID, veUrl }) {
+function startVideo ({ interactionId, autoAccept, customAttributes, startWithVideo }, { TENANT_ID, veUrl }) {
   let str = {
     sessionId: interactionId,
     hideChat: true,
@@ -132,29 +128,8 @@ function startVideo ({ interactionId, autoAccept, customAttributes, startWithVid
   iframeInstance.id = 'videoengageriframe';
   iframeInstance.allow = 'microphone; camera';
   iframeInstance.src = url;
-  iframeManager.setIframe({ iframe: iframeInstance, iframeContainer });
 
-  // add custom loading screen until smart video is ready
-  const loadingElement = document.createElement('p');
-  loadingElement.textContent = 'Loading...';
-  Object.assign(loadingElement.style, {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    zIndex: '9999', // Ensure it's on top
-    background: 'rgba(255, 255, 255)', // Semi-transparent background
-    padding: '20px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    pointerEvents: 'none' // Allow clicks to pass through
-  });
-
-  iframeManager.showLoading(loadingElement);
-
-  iframeContainer.style.display = 'block';
-  iframeContainer.style.overflow = 'hidden';
-  return interactionId;
+  return iframeInstance;
 }
 
 async function sendStartVideoSessionMessage (interactionId) {
@@ -226,7 +201,30 @@ function getGuid () {
 
 async function startGenesysVideoSession ({ startVideoButton, stopVideoButton, iframeContainer }, { TENANT_ID, veUrl }) {
   const interactionId = getGuid();
-  startVideo({ interactionId, autoAccept: true, customAttributes: null, startWithVideo: true, iframeContainer }, { TENANT_ID, veUrl });
+  const iframeInstance = startVideo({ interactionId, autoAccept: true, customAttributes: null, startWithVideo: true, iframeContainer }, { TENANT_ID, veUrl });
+  iframeManager.setIframe({ iframe: iframeInstance, iframeContainer });
+
+  // add custom loading screen until smart video is ready
+  const loadingElement = document.createElement('p');
+  loadingElement.textContent = 'Loading...';
+  Object.assign(loadingElement.style, {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: '9999', // Ensure it's on top
+    background: 'rgba(255, 255, 255)', // Semi-transparent background
+    padding: '20px',
+    borderRadius: '8px',
+    textAlign: 'center',
+    pointerEvents: 'none' // Allow clicks to pass through
+  });
+
+  iframeManager.showLoading(loadingElement);
+
+  iframeContainer.style.display = 'block';
+  iframeContainer.style.overflow = 'hidden';
+
   await videoSessionStateMachine.handleSignal('INITIALIZE_MESSENGER_REQUEST');
 
   Promise.all([

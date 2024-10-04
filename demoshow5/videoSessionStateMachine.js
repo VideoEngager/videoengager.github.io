@@ -1,4 +1,4 @@
-export class VideoSessionStateMachine {
+class VideoSessionStateMachine {
   constructor ({ onSessionStartedCallback, onSessionStoppedCallback, startVideoCallback, stopVideoCallback }) {
     this.state = 'IDLE';
     this.onSessionStartedCallback = onSessionStartedCallback || (() => {});
@@ -37,23 +37,19 @@ export class VideoSessionStateMachine {
             this.interactionId = data?.interactionId;
           }
         },
-        STOP_SESSION_REQUEST: (data) => {
-          this.interactionId = null;
-          if (data?.sendMessage === false) {
-            console.log('State_Machine: This message sent by event before video started.');
-          } else {
-            this.onStopSessionRequested(data);
-          }
+        STOP_SESSION_REQUEST: () => {
+          // Do nothing, state should remain IDLE
         },
         MESSENGER_INITIALIZED: () => {
           if (this?.interactionId) {
             this.startVideoCallback(this.interactionId)
               .then(result => {
                 this.onSessionStartedCallback(result);
-              }).catch(error => {
+                this.state = 'VIDEO_SESSION_ACTIVE';
+              })
+              .catch(error => {
                 console.error('State_Machine: Error in promise:', error);
               });
-            this.state = 'VIDEO_SESSION_ACTIVE';
           } else {
             this.state = 'MESSENGER_INITIALIZED';
           }
@@ -68,12 +64,12 @@ export class VideoSessionStateMachine {
           this.startVideoCallback(this.interactionId)
             .then(result => {
               this.onSessionStartedCallback(result);
-            }).catch(error => {
+              this.state = 'VIDEO_SESSION_ACTIVE';
+            })
+            .catch(error => {
               console.error('State_Machine: Error in promise:', error);
+              // Ensure state stays in MESSENGER_INITIALIZED in case of error
             });
-
-          this.state = 'VIDEO_SESSION_ACTIVE';
-          console.log('State_Machine: Video session is now active.');
         },
         STOP_SESSION_REQUEST: (data) => {
           if (data?.sendMessage === false) {
@@ -102,4 +98,8 @@ export class VideoSessionStateMachine {
       console.warn(`State_Machine: Unhandled signal '${signal}' in state '${this.state}'`);
     }
   }
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = VideoSessionStateMachine;
 }

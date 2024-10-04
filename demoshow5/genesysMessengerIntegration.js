@@ -1,7 +1,7 @@
 // genesysMessengerIntegration.js
 
 /* helper function to make genesys commands and subscriptions promise */
-export function PromiseGenesys (action, event, dataObject = {}, onSuccess = () => {}, onFail = () => {}) {
+function PromiseGenesys (action, event, dataObject = {}, onSuccess = () => {}, onFail = () => {}) {
   console.log(`PromiseGenesys Action: ${action}, Event: ${event}`);
 
   return new Promise((resolve, reject) => {
@@ -33,22 +33,22 @@ export function PromiseGenesys (action, event, dataObject = {}, onSuccess = () =
 }
 
 // resolve when messenger.ready
-export async function onMessengerReady () {
+async function onMessengerReady () {
   return PromiseGenesys('subscribe', 'Messenger.ready');
 }
 
 // initialize Genesys Messenger by opening messenger
-export async function initializeMessenger () {
+async function initializeMessenger () {
   return PromiseGenesys('command', 'Messenger.open');
 }
 
 // resolve when MessagingService is ready.
-export async function onMessengerServiceReady () {
+async function onMessengerServiceReady () {
   return PromiseGenesys('subscribe', 'MessagingService.ready');
 }
 
 // register Genesys event listeners for session management
-export function registerGenesysDisconnectListeners (stopSessionCallback) {
+function registerGenesysDisconnectListeners (stopSessionCallback) {
   // Video session ended by disconnect event
   window.Genesys('subscribe', 'MessagingService.conversationDisconnected', (e) => {
     console.log('Messenger event: conversationDisconnected', e);
@@ -71,7 +71,7 @@ export function registerGenesysDisconnectListeners (stopSessionCallback) {
 }
 
 // send a start video session message via Genesys
-export async function sendStartVideoSessionMessage (interactionId) {
+async function sendStartVideoSessionMessage (interactionId) {
   try {
     console.log(`VideoEngagerWidget: Updating database with veVisitorId: ${interactionId}...`);
     await PromiseGenesys('command', 'Database.update', {
@@ -105,7 +105,7 @@ export async function sendStartVideoSessionMessage (interactionId) {
 }
 
 // stop Genesys video session
-export async function sendStopVideoSessionMessage (sendMessage = true) {
+async function sendStopVideoSessionMessage (sendMessage = true) {
   try {
     await PromiseGenesys('command', 'Database.update', {
       messaging: {
@@ -125,7 +125,7 @@ export async function sendStopVideoSessionMessage (sendMessage = true) {
   }
 }
 
-export async function initializeMessengerService () {
+async function initializeMessengerService () {
   try {
     // Wait for messenger library and messaging service library initialization
     console.log('INIT: onMessengerReady');
@@ -143,7 +143,7 @@ export async function initializeMessengerService () {
   }
 }
 
-export function loadGenesysMessengerLibrary ({ environment, deploymentId, debug, envUrl }) {
+function loadGenesysMessengerLibrary ({ environment, deploymentId, debug, envUrl }) {
   // script taken from genesys messenger deployment
   function loadGenesysWidget (g, e, n, es, ys) {
     g._genesysJs = e; g[e] = g[e] || function () { (g[e].q = g[e].q || []).push(arguments); };
@@ -164,4 +164,15 @@ export function loadGenesysMessengerLibrary ({ environment, deploymentId, debug,
   } else {
     console.log('Genesys is already initialized. No configuration will be applied.');
   }
+}
+
+// Export all the relevant functions and classes
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = {
+    sendStartVideoSessionMessage,
+    sendStopVideoSessionMessage,
+    registerGenesysDisconnectListeners,
+    initializeMessengerService,
+    loadGenesysMessengerLibrary
+  };
 }

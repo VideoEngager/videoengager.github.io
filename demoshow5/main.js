@@ -1,13 +1,7 @@
-import {
-  sendStartVideoSessionMessage,
-  sendStopVideoSessionMessage,
-  registerGenesysDisconnectListeners,
-  initializeMessengerService,
-  loadGenesysMessengerLibrary
-} from './genesysMessengerIntegration.js';
-import { startVideo, getGuid } from './videoengagerHelper.js';
-import { IframeManager } from './iframeManager.js';
-import { VideoSessionStateMachine } from './videoSessionStateMachine.js';
+/* globals sendStartVideoSessionMessage, sendStopVideoSessionMessage,
+   registerGenesysDisconnectListeners, initializeMessengerService,
+   loadGenesysMessengerLibrary, startVideo, getGuid, IframeManager,
+   VideoSessionStateMachine */
 
 const config = {
   staging: {

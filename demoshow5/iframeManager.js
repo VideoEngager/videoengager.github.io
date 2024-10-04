@@ -1,4 +1,4 @@
-export class IframeManager {
+class IframeManager {
   /**
      * Initializes the IframeManager.
      * @param {HTMLElement} container - The parent element to append iframe and loading HTML. Defaults to document.body.
@@ -153,4 +153,7 @@ export class IframeManager {
       this.iframe.style.display = 'block';
     }
   }
+}
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = IframeManager;
 }

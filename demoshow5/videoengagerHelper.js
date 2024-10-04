@@ -1,6 +1,6 @@
 
 // start videoengager in iframe
-export function startVideo ({ interactionId, autoAccept, customAttributes, startWithVideo }, { TENANT_ID, veUrl }) {
+function startVideo ({ interactionId, autoAccept, customAttributes, startWithVideo }, { TENANT_ID, veUrl }) {
   let str = {
     sessionId: interactionId,
     hideChat: true,
@@ -32,9 +32,17 @@ export function startVideo ({ interactionId, autoAccept, customAttributes, start
   return iframeInstance;
 }
 
-export function getGuid () {
+function getGuid () {
   function s4 () {
     return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
   }
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
+// Export all the relevant functions and classes
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = {
+    startVideo,
+    getGuid
+  };
 }

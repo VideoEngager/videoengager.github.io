@@ -2,7 +2,9 @@ const config = {
   prod: {
     envUrl: 'https://apps.mypurecloud.com',
     veUrl: 'https://videome.leadsecure.com',
-    tenantId: '0FphTk091nt7G1W7'
+    tenantId: '0FphTk091nt7G1W7',
+    deploymentId: '88d171f0-3139-45e2-beac-1f44d0bb41be',
+    environment: 'prod'
   },
   staging: {
     envUrl: 'https://apps.mypurecloud.de',

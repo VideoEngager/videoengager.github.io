@@ -199,9 +199,17 @@
           window.location.href = "./unsupported.html";
         }
       }
-
-      // Call the function on page load
-      window.onload = checkMobileAndRedirect;
+      // Function to check if 'm' parameter is present in the URL
+      function isParameterPresent(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.has(param);
+      }
+      // Call the function on page load only if the 'm' parameter is present
+      window.onload = function() {
+        if (isParameterPresent('m')) {
+          checkMobileAndRedirect();
+        }
+      };
     </script>
 
 </head>

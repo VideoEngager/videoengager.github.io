@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Schedule a Meeting</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, button {
+      margin-top: 5px;
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+    }
+    #meetingUrl, #errorMessage {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #meetingUrl {
+      background-color: #e0ffe0;
+      border: 1px solid #00b300;
+    }
+    #errorMessage {
+      background-color: #ffe0e0;
+      border: 1px solid #b30000;
+    }
+  </style>
+</head>
+<body>
+  <h2>Schedule a Meeting</h2>
+  <form id="meetingForm">
+    <label for="date">Select Date:</label>
+    <input type="date" id="date" name="date" required>
+
+    <label for="time">Select Time:</label>
+    <select id="time" name="time" required>
+      <option value="">--Select Time--</option>
+      <!-- Time slots will be populated here -->
+    </select>
+
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="phone">Phone:</label>
+    <input type="tel" id="phone" name="phone" required>
+
+    <button type="submit" id="scheduleButton" disabled>Schedule Meeting</button>
+  </form>
+
+  <div id="meetingUrl" style="display: none;"></div>
+  <div id="errorMessage" style="display: none;"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('meetingForm');
+      const dateInput = document.getElementById('date');
+      const timeSelect = document.getElementById('time');
+      const scheduleButton = document.getElementById('scheduleButton');
+      const meetingUrlDiv = document.getElementById('meetingUrl');
+      const errorMessageDiv = document.getElementById('errorMessage');
+
+      const tenantId = 'test_tenant'; // Replace with your actual tenant ID
+      const availabilityApiUrl = `https://dev.videoengager.com/api/genesys/callback/${tenantId}/availability`;
+      const scheduleApiUrl = `https://dev.videoengager.com/api/genesys/callback/${tenantId}`;
+
+      // Function to fetch available time slots for the selected date
+      const fetchAvailableTimeSlots = async (date) => {
+        try {
+          const response = await fetch(`${availabilityApiUrl}?date=${date}`);
+          if (!response.ok) {
+            throw new Error(`Error fetching availability: ${response.status} ${response.statusText}`);
+          }
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
+      };
+
+      // Function to populate time slots in the select element
+      const populateTimeSlots = (availabilityData) => {
+        timeSelect.innerHTML = '<option value="">--Select Time--</option>';
+        if (availabilityData) {
+          Object.keys(availabilityData).forEach((time) => {
+            if (availabilityData[time] === 1) {
+              const option = document.createElement('option');
+              option.value = time;
+              option.textContent = new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              timeSelect.appendChild(option);
+            }
+          });
+        }
+      };
+
+      // Event listener for date change
+      dateInput.addEventListener('change', async () => {
+        const selectedDate = dateInput.value;
+        if (selectedDate) {
+          const availabilityData = await fetchAvailableTimeSlots(selectedDate);
+          populateTimeSlots(availabilityData);
+          timeSelect.disabled = !availabilityData;
+        } else {
+          timeSelect.innerHTML = '<option value="">--Select Time--</option>';
+          timeSelect.disabled = true;
+        }
+        scheduleButton.disabled = true;
+      });
+
+      // Event listener for form input changes to enable/disable the schedule button
+      form.addEventListener('input', () => {
+        const isFormComplete = dateInput.value && timeSelect.value && form.name.value && form.email.value && form.phone.value;
+        scheduleButton.disabled = !isFormComplete;
+      });
+
+      // Event listener for form submission
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        scheduleButton.disabled = true;
+        meetingUrlDiv.style.display = 'none';
+        errorMessageDiv.style.display = 'none';
+        const name = form.name.value;
+        console.log(dateInput.value, timeSelect.value)
+        const desiredTime = new Date(timeSelect.value).toISOString();
+        const formData = {
+          firstname: name.split(" ")[0] || name, // Use first word of name as first name
+          lastname: name.split(" ").slice(1).join(" ") || "N/A", // Use the rest as last name
+          _desired_time: desiredTime,
+          time: timeSelect.value,
+          customer_email: form.email.value,
+          _customer_number: form.phone.value,
+        };
+
+        try {
+          const response = await fetch(scheduleApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            meetingUrlDiv.textContent = `Meeting scheduled successfully! Join at: ${result.videoengager.meetingUrl}`;
+            meetingUrlDiv.style.display = 'block';
+          } else {
+            const errorData = await response.json();
+            errorMessageDiv.textContent = `Error: ${response.status} ${response.statusText}\nPayload: ${JSON.stringify(errorData, null, 2)}`;
+            errorMessageDiv.style.display = 'block';
+          }
+        } catch (error) {
+          errorMessageDiv.textContent = `Error: ${error.message}`;
+          errorMessageDiv.style.display = 'block';
+        } finally {
+          scheduleButton.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

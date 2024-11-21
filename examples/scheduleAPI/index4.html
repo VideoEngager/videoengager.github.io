@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Schedule a Meeting</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, button {
+      margin-top: 5px;
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+    }
+    #meetingUrl, #errorMessage {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #meetingUrl {
+      background-color: #e0ffe0;
+      border: 1px solid #00b300;
+    }
+    #errorMessage {
+      background-color: #ffe0e0;
+      border: 1px solid #b30000;
+    }
+    #scheduledCallbacks {
+      margin-top: 20px;
+    }
+    .callback {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 5px;
+    }
+    .delete-btn {
+      background-color: #ff6666;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Schedule a Meeting</h2>
+  <form id="meetingForm">
+    <label for="date">Select Date:</label>
+    <input type="date" id="date" name="date" required>
+
+    <label for="time">Select Time:</label>
+    <select id="time" name="time" required>
+      <option value="">--Select Time--</option>
+    </select>
+
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="phone">Phone:</label>
+    <input type="tel" id="phone" name="phone" required>
+
+    <button type="submit" id="scheduleButton" disabled>Schedule Meeting</button>
+  </form>
+
+  <div id="meetingUrl" style="display: none;"></div>
+  <div id="errorMessage" style="display: none;"></div>
+
+  <div id="scheduledCallbacks">
+    <h3>Scheduled Callbacks</h3>
+    <div id="callbacksList"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const form = document.getElementById('meetingForm');
+      const dateInput = document.getElementById('date');
+      const timeSelect = document.getElementById('time');
+      const scheduleButton = document.getElementById('scheduleButton');
+      const meetingUrlDiv = document.getElementById('meetingUrl');
+      const errorMessageDiv = document.getElementById('errorMessage');
+      const callbacksList = document.getElementById('callbacksList');
+
+      const tenantId = 'test_tenant'; // Replace with actual tenant ID
+      const impersonateApiUrl = `https://dev.videoengager.com/api/partners/impersonateCreate`;
+      const availabilityApiUrl = `https://dev.videoengager.com/api/genesys/callback/${tenantId}/availability`;
+      const scheduleApiUrl = `https://dev.videoengager.com/api/genesys/callback/${tenantId}`;
+      const callbackListApiUrl = `https://dev.videoengager.com/api/genesys/callback/list/tenant/${tenantId}`;
+      let token = '';
+
+      // Function to get JWT token
+      const getBearerToken = async () => {
+        const impersonationPayload = { pak: 'DEV2', email: 't@t' }; // Replace with actual details
+        const response = await fetch(impersonateApiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(impersonationPayload),
+        });
+        const data = await response.json();
+        token = data.token;
+      };
+
+      await getBearerToken();
+
+      const fetchScheduledCallbacks = async () => {
+      const from = new Date(new Date().setDate(new Date().getDate() - 30)).toISOString();
+      // Use a date 30 days from today as the end date
+      const to = new Date(new Date().setDate(new Date().getDate() + 30)).toISOString();
+
+  
+        try {
+          const response = await fetch(`${callbackListApiUrl}/${from}/${to}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const { data: callbacks, count, page, pageSize } = data; // Destructure response
+            callbacksList.innerHTML = '';
+
+            if (callbacks.length === 0) {
+              callbacksList.innerHTML = '<p>No scheduled callbacks found.</p>';
+              return;
+            }
+            const callbacks_active = callbacks.filter((callback) => callback.videoengager.active)
+            callbacks_active.forEach((callback) => {
+              const {
+                genesys: { conversation: { id: conversationId } },
+                videoengager: { name, meetingUrl, date, active },
+              } = callback;
+
+              const formattedDate = new Date(date).toLocaleString();
+              const div = document.createElement('div');
+              div.className = 'callback';
+              div.innerHTML = `
+                <span>${formattedDate} - ${name || 'Unknown'}: 
+                  <a href="${meetingUrl}" target="_blank">${meetingUrl}</a>
+                </span>
+                <button class="delete-btn" data-id="${conversationId}" ${!active ? 'disabled' : ''}>X</button>
+              `;
+              callbacksList.appendChild(div);
+            });
+
+            console.log(`Total callbacks: ${count}, Page: ${page}, Page size: ${pageSize}`);
+          } else {
+            console.error('Failed to fetch callbacks.');
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      callbacksList.addEventListener('click', async (event) => {
+        if (event.target.classList.contains('delete-btn')) {
+          const conversationId = event.target.dataset.id;
+          try {
+            await fetch(`${scheduleApiUrl}/${conversationId}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            await fetchScheduledCallbacks();
+          } catch (error) {
+            console.error('Failed to delete callback:', error);
+          }
+        }
+      });
+
+      await fetchScheduledCallbacks();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call Request</title>
+    <script>
+        // Function to get URL parameter by name
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        async function startVideoCall() {
+            // Retrieve 'tid' and 'url' parameters from the URL
+            const tenantId = getUrlParameter('tid');
+            const baseUrl = decodeURIComponent(getUrlParameter('url'));
+
+            // Validate both parameters
+            if (!tenantId) {
+                alert("Tenant ID ('tid') is missing in the URL!");
+                return;
+            }
+            if (!baseUrl) {
+                alert("API base URL ('url') is missing in the URL!");
+                return;
+            }
+
+            const apiUrl = `${baseUrl}/api/interactions/createByVisitor/${tenantId}`;
+            const visitorData = {
+                visitorData: {
+                    "context.firstName": "John",
+                    "context.lastName": "Doe",
+                    "context.email": "john.doe@example.com",
+                    "context.phoneNumber": "+971555555555"
+                },
+                customData: {
+                    "language": "en",
+                    "queueId": "QUEUE_ID_FROM_GENESYS"
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(visitorData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const videoCallUrl = `${baseUrl}/static/mohre/#/?i=${data.interactionId}&p=${data.eotip}`;
+                    const linkElement = document.getElementById("callLink");
+                    const counterElement = document.getElementById("clickCounter");
+
+                    // Set the link URL
+                    linkElement.href = videoCallUrl;
+                    linkElement.textContent = "Click here to start the video call";
+                    linkElement.style.display = "inline";
+
+                    // Reset click count to 0
+                    counterElement.textContent = "0";
+                } else {
+                    console.error("Error creating video call interaction:", response.status);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        function incrementClickCounter() {
+            const counterElement = document.getElementById("clickCounter");
+            let currentCount = parseInt(counterElement.textContent, 10) || 0;
+            counterElement.textContent = currentCount + 1;
+        }
+    </script>
+</head>
+<body>
+    <h1>Request a Video Call</h1>
+    <button onclick="startVideoCall()">Start Video Call</button>
+    <p>
+        <a id="callLink" href="#" target="_blank" style="display: none;" onclick="incrementClickCounter()"></a>
+        <span id="clickCountLabel" style="display: none;"> (Click Count: <span id="clickCounter">0</span>)</span>
+    </p>
+    <script>
+        // Ensure the click count label shows up when the link is displayed
+        const callLinkObserver = new MutationObserver(() => {
+            const callLink = document.getElementById("callLink");
+            const clickCountLabel = document.getElementById("clickCountLabel");
+            if (callLink.style.display === "inline") {
+                clickCountLabel.style.display = "inline";
+            }
+        });
+
+        callLinkObserver.observe(document.getElementById("callLink"), {
+            attributes: true,
+            attributeFilter: ["style"],
+        });
+    </script>
+</body>
+</html>

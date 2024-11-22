@@ -5,11 +5,11 @@ const config = {
     tenantId: '0FphTk091nt7G1W7'
   },
   staging: {
-    envUrl: 'https://apps.mypurecloud.ie',
-    veUrl: 'https://uae.leadsecure.com',
-    tenantId: 'tjgaLJugv7IgWfiL',
-    deploymentId: '22f203f1-d9fa-4cb9-a6d4-0fb4d2ca9f60',
-    environment: 'prod-euw1'
+    envUrl: 'https://apps.mypurecloud.de',
+    environment: 'prod-euc1',
+    deploymentId: '50bce9ca-111b-4372-87ff-5f98ae8849e6',
+    veUrl: 'https://staging.leadsecure.com',
+    tenantId: 'oIiTR2XQIkb7p0ub'
   },
   dev: {
     envUrl: 'https://apps.mypurecloud.com.au',

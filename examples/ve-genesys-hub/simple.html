@@ -1,0 +1,96 @@
+<html>
+
+<head>
+    <title>Genesys Hub - VideoEngager</title>
+    <script>
+        (function (g, s, c, d, q) {
+            q = []; g.__VideoEngagerQueue = q; g.__VideoEngagerConfigs = c; g.VideoEngager = new Proxy({}, { get: (_, m) => (...a) => new Promise((r, rj) => q.push({ m, a, r, rj })) });
+            d = document.createElement("script"); d.async = 1; d.src = s; d.charset = "utf-8"; document.head.appendChild(d);
+        })(window, 'https://cdn.videoengager.com/widget/latest/browser/genesys-hub.umd.js', {
+            "videoEngager": { tenantId: "test_tenant", veEnv: "dev.videoengager.com", veHttps: true, isPopup: true },
+            "genesys": { deploymentId: "240e55e7-3dc1-4e23-8755-58aabab9dfb6", domain: "mypurecloud.com.au", hideGenesysLauncher: false },
+            "useGenesysMessengerChat": true
+        });
+    </script>
+
+</head>
+
+<body>
+    <h1>VideoEngager Widget</h1>
+    <div>
+        <button id="startVideo">Start Video Chat</button>
+        <button id="endVideo" style="display:none;">End Video Chat</button>
+        <button id="startChat">Start Chat</button>
+        <button id="endChat" style="display:none;">End Chat</button>
+    </div>
+    <script>
+        /**
+         * ButtonHandlers
+         * */
+        const startVideoBtn = document.getElementById('startVideo');
+        const endVideoBtn = document.getElementById('endVideo');
+        const startChatBtn = document.getElementById('startChat');
+        const endChatBtn = document.getElementById('endChat');
+        async function startVideo() {
+            await VideoEngager.startVideoChatSession();
+            console.log('Video chat session started');
+            startVideoBtn.style.display = 'none';
+            endVideoBtn.style.display = '';
+        }
+        async function endVideo() {
+            await window.VideoEngager.endVideoChatSession();
+            console.log('Video chat session ended');
+            endVideoBtn.style.display = 'none';
+            startVideoBtn.style.display = '';
+        }
+        async function startChat() {
+            await window.VideoEngager.startGenesysChat();
+            console.log('Chat session started');
+            startChatBtn.style.display = 'none';
+            endChatBtn.style.display = '';
+        }
+        async function endChat() {
+            await window.VideoEngager.endGenesysChat();
+            console.log('Chat session ended');
+            endChatBtn.style.display = 'none';
+            startChatBtn.style.display = '';
+        }
+        startChatBtn.addEventListener('click', startChat);
+        endChatBtn.addEventListener('click', endChat);
+        startVideoBtn.addEventListener('click', startVideo);
+        endVideoBtn.addEventListener('click', endVideo);
+        /**
+          * Register event handlers for VideoEngager events
+          */
+        window.VideoEngager.on('VideoEngagerCall.started', (data) => {
+            console.log('VideoEngager call started', data);
+            endVideoBtn.style.display = 'none';
+            startVideoBtn.style.display = '';
+        });
+
+        window.VideoEngager.on('VideoEngagerCall.ended', (data) => {
+            console.log('VideoEngager call ended', data);
+            endVideoBtn.style.display = 'none';
+            startVideoBtn.style.display = '';
+        });
+
+        window.VideoEngager.on('VideoEngagerCall.agentJoined', (data) => {
+            // when agent joins the call
+        });
+
+        window.VideoEngager.on('GenesysMessenger.conversationStarted', (data) => {
+            console.log('Genesys conversation started', data);
+            endChatBtn.style.display = '';
+            startChatBtn.style.display = 'none';
+
+        });
+
+        window.VideoEngager.on('GenesysMessenger.conversationEnded', (data) => {
+            console.log('Genesys conversation ended', data);
+            endChatBtn.style.display = 'none';
+            startChatBtn.style.display = '';
+        });
+    </script>
+</body>
+
+</html>

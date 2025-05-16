@@ -1,0 +1,548 @@
+/* Main Styles */
+:root {
+  /* Color system */
+  --color-primary: #0071e3;
+  --color-primary-dark: #0050a1;
+  --color-primary-light: #3c95f4;
+  --color-secondary: #34c759;
+  --color-accent: #ff451a;
+  --color-accent-dark: #e23009;
+  --color-error: #ff3b30;
+  --color-error-dark: #c72c2f;
+  --color-neutral-100: #f5f5f7;
+  --color-neutral-200: #e5e5ea;
+  --color-neutral-300: #d1d1d6;
+  --color-neutral-400: #a9a9af;
+  --color-neutral-500: #86868b;
+  --color-neutral-600: #636366;
+  --color-neutral-700: #48484a;
+  --color-neutral-800: #3a3a3c;
+  --color-neutral-900: #1c1c1e;
+  
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  
+  /* Spacing */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: var(--space-xl) 0;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+  color: var(--color-neutral-900);
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: var(--color-neutral-600);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Main content */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+button.hidden {
+  display: none;
+}
+section {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(20px);
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+section.active {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+section.hidden {
+  display: none;
+}
+
+/* Card styling */
+.card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-xl);
+  width: 100%;
+}
+
+/* Form styling */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.form-field {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.form-field.full-width {
+  flex-basis: 100%;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+  color: var(--color-neutral-900);
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--color-neutral-700);
+  border-bottom: 1px solid var(--color-neutral-200);
+  padding-bottom: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-neutral-700);
+}
+
+input[type="text"],
+input[type="url"],
+select {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+  outline: none;
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: var(--color-neutral-500);
+}
+
+/* Toggle switch */
+.toggle-container {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.toggle {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-neutral-300);
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.toggle-label:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.toggle:checked + .toggle-label {
+  background-color: var(--color-primary);
+}
+
+.toggle:checked + .toggle-label:before {
+  transform: translateX(24px);
+}
+
+/* Buttons */
+.button-row {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  justify-content: center;
+}
+
+.primary-button, 
+.accent-button, 
+.secondary-button,
+.error-button {
+  padding: var(--space-sm) var(--space-xl);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.primary-button {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.accent-button {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.accent-button:hover {
+  background-color: var(--color-accent-dark);
+}
+.error-button {
+  background-color: var(--color-error);
+  color: white;
+}
+.error-button:hover {
+  background-color: var(--color-error-dark);
+}
+.secondary-button {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+}
+
+.secondary-button:hover {
+  background-color: var(--color-neutral-300);
+}
+
+.primary-button:active, 
+.accent-button:active,
+.secondary-button:active,
+.error-button:active {
+  transform: scale(0.98);
+}
+
+/* Status indicators */
+.status-container {
+  margin-top: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.status-row:last-child {
+  border-bottom: none;
+}
+
+.status-label {
+  font-weight: 500;
+  color: var(--color-neutral-700);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-text {
+  font-size: 0.875rem;
+}
+
+/* Status states */
+.status-ready .status-dot { background-color: var(--color-neutral-400); }
+.status-ready .status-text { color: var(--color-neutral-600); }
+
+.status-loading .status-dot { background-color: var(--color-primary); animation: pulse 1.5s infinite; }
+.status-loading .status-text { color: var(--color-primary); }
+
+.status-success .status-dot { background-color: var(--color-secondary); }
+.status-success .status-text { color: var(--color-secondary); }
+
+.status-error .status-dot { background-color: var(--color-error); }
+.status-error .status-text { color: var(--color-error); }
+
+/* Loading spinner */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.loading-spinner {
+  border: 4px solid var(--color-neutral-200);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--space-md);
+}
+
+.status-message {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  text-align: center;
+}
+
+.status-message.success {
+  background-color: rgba(52, 199, 89, 0.1);
+  color: var(--color-secondary);
+  border: 1px solid rgba(52, 199, 89, 0.2);
+}
+
+.status-message.error {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--color-error);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: var(--space-lg) 0;
+  color: var(--color-neutral-500);
+  font-size: 0.875rem;
+  border-top: 1px solid var(--color-neutral-200);
+  margin-top: var(--space-2xl);
+}
+
+/* Intro.js Custom Styling */
+.customTooltip {
+  font-family: var(--font-family);
+  color: var(--color-neutral-800);
+  background-color: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.introjs-tooltiptext {
+  color: var(--color-neutral-700);
+  line-height: 1.6;
+}
+
+.introjs-tooltiptext strong {
+  color: var(--color-neutral-900);
+}
+
+.introjs-tooltiptext code {
+  background-color: var(--color-neutral-200);
+  color: var(--color-primary-dark);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-size: 0.85em;
+}
+
+.introjs-tooltiptext pre code {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: var(--space-sm);
+}
+
+.introjs-tooltiptext a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.introjs-tooltiptext a:hover {
+  text-decoration: underline;
+}
+
+.introjs-button {
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  text-shadow: none;
+  background-image: none;
+  font-weight: 500;
+}
+
+.introjs-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.3);
+}
+
+.introjs-prevbutton {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+}
+
+.introjs-prevbutton:hover {
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-800);
+}
+
+.introjs-nextbutton {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.introjs-nextbutton:hover {
+  background-color: var(--color-primary-dark);
+  color: white;
+}
+
+.introjs-skipbutton {
+  color: var(--color-neutral-500);
+  background-color: transparent;
+  font-weight: normal;
+}
+
+.introjs-skipbutton:hover {
+  color: var(--color-neutral-700);
+  background-color: var(--color-neutral-200);
+}
+
+.introjs-bullets ul li a {
+  background: var(--color-neutral-300);
+}
+
+.introjs-bullets ul li a.active {
+  background: var(--color-primary);
+}
+
+.introjs-progress .introjs-progressbar {
+  background-color: var(--color-primary);
+}
+
+.introjs-helperLayer {
+  box-shadow: rgba(0,0,0,.3) 0px 0px 1px 2px, rgba(0,0,0,0.3) 0px 0px 0px 5000px !important; /* Darken overlay a bit more */
+  border-radius: var(--radius-sm); /* Match border radius of highlighted elements */
+}
+
+.introjs-tooltip-title {
+    font-size: 1.25rem; /* Match h3 */
+    font-weight: 600; /* Match h2 */
+    color: var(--color-neutral-900);
+    margin-top: 0;
+    margin-bottom: var(--space-sm);
+}
+
+/* Styles for when intro.js is waiting for an element */
+.introjs-is-waiting .introjs-tooltip,
+.introjs-is-waiting .introjs-bullets,
+.introjs-is-waiting .introjs-progress,
+.introjs-is-waiting .introjs-arrow {
+  display: none !important;
+}
+
+.introjs-is-waiting .introjs-helperLayer {
+  /* The overlay part of the helperLayer remains to dim the page. */
+  /* The highlighted box part might still be there but without a tooltip it's less confusing. */
+  cursor: wait !important; /* Apply wait cursor to the layer itself */
+}
+
+/* Apply wait cursor to the whole body when waiting */
+body.introjs-is-waiting {
+  cursor: wait !important;
+}
+
+.forced-show {
+  display: inherit !important;
+}

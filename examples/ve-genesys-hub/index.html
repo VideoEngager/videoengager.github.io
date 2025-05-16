@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoEngager Integration Hub</title>
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">  <!-- Added intro.js CSS -->
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>VideoEngager Integration Hub</h1>
+      <p class="subtitle">Connect VideoEngager capabilities with Genesys Cloud messaging</p>
+    </header>
+
+    <main>
+      <section id="configSection" class="active">
+        <div class="card">
+          <h2>Configuration</h2>
+          <form id="configForm">
+            <div class="form-group">
+              <h3>VideoEngager Settings</h3>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="tenantId">Tenant ID</label>
+                  <input type="text" id="tenantId" name="tenantId" placeholder="YOUR_TENANT_ID" required>
+                  <span class="help-text">Your VideoEngager tenant ID</span>
+                </div>
+                <div class="form-field">
+                  <label for="veEnv">Environment</label>
+                  <input type="text" id="veEnv" name="veEnv" placeholder="videome.leadsecure.com" required>
+                  <span class="help-text">VideoEngager service domain</span>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="veHttps">Use HTTPS</label>
+                  <div class="toggle-container">
+                    <input type="checkbox" id="veHttps" name="veHttps" class="toggle" checked>
+                    <label for="veHttps" class="toggle-label"></label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="isPopup">Use Popup</label>
+                  <div class="toggle-container">
+                    <input type="checkbox" id="isPopup" name="isPopup" class="toggle" checked>
+                    <label for="isPopup" class="toggle-label"></label>
+                  </div>
+                  <span class="help-text">Use popup for VideoEngager widget</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <h3>Genesys Settings</h3>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="deploymentId">Deployment ID</label>
+                  <input type="text" id="deploymentId" name="deploymentId" placeholder="YOUR_DEPLOYMENT_ID" required>
+                  <span class="help-text">Your Genesys deployment ID</span>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="environment">Environment</label>
+                  <input type="text" id="environment" name="environment" placeholder="us-east-1">
+                  <span class="help-text">Genesys environment (e.g., 'us-east-1')</span>
+                </div>
+                <div class="form-field">
+                  <label for="domain">Domain</label>
+                  <input type="text" id="domain" name="domain" placeholder="mypurecloud.com">
+                  <span class="help-text">Genesys domain (e.g., 'mypurecloud.com')</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <h3>Integration Settings</h3>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="useGenesysMessengerChat">Use Genesys Messenger Chat</label>
+                  <div class="toggle-container">
+                    <input type="checkbox" id="useGenesysMessengerChat" name="useGenesysMessengerChat" class="toggle" checked>
+                    <label for="useGenesysMessengerChat" class="toggle-label"></label>
+                  </div>
+                  <span class="help-text">Enable Genesys Messenger for chat</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <h3>Script URL</h3>
+              <div class="form-row">
+                <div class="form-field full-width">
+                  <label for="scriptUrl">Widget Script URL</label>
+                  <input type="url" id="scriptUrl" name="scriptUrl" 
+                         value="https://cdn.videoengager.com/widget/latest/browser/genesys-hub.umd.js" 
+                         placeholder="https://cdn.videoengager.com/widget/latest/browser/genesys-hub.umd.js" required>
+                  <span class="help-text">URL to the VideoEngager Widget script</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button type="button" id="loadIntegrationBtn" class="primary-button">Load Integration</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="controlSection" class="hidden">
+        <div class="card">
+          <h2>VideoEngager Controls</h2>
+          <p class="status-message success">Integration loaded successfully!</p>
+          
+          <div class="button-row">
+            <button id="startChatBtn" class="accent-button">Start Chat</button>
+            <button id="endChatBtn" class="error-button hidden">End Chat</button>
+            <button id="startVideoBtn" class="primary-button">Start Video</button>
+            <button id="endVideoBtn" class="error-button hidden">End Video</button>
+          </div>
+          
+          <div class="status-container">
+            <div class="status-row">
+              <span class="status-label">Chat</span>
+              <div id="chatStatus" class="status-indicator status-ready">
+                <span class="status-dot"></span>
+                <span class="status-text">Not Started</span>
+              </div>
+            </div>
+            
+            <div class="status-row">
+              <span class="status-label">Video</span>
+              <div id="videoStatus" class="status-indicator status-ready">
+                <span class="status-dot"></span>
+                <span class="status-text">Not Started</span>
+              </div>
+            </div>
+            
+            <div class="status-row">
+              <span class="status-label">Agent</span>
+              <div id="agentStatus" class="status-indicator status-ready">
+                <span class="status-dot"></span>
+                <span class="status-text">Not Connected</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="loadingSection" class="hidden">
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Loading integration...</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>VideoEngager © 2025</p>
+    </footer>
+  </div>
+
+  <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script> <!-- Added intro.js JS -->
+  <script src="js/config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/guide.js"></script> <!-- Added guide.js -->
+</body>
+</html>

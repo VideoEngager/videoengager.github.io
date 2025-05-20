@@ -1,5 +1,337 @@
-<html>
-  <head>
-    <meta http-equiv="refresh" content="0; url=https://videoengager.github.io/examples/index.html" />
-  </head>
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   VideoEngager SDK Demos
+  </title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+  <style>
+   :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --gray-light: #f4f5f7;
+      --gray-medium: #e5e7eb;
+      --gray-dark: #374151;
+      --text-color: #1f2937;
+      --border-radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--gray-light);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 2px solid var(--gray-medium);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background-color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.25rem;
+      color: white;
+    }
+
+    header h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--gray-dark);
+    }
+
+    .category {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--gray-dark);
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--gray-medium);
+      padding-bottom: 0.25rem;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .demo-card {
+      background: white;
+      border: 1px solid var(--gray-medium);
+      border-radius: var(--border-radius);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+
+    .demo-card:hover {
+      border-color: var(--primary-dark);
+    }
+
+    .demo-card h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.125rem;
+      color: var(--primary-dark);
+    }
+
+    .demo-card p {
+      font-size: 0.95rem;
+      color: var(--gray-dark);
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  
+
+.search-wrapper {
+  margin: 2rem 0 1rem;
+  display: flex;
+  justify-content: center;
+}
+#searchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--gray-medium);
+  border-radius: 8px;
+  background-color: white;
+}
+  </style>
+ </head>
+ <body>
+  <div class="container">
+   <header>
+    <div class="logo">
+     VE
+    </div>
+    <div>
+     <h1>
+      VideoEngager SDK Demos
+     </h1>
+     <p class="subtitle">
+      Interactive examples showcasing integration possibilities
+     </p>
+    </div>
+   </header>
+   <div class="search-wrapper">
+    <input id="searchInput" placeholder="Search demos..." type="text"/>
+   </div>
+   <section>
+    <h2 class="category">
+     Core Integrations
+    </h2>
+    <div class="demo-grid">
+     <a class="demo-card" href="/examples/genesys-messenger-integration/index.html">
+      <h3>
+       Genesys Messenger
+      </h3>
+      <p>
+       Full messenger integration example
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/genesys-selector-demo.html">
+      <h3>
+       Genesys Selector
+      </h3>
+      <p>
+       Custom deployment selector implementation
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/genesys-selector-demo-for-app-foundry.html">
+      <h3>
+       App Foundry Version
+      </h3>
+      <p>
+       Selector optimized for Genesys AppFoundry
+      </p>
+     </a>
+    </div>
+   </section>
+   <section>
+    <h2 class="category">
+     Interaction Demos
+    </h2>
+    <div class="demo-grid">
+     <a class="demo-card" href="/examples/agent-interactions-demo-gui.html">
+      <h3>
+       Agent Interactions
+      </h3>
+      <p>
+       Demo of agent-facing interface
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/external-interactions-demo-gui.html">
+      <h3>
+       External Interactions
+      </h3>
+      <p>
+       Customer-facing interaction demo
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/single-button-genesys-demo.html">
+      <h3>
+       Single Button
+      </h3>
+      <p>
+       Minimalist one-click implementation
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/single-button-genesys-demo.html?enableChat=true">
+      <h3>
+       Single Button + Chat
+      </h3>
+      <p>
+       With integrated chat functionality
+      </p>
+     </a>
+    </div>
+   </section>
+   <section>
+    <h2 class="category">
+     Specialized Demos
+    </h2>
+    <div class="demo-grid">
+     <a class="demo-card" href="/examples/schedule_example.html">
+      <h3>
+       Scheduling
+      </h3>
+      <p>
+       Meeting scheduling implementation
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/scheduleVerification/index.html">
+      <h3>
+       Schedule Verification
+      </h3>
+      <p>
+       Advanced scheduling validation
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/kiosk/index.html">
+      <h3>
+       Kiosk Mode
+      </h3>
+      <p>
+       Public terminal implementation
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/sales/index.html">
+      <h3>
+       Sales Demo
+      </h3>
+      <p>
+       Sales-focused implementation
+      </p>
+     </a>
+    </div>
+   </section>
+   <section>
+    <h2 class="category">
+     Co-browsing Demos
+    </h2>
+    <div class="demo-grid">
+     <a class="demo-card" href="/examples/standaloneCobrowse/index.html">
+      <h3>
+       Standalone Co-browsing
+      </h3>
+      <p>
+       Independent co-browsing implementation
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/simpleCobrowse/index.html">
+      <h3>
+       Simple Co-browsing
+      </h3>
+      <p>
+       Minimal co-browsing example
+      </p>
+     </a>
+    </div>
+   </section>
+   <section>
+    <h2 class="category">
+     Other Examples
+    </h2>
+    <div class="demo-grid">
+     <a class="demo-card" href="/examples/clean/index.html">
+      <h3>
+       Clean Example
+      </h3>
+      <p>
+       Minimal implementation template
+      </p>
+     </a>
+     <a class="demo-card" href="/examples/genesys-selector-wtih-callback.html">
+      <h3>
+       Selector with Callback
+      </h3>
+      <p>
+       Advanced selector with callback handling
+      </p>
+     </a>
+    </div>
+   </section>
+  </div>
+  <script>
+   document.getElementById('searchInput').addEventListener('input', function(e) {
+  const query = e.target.value.toLowerCase();
+  const cards = document.querySelectorAll('.demo-card');
+  let anyVisible = false;
+
+  cards.forEach(card => {
+    const text = card.textContent.toLowerCase();
+    if (text.includes(query)) {
+      card.style.display = '';
+      anyVisible = true;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  // Optionally handle "no results" message here
+});
+  </script>
+ </body>
 </html>

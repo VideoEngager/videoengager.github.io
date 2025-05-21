@@ -10,7 +10,7 @@ A zero-friction, ES-module demo harness for VideoEngager’s UMD SDK, requiring 
 ### Prerequisites
 
 * A modern web browser.
-* [Node.js](https://nodejs.org/) (optional, for `npm start` or `npx http-server`).
+* [Node.js](https://nodejs.org/) (optional, for `npm start`).
 
 ### Quick Start
 
@@ -21,7 +21,7 @@ A zero-friction, ES-module demo harness for VideoEngager’s UMD SDK, requiring 
     ```
 
 2.  **Configure (Optional - uses test defaults):**
-    Edit `src/config.js` to set your SDK parameters if needed. See the "Configuration" section below for details.
+    Edit `js/config.js` to set your SDK parameters if needed. See the "Configuration" section below for details.
 
 3.  **Run the demo:**
     From the `examples/messaging` directory (or your demo's root if `package.json` is there):
@@ -45,11 +45,11 @@ A zero-friction, ES-module demo harness for VideoEngager’s UMD SDK, requiring 
 
 ## Configuration
 
-Core SDK parameters are managed in `src/config.js` via the `testConfig` object. Modify this file to test with different environments or accounts.
+Core SDK parameters are managed in `js/config.js` via the `testConfig` object. Modify this file to test with different environments or accounts.
 
-Key properties structure (see `src/config.js` for default values and detailed comments):
+Key properties structure (see `js/config.js` for default values and detailed comments):
 ```javascript
-// src/config.js
+// js/config.js
 export const testConfig = {
   videoEngager: { tenantId: '...', veEnv: '...', isPopup: false },
   genesys:      { deploymentId: '...', domain: '...' },
@@ -57,20 +57,20 @@ export const testConfig = {
 };
 ```
 
-The `src/client.js` module correctly structures this configuration for the VideoEngager UMD SDK.
+The `js/client.js` module correctly structures this configuration for the VideoEngager UMD SDK.
 
 -----
 
 ## Troubleshooting
 
-  * **HTTP 404 on `genesys-hub.umd.js` (or SDK script):** Verify your internet connection. The CDN URL for the SDK is defined in `src/client.js`.
+  * **HTTP 404 on `genesys-hub.umd.js` (or SDK script):** Verify your internet connection. The CDN URL for the SDK is defined in `js/client.js`.
   * **"Init error: …" in Log:**
-      * Check your `testConfig` values in `src/config.js` are correct for your VideoEngager/Genesys environment.
+      * Check your `testConfig` values in `js/config.js` are correct for your VideoEngager/Genesys environment.
       * Review the browser's developer console for more detailed errors from the SDK.
   * **"Genesys script is not loaded" (during chat/video start):**
-      * Ensure `useGenesysMessengerChat: true` is set in `src/config.js`.
-      * Confirm your Genesys `domain` and `deploymentId` in `src/config.js` are valid.
-  * **File Path Issues:** The demo uses relative paths. If serving from a sub-directory or with a complex server setup, ensure paths in `public/index.html` to `styles.css` and `../src/main.js` are resolving correctly.
+      * Ensure `useGenesysMessengerChat: true` is set in `js/config.js`.
+      * Confirm your Genesys `domain` and `deploymentId` in `js/config.js` are valid.
+  * **File Path Issues:** The demo uses relative paths. If serving from a sub-directory or with a complex server setup, ensure paths in `public/index.html` to `styles.css` and `../js/main.js` are resolving correctly.
 
 -----
 
@@ -78,7 +78,7 @@ The `src/client.js` module correctly structures this configuration for the Video
 
 This demo utilizes a modular JavaScript structure to separate concerns and provide a clean interaction layer with the VideoEngager UMD SDK.
 
-### `src/client.js` ([VideoEngagerClient](src/client.js))
+### `js/client.js` ([VideoEngagerClient](js/client.js))
 
 This class is the core adapter responsible for all direct interactions with the VideoEngager UMD SDK.
 
@@ -88,7 +88,7 @@ This class is the core adapter responsible for all direct interactions with the 
       * Waits for the SDK's internal `onReady` signal before resolving, ensuring the SDK is fully initialized and the proxy has been replaced by the real API.
     <!-- end list -->
     ```javascript
-    // src/client.js - Simplified init flow
+    // js/client.js - Simplified init flow
     async init() {
       this._setupConfigProxy(); // Sets window.__VideoEngagerConfigs, window.VideoEngager proxy
       await this._loadScript();   // Loads the UMD script tag
@@ -97,17 +97,17 @@ This class is the core adapter responsible for all direct interactions with the 
     ```
   * **Public API Methods:** Exposes clean, Promise-based methods (e.g., `startChat()`, `endVideo()`, `on(event, callback)`) that internally call the corresponding `window.VideoEngager` functions. This abstracts the global SDK object from the rest of the application.
     ```javascript
-    // src/client.js - Example public method
+    // js/client.js - Example public method
     startChat()  { return window.VideoEngager.startGenesysChat(); }
     ```
 
-### `src/main.js` ([main.js](src/main.js))
+### `js/main.js` ([main.js](js/main.js))
 
 This is the main entry point for the demo application's logic.
 
   * **State Management:** Implements a simple state machine (`let state = 'idle'; setState(newState)`) to manage the current interaction state (`idle`, `chat`, `video`). This state dictates UI element properties (e.g., button disabled states, visibility of the video container).
     ```javascript
-    // src/main.js - State management example
+    // js/main.js - State management example
     let state = 'idle';
     function setState(s) {
       state = s;
@@ -120,7 +120,7 @@ This is the main entry point for the demo application's logic.
   * **UI Interaction:** Attaches event listeners to HTML buttons ("Initialize SDK", "Start Chat", etc.). These listeners trigger actions via the `VideoEngagerClient` instance.
   * **SDK Event Handling:** Uses `client.on()` to subscribe to SDK events. Callbacks update the application state and log messages.
     ```javascript
-    // src/main.js - SDK event handling example
+    // js/main.js - SDK event handling example
     client.on('GenesysMessenger.conversationEnded', () => {
       log('Chat ended');
       setState('idle');
@@ -128,12 +128,12 @@ This is the main entry point for the demo application's logic.
     ```
   * **Initialization Flow:** The `main()` function orchestrates the initialization: on "Initialize SDK" click, it creates a `VideoEngagerClient` instance, calls `client.init()`, and upon success, sets up SDK event listeners and initial UI state.
 
-### `src/config.js` ([config.js](src/config.js))
+### `js/config.js` ([config.js](js/config.js))
 
 Provides the default `testConfig` object for the SDK. This is where a developer would typically change `tenantId`, `deploymentId`, etc., to match their specific VideoEngager and Genesys environment.
 
 ```javascript
-// src/config.js - Structure
+// js/config.js - Structure
 export const testConfig = {
   videoEngager: { /* tenantId, veEnv, isPopup */ },
   genesys:      { /* deploymentId, domain */ },

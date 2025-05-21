@@ -25,3 +25,20 @@ body {
   overflow-y: auto;
   margin-top: 1rem;
 }
+
+/* Minimalistic header styles */
+.demo-header {
+  background-color: #f8f9fa;
+  padding: 8px 15px;
+  border-bottom: 1px solid #e7e7e7;
+  text-align: right; /* Aligns links to the right */
+  font-size: 0.85em;
+}
+.demo-header a {
+  margin-left: 15px;
+  text-decoration: none;
+  color: #007bff;
+}
+.demo-header a:hover {
+  text-decoration: underline;
+}

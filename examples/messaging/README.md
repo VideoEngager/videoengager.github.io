@@ -28,9 +28,9 @@ A zero-friction, ES-module demo harness for VideoEngager’s UMD SDK, requiring 
     ```bash
     npm start
     ```
-    (This assumes a `package.json` with a start script like `"start": "http-server public -o"`. If not using `npm start`, use your preferred static server command, e.g., `npx http-server ./public -o` from within the demo's root directory where `public/` resides.)
+    (This assumes a `package.json` with a start script like `"start": "npx http-server . -o"`. If not using `npm start`, use your preferred static server command, e.g., `npx http-server . -o` from within the demo's root directory where `index.html` resides.)
 
-    This will open `public/index.html` in your default browser.
+    This will open `index.html` in your default browser.
 
 ---
 
@@ -70,7 +70,7 @@ The `js/client.js` module correctly structures this configuration for the VideoE
   * **"Genesys script is not loaded" (during chat/video start):**
       * Ensure `useGenesysMessengerChat: true` is set in `js/config.js`.
       * Confirm your Genesys `domain` and `deploymentId` in `js/config.js` are valid.
-  * **File Path Issues:** The demo uses relative paths. If serving from a sub-directory or with a complex server setup, ensure paths in `public/index.html` to `styles.css` and `../js/main.js` are resolving correctly.
+  * **File Path Issues:** The demo uses relative paths. If serving from a sub-directory or with a complex server setup, ensure paths in `index.html` to `styles.css` and `../js/main.js` are resolving correctly.
 
 -----
 

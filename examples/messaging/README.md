@@ -16,8 +16,8 @@ A zero-friction, ES-module demo harness for VideoEngager’s UMD SDK, requiring 
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/VideoEngager/videoengager.github.io](https://github.com/VideoEngager/videoengager.github.io) # Or your specific demo repo URL
-    cd videoengager.github.io/examples/messaging # Adjust path to match your repository structure
+    git clone https://github.com/VideoEngager/videoengager.github.io
+    cd videoengager.github.io/examples/messaging 
     ```
 
 2.  **Configure (Optional - uses test defaults):**
@@ -151,6 +151,6 @@ This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for
 
 ## Issues & Contributions
 
-Found a bug or have a suggestion? Please [open an issue](https://github.com/VideoEngager/videoengager.github.io/issues) (replace with your actual demo repository issue URL if different).
+Found a bug or have a suggestion? Please [open an issue](https://github.com/VideoEngager/videoengager.github.io/issues).
 
 Pull requests are welcome\! For major changes, please open an issue first to discuss what you would like to change. Please ensure to update tests as appropriate and follow existing code style.

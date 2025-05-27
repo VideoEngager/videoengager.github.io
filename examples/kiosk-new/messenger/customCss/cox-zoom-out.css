@@ -1,0 +1,4 @@
+.remote-video-block.full-screen-block .sourcevideo {
+    width: 100% !important;
+    object-fit: contain !important;
+}

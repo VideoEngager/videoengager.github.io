@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tenant configuration and scheduling forms">
+    <title>Configuration & Scheduling</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="page-header">
+        <h1>Configuration & Scheduling</h1>
+        <p>Manage your tenant settings and scheduling information</p>
+    </header>
+
+    <div class="forms-container">
+        <!-- Tenant Configuration Form -->
+        <div class="form-section">
+            <div class="section-header">
+                <h2>Tenant Configuration</h2>
+                <p>Set up your tenant ID and endpoint URL</p>
+            </div>
+
+            <form id="tenant-form">
+                <div class="form-group">
+                    <label for="tenant-id" class="form-label">
+                        Tenant ID <span class="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="tenant-id"
+                        name="tenantId"
+                        class="form-input"
+                        required
+                        placeholder="Enter your tenant ID"
+                    >
+                    <div class="help-text">Your unique tenant identifier</div>
+                    <div id="tenant-id-error" class="error-message">
+                        Please enter a valid tenant ID
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="endpoint-url" class="form-label">
+                        Endpoint URL <span class="required">*</span>
+                    </label>
+                    <input
+                        type="url"
+                        id="endpoint-url"
+                        name="endpointUrl"
+                        class="form-input"
+                        required
+                        placeholder="https://leadsecure.com"
+                    >
+                    <div class="help-text">The API endpoint URL for your tenant</div>
+                    <div id="endpoint-url-error" class="error-message">
+                        Please enter a valid URL
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <span>✓</span> Save Configuration
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <span>↻</span> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Scheduling Form -->
+        <div class="form-section" id="scheduling-section">
+            <div class="section-header">
+                <h2>Scheduling Information</h2>
+                <p>Contact and scheduling details</p>
+            </div>
+
+            <div class="readonly-notice" id="readonly-notice">
+                <strong>Configuration Required:</strong> Please save tenant configuration first to enable this form
+            </div>
+
+            <form id="scheduling-form">
+                <div class="form-group">
+                    <label for="firstname" class="form-label">
+                        First Name <span class="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="firstname"
+                        name="firstname"
+                        class="form-input"
+                        readonly
+                        placeholder="Enter first name"
+                    >
+                    <div class="help-text">Your first name</div>
+                    <div id="firstname-error" class="error-message">
+                        Please enter your first name
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastname" class="form-label">
+                        Last Name <span class="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="lastname"
+                        name="lastname"
+                        class="form-input"
+                        readonly
+                        placeholder="Enter last name"
+                    >
+                    <div class="help-text">Your last name</div>
+                    <div id="lastname-error" class="error-message">
+                        Please enter your last name
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        Email <span class="required">*</span>
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-input"
+                        readonly
+                        placeholder="Enter email address"
+                    >
+                    <div class="help-text">Your email address</div>
+                    <div id="email-error" class="error-message">
+                        Please enter a valid email address
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phonenumber" class="form-label">
+                        Phone Number <span class="required">*</span>
+                    </label>
+                    <input
+                        type="tel"
+                        id="phonenumber"
+                        name="phonenumber"
+                        class="form-input"
+                        readonly
+                        placeholder="Enter phone number"
+                    >
+                    <div class="help-text">Your contact phone number</div>
+                    <div id="phonenumber-error" class="error-message">
+                        Please enter a valid phone number
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="desired_time" class="form-label">
+                        Desired Time <span class="required">*</span>
+                    </label>
+                    <div class="time-picker-wrapper">
+                        <input
+                            type="text"
+                            id="desired_time_display"
+                            name="desired_time_display"
+                            class="form-input time-picker-input"
+                            readonly
+                            placeholder="Click to select date and time"
+                            disabled
+                        >
+                        <div class="time-picker-popup" id="time-picker-popup" style="display: none;">
+                            <div class="popup-header">
+                                <h4>Select Date & Time</h4>
+                                <button type="button" class="popup-close" id="popup-close">&times;</button>
+                            </div>
+                            <div class="popup-content">
+                                <div class="calendar-section">
+                                    <h5>Available Dates</h5>
+                                    <div id="calendar-container" class="calendar-container">
+                                        <div class="calendar-loading">Loading dates...</div>
+                                    </div>
+                                </div>
+                                <div class="timeslots-section">
+                                    <h5>Available Times</h5>
+                                    <div id="timeslots-container" class="timeslots-container">
+                                        <div class="no-date-selected">Select a date to see available times</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input
+                        type="hidden"
+                        id="desired_time"
+                        name="desired_time"
+                        required
+                    >
+                    <div class="help-text">Select your preferred date and time from available slots</div>
+                    <div id="desired_time-error" class="error-message">
+                        Please select a desired time slot
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" disabled>
+                        <span>✓</span> Save Schedule
+                    </button>
+                    <button type="reset" class="btn btn-secondary" disabled>
+                        <span>↻</span> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="schedule-manager.js"></script>
+    <script src="time-slot-picker.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 // @ts-check
+/// <reference types="../types/index" />
 import { ErrorHandler, ErrorTypes } from "./error-handler.js";
 import { Utils } from "./utils.js";
 

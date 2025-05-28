@@ -379,9 +379,9 @@
   background-color: #900101;
 }
 #cancel-button-loading {
-  position: absolute;
+  position: fixed;
   bottom: 10%;
-  z-index: 505;
+  z-index: 1000;
   left: 50%;
   transform: translateX(-50%);
   height: 75px;

@@ -1,4 +1,5 @@
 // @ts-check
+/// <reference types="../types/index" />
 import { EnvironmentConfig } from "../config/environment.js";
 import { VideoEngagerClient } from "./client.js";
 import { ErrorHandler, ErrorTypes } from "./error-handler.js";
@@ -56,6 +57,12 @@ export class KioskApplication {
    */
   async init() {
     try {
+      this.setupInternalEventListeners();
+      if (!window.navigator.onLine) {
+        this.log("APP: Initialization blocked due to previous errors");
+        this.errorHandler.handleError(ErrorTypes.NETWORK_ERROR);
+        return;
+      }
       this.log("APP: Starting secure kiosk application initialization");
 
       // Set up environment configuration
@@ -107,6 +114,13 @@ export class KioskApplication {
     this.log("UI: User interface setup complete");
   }
 
+  setupInternalEventListeners() {
+    document.addEventListener("networkRestored", () => {
+      if (!this.isInitialized) {
+        window.location.reload();
+      }
+    });
+  }
   /**
    * Sets up event listeners for various UI elements and events.
    * Handles start video call button, cancel button, and message events.
@@ -459,7 +473,15 @@ export class KioskApplication {
     }
   }
 
-  // Utility Methods
+  /**
+   * Logs messages to the console and optionally to a debug element in development mode.
+   * @param {string} message - The message to log.
+   * @returns {void}
+   * @example
+   * kioskApp.log("Application started successfully");
+   * kioskApp.log("Error loading configuration");
+   * kioskApp.log("User clicked the start button");
+   */
   log(message) {
     const timestamp = new Date().toISOString();
     console.log(`[${timestamp}] ${message}`);
@@ -474,7 +496,10 @@ export class KioskApplication {
     }
   }
 
-  // Cleanup
+  /**
+   * Destroys the application instance, cleaning up resources and event listeners.
+   * @returns {void}
+   */
   destroy() {
     this.log("APP: Destroying application");
 
@@ -498,18 +523,4 @@ export class KioskApplication {
 // Initialize application when DOM is ready
 document.addEventListener("DOMContentLoaded", function () {
   window.kioskApp = new KioskApplication();
-});
-
-// Handle page visibility changes
-document.addEventListener("visibilitychange", function () {
-  if (document.hidden) {
-    // Page is hidden - pause timers if needed
-    console.log("Page hidden");
-  } else {
-    // Page is visible - resume normal operation
-    console.log("Page visible");
-    if (window.kioskApp) {
-      window.kioskApp.resetInactivityTimer();
-    }
-  }
 });

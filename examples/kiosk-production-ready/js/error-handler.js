@@ -17,8 +17,7 @@ export const ErrorTypes = {
     code: "NETWORK_ERROR",
     type: "Connection Issue",
     userMessage: "Please check your internet connection and try again.",
-    shouldRetry: true,
-    retryDelay: 5000,
+    shouldRetry: false,
   },
   CONFIG_MISSING: {
     code: "CONFIG_MISSING",
@@ -67,16 +66,22 @@ export class ErrorHandler {
   constructor() {
     /** @type {Map<string, number>} */
     this.retryAttempts = new Map();
+    this.networkRestoreEvent = new Event("networkRestored");
     /** @type {number} */
     this.maxRetryAttempts = 3;
     this.setupGlobalErrorHandling();
   }
 
+  /**
+   * Sets up global error handling for unhandled promise rejections,
+   * online/offline events, and other critical errors.
+   * @returns {void}
+   * @private
+   */
   setupGlobalErrorHandling() {
-    window.addEventListener("error", (event) => {
-      this.logError("JavaScript Error", event.error);
-      this.handleError(ErrorTypes.INTERNAL_ERROR, event.error);
-    });
+    !window.navigator.onLine &&
+      this.dispatchExecutionBlockStatus({ blocked: true }) &&
+      this.handleError(ErrorTypes.INTERNAL_ERROR);
 
     window.addEventListener("unhandledrejection", (event) => {
       this.logError("Unhandled Promise Rejection", event.reason);
@@ -86,6 +91,7 @@ export class ErrorHandler {
     window.addEventListener("online", () => {
       this.hideError();
       this.showToast("Connection restored", "success");
+      document.dispatchEvent(this.networkRestoreEvent);
     });
 
     window.addEventListener("offline", () => {
@@ -190,7 +196,6 @@ export class ErrorHandler {
     modal.removeAttribute("aria-hidden");
     modal.classList.add("show");
     document.body.classList.add("modal-open");
-    document.body.style.overflow = "hidden";
   }
 
   hideError() {
@@ -202,7 +207,6 @@ export class ErrorHandler {
     modal.setAttribute("aria-hidden", "true");
     modal.classList.remove("show");
     document.body.classList.remove("modal-open");
-    document.body.style.overflow = "auto";
   }
 
   /**
@@ -294,6 +298,20 @@ export class ErrorHandler {
   }
 
   /**
+   * Dispatches a custom event for execution block status. Mainly used to
+   * notify other parts of the application about execution blocks (e.g., KioskApp).
+   * @param {Object} object
+   * @returns {void}
+   */
+  dispatchExecutionBlockStatus(object) {
+    const event = new CustomEvent("executionBlock", {
+      detail: object,
+      bubbles: true,
+    });
+    document.dispatchEvent(event);
+  }
+
+  /**
    * Handles legacy error codes from the VideoEngager service.
    * @param {number} statusCode
    * @returns {string}
@@ -306,7 +324,7 @@ export class ErrorHandler {
       5: ErrorTypes.INTERNAL_ERROR,
       6: ErrorTypes.NETWORK_ERROR,
       7: ErrorTypes.FORBIDDEN,
-      8: ErrorTypes.LIBRARY_LOAD_FAILED
+      8: ErrorTypes.LIBRARY_LOAD_FAILED,
     };
 
     const errorType = legacyMapping[statusCode] || ErrorTypes.INTERNAL_ERROR;

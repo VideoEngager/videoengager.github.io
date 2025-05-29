@@ -56,6 +56,26 @@
       videoEngager: { tenantId:'0FphTk091nt7G1W7', veEnv:'videome.leadsecure.com', isPopup:true },
       genesys:       { deploymentId:'c5d801ae-639d-4e5e-a52f-4963342fa0dc',    domain:'mypurecloud.com' },
       useGenesysMessengerChat:false
+    },
+    inlineWithChat_usaw: {
+      videoEngager: { tenantId:'yRunQK8mL7HsJidu', veEnv:'videome.leadsecure.com', isPopup:false },
+      genesys:       { deploymentId:'efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b', domain:'usw2.pure.cloud' },
+      useGenesysMessengerChat:true
+    },
+    popupWithChat_usaw: {
+      videoEngager: { tenantId:'yRunQK8mL7HsJidu', veEnv:'videome.leadsecure.com', isPopup:true },
+      genesys:       { deploymentId:'efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b', domain:'usw2.pure.cloud' },
+      useGenesysMessengerChat:true
+    },
+    inlineNoChat_usaw: {
+      videoEngager: { tenantId:'yRunQK8mL7HsJidu', veEnv:'videome.leadsecure.com', isPopup:false },
+      genesys:       { deploymentId:'efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b',    domain:'usw2.pure.cloud' },
+      useGenesysMessengerChat:false
+    },
+    popupNoChat_usaw: {
+      videoEngager: { tenantId:'yRunQK8mL7HsJidu', veEnv:'videome.leadsecure.com', isPopup:true },
+      genesys:       { deploymentId:'efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b',    domain:'usw2.pure.cloud' },
+      useGenesysMessengerChat:false
     }
   };
 
@@ -123,6 +143,20 @@
       log('✅ SDK Ready');
       btnStartC.disabled = false;
       btnStartV.disabled = false;
+      
+      // Subscribe to events
+      client.on('VideoEngagerCall.ended', () => {
+        log('Event: VideoEngagerCall.ended');
+        btnStartV.disabled = false;
+        btnEndV.disabled = true;
+      });
+      
+      client.on('GenesysMessenger.conversationEnded', () => {
+        log('Event: GenesysMessenger.conversationEnded');
+        btnStartC.disabled = false;
+        btnEndC.disabled = true;
+      });
+      
     } catch (e) {
       log(`❌ Init error: ${e.message}`);
       btnInit.disabled = false;

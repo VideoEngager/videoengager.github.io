@@ -76,10 +76,10 @@ A production-ready, self-service kiosk application for VideoEngager's video call
 ### Environment Detection
 
 The application automatically detects the environment based on:
-- URL parameters: `?env=development|staging|production`
+- URL parameters: `?env=dev|staging|production`
 - Hostname patterns:
-  - `localhost`, `127.0.0.1` → development
-  - `staging`, `dev`, `test` → staging
+  - `localhost`, `127.0.0.1`, `192.168.XX.XX`, `dev` → dev
+  - `staging` → staging
   - Everything else → production
 
 ### Configuration Structure
@@ -87,7 +87,7 @@ The application automatically detects the environment based on:
 ```javascript
 // config/conf.js
 const configs = {
-  development: {
+  dev: {
     videoEngager: {
       tenantId: "test_tenant",
       veEnv: "dev.videoengager.com",
@@ -421,7 +421,7 @@ The application includes built-in error tracking with:
 
 Enable debug logging by adding URL parameter:
 ```
-?env=development
+?env=dev
 ```
 
 Or set configuration directly:

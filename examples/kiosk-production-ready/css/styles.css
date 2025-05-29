@@ -50,11 +50,15 @@
     rgb(255 255 255 / 0%) 45%,
     rgb(255 255 255 / 0%) 100%
   );
-  background-size: 100% 50%;
+  background-size: 100% 100%, cover;
+  background-position: top, center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: scroll, fixed;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  background-repeat: no-repeat;
+  justify-content: center;
+  align-items: center;
+  object-fit: cover;
 }
 
 #initial-screen {

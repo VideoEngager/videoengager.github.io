@@ -11,51 +11,33 @@ const configs = {
       domain: "mypurecloud.com.au",
       hideGenesysLauncher: false,
     },
-    useGenesysMessengerChat: false,
-    monitoring: {
-      enabled: true,
-      level: "debug",
-    },
+    useGenesysMessengerChat: false
   },
   staging: {
     videoEngager: {
-      tenantId: window.ENV_CONFIG?.VE_TENANT_ID || "staging_tenant",
-      veEnv: window.ENV_CONFIG?.VE_ENV || "staging.videoengager.com",
+      tenantId: "oIiTR2XQIkb7p0ub",
+      veEnv: "staging.videoengager.com",
       veHttps: true,
       isPopup: false,
-      deploymentId: window.ENV_CONFIG?.VE_DEPLOYMENT_ID,
     },
     genesys: {
-      deploymentId:
-        window.ENV_CONFIG?.GENESYS_DEPLOYMENT_ID ||
-        "0928a947-d4bd-4524-9fc3-d98cb7938a83",
-      domain: window.ENV_CONFIG?.GENESYS_DOMAIN || "mypurecloud.com.au",
+      deploymentId: "ce6ed541-29fd-42ad-8fda-c245f683d43a",
+      domain: "mypurecloud.de",
       hideGenesysLauncher: false,
     },
-    useGenesysMessengerChat: false,
-    monitoring: {
-      enabled: true,
-      level: "info",
-    },
+    useGenesysMessengerChat: false
   },
   production: {
     videoEngager: {
-      tenantId: window.ENV_CONFIG?.VE_TENANT_ID,
-      veEnv: window.ENV_CONFIG?.VE_ENV,
-      veHttps: true,
+      tenantId: '0FphTk091nt7G1W7',
+      veEnv: 'videome.leadsecure.com',
       isPopup: false,
-      deploymentId: window.ENV_CONFIG?.VE_DEPLOYMENT_ID,
     },
     genesys: {
-      deploymentId: window.ENV_CONFIG?.GENESYS_DEPLOYMENT_ID,
-      domain: window.ENV_CONFIG?.GENESYS_DOMAIN,
-      hideGenesysLauncher: false,
+      deploymentId: 'c5d801ae-639d-4e5e-a52f-4963342fa0dc',
+      domain: 'mypurecloud.com',
     },
-    useGenesysMessengerChat: false,
-    monitoring: {
-      enabled: true,
-      level: "error",
-    },
+    useGenesysMessengerChat: false
   }
 };
 
@@ -68,7 +50,7 @@ const metadata = {
       src: "https://www.videoengager.com/wp-content/uploads/2020/05/image-for-slider-1-768x392.jpg",
     },
   ],
-  backgroundImage: "img/carribeanbateries.webp",
+  backgroundImage: "img/bg.png",
 };
 
 export {configs, metadata};

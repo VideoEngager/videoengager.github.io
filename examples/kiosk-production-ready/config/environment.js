@@ -14,30 +14,21 @@ export class EnvironmentConfig {
    */
   detectEnvironment() {
     const hostname = window.location.hostname;
-    const search = window.location.search;
-
-    // Check for explicit environment parameter
-    const urlParams = new URLSearchParams(search);
+    const urlParams = new URLSearchParams(window.location.search);
     const envParam = urlParams.get("env");
-    if (
-      envParam &&
-      ["development", "staging", "production"].includes(envParam)
-    ) {
-      return envParam;
-    }
-
-    // Auto-detect based on hostname
-    if (hostname.includes("localhost") || hostname.includes("127.0.0.1")) {
-      return "development";
-    }
-    if (
-      hostname.includes("staging") ||
-      hostname.includes("dev") ||
-      hostname.includes("test")
-    ) {
-      return "staging";
-    }
-    return "production";
+    
+    const validEnvs = ["development", "staging", "production"];
+    
+    return (envParam && validEnvs.includes(envParam)) ? envParam : (() => {
+      const patterns = {
+        development: /(dev|localhost|127\.0\.0\.1|192\.168)/,
+        staging: /staging/,
+        production: /^(app\.|www\.|[^.]*\.com$)/
+      };
+      
+      return Object.entries(patterns)
+        .find(([env, pattern]) => pattern.test(hostname))?.[0] || 'production';
+    })();
   }
 
   /**

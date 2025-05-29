@@ -676,9 +676,12 @@
   bottom: 0px;
   left: 0px;
   right: 0px;
-  top: 50px;
+  top: 0px;
   z-index: 500;
   position: fixed;
+  /* iOS Safari fixes */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 .active {
@@ -689,9 +692,23 @@
 .carousel-item {
   height: 100%;
   width: 100%;
+  /* iOS Safari fixes */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .carousel-inner {
   height: 100%;
   width: 100%;
+  /* Fix for iOS Safari */
+  overflow: hidden;
+  position: relative;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Additional iOS Safari optimizations */
+.carousel {
+  -webkit-perspective: 1000;
+  perspective: 1000;
 }

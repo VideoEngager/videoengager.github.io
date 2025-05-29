@@ -58,7 +58,7 @@ export const ErrorTypes = {
     code: "CALL_TIMEOUT",
     type: "Connection Timeout",
     userMessage: "Unable to connect to an agent. Please try again.",
-    shouldRetry: false,
+    shouldRetry: true,
   },
 };
 

@@ -351,6 +351,22 @@ export class KioskApplication {
   showLoadingScreen() {
     const oncallScreen = document.getElementById("oncall-screen");
     if (oncallScreen) oncallScreen.style.display = "block";
+      // Initialize (or restart) the carousel AFTER making it visible
+  const carouselElem = document.getElementById('carousel');
+  if (window.bootstrap && carouselElem) {
+    // If already initialized, get instance and cycle to first slide
+    let carousel = bootstrap.Carousel.getInstance(carouselElem);
+    if (!carousel) {
+      carousel = new bootstrap.Carousel(carouselElem, {
+        interval: 5000,
+        wrap: true,
+        pause: false,
+      });
+    } else {
+      carousel.to(0); // optional: start from the first slide
+      carousel.cycle();
+    }
+  }
   }
 
   /**
@@ -446,7 +462,13 @@ export class KioskApplication {
       div.appendChild(img);
       container.appendChild(div);
     });
-
+    // Initialize the carousel
+    const carousel = new bootstrap.Carousel(document.getElementById('carousel'), {
+      interval: 5000,
+      wrap: true,
+      pause: false,
+      ride: true
+    });
     this.log("CAROUSEL: Carousel setup complete");
   }
 

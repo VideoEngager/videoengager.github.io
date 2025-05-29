@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Widget Standalone Test (UMD Loader with Buttons)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .controls {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .controls button {
+            padding: 10px 15px;
+            font-size: 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .controls button:hover {
+            background-color: #218838;
+        }
+        #video-call-ui {
+            border: 3px dashed #007bff; /* Blue dashed border */
+            min-height: 350px;        /* Minimum height to be visible */
+            width: 450px;             /* Fixed width for testing */
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #e9ecef; /* Light background for the container */
+            position: relative;       /* Often useful for child iframe positioning */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            color: #666;
+        }
+        #video-call-ui p.placeholder-text { /* Style for the placeholder text */
+            text-align: center;
+            margin-top: 100px;
+            font-style: italic;
+        }
+        #video-call-ui iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 300px; /* Ensure iframe itself has some height */
+            border: 1px solid #dc3545; /* Red border for the iframe to distinguish */
+            display: block; /* Remove extra space below iframe */
+        }
+    </style>
+</head>
+<body>
+    <h1>VideoEngager Widget Test (UMD Loader with Buttons)</h1>
+    <p>This page tests the VideoEngager widget (loaded via the UMD bundle from CDN) and its ability to render into a pre-existing div, with buttons to trigger actions.</p>
+    <p><strong>VERY IMPORTANT:</strong> For the widget to attempt rendering VIDEO in the div below, you <strong>MUST</strong> edit the script block further down this page and change <code>isPopup: true</code> to <code><strong>isPopup: false</strong></code> in the configuration.</p>
+
+    <div class="controls">
+        <button id="startVideoButton">Start Video</button>
+        <button id="startChatButton">Start Chat</button>
+    </div>
+
+    <div id="video-call-ui">
+        <p class="placeholder-text"><code>div#video-call-ui</code> is present. Waiting for widget content... (Video will appear here if not in popup mode)</p>
+    </div>
+    
+    <div id="videoengager-widget-iframe">
+        <p class="placeholder-text"><code>div#videoengager-widget-iframe</code> is present. Waiting for widget content... (Video will appear here if not in popup mode)</p>
+    </div>
+    <script>
+      // Loader snippet to set up queue, configs, and load the UMD bundle
+      (function(g,s,c,d,q){ // g: window, s: scriptUrl, c: configs, d: scriptElement, q: queue
+        q=[]; g.__VideoEngagerQueue = q;
+        g.__VideoEngagerConfigs = c; // The configuration object 'c' is assigned here
+        g.VideoEngager = new Proxy({}, {
+          get: (_, m) => (...a) => new Promise((r, rj) => q.push({ m, a, r, rj }))
+        });
+        d = document.createElement("script");
+        d.async = 1;
+        d.src = s; // The script URL 's' (CDN link) is assigned here
+        d.charset = "utf-8";
+        document.head.appendChild(d);
+      })(window, "https://cdn.videoengager.com/widget/latest/browser/genesys-hub.umd.js", {
+    videoEngager: {
+      tenantId: '0FphTk091nt7G1W7',
+      veEnv: 'videome.leadsecure.com',
+      // firstMessage: 'Welcome to my videoengager service!',
+      isPopup: false
+    },
+    genesys: {
+      deploymentId: 'c5d801ae-639d-4e5e-a52f-4963342fa0dc',
+      domain: 'mypurecloud.com'
+    }, 
+    ui: {
+      useVeLauncherButtons: true,
+      useVeForm: true
+    },
+    useGenesysMessengerChat: true
+  });
+    </script>
+
+    <script>
+      // Functions to interact with VideoEngager (as provided by you)
+      async function startVideo() {
+        try {
+          console.log('Attempting to start video session via VideoEngager.startVideoChatSession()...');
+          await VideoEngager.setFirstMessage('We do video!')
+          await VideoEngager.startVideoChatSession();
+          console.log('startVideoChatSession call completed.');
+        } catch (error) {
+          console.error('Video session error:', error);
+        }
+      }
+
+      async function startChat() {
+        try {
+          console.log('Attempting to start chat session via VideoEngager.startGenesysChat()...');
+          await VideoEngager.setFirstMessage('');
+          await VideoEngager.startGenesysChat();
+          console.log('startGenesysChat call completed.');
+        } catch (error) {
+          console.error('Chat session error:', error);
+        }
+      }
+
+      // Attach event listeners to buttons
+      document.addEventListener('DOMContentLoaded', function() {
+        const videoButton = document.getElementById('startVideoButton');
+        const chatButton = document.getElementById('startChatButton');
+
+        if (videoButton) {
+          videoButton.addEventListener('click', startVideo);
+        } else {
+          console.error('Start Video button not found.');
+        }
+
+        if (chatButton) {
+          chatButton.addEventListener('click', startChat);
+        } else {
+          console.error('Start Chat button not found.');
+        }
+      });
+    </script>
+
+    <h2>Debugging Notes:</h2>
+    <ul>
+        <li>Open your browser's Developer Console (F12). Check for JavaScript errors and any console logs from the widget or the button clicks.</li>
+        <li>Verify that the script from <code>https://cdn.videoengager.com/widget/latest/browser/genesys-hub.umd.js</code> is loaded successfully (check the Network tab in developer tools).</li>
+        <li><strong>Action Required for Video Test: Ensure you have changed <code>isPopup: true</code> to <code>isPopup: false</code> in the configuration script block above to enable rendering into the <code>#video-call-ui</code> div.</strong></li>
+        <li>For the "Start Chat" button to function correctly, `useGenesysMessengerChat` should be `true` in the config, and your Genesys `deploymentId` and `domain` must be correctly configured and operational.</li>
+        <li>Clicking "Start Video" (with `isPopup: false`) should result in the video iframe appearing in the `div#video-call-ui`.</li>
+        <li>Clicking "Start Chat" should initiate the Genesys chat flow.</li>
+        <li>Remember to replace <code>'DEPLOYMENT_ID'</code> with a valid Genesys deployment ID.</li>
+    </ul>
+
+</body>
+</html>

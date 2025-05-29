@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>VideoEngager Super Demo</title>
+  <style>
+    body { font:16px sans-serif; margin:1em; }
+    .controls { margin-bottom:1em; }
+    .controls > * { margin-right:.5em; }
+    #log { height:200px; overflow-y:auto; background:#f7f7f7; border:1px solid #ccc; padding:.5em; white-space:pre-wrap; }
+    button:disabled { opacity: .5; }
+  </style>
+  <!-- 1) Copy-ready wrapper (must live at js/VideoEngagerClient.js) -->
+  <script src="js/VideoEngagerClient.js"></script>
+</head>
+<body>
+  <h1>VideoEngager Super Demo</h1>
+
+  <div class="controls">
+    <label>
+      Scenario:
+      <select id="preset"></select>
+    </label>
+    <button id="copyConfig">Copy Config</button>
+    <button id="init">Init SDK</button>
+    <button id="reload">Reload Demo</button>
+    <button id="startChat" disabled>Start Chat</button>
+    <button id="endChat"   disabled>End Chat</button>
+    <button id="startVideo"disabled>Start Video</button>
+    <button id="endVideo"  disabled>End Video</button>
+  </div>
+
+  <pre id="log"></pre>
+
+  <script>
+  // ——————————————————————————————————————————————
+  // 2) Define your presets
+  // ——————————————————————————————————————————————
+  const PRESETS = {
+    inlineWithChat: {
+      videoEngager: { tenantId:'0FphTk091nt7G1W7', veEnv:'videome.leadsecure.com', isPopup:false },
+      genesys:       { deploymentId:'c5d801ae-639d-4e5e-a52f-4963342fa0dc', domain:'mypurecloud.com' },
+      useGenesysMessengerChat:true
+    },
+    popupWithChat: {
+      videoEngager: { tenantId:'0FphTk091nt7G1W7', veEnv:'videome.leadsecure.com', isPopup:true },
+      genesys:       { deploymentId:'c5d801ae-639d-4e5e-a52f-4963342fa0dc', domain:'mypurecloud.com' },
+      useGenesysMessengerChat:true
+    },
+    inlineNoChat: {
+      videoEngager: { tenantId:'0FphTk091nt7G1W7', veEnv:'videome.leadsecure.com', isPopup:false },
+      genesys:       { deploymentId:'c5d801ae-639d-4e5e-a52f-4963342fa0dc',    domain:'mypurecloud.com' },
+      useGenesysMessengerChat:false
+    },
+    popupNoChat: {
+      videoEngager: { tenantId:'0FphTk091nt7G1W7', veEnv:'videome.leadsecure.com', isPopup:true },
+      genesys:       { deploymentId:'c5d801ae-639d-4e5e-a52f-4963342fa0dc',    domain:'mypurecloud.com' },
+      useGenesysMessengerChat:false
+    }
+  };
+
+  // ——————————————————————————————————————————————
+  // 3) Grab DOM references & helpers
+  // ——————————————————————————————————————————————
+  const logEl       = document.getElementById('log');
+  const presetSel   = document.getElementById('preset');
+  const btnCopy     = document.getElementById('copyConfig');
+  const btnInit     = document.getElementById('init');
+  const btnReload   = document.getElementById('reload');
+  const btnStartC   = document.getElementById('startChat');
+  const btnEndC     = document.getElementById('endChat');
+  const btnStartV   = document.getElementById('startVideo');
+  const btnEndV     = document.getElementById('endVideo');
+
+  let cfg, client;
+
+  function log(msg) {
+    logEl.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // ——————————————————————————————————————————————
+  // 4) Populate scenario dropdown
+  // ——————————————————————————————————————————————
+  Object.keys(PRESETS).forEach(key => {
+    const o = document.createElement('option');
+    o.value = key;
+    o.text  = key.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase());
+    presetSel.add(o);
+  });
+  presetSel.onchange = () => {
+    cfg = JSON.parse(JSON.stringify(PRESETS[presetSel.value]));
+    // reset UI
+    btnStartC.disabled = true;
+    btnStartV.disabled = true;
+    btnEndC.disabled   = true;
+    btnEndV.disabled   = true;
+    log(`Preset changed → ${presetSel.value}`);
+  };
+  // init first
+  presetSel.value = Object.keys(PRESETS)[0];
+  presetSel.onchange();
+
+  // ——————————————————————————————————————————————
+  // 5) Copy config JSON
+  // ——————————————————————————————————————————————
+  btnCopy.onclick = () => {
+    navigator.clipboard.writeText(JSON.stringify(cfg, null, 2))
+      .then(() => log('Config copied to clipboard'))
+      .catch(() => log('Failed to copy config'));
+  };
+
+  // ——————————————————————————————————————————————
+  // 6) Init & ready
+  // ——————————————————————————————————————————————
+  btnInit.onclick = async () => {
+    btnInit.disabled = true;
+    log('Initializing SDK…');
+    client = new VideoEngagerClient(cfg);
+    try {
+      await client.init();
+      await client.ready;
+      log('✅ SDK Ready');
+      btnStartC.disabled = false;
+      btnStartV.disabled = false;
+    } catch (e) {
+      log(`❌ Init error: ${e.message}`);
+      btnInit.disabled = false;
+    }
+  };
+
+  // ——————————————————————————————————————————————
+  // 7) Start/End chat & video
+  // ——————————————————————————————————————————————
+  btnStartC.onclick = async () => {
+    log('Starting chat…');
+    try {
+      await client.startChat();
+      log('✅ Chat started');
+      btnStartC.disabled = true;
+      btnEndC.disabled   = false;
+    } catch(e) {
+      log(`❌ Chat error: ${e.message}`);
+    }
+  };
+  btnEndC.onclick = async () => {
+    log('Ending chat…');
+    try {
+      await client.endChat();
+      log('✅ Chat ended');
+      btnStartC.disabled = false;
+      btnEndC.disabled   = true;
+    } catch(e) {
+      log(`❌ End chat error: ${e.message}`);
+    }
+  };
+
+  btnStartV.onclick = async () => {
+    log('Starting video…');
+    try {
+      await client.startVideo();
+      log('✅ Video started');
+      btnStartV.disabled = true;
+      btnEndV.disabled   = false;
+    } catch(e) {
+      log(`❌ Video error: ${e.message}`);
+    }
+  };
+  btnEndV.onclick = async () => {
+    log('Ending video…');
+    try {
+      await client.endVideo();
+      log('✅ Video ended');
+      btnStartV.disabled = false;
+      btnEndV.disabled   = true;
+    } catch(e) {
+      log(`❌ End video error: ${e.message}`);
+    }
+  };
+
+  // ——————————————————————————————————————————————
+  // 8) Reload Demo (hard reset)
+  // ——————————————————————————————————————————————
+  btnReload.onclick = () => {
+    window.location.reload();
+  };
+  </script>
+</body>
+</html>

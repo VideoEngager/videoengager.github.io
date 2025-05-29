@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tampermonkey UserScript Demo Target</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a73e8; /* A blue shade for the title */
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f5fe; /* Light blue background for instructions */
+            border-left: 4px solid #1a73e8;
+            border-radius: 4px;
+        }
+        .instructions p {
+            margin-bottom: 10px;
+        }
+        .instructions strong {
+            color: #0d47a1; /* Darker blue for emphasis */
+        }
+        code {
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .footer-note {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Session Manager - UserScript Demo</h1>
+
+        <p>This page is the target for the "Advanced Session Manager" Tampermonkey UserScript.
+        The UserScript will dynamically add buttons and a video call interface to this page.</p>
+
+        <div class="instructions">
+            <h2>How to Use This Demo:</h2>
+            <p>
+                <strong>1. Install a UserScript Manager:</strong>
+                If you haven't already, install a UserScript manager extension in your browser.
+                <a href="https://www.tampermonkey.net/" target="_blank" rel="noopener noreferrer">Tampermonkey</a> is a popular choice (available for Chrome, Firefox, Edge, Safari, etc.).
+            </p>
+            <p>
+                <strong>2. Install the UserScript:</strong>
+                Click the link below to install the "Advanced Session Manager Demo" UserScript. Your UserScript manager should automatically detect it and prompt you for installation.
+                <br>
+                <a href="[YOUR_RAW_LINK_TO_THE_USER_SCRIPT.JS_FILE]">Install the UserScript</a>
+                <br>
+                <em>(Replace <code>[YOUR_RAW_LINK_TO_THE_USER_SCRIPT.JS_FILE]</code> with the actual raw link to your <code>.user.js</code> file, e.g., on GitHub.)</em>
+            </p>
+            <p>
+                <strong>3. Configure <code>@match</code> (Important):</strong>
+                The provided UserScript is initially configured with <code>// @match https://www.videoengager.com/*</code>. For this demo page to work, you <strong>must</strong> update the <code>@match</code> directive in the script (via the Tampermonkey dashboard) to include the URL of <strong>this current page</strong>.
+                <br>
+                For example, if this page is hosted at <code>https://your-username.github.io/your-repo/tampermonkey-demo.html</code>, you would add or change the line to:
+                <br>
+                <code>// @match https://your-username.github.io/your-repo/tampermonkey-demo.html</code>
+                <br>
+                (Ensure you save the changes in Tampermonkey after editing the script.)
+            </p>
+            <p>
+                <strong>4. See it in Action:</strong>
+                Once the UserScript is installed, configured for this page's URL, and enabled in Tampermonkey, reload this page. You should see the demo buttons appear (e.g., "Support", "Sales"). The video UI will also be managed by the script.
+            </p>
+        </div>
+
+        <div class="footer-note">
+            <p>The content below this point is just part of this simple HTML page. The interactive elements are injected by the UserScript.</p>
+            <hr style="margin-top: 20px; margin-bottom: 20px;">
+            <p><em>Some generic page content to show the script works on an existing page structure...</em></p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+        </div>
+    </div>
+</body>
+</html>

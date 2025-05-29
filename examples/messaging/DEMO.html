@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoEngager Demos - Etisalat Theme</title>
+  <style>
+    /* Etisalat Brand Colors */
+    :root {
+      --etisalat-green: #009639;
+      --card-bg: #ffffff;
+      --card-shadow: rgba(0, 0, 0, 0.1);
+      --text-color: #333333;
+      --bg-color: #f4f4f4;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+    header {
+      background-color: var(--etisalat-green);
+      color: #ffffff;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+    }
+    header img {
+      height: 40px;
+      margin-right: 1rem;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px var(--card-shadow);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .card svg {
+      width: 64px;
+      height: 64px;
+      fill: var(--etisalat-green);
+      margin-bottom: 1rem;
+    }
+    .card h2 {
+      margin: 0.5rem 0;
+      font-size: 1.25rem;
+    }
+    .card p {
+      font-size: 0.95rem;
+      margin: 0.5rem 0 1rem;
+    }
+    .button {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background-color: var(--etisalat-green);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .button:hover {
+      background-color: #007a2e;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="etisalat-logo.png" alt="Etisalat Logo" />
+    <h1>VideoEngager Demo Center</h1>
+  </header> 
+  <div class="container">
+    <!-- Scheduled Video Call Demo Card -->
+    <div class="card">
+      <!-- Calendar Icon -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/>
+      </svg>
+      <h2>Scheduled Video Call</h2>
+      <p>Book a time slot, receive calendar invite, and join a scheduled WebRTC session.</p>
+      <a href="./index5.html" class="button">Launch Demo</a>
+    </div>
+
+    <!-- Ad-hoc Video Call Demo Card -->
+    <div class="card">
+      <!-- Video Camera Icon -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M17 10.5V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.5l4 4v-11l-4 4z"/>
+      </svg>
+      <h2>Ad-hoc Video Call</h2>
+      <p>Start a live video session instantly through your existing chat interaction.</p>
+      <a href="./index3.html" class="button">Launch Demo</a>
+    </div>
+  </div>
+  <div class="card">
+    <!-- Widget Icon (e.g. puzzle piece) -->
+    <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+        <rect x="4" y="10" width="56" height="40" rx="4" fill="#fff" stroke="currentColor" stroke-width="2"/>
+        <rect x="4" y="10" width="56" height="8" rx="2" fill="#eee"/>
+        <circle cx="10" cy="14" r="1.5" fill="#e60000"/>
+        <circle cx="15" cy="14" r="1.5" fill="#f7c325"/>
+        <circle cx="20" cy="14" r="1.5" fill="#47b881"/>
+        <rect x="16" y="24" width="32" height="20" rx="2" fill="#f7f9fb" stroke="#e60000" stroke-width="1.5"/>
+        <rect x="16" y="24" width="32" height="5" rx="1" fill="#e60000"/>
+        <rect x="19" y="31" width="6" height="6" rx="1" fill="#e60000" opacity="0.18"/>
+        <rect x="27" y="31" width="6" height="6" rx="1" fill="#e60000" opacity="0.18"/>
+        <rect x="35" y="31" width="6" height="6" rx="1" fill="#e60000" opacity="0.18"/>
+        <rect x="43" y="31" width="6" height="6" rx="1" fill="#e60000" opacity="0.18"/>
+        <rect x="19" y="39" width="6" height="6" rx="1" fill="#e60000" opacity="0.18"/>
+        <rect x="27" y="39" width="6" height="6" rx="1" fill="#e60000" opacity="0.18"/>
+        <rect x="35" y="39" width="6" height="6" rx="1" fill="#e60000"/>
+      </svg>
+    <h2>Schedule Video Call in a Widget</h2>
+    <p>Open a scheduler directly in a widget for a seamless in-page booking experience.</p>
+    <a href="../sales/index.html?env=prod" class="button">Launch Widget Demo</a>
+  </div>
+</body>
+</html>

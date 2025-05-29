@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Script Load Demo (Advanced Session Manager Logic)</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 0; /* Allow script to control full page if needed */
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            min-height: 100vh; /* Ensure body takes up height for fixed position elements */
+        }
+        .header-info {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #1a73e8;
+        }
+         /* Styles for the dynamically created #video-call-ui (from the script) are applied by the script itself */
+         /* Styles for the dynamically created buttons (from the script) are applied by the script itself */
+    </style>
+</head>
+<body>
+    <div class="header-info">
+        <h1>Advanced Session Manager Logic Demo</h1>
+        <p>The following UI elements (buttons and video call area) are dynamically created and managed by the embedded JavaScript code, originally from the UserScript.</p>
+        <p>No Tampermonkey extension is needed for this version.</p>
+    </div>
+
+    <script>
+    // PASTE THE COPIED JAVASCRIPT LOGIC FROM THE USERSCRIPT HERE
+    // Start with ;(function(){ 'use strict';
+    // And end with })();
+
+    // --- BEGINNING OF PASTED USERSCRIPT CODE ---
+    ;(function(){
+      'use strict';
+        // 1. Create the div element for video UI
+        const videoUiContainer = document.createElement('div'); //
+
+        // 2. Set its ID
+        videoUiContainer.id = 'video-call-ui'; //
+
+        // 3. Style it
+        videoUiContainer.style.position = 'fixed'; //
+        videoUiContainer.style.top = '0'; //
+        videoUiContainer.style.left = '0'; //
+        videoUiContainer.style.width = '100vw'; //
+        videoUiContainer.style.height = '100vh'; //
+        videoUiContainer.style.zIndex = '99999'; //
+        videoUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.75)'; //
+        videoUiContainer.style.color = 'white'; //
+        videoUiContainer.style.boxSizing = 'border-box'; //
+        videoUiContainer.style.padding = '20px'; //
+
+        const placeholder = document.createElement('p'); //
+        placeholder.textContent = 'Video Call UI will appear here. Press ESC to hide (example functionality).'; //
+        placeholder.style.textAlign = 'center'; //
+        placeholder.style.fontSize = '24px'; //
+        placeholder.style.marginTop = '40vh'; //
+        videoUiContainer.appendChild(placeholder); //
+
+        // 4. Set it to be initially "disabled" (hidden)
+        videoUiContainer.style.display = 'none'; //
+
+        // 5. Append it to the document body
+        document.body.appendChild(videoUiContainer); //
+
+      //////////////////////////////////////////////////////////////////////
+      // 0) Tiny utility: minimal EventEmitter (no external deps)
+      //////////////////////////////////////////////////////////////////////
+      class EE { //
+        constructor(){ this._evts = Object.create(null); } //
+        on(evt, cb){ (this._evts[evt] ||= new Set()).add(cb); } //
+        off(evt, cb){ this._evts[evt]?.delete(cb); } //
+        emit(evt, payload){ (this._evts[evt]||[]).forEach(cb => cb(payload)); } //
+      }
+
+      //////////////////////////////////////////////////////////////////////
+      // 1) VideoEngagerService — wraps SDK, emits high‑level events
+      //////////////////////////////////////////////////////////////////////
+      class VideoEngagerService extends EE { //
+        constructor(config){ //
+          super(); //
+          this.config = config; //
+          this._readyResolve = null; //
+          this._ready = new Promise(res => (this._readyResolve = res)); //
+          this._initialized = false; //
+        }
+
+        /** public: Promise that resolves when the SDK is ready */ //
+        get ready(){ return this._ready; } //
+
+        /** idempotent init */ //
+        async init(){ //
+          if (this._initialized) return this.ready; //
+          this._initialized = true; //
+          this.emit('sdkInitializing'); //
+          this._setupConfigProxy(); //
+          await this._loadSdkScript(); //
+          await this._waitForSdkReady(); //
+          this._wireSdkSessionEvents(); //
+          this._readyResolve(); //
+          this.emit('sdkReady'); //
+          return this.ready; //
+        }
+
+        /** session helpers */ //
+        async startSession(attrs){ //
+          await this.ready; //
+          try{ //
+            this.emit('sessionStarting'); //
+            if(attrs){ await window.VideoEngager.setCustomAttributes(attrs);if(attrs.firstMessage) window.VideoEngager.setFirstMessage(attrs.firstMessage); } //
+            await window.VideoEngager.startVideoChatSession(); //
+          }catch(err){ //
+            this.emit('sessionError', err); //
+            throw err; //
+          }
+        }
+        async endSession(){ //
+          await this.ready; //
+          try{ //
+            await window.VideoEngager.endVideoChatSession(); //
+          }catch(err){ //
+            this.emit('sessionError', err); //
+            throw err; //
+          }
+        }
+
+        //////////////////////// internals //////////////////////// //
+        _setupConfigProxy(){ //
+          const cfg = this.config; //
+          window.__VideoEngagerConfigs = { //
+            videoEngager: { //
+              tenantId:     cfg.videoEngager.tenantId, //
+              veEnv:        cfg.videoEngager.veEnv, //
+              deploymentId: cfg.videoEngager.deploymentId || '', //
+              isPopup:      cfg.videoEngager.isPopup //
+            },
+            genesys: { //
+              deploymentId: cfg.genesys?.deploymentId || '', //
+              domain:       cfg.genesys?.domain || '' //
+            },
+            useGenesysMessengerChat: !!cfg.useGenesysMessengerChat //
+          };
+          // queue/proxy pattern so callers can invoke even before sdk arrives
+          window.__VideoEngagerQueue = []; //
+          window.VideoEngager = new Proxy({}, { //
+            get: (_, method) => (...args) => //
+              new Promise((resolve,reject)=> //
+                window.__VideoEngagerQueue.push({ m: method, a: args, r: resolve, rj: reject }) //
+              )
+          });
+        }
+
+        _loadSdkScript(){ //
+          return new Promise((resolve, reject) => { //
+            const s = document.createElement('script'); //
+            s.src = 'https://cdn.videoengager.com/widget/latest/browser/genesys-hub.umd.js'; //
+            s.async = true; //
+            s.onload = () => resolve(); //
+            s.onerror= () => reject(new Error('Failed to load VideoEngager SDK')); //
+            document.head.appendChild(s); //
+          });
+        }
+
+        _waitForSdkReady(){ //
+          return new Promise(res => window.VideoEngager.onReady(res)); //
+        }
+
+        _wireSdkSessionEvents(){ //
+          window.VideoEngager.on('VideoEngagerCall.started',  () => this.emit('sessionStarted')); //
+          window.VideoEngager.on('VideoEngagerCall.ended',    () => this.emit('sessionEnded')); //
+          window.VideoEngager.on('VideoEngagerCall.error',    err => this.emit('sessionError', err)); //
+        }
+      }
+
+      //////////////////////////////////////////////////////////////////////
+      // 2) LaunchButton — UI component, no direct SDK calls
+      //////////////////////////////////////////////////////////////////////
+      const BTN_STATES = Object.freeze({ //
+        IDLE: 'idle', //
+        REQUESTING: 'requesting', //
+        ACTIVE_SELF: 'active_self', //
+        ACTIVE_OTHER: 'active_other', //
+        DISABLED_SYS: 'disabled_system', //
+        ERROR: 'error' //
+      });
+
+      class LaunchButton extends EE { //
+        constructor({ id, label, attrs, manager, offsetX = 0 }){ //
+          super(); //
+          this.id = id; //
+          this.label = label; //
+          this.attrs = attrs; //
+          this.manager = manager; //
+          this.state = BTN_STATES.DISABLED_SYS; //
+          this.el = this._createButton(offsetX); //
+          this._bind(); //
+          manager.registerButton(this); //
+        }
+
+        _createButton(offsetX){ //
+          const btn = document.createElement('button'); //
+          btn.dataset.btnId = this.id; //
+          btn.className = 've-launch-btn'; //
+          btn.textContent = this.label; //
+          Object.assign(btn.style, { //
+            position:   'fixed', //
+            bottom:     '20px', //
+            right:      `${20 + offsetX}px`, //
+            padding:    '8px 12px', //
+            background: 'gray', //
+            color:      '#fff', //
+            border:     'none', //
+            borderRadius:'4px', //
+            cursor:     'pointer', //
+            zIndex:     999999, //
+            transition: 'all .2s ease' //
+          });
+          document.body.appendChild(btn); //
+          return btn; //
+        }
+
+        _bind(){ //
+          this.el.addEventListener('click', ()=>{ //
+            // if I started the call -> intent = end
+            if(this.state === BTN_STATES.ACTIVE_SELF){ //
+              this.emit('endIntent'); //
+            }else if(this.state === BTN_STATES.IDLE){ //
+              this.emit('launchIntent', { id:this.id, attrs:this.attrs }); //
+            }
+          });
+        }
+
+        setState(state){ //
+          this.state = state; //
+          switch(state){ //
+            case BTN_STATES.IDLE: //
+              this.el.disabled = false; //
+              this.el.textContent = this.label; //
+              this.el.style.background = 'green'; //
+              break;
+            case BTN_STATES.REQUESTING: //
+              this.el.disabled = true; //
+              this.el.textContent = `${this.label} → Connecting…`; //
+              this.el.style.background = 'orange'; //
+              break;
+            case BTN_STATES.ACTIVE_SELF: //
+              this.el.disabled = false; //
+              this.el.textContent = `${this.label} → End Call`; //
+              this.el.style.background = 'red'; //
+              break;
+            case BTN_STATES.ACTIVE_OTHER: //
+              this.el.disabled = true; //
+              this.el.textContent = `${this.label} (busy)`; //
+              this.el.style.background = 'gray'; //
+              break;
+            case BTN_STATES.DISABLED_SYS: //
+              this.el.disabled = true; //
+              this.el.style.background = 'gray'; //
+              break;
+            case BTN_STATES.ERROR: //
+              this.el.disabled = false; //
+              this.el.textContent = `${this.label} (error)`; //
+              this.el.style.background = 'darkred'; //
+              break;
+          }
+        }
+      }
+
+      //////////////////////////////////////////////////////////////////////
+      // 3) SessionManager — orchestrates buttons & service
+      //////////////////////////////////////////////////////////////////////
+      const MANAGER_STATES = Object.freeze({ //
+        INIT:              'init', //
+        SDK_INIT:          'initializing_sdk', //
+        READY_IDLE:        'sdk_ready_idle', //
+        PENDING_START:     'session_pending_start', //
+        ACTIVE:            'session_active', //
+        PENDING_END:       'session_pending_end', //
+        ERROR:             'sdk_error' //
+      });
+
+      class SessionManager extends EE { //
+        constructor(service){ //
+          super(); //
+          this.service = service; //
+          this.state = MANAGER_STATES.INIT; //
+          this.activeButtonId = null; //
+          this.buttons = new Map(); //
+          this._wireServiceEvents(); //
+          service.init().catch(err=>{ //
+            this.state = MANAGER_STATES.ERROR; //
+            this._broadcastBtnState(BTN_STATES.ERROR); //
+            console.error('VideoEngager SDK init failed', err); //
+          });
+        }
+
+        registerButton(btn){ //
+          this.buttons.set(btn.id, btn); //
+          // pipe button intents to manager
+          btn.on('launchIntent', payload => this._onLaunchIntent(payload)); //
+          btn.on('endIntent',    ()      => this._onEndIntent()); //
+          // initial visual state depends on current manager state
+          btn.setState(this._defaultBtnStateForManager()); //
+        }
+
+        //////////////////// button intent handlers //////////////////// //
+        _onLaunchIntent({ id, attrs }){ //
+          if(this.state !== MANAGER_STATES.READY_IDLE) return; // ignore
+          this.state = MANAGER_STATES.PENDING_START; //
+          this.activeButtonId = id; //
+          this.buttons.get(id).setState(BTN_STATES.REQUESTING); //
+          this._broadcastBtnState(BTN_STATES.ACTIVE_OTHER, [id]); //
+          this.service.startSession(attrs).catch(err=>{ //
+            this.state = MANAGER_STATES.ERROR; //
+            this.buttons.get(id).setState(BTN_STATES.ERROR); //
+            console.error('Session start error', err); //
+          });
+        }
+
+        _onEndIntent(){ //
+          if(this.state !== MANAGER_STATES.ACTIVE) return; //
+          this.state = MANAGER_STATES.PENDING_END; //
+          this.service.endSession().catch(err=>{ //
+            this.state = MANAGER_STATES.ERROR; //
+            console.error('Session end error', err); //
+          });
+        }
+
+        //////////////////// service event handlers //////////////////// //
+        _wireServiceEvents(){ //
+          this.service.on('sdkInitializing', () => { //
+            this.state = MANAGER_STATES.SDK_INIT; //
+            this._broadcastBtnState(BTN_STATES.DISABLED_SYS); //
+          });
+          this.service.on('sdkReady', () => { //
+            this.state = MANAGER_STATES.READY_IDLE; //
+            this._broadcastBtnState(BTN_STATES.IDLE); //
+          });
+          this.service.on('sessionStarting', () => { //
+            // already handled in launchIntent
+          });
+          this.service.on('sessionStarted', () => { //
+            this.state = MANAGER_STATES.ACTIVE; //
+            if(this.activeButtonId){ //
+              this.buttons.get(this.activeButtonId).setState(BTN_STATES.ACTIVE_SELF); //
+            }
+            const ui = document.getElementById('video-call-ui'); //
+            if(ui) ui.style.display = 'block'; //
+          });
+          this.service.on('sessionEnded', () => { //
+            this.state = MANAGER_STATES.READY_IDLE; //
+            this._broadcastBtnState(BTN_STATES.IDLE); //
+            this.activeButtonId = null; //
+            const ui = document.getElementById('video-call-ui'); //
+            if(ui) ui.style.display = 'none'; //
+          });
+          this.service.on('sessionError', () => { //
+            this.state = MANAGER_STATES.ERROR; //
+            this._broadcastBtnState(BTN_STATES.ERROR); //
+            this.activeButtonId = null; //
+          });
+        }
+
+        //////////////////// helpers //////////////////// //
+        _broadcastBtnState(state, excludeIds=[]){ //
+          this.buttons.forEach((btn,id)=>{ //
+            if(!excludeIds.includes(id)) btn.setState(state); //
+          });
+        }
+
+        _defaultBtnStateForManager(){ //
+          switch(this.state){ //
+            case MANAGER_STATES.READY_IDLE:   return BTN_STATES.IDLE; //
+            case MANAGER_STATES.ACTIVE:       return BTN_STATES.ACTIVE_OTHER; //
+            case MANAGER_STATES.ERROR:        return BTN_STATES.ERROR; //
+            default:                          return BTN_STATES.DISABLED_SYS; //
+          }
+        }
+      }
+
+      //////////////////////////////////////////////////////////////////////
+      // 4) Configuration (same values as original script)
+      //////////////////////////////////////////////////////////////////////
+      const CONFIG =  { //
+        videoEngager: { //
+          tenantId: '0FphTk091nt7G1W7', //
+          veEnv: 'videome.leadsecure.com', //
+          firstMessage: 'Welcome to my videoengager service!', //
+          isPopup: false //
+        },
+        genesys: { //
+          deploymentId: 'c5d801ae-639d-4e5e-a52f-4963342fa0dc', //
+          domain: 'mypurecloud.com' //
+        },
+        useGenesysMessengerChat: false //
+      };
+
+      //////////////////////////////////////////////////////////////////////
+      // 5) Bootstrap demo — two buttons competing for a single session
+      //////////////////////////////////////////////////////////////////////
+      const svc  = new VideoEngagerService(CONFIG); //
+      const mgr  = new SessionManager(svc); //
+
+      // Offsets keep buttons side‑by‑side like the original demo
+      new LaunchButton({ id:'support', label:'Support', attrs:{ firstMessage:"Got broken stuff!", queue:'Support', 'context.firstName':'Support "Ronny" Seeker' }, manager:mgr, offsetX:0   }); //
+      new LaunchButton({ id:'sales',   label:'Sales',   attrs:{ firstMessage:"Sell me something?", queue:'Sales', 'context.firstName':'Smiling "Joe" Reseller'   }, manager:mgr, offsetX:140 }); //
+
+    })();
+    // --- END OF PASTED USERSCRIPT CODE ---
+    </script>
+
+</body>
+</html>

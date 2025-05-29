@@ -147,6 +147,7 @@
       // Subscribe to events
       client.on('VideoEngagerCall.ended', () => {
         log('Event: VideoEngagerCall.ended');
+        btnStartV.textContent = 'Start Video'; // Reset text
         btnStartV.disabled = false;
         btnEndV.disabled = true;
       });
@@ -192,12 +193,20 @@
   btnStartV.onclick = async () => {
     log('Starting video…');
     try {
-      await client.startVideo();
+      await client.startVideo(); //
       log('✅ Video started');
-      btnStartV.disabled = true;
+      if (cfg.videoEngager.isPopup) { //
+        btnStartV.textContent = 'Show Video Popup'; // New text for popup mode
+        btnStartV.disabled = false; // Keep enabled for popup mode
+      } else {
+        btnStartV.textContent = 'Start Video'; // Ensure default text for inline
+        btnStartV.disabled = true; // Disable for inline mode as before
+      }
       btnEndV.disabled   = false;
     } catch(e) {
       log(`❌ Video error: ${e.message}`);
+      btnStartV.textContent = 'Start Video'; // Reset text on error
+      btnStartV.disabled = false; // Re-enable on error
     }
   };
   btnEndV.onclick = async () => {
@@ -205,6 +214,7 @@
     try {
       await client.endVideo();
       log('✅ Video ended');
+      btnStartV.textContent = 'Start Video'; // Reset text
       btnStartV.disabled = false;
       btnEndV.disabled   = true;
     } catch(e) {

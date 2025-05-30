@@ -2,21 +2,66 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-A production-ready, self-service kiosk application for VideoEngager's video calling capabilities. Built with vanilla JavaScript ES modules, featuring comprehensive error handling, multi-environment support, and enterprise-grade security considerations.
+A comprehensive, self-service kiosk application demonstrating VideoEngager's video calling capabilities integrated with Genesys Cloud. Built with vanilla JavaScript ES modules, this example provides enterprise-grade patterns for error handling, multi-environment support, and waitroom management.
 
 ---
 
 ## Features
 
-- **Zero-dependency** vanilla JavaScript implementation
-- **Multi-environment support** (development, staging, production)
-- **Comprehensive error handling** with retry mechanisms
+- **Zero-dependency** vanilla JavaScript implementation with ES modules
+- **Multi-environment support** (development, staging, production) with automatic detection
+- **Comprehensive error handling** with categorized error types and retry mechanisms
+- **Custom waitroom experience** with carousel slides and bot messaging
 - **Internationalization** support (English, German, Arabic)
-- **Responsive design** with Bootstrap integration
-- **Security-focused** with input sanitization and XSS protection
-- **Timeout management** for calls and inactivity
-- **Background carousel** with configurable slides
-- **Production monitoring** and logging capabilities
+- **Timeout management** for calls, inactivity, and system operations
+- **Security-focused** architecture with input sanitization and XSS protection
+- **Event-driven architecture** with proper separation of concerns
+- **TypeScript annotations** for better developer experience
+
+---
+
+## Architecture Overview
+
+### Core Components
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Kiosk Application                        │
+├─────────────────────────────────────────────────────────────┤
+│  KioskApplication (Main Orchestrator)                      │
+│  ├── VideoEngagerClient (SDK Integration)                  │
+│  ├── ErrorHandler (Error Management)                       │
+│  ├── TimeoutManager (Timer Management)                     │
+│  ├── WaitroomEventMediator (Event Bridge)                  │
+│  └── VECarouselWaitroom (Custom Element)                   │
+├─────────────────────────────────────────────────────────────┤
+│  EnvironmentConfig (Configuration Management)              │
+│  └── Utils (Utility Functions)                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### File Structure
+
+```
+├── js/
+│   ├── client.js                    # VideoEngager SDK integration
+│   ├── kiosk.js                     # Main application orchestrator
+│   ├── error-handler.js             # Comprehensive error management
+│   ├── timeout-manager.js           # Centralized timeout handling
+│   ├── utils.js                     # Utility functions
+│   ├── ve-carousel-waitroom.js      # Custom waitroom component
+│   └── waitroom-event-mediator.js   # Event bridge for waitroom
+├── config/
+│   ├── conf.js                      # Environment configurations
+│   ├── environment.js               # Environment detection logic
+│   └── waitroom.json                # Waitroom carousel configuration
+├── css/
+│   ├── styles.css                   # Main application styles
+│   └── carousel.css                 # Waitroom carousel styles
+├── types/
+│   └── ve-window.d.ts               # TypeScript definitions
+└── index.html                       # Application entry point
+```
 
 ---
 
@@ -24,50 +69,52 @@ A production-ready, self-service kiosk application for VideoEngager's video call
 
 ### Prerequisites
 
-- A modern web browser with ES module support
-- [Node.js](https://nodejs.org/) (optional, for local development server)
+- Modern web browser with ES module support
 - VideoEngager tenant credentials
 - Genesys Cloud deployment credentials
+- Web server for hosting (local development or production)
 
-### Quick Start
+### Quick Setup
 
-1. **Clone the repository:**
+1. **Clone or download the example:**
    ```bash
+   # From VideoEngager examples repository
    git clone https://github.com/VideoEngager/videoengager.github.io
    cd videoengager.github.io/examples/kiosk-production-ready
    ```
 
-2. **Configure your environment:**
-   Edit `config/conf.js` to set your VideoEngager and Genesys credentials:
+2. **Configure your credentials:**
+   Edit `config/conf.js` with your VideoEngager and Genesys settings:
    ```javascript
-   // For production deployment, set these via window.ENV_CONFIG
    const configs = {
      production: {
        videoEngager: {
-         tenantId: window.ENV_CONFIG?.VE_TENANT_ID,
-         veEnv: window.ENV_CONFIG?.VE_ENV,
-         deploymentId: window.ENV_CONFIG?.VE_DEPLOYMENT_ID,
+         tenantId: 'your-tenant-id',
+         veEnv: 'your-environment.videoengager.com',
+         deploymentId: 'your-deployment-id',
        },
        genesys: {
-         deploymentId: window.ENV_CONFIG?.GENESYS_DEPLOYMENT_ID,
-         domain: window.ENV_CONFIG?.GENESYS_DOMAIN,
+         deploymentId: 'your-genesys-deployment-id',
+         domain: 'your-genesys-domain.com',
        }
      }
    };
    ```
 
-3. **Run the application:**
+3. **Serve the application:**
    ```bash
-   # Using Node.js (recommended for development)
-   npm start
+   # Using Node.js
+   npx http-server . -p 8080
    
-   # Or use any static file server
-   npx http-server . -o
-   python -m http.server 8000
+   # Using Python
+   python -m http.server 8080
+   
+   # Using PHP
+   php -S localhost:8080
    ```
 
-4. **Access the kiosk:**
-   Open your browser to `http://localhost:8000` (or your server's URL)
+4. **Access the demo:**
+   Open `http://localhost:8080` in your browser
 
 ---
 
@@ -75,12 +122,14 @@ A production-ready, self-service kiosk application for VideoEngager's video call
 
 ### Environment Detection
 
-The application automatically detects the environment based on:
-- URL parameters: `?env=dev|staging|production`
-- Hostname patterns:
-  - `localhost`, `127.0.0.1`, `192.168.XX.XX`, `dev` → dev
-  - `staging` → staging
-  - Everything else → production
+The application automatically detects environments based on:
+
+| Pattern | Environment | Description |
+|---------|-------------|-------------|
+| `?env=dev\|staging\|production` | URL Parameter | Explicit environment override |
+| `localhost`, `127.0.0.1`, `dev.*` | Development | Local development patterns |
+| `staging.*` | Staging | Staging environment patterns |
+| Everything else | Production | Default production environment |
 
 ### Configuration Structure
 
@@ -91,305 +140,321 @@ const configs = {
     videoEngager: {
       tenantId: "test_tenant",
       veEnv: "dev.videoengager.com",
+      deploymentId: "test_deployment",
       veHttps: true,
       isPopup: false,
     },
     genesys: {
-      deploymentId: "your-deployment-id",
+      deploymentId: "your-dev-deployment-id",
       domain: "mypurecloud.com.au",
       hideGenesysLauncher: false,
     },
-    useGenesysMessengerChat: false,
-    monitoring: {
-      enabled: true,
-      level: "debug", // debug, info, error
-    },
+    useGenesysMessengerChat: false
+  }
+  // staging, production configurations...
+};
+```
+
+### Waitroom Customization
+
+Configure the waitroom experience via `config/waitroom.json`:
+
+```json
+{
+  "theme": {
+    "primaryColor": "#006699",
+    "font": "Open Sans",
+    "mode": "default"
   },
-  // staging and production configurations...
-};
-```
-
-### Environment Variables (Production)
-
-For production deployments, set configuration via `window.ENV_CONFIG`:
-
-```html
-<script>
-  window.ENV_CONFIG = {
-    VE_TENANT_ID: 'your-tenant-id',
-    VE_ENV: 'your-ve-environment.com',
-    VE_DEPLOYMENT_ID: 'your-ve-deployment-id',
-    GENESYS_DEPLOYMENT_ID: 'your-genesys-deployment-id',
-    GENESYS_DOMAIN: 'your-genesys-domain.com'
-  };
-</script>
-```
-
-### Customization Options
-
-#### Language Support
-Add or modify languages in `js/kiosk.js`:
-
-```javascript
-this.languages = {
-  en: {
-    motto: "SmartVideo Kiosk Demo",
-    connect: "Touch Here To Begin",
-    loadingText: "Connecting to an Agent",
-    cancelText: "Cancel",
-  },
-  // Add more languages...
-};
-```
-
-Access with URL parameter: `?lang=en|de|ar`
-
-#### Visual Customization
-Update `config/conf.js` metadata:
-
-```javascript
-const metadata = {
-  carouselItems: [
-    { src: "img/slide-1.avif" },
-    { src: "https://example.com/image.jpg" },
-  ],
-  backgroundImage: "img/background.webp",
-};
-```
-
-#### Timeout Configuration
-Modify timeouts in `js/kiosk.js`:
-
-```javascript
-this.timeouts = {
-  call: 1000 * 60 * 3,      // 3 minutes call timeout
-  inactivity: 1000 * 60 * 60, // 1 hour inactivity timeout
-  retry: 1000 * 5,          // 5 seconds retry delay
-};
+  "carousel": {
+    "loop": true,
+    "interval": 8000,
+    "slides": [
+      {
+        "type": "content",
+        "title": "Welcome",
+        "description": "Please wait for an agent",
+        "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      },
+      {
+        "type": "image",
+        "src": "https://example.com/image.jpg",
+        "title": "Slide Title",
+        "description": "Slide description"
+      },
+      {
+        "type": "video", 
+        "src": "https://example.com/video.mp4",
+        "muted": true,
+        "loop": true
+      }
+    ]
+  }
+}
 ```
 
 ---
 
-## How to Use
+## Core Components
 
-### Basic Operation
+### KioskApplication (`js/kiosk.js`)
 
-1. **Initial Screen**: The kiosk displays a start button with your configured language and background
-2. **Start Call**: Touch/click the start button to initiate a video call
-3. **Loading State**: Shows connecting animation and carousel while waiting for agent
-4. **Video Call**: Full-screen video interface once agent joins
-5. **Auto Return**: Returns to initial screen when call ends or times out
+Main application orchestrator that manages:
+- UI state transitions between screens
+- VideoEngager client initialization
+- Event handling and coordination
+- Language and customization
+- Timeout and inactivity management
 
-### User Interactions
+```javascript
+// Usage example
+const kiosk = new KioskApplication();
+// Automatically initializes on DOM ready
+```
 
-- **Start Video Call**: Large circular button on initial screen
-- **Cancel Call**: X button during loading/connecting phase  
-- **Automatic Timeout**: Returns to start after inactivity or failed connections
-- **Error Handling**: User-friendly error messages with retry options
+### VideoEngagerClient (`js/client.js`)
 
----
-
-## Architecture Overview
-
-### Core Classes
-
-#### `KioskApplication` ([js/kiosk.js](js/kiosk.js))
-Main application orchestrator handling:
-- UI state management and screen transitions
-- Event coordination between components
-- Language and customization application
-- Timer and timeout management
-
-#### `VideoEngagerClient` ([js/client.js](js/client.js))
-VideoEngager SDK integration layer:
-- Secure configuration proxy setup
+Secure wrapper around the VideoEngager SDK:
 - Dynamic script loading with integrity checks
 - Promise-based API wrapper
 - Event handling and error management
+- Configuration proxy setup
 
-#### `EnvironmentConfig` ([config/environment.js](config/environment.js))
-Environment detection and configuration:
-- Automatic environment detection
-- Configuration validation and sanitization
-- Metadata loading for UI customization
+```javascript
+// Usage example
+const client = new VideoEngagerClient(config);
+await client.init();
+await client.startVideo();
+```
 
-#### `ErrorHandler` ([js/error-handler.js](js/error-handler.js))
-Comprehensive error management:
+### VECarouselWaitroom (`js/ve-carousel-waitroom.js`)
+
+Custom web component providing:
+- Configurable slide carousel
+- Multiple media types (images, videos, content)
+- Bot messaging system
+- Accessibility features
+- Lazy loading for performance
+
+```html
+<!-- Usage in HTML -->
+<ve-carousel-waitroom config-src="/config/waitroom.json"></ve-carousel-waitroom>
+```
+
+### ErrorHandler (`js/error-handler.js`)
+
+Comprehensive error management system:
 - Categorized error types with user-friendly messages
-- Retry logic with exponential backoff
+- Automatic retry logic with exponential backoff
 - Modal display system
 - Logging and monitoring integration
 
-#### `TimeoutManager` ([js/timeout-manager.js](js/timeout-manager.js))
+```javascript
+// Error categories
+const ErrorTypes = {
+  NETWORK_ERROR: { shouldRetry: false },
+  LIBRARY_LOAD_FAILED: { shouldRetry: true, retryDelay: 5000 },
+  CONFIG_INVALID: { shouldRetry: false }
+};
+```
+
+### TimeoutManager (`js/timeout-manager.js`)
+
 Centralized timeout handling:
 - Named timeout management
 - Automatic cleanup
 - Remaining time calculation
 
-### Security Features
+```javascript
+const timeoutManager = new TimeoutManager();
+timeoutManager.set('call', () => handleTimeout(), 180000); // 3 minutes
+timeoutManager.clear('call');
+```
 
-- **Input Sanitization**: All user inputs and dynamic content sanitized
-- **XSS Protection**: HTML and text sanitization utilities
-- **URL Validation**: Strict validation for external resources
-- **CSP Ready**: Compatible with Content Security Policy headers
-- **Error Information Disclosure**: Limited error details in production
+---
 
-### Error Handling Strategy
+## User Experience Flow
+
+1. **Initial Screen**: Large start button with customizable background and language
+2. **Loading State**: Waitroom carousel with slides and cancel option
+3. **Video Call**: Full-screen video interface when agent joins
+4. **Auto Return**: Automatic return to start after call ends or timeout
+5. **Error Handling**: User-friendly error messages with retry options
+
+### Supported Interactions
+
+- **Start Call**: Touch/click the circular start button
+- **Cancel Call**: X button during connection phase
+- **Automatic Timeouts**: Configurable timeouts for calls and inactivity
+- **Error Recovery**: Automatic retry for recoverable errors
+
+---
+
+## Language Support
+
+Built-in support for multiple languages with URL parameter control:
 
 ```javascript
-// Categorized error types with automatic handling
-const ErrorTypes = {
-  NETWORK_ERROR: {
-    userMessage: "Please check your internet connection and try again.",
-    shouldRetry: false,
+// Access via URL: ?lang=en|de|ar
+this.languages = {
+  en: {
+    motto: "SmartVideo Kiosk Demo",
+    connect: "Touch Here To Begin",
+    loadingText: "Connecting to an Agent",
+    cancelText: "Cancel"
   },
-  CONFIG_INVALID: {
-    userMessage: "Service configuration is invalid. Please contact support.",
-    shouldRetry: false,
+  de: {
+    motto: "SmartVideo Kiosk Demo", 
+    connect: "Verbinden",
+    loadingText: "Verbinde mit einem Agenten",
+    cancelText: "Abbrechen"
   },
-  LIBRARY_LOAD_FAILED: {
-    userMessage: "Unable to load required services. Please refresh the page.",
-    shouldRetry: true,
-    retryDelay: 5000,
-  },
-  // More error types...
+  ar: {
+    motto: "عرض توضيحي لسمارت فيديو كيوسك",
+    connect: "الاتصال",
+    loadingText: "جاري الاتصال بموظف خدمة العملاء",
+    cancelText: "إلغاء"
+  }
 };
 ```
 
 ---
 
-## Deployment
+## Security Features
 
-**Note: This is a demo application intended for third-party developers to understand VideoEngager integration patterns. Production deployment is the responsibility of the implementing organization.**
+- **Input Sanitization**: All dynamic content is sanitized using `Utils.sanitizeText()`
+- **XSS Protection**: HTML content sanitization for user-facing messages
+- **URL Validation**: Strict validation for external resources
+- **Error Information Disclosure**: Limited error details in production
+- **CSP Compatible**: Works with Content Security Policy headers
 
-### Third-Party Implementation Responsibilities
+### Security Best Practices Implemented
 
-As a third-party developer implementing this kiosk demo in production, you are responsible for:
+```javascript
+// Example: Secure text sanitization
+static sanitizeText(str) {
+  if (typeof str !== "string") return "";
+  return str.replace(/[<>&"']/g, "");
+}
 
-#### Infrastructure & Hosting
-- **Web Server Setup**: Deploy on your preferred hosting platform (AWS, Azure, GCP, on-premises)
-- **SSL/TLS Configuration**: Implement HTTPS with valid certificates
-- **Load Balancing**: Configure for high availability if needed
-- **CDN Integration**: Set up content delivery networks for optimal performance
-
-#### Security Implementation
-- **Content Security Policy (CSP)**: Configure appropriate CSP headers
-- **Environment Variables**: Securely manage VideoEngager and Genesys credentials
-- **Access Control**: Implement authentication/authorization if required
-- **Network Security**: Configure firewalls and network access controls
-
-#### Monitoring & Operations
-- **Application Monitoring**: Integrate with your monitoring solutions (New Relic, DataDog, etc.)
-- **Error Tracking**: Connect to your error reporting systems (Sentry, Bugsnag, etc.)
-- **Logging Infrastructure**: Forward application logs to your centralized logging
-- **Health Checks**: Implement uptime monitoring and alerting
-
-#### Customization & Branding
-- **Visual Customization**: Apply your organization's branding, colors, and styling
-- **Language Localization**: Add additional languages as needed for your regions
-- **Business Logic**: Implement any custom business rules or integrations
-- **Analytics Integration**: Add your preferred analytics tracking
-
-### Development Environment Setup
-For local development and testing:
-
-```bash
-# Clone the demo repository
-git clone https://github.com/VideoEngager/videoengager.github.io
-cd videoengager.github.io/examples/kiosk-production-ready
-
-# Use any static file server for local testing
-npx http-server . -p 8080
-# or
-python -m http.server 8080
-# or
-php -S localhost:8080
+// Example: URL validation
+static validateURL(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
 ```
-
-### Sample Production Deployment Patterns
-
-#### Static Hosting (Recommended for demos)
-```bash
-# Example: Deploy to AWS S3 + CloudFront
-aws s3 sync . s3://your-kiosk-bucket/
-aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
-```
-
-#### Docker Containerization (Example)
-```dockerfile
-FROM nginx:alpine
-COPY . /usr/share/nginx/html
-
-# Add your custom nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-#### Environment Configuration Template
-```html
-<!-- Include before loading the kiosk application -->
-<script>
-  window.ENV_CONFIG = {
-    // Your VideoEngager credentials
-    VE_TENANT_ID: process.env.VE_TENANT_ID || 'your-tenant-id',
-    VE_ENV: process.env.VE_ENV || 'your-environment.videoengager.com',
-    VE_DEPLOYMENT_ID: process.env.VE_DEPLOYMENT_ID || 'your-deployment-id',
-    
-    // Your Genesys credentials  
-    GENESYS_DEPLOYMENT_ID: process.env.GENESYS_DEPLOYMENT_ID || 'your-genesys-deployment',
-    GENESYS_DOMAIN: process.env.GENESYS_DOMAIN || 'your-genesys-domain.com'
-  };
-</script>
-```
-
-### Compliance & Legal Considerations
-- **Data Privacy**: Ensure compliance with GDPR, CCPA, and local privacy regulations
-- **Accessibility**: Implement WCAG guidelines for public kiosk deployments
-- **Terms of Service**: Add appropriate legal disclaimers and terms of use
-- **Cookie Policies**: Implement cookie consent if tracking users
-
-### Performance Optimization
-- **Asset Optimization**: Minify CSS/JS, optimize images, implement caching headers
-- **Resource Loading**: Configure preloading for critical resources
-- **Progressive Enhancement**: Ensure graceful degradation for older browsers
-- **Bandwidth Management**: Optimize for various network conditions
-
-**Disclaimer**: This demo provides implementation patterns and best practices. VideoEngager provides the SDK and integration guidance, but production deployment, security, compliance, and maintenance are the sole responsibility of the implementing organization.
 
 ---
 
-## Monitoring and Logging
+## Error Handling Strategy
 
-### Log Levels
-- **Development**: `debug` - All logs including detailed debugging
-- **Staging**: `info` - General application flow and important events  
-- **Production**: `error` - Only errors and critical issues
+The application implements a comprehensive error handling strategy:
 
-### Error Tracking
-The application includes built-in error tracking with:
-- Unique error IDs for support correlation
-- Stack trace capture (development only)
-- User agent and environment context
-- Automatic retry attempt logging
+### Error Categories
 
-### Performance Monitoring
-- Connection state tracking
-- Call duration measurement
-- Error rate monitoring
-- Timeout occurrence tracking
+| Error Type | User Message | Retry | Use Case |
+|------------|--------------|-------|----------|
+| `NETWORK_ERROR` | Check internet connection | No | Connection issues |
+| `CONFIG_INVALID` | Contact support | No | Configuration problems |
+| `LIBRARY_LOAD_FAILED` | Refresh the page | Yes (5s) | CDN/script loading |
+| `CALL_TIMEOUT` | Try again | Yes | Agent connection timeout |
+| `INTERNAL_ERROR` | Service error occurred | Yes (5s) | General errors |
+
+### Retry Logic
+
+```javascript
+// Automatic retry with exponential backoff
+scheduleRetry(errorType, errorId) {
+  const currentAttempts = parseInt(localStorage.getItem(errorType.code) || "0");
+  
+  if (currentAttempts >= this.maxRetryAttempts) {
+    this.showToast("Maximum retry attempts reached", "error");
+    return;
+  }
+  
+  localStorage.setItem(errorType.code, String(currentAttempts + 1));
+  setTimeout(() => window.location.reload(), errorType.retryDelay);
+}
+```
+
+---
+
+## Performance Optimization
+
+### Lazy Loading
+- Images and videos loaded on-demand
+- Intersection Observer API for efficient loading
+- Preloading of next slides for smooth transitions
+
+### Resource Management
+- Automatic cleanup of timeouts and event listeners
+- Memory leak prevention in single-page application
+- Efficient DOM manipulation
+
+### Network Optimization
+- CDN usage for external dependencies
+- Minimal HTTP requests
+- Optimized asset loading
 
 ---
 
 ## Browser Support
 
-- **Chrome/Chromium**: 88+ (recommended for kiosk deployments)
-- **Firefox**: 85+
-- **Safari**: 14+
-- **Edge**: 88+
+| Browser | Minimum Version | Notes |
+|---------|----------------|-------|
+| Chrome/Chromium | 88+ | Recommended for kiosk deployments |
+| Firefox | 85+ | Full feature support |
+| Safari | 14+ | iOS Safari compatible |
+| Edge | 88+ | Chromium-based Edge |
 
-**Note**: Kiosk mode is optimized for Chrome's kiosk mode deployment.
+**Note**: ES modules and modern JavaScript features require recent browser versions.
+
+---
+
+## Deployment Considerations
+
+**Important**: This is a demo/example application for third-party developers. Production deployment and maintenance are the responsibility of the implementing organization.
+
+### Third-Party Implementation Responsibilities
+
+#### Infrastructure & Security
+- **Web Server Configuration**: Deploy on your preferred hosting platform
+- **SSL/TLS Setup**: Implement HTTPS with valid certificates  
+- **Environment Variables**: Securely manage credentials and configuration
+- **Content Security Policy**: Configure appropriate CSP headers
+- **Access Control**: Implement authentication if required
+
+#### Customization & Branding
+- **Visual Design**: Apply your organization's branding and styling
+- **Language Localization**: Add additional languages for your regions
+- **Business Logic**: Implement custom integrations and workflows
+- **Monitoring Integration**: Connect to your error tracking and analytics
+
+#### Operations & Maintenance
+- **Application Monitoring**: Integrate with your monitoring solutions
+- **Error Tracking**: Connect to your error reporting systems  
+- **Backup & Recovery**: Implement appropriate backup strategies
+- **Performance Optimization**: Configure caching and CDN as needed
+
+### Sample Environment Configuration
+
+For production deployments, configure via environment variables:
+
+```html
+<script>
+  window.ENV_CONFIG = {
+    VE_TENANT_ID: 'your-tenant-id',
+    VE_ENV: 'your-environment.videoengager.com', 
+    VE_DEPLOYMENT_ID: 'your-deployment-id',
+    GENESYS_DEPLOYMENT_ID: 'your-genesys-deployment',
+    GENESYS_DOMAIN: 'your-genesys-domain.com'
+  };
+</script>
+```
 
 ---
 
@@ -399,80 +464,158 @@ The application includes built-in error tracking with:
 
 **"Configuration validation failed"**
 - Verify all required fields in your configuration
-- Check environment variable names match exactly
+- Check that environment variables are properly set
 - Ensure no undefined values in production config
 
 **"Failed to load VideoEngager script"**
-- Check internet connectivity
-- Verify CDN access (cdn.videoengager.com)
-- Check for corporate firewall blocking
+- Check internet connectivity and CDN access
+- Verify corporate firewall isn't blocking cdn.videoengager.com
+- Review browser console for detailed network errors
 
 **"VideoEngager ready timeout"**
-- Verify tenant ID and environment are correct
-- Check Genesys deployment ID validity
-- Review browser console for detailed errors
+- Confirm tenant ID and environment are correct
+- Verify Genesys deployment ID is valid
+- Check browser console for SDK initialization errors
 
 **Video call not starting**
 - Confirm VideoEngager deployment configuration
-- Check camera/microphone permissions
-- Verify Genesys domain accessibility
+- Check camera/microphone permissions in browser
+- Verify Genesys domain is accessible
 
 ### Debug Mode
 
-Enable debug logging by adding URL parameter:
+Enable detailed logging:
 ```
+# URL parameter
 ?env=dev
-```
 
-Or set configuration directly:
-```javascript
+# Or modify configuration
 monitoring: {
   enabled: true,
   level: "debug"
 }
 ```
 
-### Support Information
+### Performance Debugging
 
-For VideoEngager-specific issues:
-- Review the [VideoEngager Documentation](https://docs.videoengager.com)
-- Check your tenant configuration
-- Verify SDK version compatibility
+Monitor the application state:
+```javascript
+// Check connection state
+console.log(window.kioskApp.videoEngagerClient.getConnectionState());
 
-For Genesys integration issues:
-- Confirm deployment ID and domain
-- Check Genesys Cloud organization settings
-- Verify chat deployment configuration
+// Check timeout status
+console.log(window.kioskApp.timeoutManager.has('call'));
+
+// Check current screen
+console.log(window.kioskApp.currentScreen);
+```
 
 ---
 
-## Contributing
+## Development
 
-We welcome contributions! Please follow these guidelines:
+### Adding New Features
 
-1. **Fork the repository** and create a feature branch
-2. **Follow the existing code style** and TypeScript annotations
-3. **Add tests** for new functionality where applicable
-4. **Update documentation** for any API changes
-5. **Test thoroughly** across supported browsers
-6. **Submit a pull request** with a clear description
+1. **Follow the modular architecture** - create new classes for distinct functionality
+2. **Use TypeScript annotations** - maintain type safety with JSDoc comments
+3. **Implement proper error handling** - use the ErrorHandler for consistent error management
+4. **Add event listeners cleanup** - prevent memory leaks in destroy methods
+5. **Test across environments** - verify functionality in dev, staging, and production configs
 
-### Development Setup
-```bash
-# Clone and setup
-git clone <your-fork>
-cd kiosk-production-ready
-npm install
+### Code Style Guidelines
 
-# Run development server with live reload
-npm run dev
+```javascript
+// Use JSDoc for type annotations
+/**
+ * @param {string} tenantId - The VideoEngager tenant ID
+ * @param {Object} config - Configuration object
+ * @returns {Promise<boolean>} Success status
+ */
+async function initializeClient(tenantId, config) {
+  // Implementation
+}
 
-# Run tests (if available)
-npm test
-
-# Type checking (if using TypeScript)
-npm run type-check
+// Use proper error handling
+try {
+  await this.videoEngagerClient.startVideo();
+} catch (error) {
+  const errorId = this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
+  this.emit('video:error', { error, errorId });
+  throw error;
+}
 ```
+
+---
+
+## API Reference
+
+### KioskApplication
+
+```javascript
+// Public methods
+await kioskApp.init()                    // Initialize application
+kioskApp.showScreen('initial')           // Switch screens
+kioskApp.log('message')                  // Application logging
+kioskApp.destroy()                       // Cleanup resources
+
+// Event handling
+kioskApp.on('client:ready', callback)    // Client ready event
+kioskApp.on('video:started', callback)   // Video call started
+kioskApp.on('video:ended', callback)     // Video call ended
+```
+
+### VideoEngagerClient
+
+```javascript
+// Client lifecycle
+const client = new VideoEngagerClient(config)
+await client.init()                      // Initialize client
+client.isReady()                         // Check ready state
+
+// Video call methods
+await client.startVideo()                // Start video call
+await client.endVideo()                  // End video call
+
+// Chat methods (if enabled)
+await client.startChat()                 // Start chat session
+await client.endChat()                   // End chat session
+```
+
+### WaitroomEventMediator
+
+```javascript
+// Event handling
+mediator.on('ready', callback)           // Waitroom ready
+mediator.on('slideChanged', callback)    // Slide change event
+mediator.on('userCancelled', callback)   // User cancellation
+mediator.on('error', callback)           // Error occured
+
+// Control methods
+mediator.sendBotMessage(message, tier)   // Display bot message
+mediator.controlCarousel('play|pause')   // Control playback
+mediator.goToSlide(index)                // Navigate to slide
+```
+
+---
+
+## Support
+
+**Note**: This is a demo application. VideoEngager provides the SDK and integration guidance, but production implementation, security, and maintenance are the responsibility of the implementing organization.
+
+### Resources
+
+- **VideoEngager Documentation**: [docs.videoengager.com](https://docs.videoengager.com)
+- **SDK Reference**: VideoEngager API documentation
+- **Genesys Integration**: Genesys Cloud developer resources
+- **Example Issues**: [GitHub Issues](https://github.com/VideoEngager/videoengager.github.io/issues)
+
+### Getting Help
+
+1. **Review the documentation** and this README thoroughly
+2. **Check browser console** for detailed error messages
+3. **Verify configuration** against the examples provided
+4. **Test in isolation** to identify specific integration issues
+5. **Contact VideoEngager support** for SDK-specific questions
 
 ---
 
@@ -482,10 +625,4 @@ This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for
 
 ---
 
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/VideoEngager/videoengager.github.io/issues)
-- **Documentation**: [VideoEngager Docs](https://docs.videoengager.com)
-- **Community**: [VideoEngager Community](https://community.videoengager.com)
-
-For enterprise support and custom integrations, contact VideoEngager directly.
+**Disclaimer**: This demo provides implementation patterns and best practices. VideoEngager provides the SDK and integration guidance, but production deployment, security, compliance, and maintenance are the sole responsibility of the implementing organization.

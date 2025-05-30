@@ -163,6 +163,11 @@ export class KioskApplication {
       this.log("WAITROOM: User cancelled from waitroom");
       this.handleCancelCall.bind(this)(detail);
     });
+
+    this.waitroomMediator.on("error", (detail) => {
+      this.log("WAITROOM: Error in waitroom");
+      this.errorHandler.handleError(ErrorTypes.WAITROOM_ERROR);
+    });
   }
 
   /**

@@ -81,19 +81,30 @@ export class VECarouselWaitroom extends HTMLElement {
   }
 
   async init() {
-    await this.loadConfig();
-    await this.loadStyles();
-    this.render();
-    this.setupEventListeners();
-    this.startCarousel();
-    this.setupAccessibility();
+    try {
+      await this.loadConfig();
+      await this.loadStyles();
+      this.render();
+      this.setupEventListeners();
+      this.startCarousel();
+      this.setupAccessibility();
 
-    // Emit ready event
-    this.dispatchEvent(
-      new CustomEvent("waitroom:ready", {
-        detail: { component: this },
-      })
-    );
+      // Emit ready event
+      this.dispatchEvent(
+        new CustomEvent("waitroom:ready", {
+          detail: { component: this },
+        })
+      );
+    } catch (error) {
+      console.error("Initialization failed:", error);
+      this.dispatchEvent(
+        new CustomEvent("waitroom:configError", {
+          detail: {
+            message: `Failed to initialize carousel: ${error.message}`,
+          },
+        })
+      );
+    }
   }
 
   async loadStyles() {

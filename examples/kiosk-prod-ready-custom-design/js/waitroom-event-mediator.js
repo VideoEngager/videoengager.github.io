@@ -77,6 +77,12 @@ export class WaitroomEventMediator {
       this.handleSlideChanged.bind(this)
     );
 
+    // Listen for configuration error events
+    carouselElement.addEventListener(
+      "waitroom:configError",
+      this.handleError.bind(this)
+    );
+
     // Listen for bot message events
     carouselElement.addEventListener(
       "waitroom:botMessage",
@@ -122,6 +128,16 @@ export class WaitroomEventMediator {
   }
 
   /**
+   * Handles configuration error event from the custom element.
+   * @private
+   * @param {CustomEvent} event - Event containing error details
+   * @returns {void}
+   */
+  handleError(event) {
+    this.emit("error", event.detail);
+  }
+
+  /**
    * Handles user cancelled event from the custom element.
    * @private
    * @param {CustomEvent<UserCancelledEventDetail>} event
@@ -133,7 +149,7 @@ export class WaitroomEventMediator {
 
   /**
    * Registers an event listener for a specific waitroom event.
-   * @param {'ready' | 'slideChanged' | 'botMessage' | 'userCancelled'} eventName - Name of the event to listen for
+   * @param {'ready' | 'slideChanged' | 'botMessage' | 'userCancelled' | 'error'} eventName - Name of the event to listen for
    * @param {Function} callback - Callback function to execute when event occurs
    * @returns {void}
    * @example
@@ -154,7 +170,7 @@ export class WaitroomEventMediator {
 
   /**
    * Unregisters an event listener for a specific waitroom event.
-   * @param {'ready' | 'slideChanged' | 'botMessage' | 'userCancelled'} eventName - Name of the event
+   * @param {'ready' | 'slideChanged' | 'botMessage' | 'userCancelled' | 'error'} eventName - Name of the event
    * @param {Function} callback - Callback function to remove
    * @returns {void}
    * @example
@@ -170,7 +186,7 @@ export class WaitroomEventMediator {
   /**
    * Emits an event to all registered listeners.
    * @private
-   * @param {'ready' | 'slideChanged' | 'botMessage' | 'userCancelled'} eventName - Name of the event
+   * @param {'ready' | 'slideChanged' | 'botMessage' | 'userCancelled' | 'error'} eventName - Name of the event
    * @param {any} detail - Event detail data
    * @returns {void}
    */

@@ -60,6 +60,13 @@ export const ErrorTypes = {
     userMessage: "Unable to connect to an agent. Please try again.",
     shouldRetry: true,
   },
+  WAITROOM_ERROR: {
+    code: "WAITROOM_ERROR",
+    type: "Waitroom Error",
+    userMessage:
+      "An error occurred while loading the waitroom. Please try again.",
+    shouldRetry: false,
+  },
 };
 
 export class ErrorHandler {

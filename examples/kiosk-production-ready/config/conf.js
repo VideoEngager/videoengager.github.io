@@ -1,5 +1,5 @@
 const configs = {
-  development: {
+  dev: {
     videoEngager: {
       tenantId: "test_tenant",
       veEnv: "dev.videoengager.com",

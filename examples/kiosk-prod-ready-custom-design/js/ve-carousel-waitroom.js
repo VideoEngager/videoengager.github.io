@@ -53,7 +53,7 @@
  * @property {BotMessagesConfig} botMessages
  */
 
-class VECarouselWaitroom extends HTMLElement {
+export class VECarouselWaitroom extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -97,7 +97,6 @@ class VECarouselWaitroom extends HTMLElement {
   }
 
   async loadStyles() {
-    debugger;
     if (!this.shadowRoot) return;
     try {
       const response = await fetch("../css/carousel.css");
@@ -403,20 +402,9 @@ class VECarouselWaitroom extends HTMLElement {
     const cancelButton = this.shadowRoot.querySelector(".cancel-button");
     if (cancelButton) {
       cancelButton.addEventListener("click", this.handleCancel.bind(this));
-      cancelButton.addEventListener(
-        "keydown",
-        /** @param {KeyboardEvent} e */
-        (e) => {
-          if (e.key === "Enter" || e.code === "Space") {
-            e.preventDefault();
-            this.handleCancel();
-          }
-        }
-      );
     }
 
     // Listen for external events
-    window.addEventListener("callStarted", this.handleCallStarted.bind(this));
     window.addEventListener("botMessage", this.handleBotMessage.bind(this));
     window.addEventListener(
       "systemInterrupt",
@@ -572,16 +560,6 @@ class VECarouselWaitroom extends HTMLElement {
     );
   }
 
-  handleCallStarted() {
-    this.pauseCarousel();
-    this.style.display = "none";
-    this.dispatchEvent(
-      new CustomEvent("waitroom:callStarted", {
-        detail: { timestamp: Date.now() },
-      })
-    );
-  }
-
   /**
    * @param {Event & { detail?: { message?: string; tier?: string; duration?: number } }} event
    */
@@ -670,7 +648,6 @@ class VECarouselWaitroom extends HTMLElement {
       });
     }
 
-    window.removeEventListener("callStarted", this.handleCallStarted);
     window.removeEventListener("botMessage", this.handleBotMessage);
     window.removeEventListener("systemInterrupt", this.handleSystemInterrupt);
   }

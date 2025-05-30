@@ -5,6 +5,7 @@ import { VideoEngagerClient } from "./client.js";
 import { ErrorHandler, ErrorTypes } from "./error-handler.js";
 import { Utils } from "./utils.js";
 import { TimeoutManager } from "./timeout-manager.js";
+import { WaitroomEventMediator } from "./waitroom-event-mediator.js";
 
 export class KioskApplication {
   constructor() {
@@ -12,6 +13,7 @@ export class KioskApplication {
     this.videoEngagerClient = null;
     this.errorHandler = new ErrorHandler();
     this.timeoutManager = new TimeoutManager();
+    this.waitroomMediator = new WaitroomEventMediator();
     this.currentScreen = "initial";
     this.isInitialized = false;
 
@@ -93,7 +95,7 @@ export class KioskApplication {
 
   /**
    * Sets up the user interface for the kiosk application.
-   * Applies language settings, background image, and carousel.
+   * Applies language settings and background image.
    */
   setupUI() {
     this.log("UI: Setting up user interface");
@@ -107,9 +109,6 @@ export class KioskApplication {
 
     // Set background image if configured
     this.setupBackgroundImage();
-
-    // Set up carousel
-    // this.setupCarousel();
 
     this.log("UI: User interface setup complete");
   }
@@ -138,10 +137,7 @@ export class KioskApplication {
     }
 
     // Cancel button
-    const cancelButton = document.getElementById("cancel-button-loading");
-    if (cancelButton) {
-      cancelButton.addEventListener("click", this.handleCancelCall.bind(this));
-    }
+    this.setupWaitroomEventListeners();
 
     // Message listener for video call events
     window.addEventListener("message", this.handleMessage.bind(this));
@@ -152,6 +148,21 @@ export class KioskApplication {
     });
 
     this.log("EVENTS: Event listeners setup complete");
+  }
+
+  /**
+   * Sets up event listeners for waitroom component events.
+   * @private
+   * @returns {void}
+   */
+  setupWaitroomEventListeners() {
+    this.log("WAITROOM: Setting up waitroom event listeners");
+
+    // Listen for user cancellation
+    this.waitroomMediator.on("userCancelled", (detail) => {
+      this.log("WAITROOM: User cancelled from waitroom");
+      this.handleCancelCall.bind(this)(detail);
+    });
   }
 
   /**
@@ -354,7 +365,7 @@ export class KioskApplication {
   }
 
   /**
-   * Shows the video call screen and hides the loading and carousel screens.
+   * Shows the video call screen.
    */
   showVideoScreen() {
     const videoUI = document.getElementById("video-call-ui");
@@ -407,47 +418,6 @@ export class KioskApplication {
       this.log("BACKGROUND: Background image applied");
     }
   }
-
-  // setupCarousel() {
-  //   const items = this.environmentConfig?.metadata.carouselItems || [];
-  //   if (items.length === 0) return;
-
-  //   this.log(`CAROUSEL: Setting up ${items.length} carousel items`);
-
-  //   const container = document.getElementById("carousel-inner");
-  //   if (!container) return;
-
-  //   // Remove existing items except the first loading item
-  //   Array.from(container.children).forEach((child) => {
-  //     if (child.id !== "carousel-item-1") {
-  //       child.remove();
-  //     }
-  //   });
-
-  //   // Add new items with validation
-  //   items.forEach((item, index) => {
-  //     if (!item.src) return;
-
-  //     // Basic URL validation
-  //     if (!Utils.validateURL(item.src) && !item.src.startsWith("img/")) {
-  //       this.log(`CAROUSEL: Skipping invalid URL: ${item.src}`);
-  //       return;
-  //     }
-
-  //     const div = document.createElement("div");
-  //     div.id = `carousel-item-${index + 2}`;
-  //     div.className = "carousel-item";
-
-  //     const img = document.createElement("img");
-  //     img.src = item.src;
-  //     img.alt = Utils.sanitizeText(item.alt || `Slide ${index + 2}`);
-  //     img.loading = "lazy"; // Performance improvement
-
-  //     div.appendChild(img);
-  //     container.appendChild(div);
-  //   });
-  //   this.log("CAROUSEL: Carousel setup complete");
-  // }
 
   // Timer Management
   setupInactivityTimer() {

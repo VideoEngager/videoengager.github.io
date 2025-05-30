@@ -250,11 +250,6 @@ export class KioskApplication {
    */
   handleMessage(event) {
     this.log(`MESSAGE: Received message: ${JSON.stringify(event.data)}`);
-
-    if (event.data && event.data.type === "CallStarted") {
-      this.log("MESSAGE: Starting video call from message event");
-      this.handleVideoCallStarted();
-    }
   }
 
   /**

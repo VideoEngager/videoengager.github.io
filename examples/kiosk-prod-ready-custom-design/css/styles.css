@@ -361,41 +361,6 @@
   right: 15px;
   top: 15px;
 }
-#closeVideoButtonContainer {
-  bottom: 10%;
-  z-index: 499;
-  position: absolute;
-  left: 0px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-#closeVideoButton {
-  height: 75px;
-  width: 75px;
-  border-radius: 9999px;
-  padding: 15px;
-  border: 0px;
-  background-color: #ea0000;
-}
-#closeVideoButton:active {
-  background-color: #900101;
-}
-#cancel-button-loading {
-  position: fixed;
-  bottom: 10%;
-  z-index: 1000;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 75px;
-  width: 75px;
-  border-radius: 9999px;
-  background-color: #ea0000;
-}
-#cancel-button-loading:active {
-  background-color: #900101;
-}
 .callButtonContainer {
   background-color: white;
   padding: 20px;
@@ -667,52 +632,4 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.carousel-inner img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-#carousel {
-  background: #33303d;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  z-index: 500;
-  position: fixed;
-  /* iOS Safari fixes */
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-}
-
-.active {
-  height: 100%;
-  width: 100%;
-}
-
-.carousel-item {
-  height: 100%;
-  width: 100%;
-  /* iOS Safari fixes */
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-.carousel-inner {
-  height: 100%;
-  width: 100%;
-  /* Fix for iOS Safari */
-  overflow: hidden;
-  position: relative;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-}
-
-/* Additional iOS Safari optimizations */
-.carousel {
-  -webkit-perspective: 1000;
-  perspective: 1000;
 }

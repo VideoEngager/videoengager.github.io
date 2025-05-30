@@ -435,7 +435,7 @@ monitoring: {
 ### Support Information
 
 For VideoEngager-specific issues:
-- Review the [VideoEngager Documentation](https://docs.videoengager.com)
+- Review the [VideoEngager Dev Documentation](https://videoengager.github.io/videoengager.widget/#/)
 - Check your tenant configuration
 - Verify SDK version compatibility
 
@@ -484,8 +484,8 @@ This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/VideoEngager/videoengager.github.io/issues)
-- **Documentation**: [VideoEngager Docs](https://docs.videoengager.com)
-- **Community**: [VideoEngager Community](https://community.videoengager.com)
+- **Issues**: [Video Engager Helpdesk](https://help.videoengager.com/hc/en-us/requests/new)
+- **Dev Documentation**: [VideoEngager Docs](https://videoengager.github.io/videoengager.widget/#/)
+- **User Documentation**: [VideoEngager Helpdesk](https://help.videoengager.com/)
 
-For enterprise support and custom integrations, contact VideoEngager directly.
+For enterprise support and custom integrations, contact VideoEngager Support <a href="mailto:support@videoengager.com">support@videoengager.com</a> directly.

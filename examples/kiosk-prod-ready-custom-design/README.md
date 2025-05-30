@@ -602,20 +602,14 @@ mediator.goToSlide(index)                // Navigate to slide
 
 **Note**: This is a demo application. VideoEngager provides the SDK and integration guidance, but production implementation, security, and maintenance are the responsibility of the implementing organization.
 
-### Resources
-
-- **VideoEngager Documentation**: [docs.videoengager.com](https://docs.videoengager.com)
-- **SDK Reference**: VideoEngager API documentation
-- **Genesys Integration**: Genesys Cloud developer resources
-- **Example Issues**: [GitHub Issues](https://github.com/VideoEngager/videoengager.github.io/issues)
-
 ### Getting Help
 
-1. **Review the documentation** and this README thoroughly
-2. **Check browser console** for detailed error messages
-3. **Verify configuration** against the examples provided
-4. **Test in isolation** to identify specific integration issues
-5. **Contact VideoEngager support** for SDK-specific questions
+- **Issues**: [Video Engager Helpdesk](https://help.videoengager.com/hc/en-us/requests/new)
+- **Dev Documentation**: [VideoEngager Docs](https://videoengager.github.io/videoengager.widget/#/)
+- **User Documentation**: [VideoEngager Helpdesk](https://help.videoengager.com/)
+
+
+For enterprise support and custom integrations, contact VideoEngager Support <a href="mailto:support@videoengager.com">support@videoengager.com</a> directly.
 
 ---
 

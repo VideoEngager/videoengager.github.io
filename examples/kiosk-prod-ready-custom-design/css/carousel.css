@@ -1,0 +1,306 @@
+/* Waitroom Component CSS - Valid standalone version */
+
+/* CSS Custom Properties (Variables) */
+:root {
+  --theme-font: "Inter", "Segoe UI", "Roboto", sans-serif;
+  --primary-color: #007bff;
+}
+
+/* Main host container */
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+/* Fixed overlay container */
+.waitroom-container {
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  z-index: 500;
+  position: fixed;
+  /* iOS Safari fixes */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Carousel wrapper */
+.carousel-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Individual slides */
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  color: white;
+  font-family: var(--theme-font);
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.slide.reduced-motion {
+  transition: none;
+}
+
+/* Slide content */
+.slide-content {
+  max-width: 80%;
+  padding: 2rem;
+  z-index: 2;
+}
+
+.slide-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slide-description {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Media elements */
+.slide-media {
+  max-width: 90%;
+  max-height: 60vh;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-bottom: 2rem;
+}
+
+.slide-image {
+  max-width: 90%;
+  max-height: 60vh;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-bottom: 2rem;
+}
+
+.slide-video {
+  max-width: 90%;
+  max-height: 60vh;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-bottom: 2rem;
+}
+
+/* Slide overlays */
+.slide-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 2rem;
+  color: white;
+}
+
+.slide.media-slide {
+  padding: 0;
+}
+
+.slide.media-slide .slide-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  padding: 2rem;
+  max-width: 100%;
+}
+
+/* Loading states */
+.loading-placeholder {
+  width: 90%;
+  max-width: 800px;
+  height: 60vh;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+}
+
+.loading-spinner-media {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Cancel button */
+.cancel-button {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  background: rgba(220, 53, 69, 0.9);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(220, 53, 69, 0.4);
+}
+
+.cancel-button:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: scale(1.1);
+}
+
+.cancel-button:active {
+  transform: scale(0.95);
+}
+
+.cancel-icon {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+/* Bot message overlays */
+.bot-message-overlay {
+  position: fixed;
+  z-index: 900;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border-left: 4px solid var(--primary-color);
+  max-width: 400px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--theme-font);
+}
+
+.bot-message-overlay.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bot-message-overlay.tier-low {
+  bottom: 2rem;
+  right: 2rem;
+}
+
+.bot-message-overlay.tier-high {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 500px;
+}
+
+.bot-message-overlay.tier-critical {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: none;
+  border-radius: 0;
+  background: rgba(220, 53, 69, 0.95);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.bot-message-text {
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0;
+}
+
+.bot-message-overlay.tier-critical .bot-message-text {
+  color: white;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition: none;
+  }
+
+  .loading-spinner-media {
+    animation: none;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .slide-title {
+    font-size: 2rem;
+  }
+
+  .slide-description {
+    font-size: 1rem;
+  }
+
+  .cancel-button {
+    width: 50px;
+    height: 50px;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .bot-message-overlay.tier-low {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+}

@@ -109,7 +109,7 @@ export class KioskApplication {
     this.setupBackgroundImage();
 
     // Set up carousel
-    this.setupCarousel();
+    // this.setupCarousel();
 
     this.log("UI: User interface setup complete");
   }
@@ -349,7 +349,6 @@ export class KioskApplication {
   }
 
   showLoadingScreen() {
-    this.resetCarouselToFirstItem();
     const oncallScreen = document.getElementById("oncall-screen");
     if (oncallScreen) oncallScreen.style.display = "block";
   }
@@ -409,74 +408,46 @@ export class KioskApplication {
     }
   }
 
-  /**
-   * Sets up the carousel with items from the environment configuration.
-   * Validates URLs and applies lazy loading for performance.
-   */
-  setupCarousel() {
-    const items = this.environmentConfig?.metadata.carouselItems || [];
-    if (items.length === 0) return;
+  // setupCarousel() {
+  //   const items = this.environmentConfig?.metadata.carouselItems || [];
+  //   if (items.length === 0) return;
 
-    this.log(`CAROUSEL: Setting up ${items.length} carousel items`);
+  //   this.log(`CAROUSEL: Setting up ${items.length} carousel items`);
 
-    const container = document.getElementById("carousel-inner");
-    if (!container) return;
+  //   const container = document.getElementById("carousel-inner");
+  //   if (!container) return;
 
-    // Remove existing items except the first loading item
-    Array.from(container.children).forEach((child) => {
-      if (child.id !== "carousel-item-1") {
-        child.remove();
-      }
-    });
+  //   // Remove existing items except the first loading item
+  //   Array.from(container.children).forEach((child) => {
+  //     if (child.id !== "carousel-item-1") {
+  //       child.remove();
+  //     }
+  //   });
 
-    // Add new items with validation
-    items.forEach((item, index) => {
-      if (!item.src) return;
+  //   // Add new items with validation
+  //   items.forEach((item, index) => {
+  //     if (!item.src) return;
 
-      // Basic URL validation
-      if (!Utils.validateURL(item.src) && !item.src.startsWith("img/")) {
-        this.log(`CAROUSEL: Skipping invalid URL: ${item.src}`);
-        return;
-      }
+  //     // Basic URL validation
+  //     if (!Utils.validateURL(item.src) && !item.src.startsWith("img/")) {
+  //       this.log(`CAROUSEL: Skipping invalid URL: ${item.src}`);
+  //       return;
+  //     }
 
-      const div = document.createElement("div");
-      div.id = `carousel-item-${index + 2}`;
-      div.className = "carousel-item";
+  //     const div = document.createElement("div");
+  //     div.id = `carousel-item-${index + 2}`;
+  //     div.className = "carousel-item";
 
-      const img = document.createElement("img");
-      img.src = item.src;
-      img.alt = Utils.sanitizeText(item.alt || `Slide ${index + 2}`);
-      img.loading = "lazy"; // Performance improvement
+  //     const img = document.createElement("img");
+  //     img.src = item.src;
+  //     img.alt = Utils.sanitizeText(item.alt || `Slide ${index + 2}`);
+  //     img.loading = "lazy"; // Performance improvement
 
-      div.appendChild(img);
-      container.appendChild(div);
-    });
-    
-    this.log("CAROUSEL: Carousel setup complete");
-  }
-
-  /**
-   * Resets the carousel to the first item.
-   * This method can be called when switching to the loading screen.
-   * It ensures the carousel starts from the first item, removing any active classes from other items.
-   */
-  resetCarouselToFirstItem() {
-    // Reset carousel to first slide using CSS/DOM manipulation (optionalƒ)
-    const carouselInner = document.getElementById("carousel-inner");
-    const firstItem = document.getElementById("carousel-item-1");
-
-    if (carouselInner && firstItem) {
-      // Remove active class from all items
-      const allItems = carouselInner.querySelectorAll(".carousel-item");
-      allItems.forEach((item) => item.classList.remove("active"));
-
-      // Add active class to first item
-      firstItem.classList.add("active");
-
-      // Reset transform if Bootstrap has moved the carousel
-      carouselInner.style.transform = "translateX(0%)";
-    }
-  }
+  //     div.appendChild(img);
+  //     container.appendChild(div);
+  //   });
+  //   this.log("CAROUSEL: Carousel setup complete");
+  // }
 
   // Timer Management
   setupInactivityTimer() {

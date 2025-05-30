@@ -250,6 +250,11 @@ export class KioskApplication {
    */
   handleMessage(event) {
     this.log(`MESSAGE: Received message: ${JSON.stringify(event.data)}`);
+
+    if (event.data && event.data.type === "CallStarted") {
+      this.log("MESSAGE: Starting video call from message event");
+      this.handleVideoCallStarted();
+    }
   }
 
   /**
@@ -349,24 +354,9 @@ export class KioskApplication {
   }
 
   showLoadingScreen() {
+    this.resetCarouselToFirstItem();
     const oncallScreen = document.getElementById("oncall-screen");
     if (oncallScreen) oncallScreen.style.display = "block";
-      // Initialize (or restart) the carousel AFTER making it visible
-  const carouselElem = document.getElementById('carousel');
-  if (window.bootstrap && carouselElem) {
-    // If already initialized, get instance and cycle to first slide
-    let carousel = bootstrap.Carousel.getInstance(carouselElem);
-    if (!carousel) {
-      carousel = new bootstrap.Carousel(carouselElem, {
-        interval: 5000,
-        wrap: true,
-        pause: false,
-      });
-    } else {
-      carousel.to(0); // optional: start from the first slide
-      carousel.cycle();
-    }
-  }
   }
 
   /**
@@ -424,6 +414,10 @@ export class KioskApplication {
     }
   }
 
+  /**
+   * Sets up the carousel with items from the environment configuration.
+   * Validates URLs and applies lazy loading for performance.
+   */
   setupCarousel() {
     const items = this.environmentConfig?.metadata.carouselItems || [];
     if (items.length === 0) return;
@@ -462,14 +456,30 @@ export class KioskApplication {
       div.appendChild(img);
       container.appendChild(div);
     });
-    // Initialize the carousel
-    const carousel = new bootstrap.Carousel(document.getElementById('carousel'), {
-      interval: 5000,
-      wrap: true,
-      pause: false,
-      ride: true
-    });
     this.log("CAROUSEL: Carousel setup complete");
+  }
+
+  /**
+   * Resets the carousel to the first item.
+   * This method can be called when switching to the loading screen.
+   * It ensures the carousel starts from the first item, removing any active classes from other items.
+   */
+  resetCarouselToFirstItem() {
+    // Reset carousel to first slide using CSS/DOM manipulation (optionalƒ)
+    const carouselInner = document.getElementById("carousel-inner");
+    const firstItem = document.getElementById("carousel-item-1");
+
+    if (carouselInner && firstItem) {
+      // Remove active class from all items
+      const allItems = carouselInner.querySelectorAll(".carousel-item");
+      allItems.forEach((item) => item.classList.remove("active"));
+
+      // Add active class to first item
+      firstItem.classList.add("active");
+
+      // Reset transform if Bootstrap has moved the carousel
+      carouselInner.style.transform = "translateX(0%)";
+    }
   }
 
   // Timer Management

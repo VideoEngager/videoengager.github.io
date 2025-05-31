@@ -451,7 +451,6 @@ export class KioskApplication {
       div.appendChild(img);
       container.appendChild(div);
     });
-    
     this.log("CAROUSEL: Carousel setup complete");
   }
 

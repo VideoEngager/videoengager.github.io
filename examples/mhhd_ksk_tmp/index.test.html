@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test VE Carousel Waitroom</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
+        ve-carousel-waitroom { width: 100%; height: 100%; border: 2px solid blue; }
+    </style>
+</head>
+<body>
+    <ve-carousel-waitroom id="myCarousel"></ve-carousel-waitroom>
+
+    <script type="module">
+        // Import the component class so it registers itself
+        import './js/ve-carousel-waitroom.js';
+        // Import your logger for testing injection (adjust path)
+        // import { ConsoleLogger, LogLevel } from './js/logger/index.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const carousel = document.getElementById('myCarousel');
+
+            // --- Test Logger Injection ---
+            // const appLogger = new ConsoleLogger({ component: 'TestHarnessApp', level: LogLevel.DEBUG });
+            // carousel.logger = appLogger; // Inject the logger
+
+            // --- Test Configuration ---
+            const testConfig = {
+                slides: [
+                    { type: 'content', title: 'Slide 1 Title', description: 'Description for slide 1.' },
+                    { type: 'content', title: 'Slide 2 Title', description: 'Description for slide 2.' }
+                ],
+                theme: { // Example theme object, to be expanded based on themeguide.md
+                    componentBackground: 'lightblue',
+                    primaryTextColor: 'darkblue',
+                    accentColor: 'orange'
+                },
+                accessibility: {
+                    carouselLabel: "Test Carousel Information Display"
+                },
+                carousel: { // Settings for autoplay, etc.
+                    interval: 5000,
+                    loop: true
+                }
+            };
+            carousel.config = testConfig;
+
+            // --- Test API Calls (Example) ---
+            // setTimeout(() => carousel.freeze(), 2000);
+            // setTimeout(() => carousel.thaw(), 4000);
+            // setTimeout(() => carousel.showBotMessage("This is a test bot message."), 1000);
+
+            // --- Test Event Listening ---
+            carousel.addEventListener('userCancelled', (e) => {
+                console.log('EVENT from CAROUSEL: userCancelled', e.detail);
+                alert('User cancelled from carousel!');
+            });
+        });
+    </script>
+</body>
+</html>

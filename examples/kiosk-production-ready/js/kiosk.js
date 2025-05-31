@@ -6,6 +6,88 @@ import { ErrorHandler, ErrorTypes } from "./error-handler.js";
 import { Utils } from "./utils.js";
 import { TimeoutManager } from "./timeout-manager.js";
 
+const DEFAULT_SLIDE_INTERVAL = 8000; // Default slide interval for ve-carousel-waitroom
+
+// --- JSDoc Type Definitions for VECarouselWaitroom ---
+/**
+ * @typedef {Object} SlideConfig - Represents the configuration for a single slide.
+ * @property {string} type - e.g., 'image', 'video', 'content'.
+ * @property {string} [src] - URL for image or video.
+ * @property {string} [alt] - Alt text for image.
+ * @property {string} [title] - Title of the slide.
+ * @property {string} [description] - Description text.
+ * @property {string} [background] - Background for content slides.
+ * @property {string} [poster] - Poster image for video.
+ * @property {boolean} [videoLoop] - Whether video should loop.
+ * @property {boolean} [muted] - Whether video should be muted.
+ * @property {boolean} [videoAutoplay] - Whether video should attempt to autoplay.
+ */
+
+/**
+ * @typedef {Object} ThemeSettingsV1 - Theming options.
+ * @property {string} [fontFamily]
+ * @property {string} [componentBackground]
+ * @property {string} [primaryTextColor]
+ * @property {string} [baseFontSize]
+ * @property {string} [slideTitleColor]
+ * @property {string} [slideTitleFontSize]
+ * @property {string} [slideDescriptionColor]
+ * @property {string} [slideDescriptionFontSize]
+ * @property {string} [slideMediaOverlayBackground]
+ * @property {string} [botMessageBackground]
+ * @property {string} [botMessageTextColor]
+ * @property {string} [botMessageBorderRadius]
+ * @property {string} [botMessageFontSize]
+ * @property {string} [botMessageTierLowAccentColor]
+ * @property {string} [botMessageTierHighAccentColor]
+ * @property {string} [botMessageTierCriticalBackground]
+ * @property {string} [botMessageTierCriticalTextColor]
+ * @property {string} [accentColor]
+ */
+
+/**
+ * @typedef {Object} AccessibilitySettings
+ * @property {string} [carouselLabel]
+ * @property {string} [slideChangeAnnouncementPattern]
+ * @property {string} [keyboardInstructions]
+ * @property {string} [noSlidesText]
+ * @property {string} [slideLoadErrorText]
+ * @property {string} [unsavedChangesTitle]
+ * @property {string} [unsavedChangesMessage]
+ * @property {string} [unsavedChangesConfirmText]
+ * @property {string} [unsavedChangesCancelText]
+ */
+
+/**
+ * @typedef {Object} CarouselConfig
+ * @property {SlideConfig[]} slides
+ * @property {boolean} [loop]
+ * @property {number} [interval]
+ * @property {ThemeSettingsV1} [theme]
+ * @property {AccessibilitySettings} [accessibility]
+ */
+
+/**
+ * @typedef {HTMLElement & VECarouselWaitroomInstanceInternal} VECarouselWaitroomElement
+ */
+
+/**
+ * @typedef {Object} VECarouselWaitroomInstanceInternal - Interface for ve-carousel-waitroom.
+ * @property {CarouselConfig} config
+ * @property {boolean} pauseWhenHidden
+ * @property {number} maxCachedMedia
+ * @property {function(): void} freeze
+ * @property {function(): void} thaw
+ * @property {function(string, {tier?: string, duration?: number}): void} showBotMessage
+ * @property {string} version
+ * @property {boolean} isThemeSafeModeActive - Read-only property
+ */
+// --- End JSDoc Type Definitions ---
+
+/**
+ * @typedef {Window & typeof globalThis & { kioskAppInstance?: KioskApplication }} KioskWindow
+ */
+
 export class KioskApplication {
   constructor() {
     this.config = null;
@@ -15,354 +97,388 @@ export class KioskApplication {
     this.currentScreen = "initial";
     this.isInitialized = false;
 
-    // Configuration
+    /** @type {HTMLElement | null} */
+    this.onCallScreenElement = null;
+    /** @type {VECarouselWaitroomElement | null} */
+    this.carousel = null; // This refers to ve-carousel-waitroom
+
     this.timeouts = {
-      call: 1000 * 60 * 3, // 3 minutes
-      inactivity: 1000 * 60 * 60, // 1 hour
-      retry: 1000 * 5, // 5 seconds
+      call: 1000 * 60 * 3, 
+      inactivity: 1000 * 60 * 60,
+      retry: 1000 * 5,
     };
 
-    // Language configurations
     this.languages = {
-      en: {
-        motto: "SmartVideo Kiosk Demo",
-        connect: "Touch Here To Begin",
-        loadingText: "Connecting to an Agent",
-        cancelText: "Cancel",
-        retryText: "Retry",
-      },
-      de: {
-        motto: "SmartVideo Kiosk Demo",
-        connect: "Verbinden",
-        loadingText: "Verbinde mit einem Agenten",
-        cancelText: "Abbrechen",
-        retryText: "Wiederholen",
-      },
-      ar: {
-        motto: "عرض توضيحي لسمارت فيديو كيوسك",
-        connect: "الاتصال",
-        loadingText: "جاري الاتصال بموظف خدمة العملاء",
-        cancelText: "إلغاء",
-        retryText: "إعادة المحاولة",
-      },
+      en: { motto: "SmartVideo Kiosk Demo", connect: "Touch Here To Begin", loadingText: "Connecting to an Agent", cancelText: "Cancel", retryText: "Retry" },
+      de: { motto: "SmartVideo Kiosk Demo", connect: "Verbinden", loadingText: "Verbinde mit einem Agenten", cancelText: "Abbrechen", retryText: "Wiederholen" },
+      ar: { motto: "عرض توضيحي لسمارت فيديو كيوسك", connect: "الاتصال", loadingText: "جاري الاتصال بموظف خدمة العملاء", cancelText: "إلغاء", retryText: "إعادة المحاولة" },
     };
+
+    // Bind event handlers
+    this._boundHandleCarouselCancelEvent = this.handleCarouselCancelEvent.bind(this);
+    this._boundHandleCarouselErrorEvent = this.handleCarouselErrorEvent.bind(this);
+    this._boundResetInactivityTimer = this.resetInactivityTimer.bind(this);
+    this._boundHandleMessage = this.handleMessage.bind(this);
+    this._boundHandleStartVideoCall = this.handleStartVideoCall.bind(this);
+    this._boundHandleCancelCall = this.handleCancelCall.bind(this);
+    this._boundNetworkRestoredHandler = this._networkRestoredHandler.bind(this);
+
 
     this.init();
   }
 
-  /**
-   * Initializes the kiosk application.
-   * Sets up environment configuration, UI, event listeners, and VideoEngager client.
-   * @returns {Promise<void>}
-   */
   async init() {
     try {
       this.setupInternalEventListeners();
       if (!window.navigator.onLine) {
-        this.log("APP: Initialization blocked due to previous errors");
+        this.log("APP: Initialization blocked due to network offline state.");
         this.errorHandler.handleError(ErrorTypes.NETWORK_ERROR);
         return;
       }
-      this.log("APP: Starting secure kiosk application initialization");
+      this.log("APP: Starting kiosk application initialization");
 
-      // Set up environment configuration
       this.environmentConfig = new EnvironmentConfig();
       this.config = this.environmentConfig.getConfig();
+      if (!this.config) {
+        this.log("APP: Critical error - EnvironmentConfig did not provide a configuration.");
+        this.errorHandler.handleError(ErrorTypes.CONFIG_MISSING, new Error("Environment configuration is null or undefined."));
+        return; // Stop initialization if config is missing
+      }
+      this.log(`APP: Environment detected: ${this.environmentConfig.getEnvironment()}`);
 
-      this.log(
-        `APP: Environment detected: ${this.environmentConfig.getEnvironment()}`
-      );
-
-      // Initialize UI
-      this.setupUI();
+      this.setupUI(); 
       this.setupEventListeners();
-
-      // Initialize VideoEngager client
       await this.initializeVideoEngager();
-
-      // Set up timers
       this.setupInactivityTimer();
 
       this.isInitialized = true;
-      this.log("APP: Secure kiosk application initialized successfully");
+      this.log("APP: Kiosk application initialized successfully");
     } catch (error) {
-      this.log(`APP: Initialization failed: ${error.message}`);
+      this.log(`APP: Initialization failed: ${error.message}`, error);
       this.errorHandler.handleError(ErrorTypes.CONFIG_INVALID, error);
     }
   }
 
-  /**
-   * Sets up the user interface for the kiosk application.
-   * Applies language settings, background image, and carousel.
-   */
   setupUI() {
     this.log("UI: Setting up user interface");
-
-    // Set initial screen
     this.showScreen("initial");
-
-    // Apply language settings
     const lang = this.getLanguageFromParams();
     this.applyLanguageSettings(lang);
-
-    // Set background image if configured
     this.setupBackgroundImage();
-
-    // Set up carousel
-    this.setupCarousel();
-
+    this._setupWaitroomCarousel(); 
     this.log("UI: User interface setup complete");
   }
 
-  setupInternalEventListeners() {
-    document.addEventListener("networkRestored", () => {
-      if (!this.isInitialized) {
-        window.location.reload();
-      }
-    });
+  _networkRestoredHandler() {
+    if (!this.isInitialized && window.navigator.onLine) { 
+      this.log("APP: Network restored, reloading application.");
+      window.location.reload();
+    }
   }
-  /**
-   * Sets up event listeners for various UI elements and events.
-   * Handles start video call button, cancel button, and message events.
-   */
+
+  setupInternalEventListeners() {
+    document.addEventListener("networkRestored", this._boundNetworkRestoredHandler);
+  }
+
   setupEventListeners() {
     this.log("EVENTS: Setting up event listeners");
-
-    // Start video call button
     const startButton = document.getElementById("StartVideoCall");
     if (startButton) {
-      startButton.addEventListener(
-        "click",
-        this.handleStartVideoCall.bind(this)
-      );
+      startButton.addEventListener("click", this._boundHandleStartVideoCall);
+    } else {
+      this.log("EVENTS: StartVideoCall button not found.");
     }
 
-    // Cancel button
     const cancelButton = document.getElementById("cancel-button-loading");
     if (cancelButton) {
-      cancelButton.addEventListener("click", this.handleCancelCall.bind(this));
+      cancelButton.addEventListener("click", this._boundHandleCancelCall);
+    } else {
+      this.log("EVENTS: cancel-button-loading not found.");
     }
 
-    // Message listener for video call events
-    window.addEventListener("message", this.handleMessage.bind(this));
+    window.addEventListener("message", this._boundHandleMessage);
 
-    // Activity detection for inactivity timer
     ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
-      document.addEventListener(event, this.resetInactivityTimer.bind(this));
+      document.addEventListener(event, this._boundResetInactivityTimer);
     });
-
     this.log("EVENTS: Event listeners setup complete");
   }
 
-  /**
-   * Initializes the VideoEngager client and sets up event listeners.
-   * @returns {Promise<void>}
-   */
   async initializeVideoEngager() {
     this.log("VIDEOCLIENT: Initializing VideoEngager client");
-
+    if (!this.config) {
+        this.log("VIDEOCLIENT: Cannot initialize, Kiosk config is missing.");
+        this.errorHandler.handleError(ErrorTypes.CONFIG_MISSING, new Error("VideoEngager client initialization failed due to missing Kiosk config."));
+        return; // Do not proceed if config is missing
+    }
     try {
       this.videoEngagerClient = new VideoEngagerClient(this.config);
-      // Initialize the client
       await this.videoEngagerClient.init();
-
-      // Set up event listeners
       this.videoEngagerClient.on("VideoEngagerCall.agentJoined", () => {
         this.log("VIDEOCLIENT: Video call agent joined");
         this.handleVideoCallStarted();
       });
-
       this.videoEngagerClient.on("VideoEngagerCall.ended", () => {
         this.log("VIDEOCLIENT: Video call ended");
         this.handleVideoCallEnded();
       });
+      // It's good practice to also listen for errors from the VideoEngagerClient
+      this.videoEngagerClient.on("VideoEngagerCall.error", (errorData) => {
+        this.log("VIDEOCLIENT: VideoEngagerCall.error received", errorData);
+        this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, new Error(errorData?.message || "VideoEngager call error"));
+        this.showScreen("initial"); // Revert to initial screen on call error
+      });
       this.log("VIDEOCLIENT: VideoEngager client initialized successfully");
     } catch (error) {
-      this.log(`VIDEOCLIENT: Failed to initialize: ${error.message}`);
+      this.log(`VIDEOCLIENT: Failed to initialize: ${error.message}`, error);
       this.errorHandler.handleError(ErrorTypes.LIBRARY_LOAD_FAILED, error);
-      throw error;
+      // No re-throw here, allow init to complete if possible, or handle UI state appropriately
     }
   }
 
-  /**
-   * Handles the start video call button click event.
-   * Shows loading screen, sets call timeout, and starts the video call.
-   * @param {Event} event - The click event.
-   */
   async handleStartVideoCall(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     this.log("CALL: Start video call requested");
-
     try {
-      // Show loading screen
       this.showScreen("loading");
+      this.timeoutManager.set("call", () => {
+        this.log("CALL: Call timeout reached");
+        this.handleCallTimeout();
+      }, this.timeouts.call);
 
-      // Set call timeout
-      this.timeoutManager.set(
-        "call",
-        () => {
-          this.log("CALL: Call timeout reached");
-          this.handleCallTimeout();
-        },
-        this.timeouts.call
-      );
-
-      // Start video call
       if (this.videoEngagerClient && this.videoEngagerClient.isReady()) {
         await this.videoEngagerClient.startVideo();
       } else {
+        this.log("CALL: VideoEngager client not ready or not initialized for startVideo.");
         throw new Error("VideoEngager client not ready");
       }
     } catch (error) {
-      this.log(`CALL: Failed to start video call: ${error.message}`);
+      this.log(`CALL: Failed to start video call: ${error.message}`, error);
       this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
-      this.showScreen("initial");
+      this.showScreen("initial"); 
     }
   }
 
-  /**
-   * Handles the cancel call button click event.
-   * Cancels the call, clears the timeout, and returns to the initial screen.
-   * @param {Event} event - The click event.
-   */
   handleCancelCall(event) {
-    event.preventDefault();
+    if(event) event.preventDefault(); 
     this.log("CALL: Cancel call requested");
-
-    // Clear call timeout
     this.timeoutManager.clear("call");
-
-    // End video call if active
     if (this.videoEngagerClient) {
-      this.videoEngagerClient.endVideo().catch((error) => {
-        this.log(`CALL: Error ending video call: ${error.message}`);
+      this.videoEngagerClient.endVideo().catch(error => {
+        this.log(`CALL: Error ending video call on cancel: ${error.message}`, error);
       });
     }
-
-    // Return to initial screen
     this.showScreen("initial");
   }
 
-  /**
-   * Handles incoming messages from the VideoEngager client.
-   * Processes call started events and updates the UI accordingly.
-   * @param {MessageEvent} event - The message event containing data from the VideoEngager client.
-   */
   handleMessage(event) {
-    this.log(`MESSAGE: Received message: ${JSON.stringify(event.data)}`);
+    // Add origin check for security if messages are expected from specific sources
+    // if (event.origin !== 'https://expected.origin.com') return;
+    this.log(`MESSAGE: Received message:`, event.data);
+    // Add specific message parsing and handling logic here if applicable
   }
 
-  /**
-   * Handles the video call started event.
-   * Updates the UI to show the video call screen and clears the call timeout.
-   */
   handleVideoCallStarted() {
     this.log("CALL: Video call started successfully");
-
-    // Clear call timeout
     this.timeoutManager.clear("call");
-
-    // Show video screen
     this.showScreen("video");
   }
 
   handleVideoCallEnded() {
     this.log("CALL: Video call ended");
-
-    // Clear any active timeouts
     this.timeoutManager.clear("call");
-
-    // Return to initial screen
-    this.showScreen("initial");
-  }
-
-  handleVideoCallError(error) {
-    this.log(`CALL: Video call error: ${error.message}`);
-
-    // Clear call timeout
-    this.timeoutManager.clear("call");
-
-    // Handle the error
-    this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
-
-    // Return to initial screen
     this.showScreen("initial");
   }
 
   handleCallTimeout() {
     this.log("CALL: Call timeout - ending call");
-
-    // End video call
     if (this.videoEngagerClient) {
-      this.videoEngagerClient.endVideo().catch((error) => {
-        this.log(`CALL: Error ending timed out call: ${error.message}`);
+      this.videoEngagerClient.endVideo().catch(error => {
+        this.log(`CALL: Error ending timed out call: ${error.message}`, error);
       });
     }
-
-    // Show timeout error
     this.errorHandler.handleError(ErrorTypes.CALL_TIMEOUT);
-
-    // Return to initial screen
     this.showScreen("initial");
   }
 
-  /**
-   * Switches the visible screen based on the provided screen name.
-   * @param {"initial" | "loading" | "video"} screenName - The name of the screen to show ("initial", "loading", "video").
-   */
   showScreen(screenName) {
     this.log(`SCREEN: Switching to ${screenName} screen`);
+    const initialScreen = document.getElementById('initial-screen');
+    const videoCallUI = document.getElementById('video-call-ui');
+    // this.onCallScreenElement is initialized in _setupWaitroomCarousel
 
-    // Hide all screens
-    const screens = ["initial-screen", "oncall-screen"];
-    screens.forEach((screenId) => {
-      const screen = document.getElementById(screenId);
-      if (screen) {
-        screen.style.display = "none";
-      }
-    });
+    if (initialScreen) initialScreen.hidden = true;
+    if (this.onCallScreenElement) this.onCallScreenElement.hidden = true;
+    if (videoCallUI) videoCallUI.hidden = true;
 
-    // Show requested screen
     switch (screenName) {
-      case "initial":
-        this.showInitialScreen();
-        break;
-      case "loading":
-        this.showLoadingScreen();
-        break;
-      case "video":
-        this.showVideoScreen();
-        break;
+        case "initial":
+            if (initialScreen) initialScreen.hidden = false;
+            this.carousel?.freeze?.(); 
+            this.setupInactivityTimer();
+            break;
+        case "loading":
+            if (this.onCallScreenElement) {
+                if (this.carousel) { 
+                    const carouselConfig = this._buildKioskCarouselConfig();
+                    this.carousel.config = carouselConfig; // This should trigger theme application and rendering
+                    this.carousel.thaw?.(); 
+                } else {
+                    this.log("KioskApp: ve-carousel-waitroom not available for loading screen. Showing fallback.");
+                    const loadingFallback = document.getElementById('loadingScreenFallback');
+                    if(loadingFallback) loadingFallback.style.display = 'flex';
+                }
+                this.onCallScreenElement.hidden = false;
+            } else {
+                this.log("KioskApp: #oncall-screen element not found when trying to show 'loading' screen.");
+            }
+            break;
+        case "video":
+            if (videoCallUI) {
+              videoCallUI.hidden = false;
+              videoCallUI.style.height = "calc(100% - 38px)"; // Assuming 38px is header height
+            }
+            this.carousel?.freeze?.(); 
+            break;
+        default:
+            this.log(`SCREEN: Unknown screen name "${screenName}". Defaulting to initial screen.`);
+            if (initialScreen) initialScreen.hidden = false;
+            this.setupInactivityTimer();
+            break;
     }
-
     this.currentScreen = screenName;
   }
 
-  showInitialScreen() {
-    const screen = document.getElementById("initial-screen");
-    if (screen) {
-      screen.style.display = "flex";
+  _setupWaitroomCarousel() {
+    this.onCallScreenElement = document.getElementById('oncall-screen');
+    if (!this.onCallScreenElement) {
+        this.log("KioskApp: #oncall-screen element not found! Cannot setup ve-carousel-waitroom.");
+        this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, new Error("Critical UI element #oncall-screen missing for ve-carousel-waitroom."));
+        return;
     }
 
-    // Reset inactivity timer
-    this.setupInactivityTimer();
+    try {
+        if (customElements.get('ve-carousel-waitroom')) {
+            /** @type {VECarouselWaitroomElement} */
+            const carouselElement = /** @type {VECarouselWaitroomElement} */ (document.createElement('ve-carousel-waitroom'));
+            // Pass logger to the carousel constructor if it supports it
+            // For now, assuming ve-carousel-waitroom creates its own default logger or gets it via a global/DI
+            // If VECarouselWaitroom constructor is updated to accept { logger: this.yourKioskLogger }, pass it here.
+            this.carousel = carouselElement; 
+            this.log("KioskApp: ve-carousel-waitroom element created.");
+
+            // These properties are defined in VECarouselWaitroomElement JSDoc
+            this.carousel.pauseWhenHidden = true;
+            this.carousel.maxCachedMedia = 5; // Example
+
+            this.carousel.addEventListener('cancel', this._boundHandleCarouselCancelEvent);
+            this.carousel.addEventListener('error', this._boundHandleCarouselErrorEvent);
+            this.log("KioskApp: Event listeners added to ve-carousel-waitroom.");
+
+            this.onCallScreenElement.appendChild(this.carousel);
+            this.log("KioskApp: ve-carousel-waitroom appended to #oncall-screen.");
+        } else {
+            this.log("KioskApp: ve-carousel-waitroom custom element not defined. Carousel setup skipped.");
+            this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, new Error("ve-carousel-waitroom custom element is not defined. Ensure it's imported and registered."));
+        }
+    } catch (error) {
+        this.log(`KioskApp: Failed to initialize ve-carousel-waitroom: ${error.message}`, error);
+        this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
+        this.carousel = null; // Ensure carousel is null if setup fails
+    }
   }
 
-  showLoadingScreen() {
-    this.resetCarouselToFirstItem();
-    const oncallScreen = document.getElementById("oncall-screen");
-    if (oncallScreen) oncallScreen.style.display = "block";
+  _buildKioskCarouselConfig() {
+    const itemsForWaitroom = this.environmentConfig?.metadata?.waitroomCarouselItems || this.environmentConfig?.metadata?.carouselItems || [];
+    
+    const slides = itemsForWaitroom.map(item => ({
+        type: item.type || 'image',
+        src: item.src,
+        alt: Utils.sanitizeText(item.alt || item.title || ''), // Sanitize alt text
+        title: Utils.sanitizeText(item.title || ''), // Sanitize title
+        description: Utils.sanitizeText(item.description || ''), // Sanitize description
+        background: item.type === 'content' ? item.background : undefined, // Backgrounds can be complex CSS, usually trusted
+        poster: item.poster,
+        videoLoop: item.videoLoop,
+        muted: item.muted,
+        videoAutoplay: item.videoAutoplay === undefined ? true : item.videoAutoplay,
+    }));
+
+    // Ensure theme settings are pulled from a potentially nested structure in this.config
+    const appThemeConfig = this.config?.theme || {}; // Kiosk-level theme config
+    const carouselSpecificTheme = this.environmentConfig?.metadata?.carouselTheme || {}; // More specific theme from metadata
+
+    const kioskThemeSettings = {
+        fontFamily: carouselSpecificTheme.fontFamily || appThemeConfig.fontFamily || "'Open Sans', Arial, sans-serif",
+        componentBackground: carouselSpecificTheme.componentBackground || appThemeConfig.componentBackground || 'linear-gradient(135deg, #435d7d 0%, #243b55 100%)',
+        primaryTextColor: carouselSpecificTheme.primaryTextColor || appThemeConfig.primaryTextColor || '#EAEAEA',
+        baseFontSize: carouselSpecificTheme.baseFontSize || appThemeConfig.baseFontSize || '15px',
+        slideTitleColor: carouselSpecificTheme.slideTitleColor || appThemeConfig.slideTitleColor,
+        slideTitleFontSize: carouselSpecificTheme.slideTitleFontSize || appThemeConfig.slideTitleFontSize,
+        // ...etc. for all ThemeSettingsV1 properties
+    };
+    
+    const appAccessibilityConfig = this.config?.accessibility || {};
+    const carouselSpecificAccessibility = this.config?.carousel?.accessibility || {};
+
+
+    return {
+        slides: slides,
+        loop: this.config?.carousel?.loop === undefined ? true : this.config.carousel.loop,
+        interval: this.config?.carousel?.interval || DEFAULT_SLIDE_INTERVAL,
+        theme: kioskThemeSettings,
+        accessibility: { 
+            carouselLabel: carouselSpecificAccessibility.label || appAccessibilityConfig.carouselLabel || "Clinic Information Display",
+            slideChangeAnnouncementPattern: carouselSpecificAccessibility.slideChangeAnnouncementPattern || appAccessibilityConfig.slideChangeAnnouncementPattern || "Displaying slide {current} of {total}: {title}",
+            keyboardInstructions: carouselSpecificAccessibility.keyboardInstructions || appAccessibilityConfig.keyboardInstructions || "Use arrow keys to navigate slides when carousel is focused.",
+            noSlidesText: carouselSpecificAccessibility.noSlidesText || appAccessibilityConfig.noSlidesText || "Information will be displayed here shortly.",
+            slideLoadErrorText: carouselSpecificAccessibility.slideLoadErrorText || appAccessibilityConfig.slideLoadErrorText || "Unable to load this information.",
+            unsavedChangesTitle: carouselSpecificAccessibility.unsavedChangesTitle || appAccessibilityConfig.unsavedChangesTitle || "Unsaved Information",
+            unsavedChangesMessage: carouselSpecificAccessibility.unsavedChangesMessage || appAccessibilityConfig.unsavedChangesMessage || "You have unsaved entries. Are you sure you want to leave this step?",
+            unsavedChangesConfirmText: carouselSpecificAccessibility.unsavedChangesConfirmText || appAccessibilityConfig.unsavedChangesConfirmText || "Leave Step",
+            unsavedChangesCancelText: carouselSpecificAccessibility.unsavedChangesCancelText || appAccessibilityConfig.unsavedChangesCancelText || "Stay",
+        }
+    };
   }
 
-  /**
-   * Shows the video call screen and hides the loading and carousel screens.
-   */
-  showVideoScreen() {
-    const videoUI = document.getElementById("video-call-ui");
-    if (videoUI) videoUI.style.height = "calc(100% - 38px)"; // Remove 38px for header height
+  handleCarouselCancelEvent(event) {
+    this.log("KioskApp: Carousel 'cancel' event received.", event.detail);
+    // Ensure handleCancelCall can be called without an event if needed, or create a dummy event
+    this.handleCancelCall(event instanceof Event ? event : new Event('carouselInternalCancel', { bubbles: true, cancelable: true }));
   }
 
-  // Configuration and Setup
+  handleCarouselErrorEvent(event) {
+    const { errorCode, ...details } = event.detail;
+    let errorMessageString = "Unknown carousel error";
+    if (details && typeof details.reason === 'string') {
+        errorMessageString = details.reason;
+    } else if (details && typeof details === 'object' && details !== null) {
+        try {errorMessageString = JSON.stringify(details); } catch(e) { errorMessageString = "Invalid error details object.";}
+    } else if (typeof details === 'string') {
+        errorMessageString = details;
+    }
+
+    this.log(`KioskApp: Carousel 'error' event received: ${errorCode}`, details);
+
+    // Assuming ErrorHandler has a logError method: logError(type, error, metadata)
+    // If not, adapt to use handleError(ErrorType, error)
+    if (this.errorHandler.logError && typeof this.errorHandler.logError === 'function') {
+         this.errorHandler.logError( // This method signature might not match your ErrorHandler
+            `CarouselError_${errorCode}`, 
+            new Error(errorMessageString),      
+            details                       
+        );
+    } else {
+        this.log(`KioskApp: Fallback log for Carousel Error: ${errorCode} - ${errorMessageString}. Details:`, details);
+        // Corrected call to handleError:
+        this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, new Error(`Carousel Error: ${errorCode} - ${errorMessageString}`));
+    }
+
+    if (errorCode === 'INVALID_CONFIG' || errorCode === 'INVALID_CONFIG_ATTRIBUTE' || errorCode === 'THEME_FAILSAFE') {
+        this.log("KioskApp: Carousel reported critical configuration or theme error. Consider fallback UI.");
+    }
+  }
+
   getLanguageFromParams() {
     const urlParams = new URLSearchParams(window.location.search);
     const lang = urlParams.get("lang");
@@ -371,179 +487,123 @@ export class KioskApplication {
 
   applyLanguageSettings(lang) {
     const langConfig = this.languages[lang];
-    if (!langConfig) return;
-
+    if (!langConfig) {
+        this.log(`LANG: Language configuration for "${lang}" not found. Using default.`);
+        return;
+    }
     this.log(`LANG: Applying language settings for: ${lang}`);
-
-    // Apply language strings with XSS protection
-    const elements = {
-      ".secondery-text": langConfig.motto,
-      "#connectButton": langConfig.connect,
-      "#loadingText": langConfig.loadingText,
+    const elementsToUpdate = {
+      ".secondery-text": langConfig.motto, 
+      "#connectButton": langConfig.connect, 
+      "#loadingTextFallback": langConfig.loadingText,
     };
-
-    Object.entries(elements).forEach(([selector, text]) => {
+    Object.entries(elementsToUpdate).forEach(([selector, text]) => {
       const element = document.querySelector(selector);
       if (element) {
         element.textContent = Utils.sanitizeText(text);
+      } else {
+        this.log(`LANG: Element with selector "${selector}" not found for language update.`);
       }
     });
   }
 
   setupBackgroundImage() {
-    if (!this.environmentConfig?.metadata.backgroundImage) return;
-
-    // Validate URL
-    if (
-      !Utils.validateURL(this.environmentConfig?.metadata.backgroundImage) &&
-      !this.environmentConfig?.metadata.backgroundImage.startsWith("img/")
-    ) {
-      this.log("BACKGROUND: Invalid background image URL");
+    if (!this.environmentConfig?.metadata?.backgroundImage) return;
+    const bgImage = this.environmentConfig.metadata.backgroundImage;
+    // Basic check for common image extensions if not a full URL or data URI
+    const isLikelyImagePath = /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(bgImage);
+    if (!Utils.validateURL(bgImage) && !bgImage.startsWith("img/") && !isLikelyImagePath) { 
+      this.log("BACKGROUND: Invalid or unsupported background image URL/path", { url: bgImage });
       return;
     }
-
-    const elem = document.getElementById("initial-screen");
-    if (elem) {
-      elem.style.backgroundImage = `url(${this.environmentConfig?.metadata.backgroundImage})`;
-      this.log("BACKGROUND: Background image applied");
+    const initialScreenElement = document.getElementById("initial-screen");
+    if (initialScreenElement) {
+      initialScreenElement.style.backgroundImage = `url('${bgImage}')`; // Added quotes for safety with special chars in URL
+      this.log("BACKGROUND: Background image applied to initial screen");
     }
   }
 
-  /**
-   * Sets up the carousel with items from the environment configuration.
-   * Validates URLs and applies lazy loading for performance.
-   */
-  setupCarousel() {
-    const items = this.environmentConfig?.metadata.carouselItems || [];
-    if (items.length === 0) return;
-
-    this.log(`CAROUSEL: Setting up ${items.length} carousel items`);
-
-    const container = document.getElementById("carousel-inner");
-    if (!container) return;
-
-    // Remove existing items except the first loading item
-    Array.from(container.children).forEach((child) => {
-      if (child.id !== "carousel-item-1") {
-        child.remove();
-      }
-    });
-
-    // Add new items with validation
-    items.forEach((item, index) => {
-      if (!item.src) return;
-
-      // Basic URL validation
-      if (!Utils.validateURL(item.src) && !item.src.startsWith("img/")) {
-        this.log(`CAROUSEL: Skipping invalid URL: ${item.src}`);
-        return;
-      }
-
-      const div = document.createElement("div");
-      div.id = `carousel-item-${index + 2}`;
-      div.className = "carousel-item";
-
-      const img = document.createElement("img");
-      img.src = item.src;
-      img.alt = Utils.sanitizeText(item.alt || `Slide ${index + 2}`);
-      img.loading = "lazy"; // Performance improvement
-
-      div.appendChild(img);
-      container.appendChild(div);
-    });
-    this.log("CAROUSEL: Carousel setup complete");
-  }
-
-  /**
-   * Resets the carousel to the first item.
-   * This method can be called when switching to the loading screen.
-   * It ensures the carousel starts from the first item, removing any active classes from other items.
-   */
-  resetCarouselToFirstItem() {
-    // Reset carousel to first slide using CSS/DOM manipulation (optionalƒ)
-    const carouselInner = document.getElementById("carousel-inner");
-    const firstItem = document.getElementById("carousel-item-1");
-
-    if (carouselInner && firstItem) {
-      // Remove active class from all items
-      const allItems = carouselInner.querySelectorAll(".carousel-item");
-      allItems.forEach((item) => item.classList.remove("active"));
-
-      // Add active class to first item
-      firstItem.classList.add("active");
-
-      // Reset transform if Bootstrap has moved the carousel
-      carouselInner.style.transform = "translateX(0%)";
-    }
-  }
-
-  // Timer Management
   setupInactivityTimer() {
     this.timeoutManager.clear("inactivity");
-    this.timeoutManager.set(
-      "inactivity",
-      () => {
-        this.log("INACTIVITY: Inactivity timeout reached - reloading");
-        window.location.reload();
-      },
-      this.timeouts.inactivity
-    );
+    this.timeoutManager.set("inactivity", () => {
+      this.log("INACTIVITY: Timeout reached - reloading application");
+      window.location.reload();
+    }, this.timeouts.inactivity);
   }
 
   resetInactivityTimer() {
-    if (this.currentScreen === "initial") {
+    if (this.currentScreen === "initial") { 
       this.setupInactivityTimer();
     }
   }
 
-  /**
-   * Logs messages to the console and optionally to a debug element in development mode.
-   * @param {string} message - The message to log.
-   * @returns {void}
-   * @example
-   * kioskApp.log("Application started successfully");
-   * kioskApp.log("Error loading configuration");
-   * kioskApp.log("User clicked the start button");
-   */
-  log(message) {
+  log(message, details) {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${message}`);
-
-    // In development, also log to potential debug element
+    // Basic log, can be replaced by a more sophisticated logger instance if KioskApp itself uses one
+    const logMessage = `[KioskApp][${timestamp}] ${message}`;
+    if (details !== undefined) {
+        console.log(logMessage, details);
+    } else {
+        console.log(logMessage);
+    }
+    
     if (this.environmentConfig?.getEnvironment() === "development") {
-      const debugElement = document.getElementById("debug-log");
+      const debugElement = document.getElementById("debug-log"); 
       if (debugElement) {
-        debugElement.textContent += `[${timestamp}] ${message}\n`;
+        const entry = document.createElement('div');
+        entry.textContent = details ? `${logMessage} ${JSON.stringify(details)}` : logMessage;
+        debugElement.appendChild(entry);
+        while (debugElement.children.length > 100) { 
+            const firstChild = debugElement.firstChild; 
+            if (firstChild) { 
+                debugElement.removeChild(firstChild);
+            } else {
+                break; 
+            }
+        }
         debugElement.scrollTop = debugElement.scrollHeight;
       }
     }
   }
 
-  /**
-   * Destroys the application instance, cleaning up resources and event listeners.
-   * @returns {void}
-   */
   destroy() {
-    this.log("APP: Destroying application");
-
-    // Clear all timeouts
+    this.log("APP: Destroying Kiosk Application");
     this.timeoutManager.clearAll();
 
-    // Destroy VideoEngager client
     if (this.videoEngagerClient) {
       this.videoEngagerClient.destroy();
+      this.videoEngagerClient = null;
     }
 
-    // Remove event listeners
-    ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
-      document.removeEventListener(event, this.resetInactivityTimer.bind(this));
-    });
+    if (this.carousel) { 
+        this.log("KioskApp: Freezing and removing ve-carousel-waitroom.");
+        this.carousel.freeze?.();
+        this.carousel.removeEventListener('cancel', this._boundHandleCarouselCancelEvent);
+        this.carousel.removeEventListener('error', this._boundHandleCarouselErrorEvent);
+        if (this.carousel.parentNode) {
+            this.carousel.parentNode.removeChild(this.carousel);
+        }
+        this.carousel = null;
+    }
 
-    window.removeEventListener("message", this.handleMessage.bind(this));
+    ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
+      document.removeEventListener(event, this._boundResetInactivityTimer);
+    });
+    window.removeEventListener("message", this._boundHandleMessage);
+    document.removeEventListener("networkRestored", this._boundNetworkRestoredHandler);
+
+
+    this.log("APP: Kiosk Application destroyed.");
+    this.isInitialized = false;
   }
 }
 
-// Initialize application when DOM is ready
+/** @type {KioskWindow} */
+const kioskGlobal = window;
+
 document.addEventListener("DOMContentLoaded", function () {
-  window.kioskApp = new KioskApplication();
+  // Ensure KioskApplication is only initialized once.
+  if (!kioskGlobal.kioskAppInstance) { 
+    kioskGlobal.kioskAppInstance = new KioskApplication();
+  }
 });

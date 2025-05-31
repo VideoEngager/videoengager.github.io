@@ -76,8 +76,6 @@ export class VECarouselWaitroom extends HTMLElement {
 
     /** @type {IntersectionObserver | null} */
     this.mediaObserver = null;
-
-    this.init();
   }
 
   async init() {

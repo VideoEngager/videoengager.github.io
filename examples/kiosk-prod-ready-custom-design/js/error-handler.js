@@ -67,6 +67,13 @@ export const ErrorTypes = {
       "An error occurred while loading the waitroom. Please try again.",
     shouldRetry: false,
   },
+  WAITROOM_COMPONENT_NOT_FOUND: {
+    code: "WAITROOM_COMPONENT_NOT_FOUND",
+    type: "Component Not Found",
+    userMessage:
+      "The waitroom component is not available. Please check your configuration.",
+    shouldRetry: false,
+  },
 };
 
 export class ErrorHandler {

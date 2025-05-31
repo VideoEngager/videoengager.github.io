@@ -107,8 +107,12 @@ export class VECarouselWaitroom extends HTMLElement {
 
   async loadStyles() {
     if (!this.shadowRoot) return;
+    const styleSrc = this.getAttribute("style-src") || "css/carousel.css";
     try {
-      const response = await fetch("../css/carousel.css");
+      const response = await fetch(styleSrc);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const cssText = await response.text();
 
       const styleSheet = new CSSStyleSheet();
@@ -117,6 +121,7 @@ export class VECarouselWaitroom extends HTMLElement {
       this.shadowRoot.adoptedStyleSheets = [styleSheet];
     } catch (error) {
       console.error("Failed to load styles:", error);
+      throw error;
     }
   }
 

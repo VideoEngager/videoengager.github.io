@@ -281,6 +281,7 @@ export class VideoEngagerClient {
       "VideoEngagerCall.started",
       "VideoEngagerCall.ended",
       "VideoEngagerCall.error",
+      "VideoEngagerCall.agentJoined",
       "GenesysChat.started",
       "GenesysChat.ended",
       "GenesysChat.error",

@@ -77,7 +77,7 @@ export class KioskApplication {
 
       // Initialize UI
       this.setupUI();
-      this.setupEventListeners();
+      await this.setupEventListeners();
 
       // Initialize VideoEngager client
       await this.initializeVideoEngager();
@@ -124,7 +124,7 @@ export class KioskApplication {
    * Sets up event listeners for various UI elements and events.
    * Handles start video call button, cancel button, and message events.
    */
-  setupEventListeners() {
+  async setupEventListeners() {
     this.log("EVENTS: Setting up event listeners");
 
     // Start video call button
@@ -138,6 +138,7 @@ export class KioskApplication {
 
     // Cancel button
     this.setupWaitroomEventListeners();
+    await this.initializeWaitroom();
 
     // Message listener for video call events
     window.addEventListener("message", this.handleMessage.bind(this));
@@ -168,6 +169,19 @@ export class KioskApplication {
       this.log("WAITROOM: Error in waitroom");
       this.errorHandler.handleError(ErrorTypes.WAITROOM_ERROR);
     });
+  }
+
+  async initializeWaitroom() {
+    /** @type {HTMLElement & { init: () => Promise<void>} | null} */
+    const carouselWaitroom = document.querySelector("ve-carousel-waitroom");
+
+    if (!carouselWaitroom) {
+      this.log("WAITROOM: Carousel waitroom component not found");
+      this.errorHandler.handleError(ErrorTypes.WAITROOM_COMPONENT_NOT_FOUND);
+      return;
+    }
+    this.log("WAITROOM: Initializing carousel waitroom");
+    await carouselWaitroom.init();
   }
 
   /**

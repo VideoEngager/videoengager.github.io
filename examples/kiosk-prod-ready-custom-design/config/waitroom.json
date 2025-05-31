@@ -1,0 +1,68 @@
+{
+  "theme": {
+    "primaryColor": "#006699",
+    "font": "Open Sans",
+    "logo": "/assets/clinic-logo.svg",
+    "mode": "default"
+  },
+  "controls": {
+    "text": "Start Call"
+  },
+  "carousel": {
+    "loop": true,
+    "interval": 8000,
+    "slides": [
+      {
+        "type": "content",
+        "title": "Welcome to Your Appointment",
+        "description": "Please remain seated. A healthcare professional will be with you shortly.",
+        "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      },
+      {
+        "type": "image",
+        "src": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+        "title": "Relaxation Techniques",
+        "description": "Take a moment to center yourself and breathe deeply.",
+        "alt": "Peaceful meditation scene with stones balanced on water"
+      },
+      {
+        "type": "video",
+        "src": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "title": "Breathing Exercise",
+        "description": "Follow along with this simple breathing exercise to help you relax.",
+        "poster": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+        "muted": true,
+        "loop": true
+      },
+      {
+        "type": "image",
+        "src": "https://images.unsplash.com/photo-1662926912257-514bbe9d4ba3?q=80&w=2980&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "title": "Stay Hydrated",
+        "description": "Remember to drink water throughout the day. Proper hydration supports your overall health.",
+        "alt": "Clear glass of water with droplets"
+      },
+      {
+        "type": "content",
+        "title": "Wellness Tips",
+        "description": "Regular check-ups are important for maintaining your health. Thank you for taking care of yourself.",
+        "background": "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+      }
+    ]
+  },
+  "botMessages": {
+    "templates": {
+      "nextInQueue": {
+        "tier": "high",
+        "text": "You're next in line! Please prepare for your appointment."
+      },
+      "doctorDelayed": {
+        "tier": "critical",
+        "text": "Doctor is delayed by 15 minutes. Thank you for your patience."
+      },
+      "reminderHydrate": {
+        "tier": "low",
+        "text": "Reminder: Stay hydrated during your wait."
+      }
+    }
+  }
+}

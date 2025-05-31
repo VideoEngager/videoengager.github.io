@@ -279,9 +279,9 @@ export class VideoEngagerClient {
     // Set up VideoEngager event listeners with error handling
     const events = [
       "VideoEngagerCall.started",
+      "VideoEngagerCall.agentJoined",
       "VideoEngagerCall.ended",
       "VideoEngagerCall.error",
-      "VideoEngagerCall.agentJoined",
       "GenesysChat.started",
       "GenesysChat.ended",
       "GenesysChat.error",

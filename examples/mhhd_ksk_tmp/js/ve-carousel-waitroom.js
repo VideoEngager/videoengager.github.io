@@ -1,15 +1,14 @@
 // file: js/ve-carousel-waitroom.js
 
 // Assume ILogger, LogLevel, ConsoleLogger are imported from your logger module.
-// For this example, using the minimal stub from the previous response.
-// import { ILogger, LogLevel, ConsoleLogger } from './logger/index.js'; // Adjust path
+// Using the minimal stub from the Phase 1 sign-off.
+// import { ILogger, LogLevel, ConsoleLogger } from './logger/index.js';
 
-// --- Minimal Logger Stub (Ensure this aligns with your actual logger/index.js) ---
+// --- Minimal Logger Stub ---
 const LogLevel = Object.freeze({
     NONE: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4,
 });
-
-class ILogger { // Basic interface definition
+class ILogger {
     debug(message, context) { console.debug('[ILogger STUB]', message, context); }
     info(message, context) { console.info('[ILogger STUB]', message, context); }
     warn(message, context) { console.warn('[ILogger STUB]', message, context); }
@@ -18,63 +17,74 @@ class ILogger { // Basic interface definition
     setLevel(level) {}
     getLevel() { return LogLevel.INFO; }
 }
-
 class ConsoleLogger extends ILogger {
-    constructor(options = {}) {
-        super();
-        this._level = options.level || LogLevel.INFO;
-        this._component = options.component || 'VECarouselWaitroomDefault';
-        this._baseContext = options.context || {};
-    }
-    _log(level, type, message, ...args) {
-        if (this._level >= level) {
-            const logMessage = `[${this._component}] ${type}: ${message}`;
-            const fullArgs = args.filter(arg => arg !== undefined);
-            console[type.toLowerCase()](logMessage, ...fullArgs);
-        }
-    }
+    constructor(options = {}) { super(); this._level = options.level || LogLevel.INFO; this._component = options.component || 'VECarouselWaitroomDefault'; this._baseContext = options.context || {}; }
+    _log(level, type, message, ...args) { if (this._level >= level) { const logMessage = `[${this._component}] ${type}: ${message}`; const fullArgs = args.filter(arg => arg !== undefined); console[type.toLowerCase()](logMessage, ...fullArgs); } }
     debug(message, context) { this._log(LogLevel.DEBUG, 'DEBUG', message, context); }
     info(message, context) { this._log(LogLevel.INFO, 'INFO', message, context); }
     warn(message, context) { this._log(LogLevel.WARN, 'WARN', message, context); }
     error(message, error, context) { this._log(LogLevel.ERROR, 'ERROR', message, error, context); }
-    withContext(newContext) {
-      return new ConsoleLogger({
-        level: this._level,
-        component: this._component,
-        context: { ...this._baseContext, ...newContext }
-      });
-    }
-    setLevel(level) {
-        if (Object.values(LogLevel).includes(level)) {
-            this._level = level;
-        } else {
-            this._log(LogLevel.WARN, 'WARN', `Attempted to set invalid log level: ${level}. Level remains ${this._level}.`);
-        }
-    }
+    withContext(newContext) { return new ConsoleLogger({ level: this._level, component: this._component, context: { ...this._baseContext, ...newContext } }); }
+    setLevel(level) { if (Object.values(LogLevel).includes(level)) { this._level = level; } else { this._log(LogLevel.WARN, 'WARN', `Invalid log level: ${level}. Level remains ${this._level}.`); } }
     getLevel() { return this._level; }
 }
 // --- End Minimal Logger Stub ---
 
-const COMPONENT_VERSION = "1.0.0"; // Phase 1 sign-off was based on this.
+const COMPONENT_VERSION = "1.0.0";
 const THEME_API_VERSION = "1.0";
 const ACCESSIBILITY_API_VERSION = "1.0";
 const DEFAULT_HOST_LABEL = "Waitroom Information Carousel";
 const DEFAULT_CANCEL_BUTTON_ARIA_LABEL = "Cancel current operation";
 
-// Default theme values relevant to the cancel button (to be part of full default theme object later)
-const DEFAULT_THEME_VALUES = {
-    cancelButtonBackground: '#dc3545', // Danger Red
+/**
+ * Default theme values as per themeguide.md.
+ * This object defines the complete ThemeSettingsV1 structure with defaults.
+ */
+const DEFAULT_THEME = Object.freeze({
+    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    componentBackground: '#333333', // Dark Grey
+    primaryTextColor: '#FFFFFF',    // White
+    baseFontSize: '16px',
+
+    slideTitleColor: '#FFFFFF', // Defaults to primaryTextColor conceptually
+    slideTitleFontSize: '2em',
+    slideDescriptionColor: '#FFFFFF', // Defaults to primaryTextColor conceptually
+    slideDescriptionFontSize: '1.2em',
+    slideMediaOverlayBackground: 'rgba(0,0,0,0.5)', // Semi-black
+
+    botMessageBackground: 'rgba(0,0,0,0.8)', // Semi-black
+    botMessageTextColor: '#FFFFFF',         // Defaults to primaryTextColor conceptually
+    botMessageBorderRadius: '4px',
+    botMessageFontSize: '1em',
+    botMessageTierLowAccentColor: '#5bc0de',       // Info Blue
+    botMessageTierHighAccentColor: '#f0ad4e',      // Warning Orange
+    botMessageTierCriticalBackground: '#d9534f',  // Danger Red
+    botMessageTierCriticalTextColor: '#FFFFFF',    // White
+
+    accentColor: '#007bff', // Primary Blue
+
+    // Cancel Button Specifics (added based on spec discussion)
+    cancelButtonBackground: '#dc3545', // Danger Red (Bootstrap's danger)
     cancelButtonIconColor: '#ffffff',  // White
     cancelButtonSize: '60px',
-    cancelButtonMobileSize: '50px', // For smaller screens
+    cancelButtonMobileSize: '50px',
     cancelButtonRadius: '50%',
-    cancelButtonOffsetTop: '2rem',
-    cancelButtonOffsetRight: '2rem',
-    cancelButtonShadow: '0 4px 16px rgba(0,0,0,0.2)',
-    cancelButtonFocusRingColor: 'rgba(220, 53, 69, 0.5)', // Derived from its own background
-    accentColor: '#007bff' // General accent for other focus rings
-};
+    cancelButtonOffsetTop: '1.5rem', // Adjusted slightly from POC for typical viewport
+    cancelButtonOffsetRight: '1.5rem',// Adjusted slightly from POC
+    cancelButtonShadow: '0 2px 8px rgba(0,0,0,0.25)',
+    cancelButtonFocusRingColor: 'rgba(220, 53, 69, 0.5)', // Default derived from its own bg
 
+    // Placeholders for other focus indicators if needed separately
+    focusIndicatorHostShadow: 'rgba(0, 123, 255, 0.5)', // Derived from accentColor
+    focusIndicatorButtonShadow: 'rgba(0, 123, 255, 0.5)', // Generic button, cancel overrides
+
+    // Debug/Placeholder colors (not part of ThemeSettingsV1, for internal use)
+    debugBorderColor: '#adb5bd',
+    placeholderTextColor: '#6c757d',
+    errorTextColor: '#721c24',
+    errorBgColor: '#f8d7da',
+    errorBorderColor: '#f5c6cb'
+});
 
 class VECarouselWaitroom extends HTMLElement {
     #logger;
@@ -91,109 +101,79 @@ class VECarouselWaitroom extends HTMLElement {
     #debugTotalSlides = 0;
     #debugCurrentSlideIndex = 0;
 
-    // Internal bound event handlers
     #boundHandleCancelClick;
     #boundHandleHostKeydown;
 
-
-    static get observedAttributes() {
-        return [];
-    }
+    static get observedAttributes() { return []; }
 
     constructor() {
         super();
         this.#shadow = this.attachShadow({ mode: 'open' });
-
-        this.#logger = new ConsoleLogger({
-            component: 'VECarouselWaitroom',
-            level: LogLevel.INFO
-        });
-        this.#logger.info(`Constructor: Component instance created. Version: ${this.version}. Default logger active.`);
-
+        this.#logger = new ConsoleLogger({ component: 'VECarouselWaitroom', level: LogLevel.INFO });
+        this.#logger.info(`Constructor: Version ${this.version}. Default logger active.`);
         this.#boundHandleCancelClick = this._handleCancelClick.bind(this);
         this.#boundHandleHostKeydown = this._handleHostKeydown.bind(this);
     }
 
     set logger(newLogger) {
         if (newLogger && typeof newLogger.info === 'function' && typeof newLogger.error === 'function') {
-            this.#logger = newLogger;
-            this.#isExternalLoggerInjected = true;
-            this.#logger.info("External logger injected successfully.");
+            this.#logger = newLogger; this.#isExternalLoggerInjected = true;
+            this.#logger.info("External logger injected.");
         } else {
-            this.#logger.warn("Attempted to inject an invalid logger. Continuing with current logger.");
+            this.#logger.warn("Invalid external logger. Continuing with current.");
         }
     }
-
-    get logger() {
-        return this.#logger;
-    }
-
+    get logger() { return this.#logger; }
     get version() { return COMPONENT_VERSION; }
     get themeApiVersion() { return THEME_API_VERSION; }
     get accessibilityApiVersion() { return ACCESSIBILITY_API_VERSION; }
 
     set config(newConfig) {
-        this.#logger.info("Configuration received.", { configObjectReceived: !!newConfig });
-
+        this.#logger.info("Config received.", { hasConfig: !!newConfig });
         if (!newConfig || typeof newConfig !== 'object') {
-            this.#logger.error("Invalid configuration: Config must be an object.", { receivedType: typeof newConfig });
-            this._renderFailSafe("Invalid configuration provided to carousel.");
+            this.#logger.error("Invalid config: Must be an object.", { type: typeof newConfig });
+            this._renderFailSafe("Invalid configuration provided.");
             this.#internalConfig = null;
-            this._dispatchEvent('error', { errorCode: 'INVALID_CONFIG', reason: 'Configuration must be an object.' });
+            this._dispatchEvent('error', { errorCode: 'INVALID_CONFIG', reason: 'Config must be an object.' });
             return;
         }
         if (!Array.isArray(newConfig.slides)) {
-            this.#logger.error("Invalid configuration: 'slides' property must be an array.", { slidesReceived: typeof newConfig.slides });
-            this._renderFailSafe("Slide configuration is missing or invalid (slides must be an array).");
+            this.#logger.error("Invalid config: 'slides' must be an array.", { slidesType: typeof newConfig.slides });
+            this._renderFailSafe("Slide config missing/invalid (must be array).");
             this.#internalConfig = null;
-            this._dispatchEvent('error', { errorCode: 'INVALID_CONFIG_SLIDES', reason: "'slides' property must be an array." });
+            this._dispatchEvent('error', { errorCode: 'INVALID_CONFIG_SLIDES', reason: "'slides' must be an array." });
             return;
         }
 
-        const validatedConfig = {
+        this.#internalConfig = {
             slides: newConfig.slides,
-            theme: (typeof newConfig.theme === 'object' && newConfig.theme !== null) ? newConfig.theme : {},
-            accessibility: (typeof newConfig.accessibility === 'object' && newConfig.accessibility !== null) ? newConfig.accessibility : {},
-            carousel: (typeof newConfig.carousel === 'object' && newConfig.carousel !== null) ? newConfig.carousel : {}
+            theme: (typeof newConfig.theme === 'object' && newConfig.theme !== null) ? { ...newConfig.theme } : {},
+            accessibility: (typeof newConfig.accessibility === 'object' && newConfig.accessibility !== null) ? { ...newConfig.accessibility } : {},
+            carousel: (typeof newConfig.carousel === 'object' && newConfig.carousel !== null) ? { ...newConfig.carousel } : {}
         };
+        // Ensure all sub-objects exist even if empty, for easier merging with defaults later
+        if (!this.#internalConfig.theme) this.#internalConfig.theme = {};
+        if (!this.#internalConfig.accessibility) this.#internalConfig.accessibility = {};
+        if (!this.#internalConfig.carousel) this.#internalConfig.carousel = {};
 
-        if (!validatedConfig.theme) this.#logger.warn("Config: 'theme' missing, using defaults.");
-        if (!validatedConfig.accessibility) this.#logger.warn("Config: 'accessibility' missing, using defaults.");
-        if (!validatedConfig.carousel) this.#logger.warn("Config: 'carousel' settings missing, using defaults.");
 
-        this.#internalConfig = validatedConfig;
-        this.#logger.info("Configuration processed and stored.");
-        this._dispatchEvent('configApplied', { config: this.#internalConfig });
-
-        if (this.isConnected) {
-            this._applyFullConfig();
-        }
+        this.#logger.info("Config processed.");
+        this._dispatchEvent('configApplied', { /* config: this.#internalConfig (can be large) */ });
+        if (this.isConnected) this._applyFullConfig();
     }
+    get config() { return this.#internalConfig; }
 
-    get config() {
-        return this.#internalConfig;
-    }
-
-    freeze() {
-        this.#logger.info("API CALL: freeze() invoked.");
-        this._internalPauseActivity('freeze_api');
-        this._dispatchEvent('frozen');
-    }
-
-    thaw() {
-        this.#logger.info("API CALL: thaw() invoked.");
-        // TODO (Phase 2/3): Resume autoplay, etc. For now, just log.
-        // this._internalResumeActivity('thaw_api');
-        this._dispatchEvent('thawed');
-    }
+    freeze() { this.#logger.info("API: freeze()"); this._internalPauseActivity('freeze_api'); this._dispatchEvent('frozen'); }
+    thaw() { this.#logger.info("API: thaw()"); /* TODO: _internalResumeActivity('thaw_api'); */ this._dispatchEvent('thawed'); }
 
     showBotMessage(message, options = {}) {
         const { tier = 'low', duration = 5000 } = options;
-        this.#logger.info("API CALL: showBotMessage() invoked.", { message, tier, duration });
+        this.#logger.info("API: showBotMessage()", { message, tier, duration });
         if (this.#botMessageAreaEl) {
-            this.#botMessageAreaEl.innerHTML = ''; // Clear previous content
+            // Sanitize message text before inserting
             const messageP = document.createElement('p');
-            messageP.textContent = message; // Text content for security
+            messageP.textContent = message; // textContent auto-sanitizes against HTML injection
+            this.#botMessageAreaEl.innerHTML = ''; // Clear previous
             this.#botMessageAreaEl.appendChild(messageP);
 
             this.#botMessageAreaEl.className = `bot-message-area__waitroom tier-${tier}`;
@@ -202,58 +182,38 @@ class VECarouselWaitroom extends HTMLElement {
             this._announceToScreenReader(`Notification: ${message}`);
             this._dispatchEvent('botMessageShown', { message, tier });
 
+            // Clear existing timeout if any, to prevent multiple hide timeouts
+            if (this.#botMessageAreaEl.hideTimeout) clearTimeout(this.#botMessageAreaEl.hideTimeout);
+
             if (tier !== 'critical' && duration > 0) {
-                // TODO: Manage timeouts for bot messages properly (e.g., clear previous if new one comes)
-                setTimeout(() => {
-                    if (this.#botMessageAreaEl && this.#botMessageAreaEl.style.display === 'block' && this.#botMessageAreaEl.textContent.includes(message)) {
+                this.#botMessageAreaEl.hideTimeout = setTimeout(() => {
+                    if (this.#botMessageAreaEl && this.#botMessageAreaEl.style.display === 'block') {
                         this.#botMessageAreaEl.style.display = 'none';
                         this.#botMessageAreaEl.setAttribute('aria-hidden', 'true');
                         this._dispatchEvent('botMessageDismissed', { message, tier });
                     }
                 }, duration);
             }
-        } else {
-            this.#logger.warn("showBotMessage called, but bot message area is not available.");
-        }
+        } else { this.#logger.warn("Bot message area not available."); }
     }
 
-    play() {
-        this.#logger.info("API CALL: play() invoked.");
-        // TODO (Phase 2): Start/resume autoplay. For now, links to _internalResumeActivity
-        // this._internalResumeActivity('play_api');
-        this._dispatchEvent('playTriggered');
-    }
-
-    /** Pauses autoplay. */
-    pause() {
-        this.#logger.info("API CALL: pause() invoked.");
-        this._internalPauseActivity('pause_api'); // Call the internal method to do the work
-        // The event is dispatched here, after the internal logic is called.
-        this._dispatchEvent('pauseTriggered', { reason: 'pause_api_called' });
-    }
+    play() { this.#logger.info("API: play()"); /* TODO: _internalResumeActivity('play_api'); */ this._dispatchEvent('playTriggered'); }
+    pause() { this.#logger.info("API: pause()"); this._internalPauseActivity('pause_api'); this._dispatchEvent('pauseTriggered'); }
 
     goToSlide(index) {
-        this.#logger.info("API CALL: goToSlide() invoked.", { index });
+        this.#logger.info("API: goToSlide()", { index });
         if (this.#internalConfig && index >= 0 && index < this.#debugTotalSlides) {
             this._updateDebugSlideIndex(index, "API");
         } else {
-            this.#logger.warn(`goToSlide: Invalid index ${index} or no slides.`);
-            this._dispatchEvent('error', { errorCode: 'INVALID_SLIDE_INDEX', reason: `Attempted to go to invalid slide index: ${index}` });
+            this.#logger.warn(`Invalid slide index ${index}.`);
+            this._dispatchEvent('error', { errorCode: 'INVALID_SLIDE_INDEX', reason: `Invalid index: ${index}` });
         }
     }
-
-    reset() {
-        this.#logger.info("API CALL: reset() invoked.");
-        this._updateDebugSlideIndex(0, "reset_api");
-        // TODO (Phase 2): Fully reset internal state to reflect first slide, clear bot messages, etc.
-        this._dispatchEvent('reset');
-    }
+    reset() { this.#logger.info("API: reset()"); this._updateDebugSlideIndex(0, "reset_api"); this._dispatchEvent('reset'); }
 
     connectedCallback() {
-        this.#logger.info(`Component connected. Version: ${this.version}. Theme API: ${this.themeApiVersion}. Accessibility API: ${this.accessibilityApiVersion}.`);
-        if (!this.#isExternalLoggerInjected) {
-            this.#logger.warn("CRITICAL WARNING: No external production logger injected. Using default. NOT SUITABLE FOR CLINICAL PRODUCTION.");
-        }
+        this.#logger.info(`Connected. Version: ${this.version}. ThemeAPI: ${this.themeApiVersion}. A11yAPI: ${this.accessibilityApiVersion}.`);
+        if (!this.#isExternalLoggerInjected) this.#logger.warn("CRITICAL WARNING: No external logger. Using default. NOT FOR CLINICAL PRODUCTION.");
 
         if (!this.hasAttribute('role')) this.setAttribute('role', 'region');
         const initialAriaLabel = this.#internalConfig?.accessibility?.carouselLabel || DEFAULT_HOST_LABEL;
@@ -264,115 +224,95 @@ class VECarouselWaitroom extends HTMLElement {
         this._attachInternalEventListeners();
         this._setInitialFocus();
 
-        if (this.#internalConfig) {
-            this._applyFullConfig();
-        } else {
-            this.#logger.error("Component connected but no config set. Displaying fail-safe. Provide config via 'config' property.");
+        if (this.#internalConfig) this._applyFullConfig();
+        else {
+            this.#logger.error("Connected, no valid config. Fail-safe. Set 'config' property.");
             this._renderFailSafe("Carousel configuration missing.");
-            this._dispatchEvent('error', { errorCode: 'CONFIG_MISSING_ON_CONNECT', reason: 'Config not set on connection.' });
+            this._dispatchEvent('error', { errorCode: 'CONFIG_MISSING_ON_CONNECT', reason: 'No config on connect.' });
         }
-
-        this._dispatchEvent('carouselReady', {
-            version: this.version,
-            supportedThemeApi: this.themeApiVersion,
-            supportedAccessibilityApi: this.accessibilityApiVersion,
-            initialConfigPresent: !!this.#internalConfig,
-            loggerInjected: this.#isExternalLoggerInjected
-        });
+        this._dispatchEvent('carouselReady', { version: this.version, supportedThemeApi: this.themeApiVersion, supportedAccessibilityApi: this.accessibilityApiVersion, initialConfigPresent: !!this.#internalConfig, loggerInjected: this.#isExternalLoggerInjected });
     }
 
     disconnectedCallback() {
-        this.#logger.info("Component disconnected. Cleaning up.");
-        if (this.#cancelButtonEl) {
-            this.#cancelButtonEl.removeEventListener('click', this.#boundHandleCancelClick);
-        }
+        this.#logger.info("Disconnected. Cleaning up.");
+        if (this.#cancelButtonEl) this.#cancelButtonEl.removeEventListener('click', this.#boundHandleCancelClick);
         this.removeEventListener('keydown', this.#boundHandleHostKeydown);
-        // TODO (Phase 2+): Clear autoplay timers, disconnect IntersectionObservers.
+        // TODO: Clear autoplay timers, IntersectionObservers
     }
 
     _renderScaffold() {
-        this.#logger.debug("Rendering scaffold structure into Shadow DOM.");
+        this.#logger.debug("Rendering scaffold structure.");
+        // Style tag now directly includes theme variable fallbacks from DEFAULT_THEME
         this.#shadow.innerHTML = `
             <style>
                 :host {
                     display: block; width: 100%; height: 100%; position: relative; overflow: hidden;
-                    background: var(--ve-cw-component-background, #e9ecef);
-                    color: var(--ve-cw-primary-text-color, #212529);
-                    font-family: var(--ve-cw-font-family, system-ui, sans-serif);
-                    font-size: var(--ve-cw-base-font-size, 1rem);
+                    background: var(--ve-cw-component-background, ${DEFAULT_THEME.componentBackground});
+                    color: var(--ve-cw-primary-text-color, ${DEFAULT_THEME.primaryTextColor});
+                    font-family: var(--ve-cw-font-family, ${DEFAULT_THEME.fontFamily});
+                    font-size: var(--ve-cw-base-font-size, ${DEFAULT_THEME.baseFontSize});
                     outline: none;
                 }
                 :host(:focus-visible) {
-                     box-shadow: 0 0 0 3px var(--ve-cw-focus-indicator-host-shadow, rgba(0, 90, 180, 0.6));
+                     box-shadow: 0 0 0 3px var(--ve-cw-focus-indicator-host-shadow, ${DEFAULT_THEME.focusIndicatorHostShadow});
                      border-radius: 2px;
                 }
                 .container__waitroom { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-                .slides-area__waitroom { flex-grow: 1; width: 100%; display: flex; flex-direction:column; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px dashed var(--ve-cw-debug-border-color, #adb5bd); min-height: 250px; padding: 1em; }
-                .slides-area__waitroom-message { padding: 1rem; font-style: italic; color: var(--ve-cw-placeholder-text-color, #555); text-align: center; }
+                .slides-area__waitroom { flex-grow: 1; width: 100%; display: flex; flex-direction:column; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px dashed var(--ve-cw-debug-border-color, ${DEFAULT_THEME.debugBorderColor}); min-height: 250px; padding: 1em; }
+                .slides-area__waitroom-message { padding: 1rem; font-style: italic; color: var(--ve-cw-placeholder-text-color, ${DEFAULT_THEME.placeholderTextColor}); text-align: center; }
                 .debug-slide-info { font-size: 0.9em; color: #777; margin-top: 10px; }
 
                 .cancel-button__waitroom {
-                    /* From POC & Spec */
                     position: absolute;
-                    top: var(--ve-cw-cancel-button-offset-top, ${DEFAULT_THEME_VALUES.cancelButtonOffsetTop});
-                    right: var(--ve-cw-cancel-button-offset-right, ${DEFAULT_THEME_VALUES.cancelButtonOffsetRight});
-                    width: var(--ve-cw-cancel-button-size, ${DEFAULT_THEME_VALUES.cancelButtonSize});
-                    height: var(--ve-cw-cancel-button-size, ${DEFAULT_THEME_VALUES.cancelButtonSize});
-                    background: var(--ve-cw-cancel-button-background, ${DEFAULT_THEME_VALUES.cancelButtonBackground});
+                    top: var(--ve-cw-cancel-button-offset-top, ${DEFAULT_THEME.cancelButtonOffsetTop});
+                    right: var(--ve-cw-cancel-button-offset-right, ${DEFAULT_THEME.cancelButtonOffsetRight});
+                    width: var(--ve-cw-cancel-button-size, ${DEFAULT_THEME.cancelButtonSize});
+                    height: var(--ve-cw-cancel-button-size, ${DEFAULT_THEME.cancelButtonSize});
+                    background: var(--ve-cw-cancel-button-background, ${DEFAULT_THEME.cancelButtonBackground});
                     border: none;
-                    border-radius: var(--ve-cw-cancel-button-radius, ${DEFAULT_THEME_VALUES.cancelButtonRadius});
-                    cursor: pointer;
-                    z-index: 1000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 0; /* Remove padding if using SVG for size control */
+                    border-radius: var(--ve-cw-cancel-button-radius, ${DEFAULT_THEME.cancelButtonRadius});
+                    cursor: pointer; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 0;
                     transition: transform 0.1s ease-out, background-color 0.2s ease;
-                    box-shadow: var(--ve-cw-cancel-button-shadow, ${DEFAULT_THEME_VALUES.cancelButtonShadow});
+                    box-shadow: var(--ve-cw-cancel-button-shadow, ${DEFAULT_THEME.cancelButtonShadow});
                 }
                 .cancel-button__waitroom:hover {
-                    background-color: var(--ve-cw-cancel-button-background-hover, ${this._adjustColor(DEFAULT_THEME_VALUES.cancelButtonBackground, -0.1)}); /* Darken slightly */
+                    /* Hover styles will be defined by themes or use CSS filters for simple variations */
+                    filter: brightness(1.1); /* Example for hover */
                     transform: scale(1.05);
                 }
-                .cancel-button__waitroom:active {
-                    transform: scale(0.95);
-                }
+                .cancel-button__waitroom:active { transform: scale(0.95); filter: brightness(0.9); }
                 .cancel-button__waitroom .icon__cancel {
-                    width: 50%; /* Relative to button size */
-                    height: 50%; /* Relative to button size */
-                    fill: var(--ve-cw-cancel-button-icon-color, ${DEFAULT_THEME_VALUES.cancelButtonIconColor});
+                    width: 50%; height: 50%;
+                    fill: var(--ve-cw-cancel-button-icon-color, ${DEFAULT_THEME.cancelButtonIconColor});
                 }
                 .cancel-button__waitroom:focus-visible {
                     outline: none;
-                    box-shadow: 0 0 0 0.25rem var(--ve-cw-cancel-button-focus-ring-color, ${DEFAULT_THEME_VALUES.cancelButtonFocusRingColor});
+                    box-shadow: 0 0 0 0.25rem var(--ve-cw-cancel-button-focus-ring-color, ${DEFAULT_THEME.cancelButtonFocusRingColor});
                 }
 
                 .bot-message-area__waitroom {
-                    /* Basic styles, to be enhanced by ThemeSettingsV1 in _applyTheme */
                     position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); width: auto; max-width: 90%;
                     padding: 0.75rem 1.25rem;
-                    background-color: var(--ve-cw-bot-message-background, rgba(0,0,0,0.85));
-                    color: var(--ve-cw-bot-message-text-color, white);
-                    border-radius: var(--ve-cw-bot-message-border-radius, 4px);
+                    background-color: var(--ve-cw-bot-message-background, ${DEFAULT_THEME.botMessageBackground});
+                    color: var(--ve-cw-bot-message-text-color, ${DEFAULT_THEME.botMessageTextColor});
+                    border-radius: var(--ve-cw-bot-message-border-radius, ${DEFAULT_THEME.botMessageBorderRadius});
                     text-align: center; z-index: 900; display: none;
                     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-                    font-size: var(--ve-cw-bot-message-font-size, 0.95rem);
+                    font-size: var(--ve-cw-bot-message-font-size, ${DEFAULT_THEME.botMessageFontSize});
                 }
-                /* Tiered bot messages - example styling, theme will override via CSS vars */
-                .bot-message-area__waitroom.tier-low { border-left: 5px solid var(--ve-cw-bot-message-tier-low-accent, #5bc0de); }
-                .bot-message-area__waitroom.tier-high { border-left: 5px solid var(--ve-cw-bot-message-tier-high-accent, #f0ad4e); background-color: var(--ve-cw-bot-message-tier-high-bg, rgba(50,50,50,0.9));}
-                .bot-message-area__waitroom.tier-critical { border: none; background-color: var(--ve-cw-bot-message-tier-critical-bg, #d9534f); color: var(--ve-cw-bot-message-tier-critical-text, white); }
+                .bot-message-area__waitroom.tier-low { border-left: 5px solid var(--ve-cw-bot-message-tier-low-accent, ${DEFAULT_THEME.botMessageTierLowAccentColor}); }
+                .bot-message-area__waitroom.tier-high { border-left: 5px solid var(--ve-cw-bot-message-tier-high-accent, ${DEFAULT_THEME.botMessageTierHighAccentColor}); /* Potentially different background too */ }
+                .bot-message-area__waitroom.tier-critical { border: none; background-color: var(--ve-cw-bot-message-tier-critical-bg, ${DEFAULT_THEME.botMessageTierCriticalBackground}); color: var(--ve-cw-bot-message-tier-critical-text, ${DEFAULT_THEME.botMessageTierCriticalTextColor}); }
 
-                .fail-safe__message { padding: 2rem; text-align: center; font-weight: bold; font-size: 1.1rem; color: var(--ve-cw-error-text-color, #721c24); background-color: var(--ve-cw-error-bg-color, #f8d7da); border: 1px solid var(--ve-cw-error-border-color, #f5c6cb); border-radius: 4px;}
+                .fail-safe__message { padding: 2rem; text-align: center; font-weight: bold; font-size: 1.1rem; color: var(--ve-cw-error-text-color, ${DEFAULT_THEME.errorTextColor}); background-color: var(--ve-cw-error-bg-color, ${DEFAULT_THEME.errorBgColor}); border: 1px solid var(--ve-cw-error-border-color, ${DEFAULT_THEME.errorBorderColor}); border-radius: 4px;}
                 .aria-live-region { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
 
-                /* Responsive size for cancel button icon */
                 @media (max-width: 768px) {
                     .cancel-button__waitroom {
-                        width: var(--ve-cw-cancel-button-mobile-size, ${DEFAULT_THEME_VALUES.cancelButtonMobileSize});
-                        height: var(--ve-cw-cancel-button-mobile-size, ${DEFAULT_THEME_VALUES.cancelButtonMobileSize});
-                        top: var(--ve-cw-cancel-button-mobile-offset-top, 1rem);
-                        right: var(--ve-cw-cancel-button-mobile-offset-right, 1rem);
+                        width: var(--ve-cw-cancel-button-mobile-size, ${DEFAULT_THEME.cancelButtonMobileSize});
+                        height: var(--ve-cw-cancel-button-mobile-size, ${DEFAULT_THEME.cancelButtonMobileSize});
+                        top: var(--ve-cw-cancel-button-mobile-offset-top, 1rem); /* Example - these need theme props */
+                        right: var(--ve-cw-cancel-button-mobile-offset-right, 1rem);/* Example - these need theme props */
                     }
                 }
             </style>
@@ -385,333 +325,309 @@ class VECarouselWaitroom extends HTMLElement {
                     <svg class="icon__cancel" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                     </svg>
-                    </button>
+                </button>
                 <div class="bot-message-area__waitroom" id="bot-message-area-id" aria-hidden="true" role="status" aria-live="polite" aria-atomic="true"></div>
                 <div class="aria-live-region" id="aria-live-region-id" aria-live="polite" aria-atomic="true"></div>
             </div>
         `;
-
         this.#containerEl = this.#shadow.getElementById('waitroom-container-host-id');
         this.#slideDisplayAreaEl = this.#shadow.getElementById('slide-display-area-id');
         this.#cancelButtonEl = this.#shadow.getElementById('cancel-btn-id');
         this.#botMessageAreaEl = this.#shadow.getElementById('bot-message-area-id');
         this.#ariaLiveRegionEl = this.#shadow.getElementById('aria-live-region-id');
-        this.#logger.debug("Scaffold DOM elements assigned and initial styles applied.");
+        this.#logger.debug("Scaffold DOM elements assigned.");
     }
 
     _applyFullConfig() {
         if (!this.#internalConfig || !this.isConnected) {
-            this.#logger.debug("Skipping _applyFullConfig: Config not ready or component not connected.");
-            return;
+            this.#logger.debug("Skipping _applyFullConfig: No config or not connected."); return;
         }
-        this.#logger.info("Applying full configuration to component.");
+        this.#logger.info("Applying full configuration.");
         this._resetInternalState();
-
-        // Apply theme first, so CSS vars are available for slide rendering if needed
         this._applyTheme(this.#internalConfig.theme || {});
         this._applyAccessibilitySettings(this.#internalConfig.accessibility || {});
-        this._renderSlides(this.#internalConfig.slides || []); // Actual slide rendering in Phase 2
-
-        // TODO (Phase 2): Restart/configure autoplay from this.#internalConfig.carousel.
+        this._renderSlides(this.#internalConfig.slides || []);
+        // TODO (P2): Configure autoplay from this.#internalConfig.carousel
     }
 
     _resetInternalState() {
-        this.#logger.debug("Resetting internal component state.");
+        this.#logger.debug("Resetting internal state.");
         if (this.#slideDisplayAreaEl) {
-            this.#slideDisplayAreaEl.innerHTML = `<p class="slides-area__waitroom-message">Re-configuring slides...</p> <div class="debug-slide-info" id="debug-slide-info-id">Current Placeholder Slide: 0</div>`;
+            this.#slideDisplayAreaEl.innerHTML = `<p class="slides-area__waitroom-message">Re-configuring...</p> <div class="debug-slide-info" id="debug-slide-info-id">Current Placeholder Slide: 0</div>`;
         }
         this.#debugCurrentSlideIndex = 0;
         this.#debugTotalSlides = this.#internalConfig?.slides?.length || 0;
         this._updateDebugSlideDisplay();
-        // TODO (Phase 2+): Clear autoplay timers, active slide elements, etc.
+        // TODO (P2+): Clear autoplay timers, active slide elements etc.
     }
 
     /** @param {object} themeConfig - ThemeSettingsV1 object */
-    _applyTheme(themeConfig) {
-        this.#logger.info("Applying theme configuration.", { receivedTheme: themeConfig });
+    _applyTheme(themeConfigInput) {
+        const themeConfig = themeConfigInput || {}; // Ensure themeConfig is an object
+        this.#logger.info("Applying theme.", { receivedThemeIsObject: typeof themeConfig === 'object' });
 
-        const setCssVar = (varName, value, defaultValue, validatorFn) => {
-            const validatedValue = validatorFn ? validatorFn(value, defaultValue) : (value || defaultValue);
-            this.style.setProperty(varName, validatedValue);
-            this.#logger.debug(`CSS Var Set: ${varName} = ${validatedValue}`);
+        // Define mapping from ThemeSettingsV1 keys to CSS Custom Property names
+        const themePropertyMap = {
+            fontFamily: '--ve-cw-font-family',
+            componentBackground: '--ve-cw-component-background',
+            primaryTextColor: '--ve-cw-primary-text-color',
+            baseFontSize: '--ve-cw-base-font-size',
+            slideTitleColor: '--ve-cw-slide-title-color',
+            slideTitleFontSize: '--ve-cw-slide-title-font-size',
+            slideDescriptionColor: '--ve-cw-slide-description-color',
+            slideDescriptionFontSize: '--ve-cw-slide-description-font-size',
+            slideMediaOverlayBackground: '--ve-cw-slide-media-overlay-background',
+            botMessageBackground: '--ve-cw-bot-message-background',
+            botMessageTextColor: '--ve-cw-bot-message-text-color',
+            botMessageBorderRadius: '--ve-cw-bot-message-border-radius',
+            botMessageFontSize: '--ve-cw-bot-message-font-size',
+            botMessageTierLowAccentColor: '--ve-cw-bot-message-tier-low-accent',
+            botMessageTierHighAccentColor: '--ve-cw-bot-message-tier-high-accent',
+            botMessageTierCriticalBackground: '--ve-cw-bot-message-tier-critical-bg',
+            botMessageTierCriticalTextColor: '--ve-cw-bot-message-tier-critical-text',
+            accentColor: '--ve-cw-accent-color',
+            // Cancel Button
+            cancelButtonBackground: '--ve-cw-cancel-button-background',
+            cancelButtonIconColor: '--ve-cw-cancel-button-icon-color',
+            cancelButtonSize: '--ve-cw-cancel-button-size',
+            cancelButtonMobileSize: '--ve-cw-cancel-button-mobile-size',
+            cancelButtonRadius: '--ve-cw-cancel-button-radius',
+            cancelButtonOffsetTop: '--ve-cw-cancel-button-offset-top',
+            cancelButtonOffsetRight: '--ve-cw-cancel-button-offset-right',
+            cancelButtonShadow: '--ve-cw-cancel-button-shadow',
+            cancelButtonFocusRingColor: '--ve-cw-cancel-button-focus-ring-color',
+            // Focus Indicators (can be derived if not set, using accentColor)
+            focusIndicatorHostShadow: '--ve-cw-focus-indicator-host-shadow',
+            focusIndicatorButtonShadow: '--ve-cw-focus-indicator-button-shadow',
+            // Internal/Debug (not part of ThemeSettingsV1, but still useful for consistency)
+            debugBorderColor: '--ve-cw-debug-border-color',
+            placeholderTextColor: '--ve-cw-placeholder-text-color',
+            errorTextColor: '--ve-cw-error-text-color',
+            errorBgColor: '--ve-cw-error-bg-color',
+            errorBorderColor: '--ve-cw-error-border-color',
         };
-        
-        // Apply all theme properties from ThemeSettingsV1 using their CSS vars
-        // This is just a small subset for demonstration; expand for all in themeguide.md
-        setCssVar('--ve-cw-component-background', themeConfig.componentBackground, DEFAULT_THEME_VALUES.componentBackground, this._validateCssColor);
-        setCssVar('--ve-cw-primary-text-color', themeConfig.primaryTextColor, DEFAULT_THEME_VALUES.primaryTextColor, this._validateCssColor);
-        setCssVar('--ve-cw-font-family', themeConfig.fontFamily, 'sans-serif', this._validateFontFamily); // Assuming _validateFontFamily
-        setCssVar('--ve-cw-base-font-size', themeConfig.baseFontSize, '1rem', this._validateCssSize); // Assuming _validateCssSize
 
-        // Cancel Button Specific Theming
-        setCssVar('--ve-cw-cancel-button-background', themeConfig.cancelButtonBackground, DEFAULT_THEME_VALUES.cancelButtonBackground, this._validateCssColor);
-        setCssVar('--ve-cw-cancel-button-icon-color', themeConfig.cancelButtonIconColor, DEFAULT_THEME_VALUES.cancelButtonIconColor, this._validateCssColor);
-        setCssVar('--ve-cw-cancel-button-size', themeConfig.cancelButtonSize, DEFAULT_THEME_VALUES.cancelButtonSize, this._validateCssSize);
-        setCssVar('--ve-cw-cancel-button-mobile-size', themeConfig.cancelButtonMobileSize, DEFAULT_THEME_VALUES.cancelButtonMobileSize, this._validateCssSize);
-        setCssVar('--ve-cw-cancel-button-radius', themeConfig.cancelButtonRadius, DEFAULT_THEME_VALUES.cancelButtonRadius, this._validateCssSize);
-        setCssVar('--ve-cw-cancel-button-offset-top', themeConfig.cancelButtonOffsetTop, DEFAULT_THEME_VALUES.cancelButtonOffsetTop, this._validateCssSize);
-        setCssVar('--ve-cw-cancel-button-offset-right', themeConfig.cancelButtonOffsetRight, DEFAULT_THEME_VALUES.cancelButtonOffsetRight, this._validateCssSize);
-        setCssVar('--ve-cw-cancel-button-shadow', themeConfig.cancelButtonShadow, DEFAULT_THEME_VALUES.cancelButtonShadow, this._validateShadow); // Assuming _validateShadow
-        setCssVar('--ve-cw-cancel-button-focus-ring-color', themeConfig.cancelButtonFocusRingColor, DEFAULT_THEME_VALUES.cancelButtonFocusRingColor, this._validateCssColor);
-        
-        // Accent color for general focus (fallback if specific not set)
-        const accentColor = this._validateCssColor(themeConfig.accentColor, DEFAULT_THEME_VALUES.accentColor);
-        setCssVar('--ve-cw-accent-color', accentColor);
-        if (!themeConfig.cancelButtonFocusRingColor) { // If specific cancel button focus color not set, derive from accent
-            this.style.setProperty('--ve-cw-cancel-button-focus-ring-color', `rgba(${this._hexToRgb(accentColor)?.join(',') || '0,123,255'}, 0.5)`);
+        let effectiveTheme = {};
+
+        for (const key in DEFAULT_THEME) {
+            const cssVarName = themePropertyMap[key];
+            if (!cssVarName) {
+                //this.#logger.warn(`No CSS variable mapping for theme key: ${key}`);
+                continue; // Skip if no CSS var defined for this default key
+            }
+
+            let valueToApply = themeConfig[key];
+            let validationFn;
+
+            // Determine validation function based on key
+            if (key.toLowerCase().includes('color') || key.toLowerCase().includes('background') && !key.toLowerCase().includes('image')) { // crude check
+                validationFn = this._validateCssColor.bind(this);
+            } else if (key.toLowerCase().includes('size') || key.toLowerCase().includes('radius') || key.toLowerCase().includes('offset')) {
+                validationFn = this._validateCssSize.bind(this);
+            } else if (key.toLowerCase().includes('family')) {
+                validationFn = this._validateFontFamily.bind(this);
+            } else if (key.toLowerCase().includes('shadow')) {
+                validationFn = this._validateShadow.bind(this);
+            } else {
+                validationFn = (val, defVal) => val !== undefined ? val : defVal; // Passthrough if no specific validator
+            }
+
+            const validatedValue = validationFn(valueToApply, DEFAULT_THEME[key], key); // Pass key for error reporting
+            this.style.setProperty(cssVarName, validatedValue);
+            effectiveTheme[key] = validatedValue;
+           // this.#logger.debug(`Theme: CSS Var ${cssVarName} = ${validatedValue}`);
         }
-         if (!themeConfig.hostFocusIndicatorShadowColor) { // Example for host focus
-            this.style.setProperty('--ve-cw-focus-indicator-host-shadow', `rgba(${this._hexToRgb(accentColor)?.join(',') || '0,90,180'}, 0.6)`);
+        
+        // Handle derived focus colors if not explicitly set by theme
+        if (!themeConfig.focusIndicatorHostShadow && effectiveTheme.accentColor) {
+            const derivedFocus = `rgba(${this._hexToRgb(effectiveTheme.accentColor)?.join(',') || '0,90,180'}, 0.6)`;
+            this.style.setProperty(themePropertyMap.focusIndicatorHostShadow, derivedFocus);
+            effectiveTheme.focusIndicatorHostShadow = derivedFocus;
+           // this.#logger.debug(`Theme: Derived CSS Var ${themePropertyMap.focusIndicatorHostShadow} = ${derivedFocus}`);
+        }
+        if (!themeConfig.cancelButtonFocusRingColor && effectiveTheme.cancelButtonBackground) { // Derive from its own bg
+             const derivedCancelFocus = `rgba(${this._hexToRgb(effectiveTheme.cancelButtonBackground)?.join(',') || '220,53,69'}, 0.5)`;
+            this.style.setProperty(themePropertyMap.cancelButtonFocusRingColor, derivedCancelFocus);
+            effectiveTheme.cancelButtonFocusRingColor = derivedCancelFocus;
+           // this.#logger.debug(`Theme: Derived CSS Var ${themePropertyMap.cancelButtonFocusRingColor} = ${derivedCancelFocus}`);
         }
 
 
-        this._dispatchEvent('themeApplied', { themeApplied: themeConfig });
+        this.#logger.info("Theme applied successfully.");
+        this._dispatchEvent('themeApplied', { effectiveTheme });
     }
 
-    /** @param {object} accessibilityConfig */
     _applyAccessibilitySettings(accessibilityConfig) {
-        this.#logger.info("Applying accessibility configuration.", { accessibilityConfig });
-
+        this.#logger.info("Applying accessibility settings.", { accessibilityConfig });
         const hostLabel = accessibilityConfig.carouselLabel || DEFAULT_HOST_LABEL;
         if (this.getAttribute('aria-label') !== hostLabel) {
             this.setAttribute('aria-label', hostLabel);
-            this.#logger.debug(`Host aria-label updated to: "${hostLabel}"`);
+            this.#logger.debug(`Host aria-label set: "${hostLabel}"`);
         }
-
         if (this.#cancelButtonEl) {
             const cancelLabel = accessibilityConfig.cancelButtonAriaLabel || DEFAULT_CANCEL_BUTTON_ARIA_LABEL;
             if (this.#cancelButtonEl.getAttribute('aria-label') !== cancelLabel) {
                 this.#cancelButtonEl.setAttribute('aria-label', cancelLabel);
-                this.#logger.debug(`Cancel button aria-label updated to: "${cancelLabel}"`);
+                this.#logger.debug(`Cancel button aria-label set: "${cancelLabel}"`);
             }
         }
-        // TODO (Phase 3): Apply other accessibility settings like patterns for announcements.
+        // TODO (P3): Use accessibilityConfig.slideChangeAnnouncementPattern etc.
     }
 
-
-    /** @param {Array<object>} slidesConfig */
     _renderSlides(slidesConfig) {
-        this.#logger.info(`Preparing to render ${slidesConfig.length} slides.`);
+        this.#logger.info(`Rendering ${slidesConfig.length} slides.`);
         this.#debugTotalSlides = slidesConfig.length;
         this.#debugCurrentSlideIndex = 0;
-        this._updateDebugSlideDisplay(); // Update placeholder with correct total
+        this._updateDebugSlideDisplay();
 
         if (this.#slideDisplayAreaEl) {
             if (slidesConfig.length > 0) {
-                // Phase 1: Update placeholder. Phase 2: Actual slide rendering.
-                this.#slideDisplayAreaEl.innerHTML = `<p class="slides-area__waitroom-message">Slides would be rendered here. First slide title (if any): "${slidesConfig[0]?.title || 'N/A'}"</p> <div class="debug-slide-info" id="debug-slide-info-id">${this._getDebugSlideInfoText()}</div>`;
-                this._announceToScreenReader(`Displaying slide 1 of ${slidesConfig.length}. ${slidesConfig[0]?.title || ''}`);
-                this._dispatchEvent('slideChanged', { currentIndex: 0, slideData: slidesConfig[0], totalSlides: slidesConfig.length, trigger: 'config_apply' });
+                this.#slideDisplayAreaEl.innerHTML = `<p class="slides-area__waitroom-message">Slides rendering Phase 2. First slide title: "${slidesConfig[0]?.title || 'N/A'}"</p> <div class="debug-slide-info" id="debug-slide-info-id">${this._getDebugSlideInfoText()}</div>`;
+                const firstSlideData = slidesConfig[0];
+                this._announceToScreenReader(`Displaying slide 1 of ${slidesConfig.length}. ${firstSlideData?.title || ''}`);
+                this._dispatchEvent('slideChanged', { currentIndex: 0, slideData: firstSlideData, totalSlides: slidesConfig.length, trigger: 'config_apply' });
             } else {
-                const noSlidesText = this.#internalConfig?.accessibility?.noSlidesText || "No information to display at this time.";
+                const noSlidesText = this.#internalConfig?.accessibility?.noSlidesText || "No information to display.";
                 this.#slideDisplayAreaEl.innerHTML = `<p class="slides-area__waitroom-message">${noSlidesText}</p>`;
                 this._announceToScreenReader(noSlidesText);
             }
         }
-        // TODO (Phase 2): Create slide elements, manage active slide, transitions, lazy loading.
+        // TODO (P2 Actual): Clear old, create actual slide elements, lazy load, transitions.
     }
 
     _renderFailSafe(message) {
-        this.#logger.error("Entering fail-safe rendering mode.", { failMessage: message });
-        if (!this.#shadow || !this.#shadow.firstChild) {
-            this._renderScaffold();
-        }
-        const targetArea = this.#slideDisplayAreaEl || this.#containerEl;
-        if (targetArea) {
-            targetArea.innerHTML = `<div class="fail-safe__message">${message}</div>`;
-        } else {
-            this.#shadow.innerHTML = `<div style="color:red; padding:1em; border:2px solid red;">${message} (Critical render failure)</div>`;
-        }
+        this.#logger.error("Fail-safe render.", { failMessage: message });
+        if (!this.#shadow?.firstChild) this._renderScaffold();
+        const target = this.#slideDisplayAreaEl || this.#containerEl || this.#shadow;
+        if (target) target.innerHTML = `<div class="fail-safe__message">${message}</div>`;
         this._announceToScreenReader(`Error: ${message}`);
         this._dispatchEvent('criticalError', { errorCode: 'FAIL_SAFE_RENDER', reason: message });
     }
 
-    _setInitialFocus() {
-        this.focus(); // Focus the host element by default.
-        this.#logger.debug("Initial focus programmatically set to host element.");
-    }
+    _setInitialFocus() { this.focus(); this.#logger.debug("Initial focus set to host."); }
 
     _attachInternalEventListeners() {
         if (this.#cancelButtonEl) {
-            this.#cancelButtonEl.removeEventListener('click', this.#boundHandleCancelClick); // Remove first to prevent duplicates if called again
+            this.#cancelButtonEl.removeEventListener('click', this.#boundHandleCancelClick);
             this.#cancelButtonEl.addEventListener('click', this.#boundHandleCancelClick);
         }
-        this.removeEventListener('keydown', this.#boundHandleHostKeydown); // Remove first
+        this.removeEventListener('keydown', this.#boundHandleHostKeydown);
         this.addEventListener('keydown', this.#boundHandleHostKeydown);
         this.#logger.debug("Internal event listeners (re)attached.");
     }
 
     _handleCancelClick() {
-        this.#logger.info("Cancel button clicked by user.");
-        // When cancel is clicked, we want to pause the carousel's activity
-        this._internalPauseActivity('cancel_button'); // Call the internal method
+        this.#logger.info("Cancel button clicked.");
+        this._internalPauseActivity('cancel_button');
         this._dispatchEvent('userCancelled', { timestamp: Date.now(), reason: 'cancel_button_click' });
     }
 
     _internalPauseActivity(reason) {
-        this.#logger.info(`Internal activity being paused due to: ${reason}.`);
-        // TODO (Phase 2): Implement actual pausing logic here:
-        // - Clear autoplay timers (e.g., if (this.#autoplayTimerId) clearInterval(this.#autoplayTimerId); this.#autoplayTimerId = null;)
-        // - Stop any ongoing slide transitions or animations.
-        // - Potentially update an internal state like this.#isPlaying = false;
-        // DO NOT CALL this.pause() from here as that creates the loop.
-        this.#logger.debug(`Internal pause logic executed for reason: ${reason}.`);
+        this.#logger.info(`Internal activity paused due to: ${reason}.`);
+        // No call to this.pause() here. This IS the core pause logic stub for Phase 1/2.
+        // TODO (P2/P3): Clear autoplay timers, stop animations, etc.
+        this.#logger.debug(`Internal pause logic executed for ${reason}.`);
     }
-    // _internalResumeActivity(reason) { /* For symmetry, to be used by thaw/play */ }
 
-
-    /** @param {KeyboardEvent} event */
     _handleHostKeydown(event) {
-        this.#logger.debug(`Host keydown: Key='${event.key}', Code='${event.code}'`);
-        let handled = false;
-        const totalSlides = this.#debugTotalSlides;
-
-        if (totalSlides === 0 && event.key !== "Escape") return;
-
+        this.#logger.debug(`Host keydown: Key='${event.key}'`);
+        let handled = false; const total = this.#debugTotalSlides;
+        if (total === 0 && event.key !== "Escape") return;
         switch (event.key) {
-            case "Escape":
-                this.#logger.info("Escape key pressed. Triggering cancel action.");
-                this._handleCancelClick();
-                handled = true;
-                break;
-            case "ArrowLeft": case "ArrowUp":
-                this.#logger.info("ArrowLeft/Up key pressed (previous slide).");
-                if (totalSlides > 0) {
-                    const newIndex = (this.#debugCurrentSlideIndex - 1 + totalSlides) % totalSlides;
-                    this._updateDebugSlideIndex(newIndex, "keyboard_prev");
-                }
-                handled = true;
-                break;
-            case "ArrowRight": case "ArrowDown": case " ":
-                this.#logger.info("ArrowRight/Down/Space key pressed (next slide).");
-                 if (totalSlides > 0) {
-                    const newIndex = (this.#debugCurrentSlideIndex + 1) % totalSlides;
-                    this._updateDebugSlideIndex(newIndex, "keyboard_next");
-                }
-                handled = true;
-                break;
-            case "Home":
-                this.#logger.info("Home key pressed (first slide).");
-                if (totalSlides > 0) this._updateDebugSlideIndex(0, "keyboard_home");
-                handled = true;
-                break;
-            case "End":
-                this.#logger.info("End key pressed (last slide).");
-                if (totalSlides > 0) this._updateDebugSlideIndex(totalSlides - 1, "keyboard_end");
-                handled = true;
-                break;
+            case "Escape": this._handleCancelClick(); handled = true; break;
+            case "ArrowLeft": case "ArrowUp": if(total > 0) this._updateDebugSlideIndex((this.#debugCurrentSlideIndex - 1 + total) % total, "kb_prev"); handled = true; break;
+            case "ArrowRight": case "ArrowDown": case " ": if(total > 0) this._updateDebugSlideIndex((this.#debugCurrentSlideIndex + 1) % total, "kb_next"); handled = true; break;
+            case "Home": if(total > 0) this._updateDebugSlideIndex(0, "kb_home"); handled = true; break;
+            case "End": if(total > 0) this._updateDebugSlideIndex(total - 1, "kb_end"); handled = true; break;
         }
-
-        if (handled) {
-            event.preventDefault();
-            this.#logger.debug(`Key "${event.key}" handled, default action prevented.`);
-        }
+        if (handled) event.preventDefault();
     }
 
-    _getDebugSlideInfoText() {
-        if (this.#debugTotalSlides > 0) {
-            return `Current Placeholder Slide: ${this.#debugCurrentSlideIndex + 1} of ${this.#debugTotalSlides}`;
-        }
-        return "No slides loaded for placeholder navigation.";
-    }
+    _getDebugSlideInfoText() { return this.#debugTotalSlides > 0 ? `Placeholder Slide: ${this.#debugCurrentSlideIndex + 1}/${this.#debugTotalSlides}` : "No slides for placeholder nav."; }
 
     _updateDebugSlideIndex(newIndex, trigger) {
         const oldIndex = this.#debugCurrentSlideIndex;
         this.#debugCurrentSlideIndex = newIndex;
-        this.#logger.info(`Placeholder slide index changed from ${oldIndex} to ${newIndex} by ${trigger}.`);
+        this.#logger.info(`Placeholder slide idx ${oldIndex} -> ${newIndex} by ${trigger}.`);
         this._updateDebugSlideDisplay();
-
         const slideData = this.#internalConfig?.slides[newIndex];
         const announcement = `Slide ${newIndex + 1} of ${this.#debugTotalSlides}. ${slideData?.title || ''}`.trim();
         this._announceToScreenReader(announcement);
-
-        this._dispatchEvent('slideChanged', {
-            currentIndex: this.#debugCurrentSlideIndex,
-            totalSlides: this.#debugTotalSlides,
-            trigger: trigger,
-            slideData: slideData || null
-        });
+        this._dispatchEvent('slideChanged', { currentIndex: newIndex, totalSlides: this.#debugTotalSlides, trigger, slideData: slideData || null });
     }
 
     _updateDebugSlideDisplay() {
-        const debugInfoEl = this.#shadow.getElementById('debug-slide-info-id');
-        if (debugInfoEl) {
-            debugInfoEl.textContent = this._getDebugSlideInfoText();
-        }
+        const el = this.#shadow.getElementById('debug-slide-info-id');
+        if (el) el.textContent = this._getDebugSlideInfoText();
     }
 
     _announceToScreenReader(message) {
         if (this.#ariaLiveRegionEl) {
-            // Clear previous message before setting new one to ensure it's announced
-            this.#ariaLiveRegionEl.textContent = '';
-            this.#ariaLiveRegionEl.textContent = message;
-            this.#logger.debug(`Announced to screen reader (aria-live): "${message}"`);
-        } else {
-            this.#logger.warn("ARIA live region element not found for screen reader announcement.");
-        }
+            this.#ariaLiveRegionEl.textContent = ''; this.#ariaLiveRegionEl.textContent = message;
+            this.#logger.debug(`ARIA Live: "${message}"`);
+        } else this.#logger.warn("ARIA live region not found for announcement.");
     }
 
     _dispatchEvent(eventName, detailPayload = {}) {
-        if (!this.isConnected) {
-            this.#logger.warn(`Dispatch event "${eventName}" attempt while disconnected. Suppressed.`, { detailPayload });
-            return;
-        }
+        if (!this.isConnected) { this.#logger.warn(`Dispatch "${eventName}" suppressed (disconnected).`, { detailPayload }); return; }
         const detail = (typeof detailPayload === 'object' && detailPayload !== null) ? detailPayload : {};
-        const event = new CustomEvent(eventName, { detail, bubbles: true, composed: true });
-        this.dispatchEvent(event);
+        this.dispatchEvent(new CustomEvent(eventName, { detail, bubbles: true, composed: true }));
         this.#logger.debug(`Dispatched event: "${eventName}"`, detail);
     }
 
-    // --- Helper for theme validation (example with expanded stubs) ---
-    _validateCssColor(colorString, defaultValue) {
-        if (typeof colorString === 'string' && colorString.trim() !== '') {
-            const s = new Option().style;
-            s.color = colorString.trim(); // Use trimmed value for validation
-            if (s.color !== '') return colorString.trim(); // Return trimmed valid color
+    // --- Validation Helpers (to be expanded as per themeguide.md) ---
+    _validateCssColor(value, defaultValue, propertyName = 'unknown_color_prop') {
+        if (typeof value === 'string' && value.trim() !== '') {
+            const s = new Option().style; s.color = value.trim();
+            if (s.color !== '') return value.trim();
         }
-        //this.#logger.warn(`Invalid CSS color value "${colorString}". Using default "${defaultValue}".`);
-        //this._dispatchEvent('error', { errorCode: 'THEME_INVALID_COLOR', propertyValue: String(colorString), fallbackValue: defaultValue});
-        return defaultValue;
-    }
-    _validateCssSize(sizeString, defaultValue) {
-        if (typeof sizeString === 'string' && /^\d+(\.\d+)?(px|em|rem|%|vw|vh)$/i.test(sizeString.trim())) {
-            return sizeString.trim();
-        }
-        //this.#logger.warn(`Invalid CSS size value "${sizeString}". Using default "${defaultValue}".`);
-        //this._dispatchEvent('error', { errorCode: 'THEME_INVALID_SIZE', propertyValue: String(sizeString), fallbackValue: defaultValue});
-        return defaultValue;
-    }
-    _validateFontFamily(fontString, defaultValue) {
-        if (typeof fontString === 'string' && fontString.trim() !== '') {
-            return fontString.trim(); // Basic check, browser handles actual font availability
+        if (value !== undefined) { // Only warn if a value was provided but was invalid
+            this.#logger.warn(`Invalid CSS color for ${propertyName}: "${value}". Using default "${defaultValue}".`);
+            this._dispatchEvent('error', { errorCode: 'THEME_INVALID_VALUE', propertyName, receivedValue: String(value), fallbackValue: defaultValue });
         }
         return defaultValue;
     }
-    _validateShadow(shadowString, defaultValue) {
-         if (typeof shadowString === 'string' && shadowString.trim() !== '') {
-            return shadowString.trim(); // Complex to validate fully, accept strings
+    _validateCssSize(value, defaultValue, propertyName = 'unknown_size_prop') {
+        if (typeof value === 'string' && /^\d+(\.\d+)?(px|em|rem|%|vw|vh|vmin|vmax)$/i.test(value.trim())) {
+            return value.trim();
+        }
+        if (value !== undefined) {
+            this.#logger.warn(`Invalid CSS size for ${propertyName}: "${value}". Using default "${defaultValue}".`);
+            this._dispatchEvent('error', { errorCode: 'THEME_INVALID_VALUE', propertyName, receivedValue: String(value), fallbackValue: defaultValue });
+        }
+        return defaultValue;
+    }
+    _validateFontFamily(value, defaultValue, propertyName = 'unknown_font_prop') { // Basic, relies on browser parsing
+        if (typeof value === 'string' && value.trim() !== '') return value.trim();
+        if (value !== undefined) {
+             this.#logger.warn(`Invalid Font Family for ${propertyName}: "${value}". Using default "${defaultValue}".`);
+             this._dispatchEvent('error', { errorCode: 'THEME_INVALID_VALUE', propertyName, receivedValue: String(value), fallbackValue: defaultValue });
+        }
+        return defaultValue;
+    }
+    _validateShadow(value, defaultValue, propertyName = 'unknown_shadow_prop') { // Basic, relies on browser parsing
+        if (typeof value === 'string' && value.trim() !== '' && value.toLowerCase() !== 'none') return value.trim();
+        if (value === 'none') return 'none'; // Allow 'none' explicitly
+        if (value !== undefined) {
+             this.#logger.warn(`Invalid Box Shadow for ${propertyName}: "${value}". Using default "${defaultValue}".`);
+             this._dispatchEvent('error', { errorCode: 'THEME_INVALID_VALUE', propertyName, receivedValue: String(value), fallbackValue: defaultValue });
         }
         return defaultValue;
     }
 
      _hexToRgb(hex) {
         if (!hex || typeof hex !== 'string') return null;
-        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-        hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+        hex = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => r + r + g + g + b + b);
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
     }
-    // Helper to slightly darken or lighten a hex color for hover/active states (very basic)
+     // Basic color adjuster for hover/active states if specific theme props aren't given
     _adjustColor(hexColor, percent) {
-        const num = parseInt(hexColor.slice(1), 16);
-        const amt = Math.round(2.55 * percent * 10); // More aggressive change
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
-        const newR = Math.max(0, Math.min(255, R)).toString(16).padStart(2, '0');
-        const newG = Math.max(0, Math.min(255, G)).toString(16).padStart(2, '0');
-        const newB = Math.max(0, Math.min(255, B)).toString(16).padStart(2, '0');
-        return `#${newR}${newG}${newB}`;
+        const rgb = this._hexToRgb(hexColor);
+        if (!rgb) return hexColor; // Return original if not a valid hex
+        const amt = Math.round(25.5 * percent); // percent is -1 to 1 for -100% to 100% change
+        const [r, g, b] = rgb.map(val => Math.max(0, Math.min(255, val + amt)));
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
 }
 
@@ -719,67 +635,28 @@ if (!customElements.get('ve-carousel-waitroom')) {
     customElements.define('ve-carousel-waitroom', VECarouselWaitroom);
 }
 
-/*
-================================================================================
-MANUAL TEST HARNESS CHECKLIST FOR PHASE 1 (ve-carousel-waitroom.js) - UPDATED
-================================================================================
-(As per previous Phase 1 sign-off, this checklist is for verifying the scaffold)
+/* MANUAL TEST HARNESS CHECKLIST FOR PHASE 1 & 2.2 (THEMING) REMAINS LARGELY THE SAME
+   ADDITIONAL CHECKS FOR THEMING (Task 2.2):
+1. THEME APPLICATION & VALIDATION:
+    [ ] Verify: All properties in `ThemeSettingsV1` (from `themeguide.md`) are processed by `_applyTheme`.
+    [ ] Verify: For each theme property, if an *invalid* value is provided in `config.theme`:
+        [ ] A warning is logged by the component's logger detailing the property, invalid value, and fallback.
+        [ ] An 'error' event with `errorCode: 'THEME_INVALID_VALUE'` and relevant details is dispatched.
+        [ ] The corresponding CSS Custom Property on the host element is set to the documented default value for that property.
+        [ ] The component's visual appearance reflects the default value for that property.
+    [ ] Verify: If a theme property is *omitted* from `config.theme`, its documented default value is used for the CSS Custom Property and visuals.
+    [ ] Verify: If a *valid* value is provided for a theme property, the CSS Custom Property is set correctly, and visuals reflect this.
+    [ ] Verify: Test with a "worst-case" theme object containing multiple invalid values. Ensure all are handled, fallbacks applied, and component remains stable.
+    [ ] Verify: `themeApplied` event is dispatched after `_applyTheme` completes, with `event.detail.effectiveTheme` reflecting the applied (validated/defaulted) theme.
+    [ ] Verify: Styles in Shadow DOM correctly use `var(--ve-cw-propertyName, DEFAULT_VALUE_IN_CSS)` for all themeable aspects.
+    [ ] Verify: Runtime theme changes:
+        [ ] Set initial config with theme A.
+        [ ] Later, set `carousel.config = newConfigWithThemeB`.
+        [ ] Verify CSS Custom Properties and visuals update to reflect Theme B.
+        [ ] Verify `themeApplied` event is dispatched again.
 
-Developer/Tester: After integrating this scaffold into `test-carousel.html` (or similar):
-
-1.  LOGGER INJECTION:
-    [X] Verify: If no logger is passed to `carousel.logger`, a "CRITICAL WARNING" about using default logger appears in console on connect.
-    [X] Verify: If a valid custom logger (implementing ILogger) is passed to `carousel.logger` *before* `connectedCallback` (e.g., before appending to DOM), subsequent logs (like in `connectedCallback`) use the custom logger.
-    [X] Verify: If an invalid logger object is passed, a warning is logged, and the component continues with its previous/default logger.
-
-2.  CONFIGURATION & FAIL-SAFE:
-    [X] Verify: `carousel.config = null` (or non-object) -> error log, fail-safe message in Shadow DOM, 'error' event 'INVALID_CONFIG'.
-    [X] Verify: `carousel.config = { slides: "not-an-array" }` -> error log, fail-safe, 'error' event 'INVALID_CONFIG_SLIDES'.
-    [X] Verify: `config.theme` or `config.accessibility` missing/invalid -> warnings logged, defaults used, component initializes.
-    [X] Verify: Valid minimal config (`{slides:[], theme:{}, accessibility:{}, carousel:{}}`) -> `carouselReady` event detail `initialConfigPresent: true`. Shows "No slides to display" (or configured `noSlidesText`).
-    [X] Verify: Setting a new valid config updates component (debugTotalSlides, host aria-label). `configApplied` event dispatched.
-
-3.  API & VERSIONING:
-    [X] Verify: `carousel.version` returns "1.0.0".
-    [X] Verify: `carousel.themeApiVersion` returns "1.0".
-    [X] Verify: `carousel.accessibilityApiVersion` returns "1.0".
-    [X] Verify: Calling stubbed methods (`freeze`, `thaw`, `play`, `pause`, `goToSlide`, `reset`, `showBotMessage`) logs invocation. `showBotMessage` makes bot message area visible with text and ARIA live region updated.
-
-4.  ACCESSIBILITY (BASIC):
-    [X] Verify: Host `<ve-carousel-waitroom>` has `role="region"`, `tabindex="0"`, and `aria-label` (default or from config).
-    [X] Verify: Cancel button (`#cancel-btn-id` in shadow DOM) is a `<button>`, has `aria-label` (default or from config).
-    [X] Verify: Cancel button focusable via Tab. Host focusable via Tab. Logical tab order.
-    [X] Verify: Visible focus indicator (`box-shadow`) on host and cancel button when keyboard focused.
-    [X] Verify (axe-core): Run on test page. Expect minimal/no automated violations for this scaffold.
-    [X] Verify (Manual Screen Reader):
-        [X] Host focused: role and label announced.
-        [X] Cancel button focused: role and label announced.
-        [X] ARIA live region (`#aria-live-region-id`) present.
-
-5.  KEYBOARD NAVIGATION (PLACEHOLDER):
-    [X] Verify: Focus on host:
-        [X] `ArrowRight/Down/Space`: "Current Placeholder Slide" text in shadow DOM updates (loops). ARIA live region announces "Slide X of Y. [Optional Title]". `slideChanged` event dispatched.
-        [X] `ArrowLeft/Up`: Same for previous slide.
-        [X] `Home`: Updates to "Slide 1 of Y", announces, dispatches event.
-        [X] `End`: Updates to "Slide Y of Y", announces, dispatches event.
-        [X] `Escape`: Triggers cancel log, dispatches `userCancelled` event.
-    [X] Verify: Console logs confirm key presses and `event.preventDefault()`.
-
-6.  THEMING (PLACEHOLDER):
-    [X] Verify: After `carousel.config = { theme: { componentBackground: 'purple', accentColor: 'lime' } }`, inspect host's inline styles:
-        `--ve-cw-component-background: purple;`
-        `--ve-cw-accent-color: lime;` (and derived focus colors if not explicitly set in theme)
-        `themeApplied` event dispatched.
-    [X] Verify: Invalid color (e.g. `componentBackground: 'not-a-color'`) -> warning logged, fallback color used for CSS var, `error` event `THEME_INVALID_COLOR` dispatched.
-
-7.  EVENT DISPATCH:
-    [X] Verify: `carouselReady` event (bubbles, composed) dispatched on `connectedCallback` with correct detail.
-    [X] Verify: `userCancelled` event (bubbles, composed) on cancel button/Escape, with correct detail.
-    [X] Verify: All other specified events (`error`, `configApplied`, `themeApplied`, `slideChanged`, `botMessageShown/Dismissed`, `frozen`, `thawed`, `playTriggered`, `pauseTriggered`, `reset`) are dispatched from their respective (stubbed) locations with non-null `detail` objects.
-
-8.  ROBUST RE-RENDERING / STATE RESET:
-    [X] Set initial valid config.
-    [X] `carousel.config = null`. Verify fail-safe mode.
-    [X] Set new valid config. Verify component recovers, clears fail-safe, applies new config (placeholder slide info updates). `_resetInternalState` is called.
-================================================================================
+2. CANCEL BUTTON THEMING (Specific Checks):
+    [ ] Verify: `cancelButtonBackground`, `cancelButtonIconColor`, `cancelButtonSize`, `cancelButtonMobileSize`, `cancelButtonRadius`, `cancelButtonOffsetTop`, `cancelButtonOffsetRight`, `cancelButtonShadow`, `cancelButtonFocusRingColor` from `ThemeSettingsV1` correctly style the cancel button via their respective CSS Custom Properties.
+    [ ] Verify: Default values for cancel button theming are applied if properties are missing/invalid.
+    [ ] Verify responsive styling for cancel button size/offsets (desktop vs. mobile viewports).
 */

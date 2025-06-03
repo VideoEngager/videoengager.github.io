@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VideoEngager Schedules API Test Harness</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .demo-header {
+        background: rgb(243, 244, 246);
+        color: white;
+        padding: 15px 20px;
+        text-align: end;
+        font-size: 1.2rem;
+      }
+
+      .demo-header a {
+        color: #007bff;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        margin-top: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 300;
+      }
+
+      .header p {
+        opacity: 0.8;
+        font-size: 1.1rem;
+      }
+
+      .auth-section {
+        background: #f8f9fa;
+        padding: 25px;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .auth-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #dc3545;
+      }
+
+      .status-dot.authenticated {
+        background: #28a745;
+      }
+
+      .auth-forms {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .main-content {
+        padding: 30px;
+      }
+
+      .api-section {
+        margin-bottom: 40px;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #3498db;
+        display: inline-block;
+      }
+
+      .endpoint-group {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+      }
+
+      .endpoint-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .method-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      .method-get {
+        background: #28a745;
+        color: white;
+      }
+      .method-post {
+        background: #007bff;
+        color: white;
+      }
+      .method-put {
+        background: #ffc107;
+        color: black;
+      }
+      .method-delete {
+        background: #dc3545;
+        color: white;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      .form-group textarea {
+        height: 100px;
+        resize: vertical;
+        font-family: "Courier New", monospace;
+      }
+
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .checkbox-group input[type="checkbox"] {
+        width: auto;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+      }
+
+      .btn-auth {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      }
+
+      .response-section {
+        margin-top: 20px;
+        padding: 15px;
+        background: #2c3e50;
+        border-radius: 6px;
+        color: white;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .response-section pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+      }
+
+      .deprecated {
+        opacity: 0.6;
+        position: relative;
+      }
+
+      .deprecated::before {
+        content: "DEPRECATED";
+        position: absolute;
+        top: -5px;
+        right: 0;
+        background: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        font-size: 10px;
+        border-radius: 3px;
+      }
+
+      @media (max-width: 768px) {
+        .auth-forms,
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="demo-header">
+      <a href="https://videoengager.github.io" title="Back to Demos Index"
+        >Index</a
+      >
+      <a
+        href="https://github.com/VideoEngager/videoengager.github.io/blob/master/examples/schedules-api-demonstration"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="View Source on GitHub"
+        >View Source</a
+      >
+    </header>
+    <div class="container">
+      <div class="header">
+        <h1>VideoEngager Schedules API</h1>
+        <p>Comprehensive Test Harness v1.0.0</p>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-status">
+          <div class="status-indicator">
+            <div class="status-dot" id="authStatus"></div>
+            <span id="authStatusText">Not Authenticated</span>
+          </div>
+          <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="auth-forms">
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-post">POST</span>
+              Local Authentication
+            </div>
+            <div class="form-group">
+              <label>Email:</label>
+              <input
+                type="email"
+                id="loginEmail"
+                placeholder="email@user.email.com"
+              />
+            </div>
+            <div class="form-group">
+              <label>Password:</label>
+              <input type="password" id="loginPassword" placeholder="passwd" />
+            </div>
+            <button class="btn btn-auth" onclick="localLogin()">Login</button>
+            <div
+              id="loginResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              PAK Authentication
+            </div>
+            <div class="form-group">
+              <label>Partner API Key:</label>
+              <input type="text" id="pakKey" placeholder="Enter PAK" />
+            </div>
+            <div class="form-group">
+              <label>External ID:</label>
+              <input type="text" id="pakExternalId" placeholder="External ID" />
+            </div>
+            <div class="form-group">
+              <label>Email:</label>
+              <input
+                type="email"
+                id="pakEmail"
+                placeholder="partner@email.com"
+              />
+            </div>
+            <button class="btn btn-auth" onclick="pakLogin()">
+              Authenticate
+            </button>
+            <div
+              id="pakResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <!-- Agent API Schedules -->
+        <div class="api-section">
+          <h2 class="section-title">Agent API Schedules</h2>
+
+          <!-- Create Schedule -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-post">POST</span>
+              Create Schedule (/api/schedules/my/)
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>PIN:</label>
+                <input type="number" id="agentCreatePin" placeholder="123456" />
+              </div>
+              <div class="form-group">
+                <label>Date & Time:</label>
+                <input type="datetime-local" id="agentCreateDate" />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Duration (minutes):</label>
+                <input
+                  type="number"
+                  id="agentCreateDuration"
+                  placeholder="30"
+                />
+              </div>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="agentCreateSendEmail" />
+                <label>Send Notification Email</label>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>Visitor Name:</label>
+                <input
+                  type="text"
+                  id="agentCreateVisitorName"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Email:</label>
+                <input
+                  type="email"
+                  id="agentCreateVisitorEmail"
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Phone:</label>
+                <input
+                  type="tel"
+                  id="agentCreateVisitorPhone"
+                  placeholder="+1234567890"
+                />
+              </div>
+            </div>
+            <button class="btn" onclick="createAgentSchedule()">
+              Create Schedule
+            </button>
+            <div
+              id="agentCreateResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Get Single Schedule -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              Get Single Schedule (/api/schedules/my/{id})
+            </div>
+            <div class="form-group">
+              <label>Schedule ID:</label>
+              <input
+                type="text"
+                id="agentGetId"
+                placeholder="Enter schedule ID"
+              />
+            </div>
+            <button class="btn" onclick="getAgentSchedule()">
+              Get Schedule
+            </button>
+            <div
+              id="agentGetResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Update Schedule -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-put">PUT</span>
+              Update Schedule (/api/schedules/my/{id})
+            </div>
+            <div class="form-group">
+              <label>Schedule ID:</label>
+              <input
+                type="text"
+                id="agentUpdateId"
+                placeholder="Enter schedule ID"
+              />
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>PIN:</label>
+                <input type="number" id="agentUpdatePin" placeholder="123456" />
+              </div>
+              <div class="form-group">
+                <label>Date & Time:</label>
+                <input type="datetime-local" id="agentUpdateDate" />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Duration (minutes):</label>
+                <input
+                  type="number"
+                  id="agentUpdateDuration"
+                  placeholder="30"
+                />
+              </div>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="agentUpdateSendEmail" />
+                <label>Send Notification Email</label>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>Visitor Name:</label>
+                <input
+                  type="text"
+                  id="agentUpdateVisitorName"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Email:</label>
+                <input
+                  type="email"
+                  id="agentUpdateVisitorEmail"
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Phone:</label>
+                <input
+                  type="tel"
+                  id="agentUpdateVisitorPhone"
+                  placeholder="+1234567890"
+                />
+              </div>
+            </div>
+            <button class="btn" onclick="updateAgentSchedule()">
+              Update Schedule
+            </button>
+            <div
+              id="agentUpdateResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Delete Schedule -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-delete">DELETE</span>
+              Delete Schedule (/api/schedules/my/{id})
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Schedule ID:</label>
+                <input
+                  type="text"
+                  id="agentDeleteId"
+                  placeholder="Enter schedule ID"
+                />
+              </div>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="agentDeleteSendEmail" />
+                <label>Send Notification Email</label>
+              </div>
+            </div>
+            <button class="btn btn-danger" onclick="deleteAgentSchedule()">
+              Delete Schedule
+            </button>
+            <div
+              id="agentDeleteResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Get Schedules by Period -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              Get Schedules by Period (/api/schedules/my/{from}/{to})
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>From Date & Time:</label>
+                <input type="datetime-local" id="agentPeriodFrom" />
+              </div>
+              <div class="form-group">
+                <label>To Date & Time:</label>
+                <input type="datetime-local" id="agentPeriodTo" />
+              </div>
+            </div>
+            <button class="btn" onclick="getAgentSchedulesByPeriod()">
+              Get Schedules
+            </button>
+            <div
+              id="agentPeriodResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Tenant API Schedules -->
+        <div class="api-section">
+          <h2 class="section-title">Tenant API Schedules</h2>
+
+          <!-- Create Schedule for Tenant -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-post">POST</span>
+              Create Schedule for Tenant (/api/schedules/tenant/)
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Agent Email (Required):</label>
+                <input
+                  type="email"
+                  id="tenantCreateAgentEmail"
+                  placeholder="agent@example.com"
+                />
+              </div>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="tenantCreateSendEmail" />
+                <label>Send Notification Email</label>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>PIN:</label>
+                <input
+                  type="number"
+                  id="tenantCreatePin"
+                  placeholder="123456"
+                />
+              </div>
+              <div class="form-group">
+                <label>Date & Time:</label>
+                <input type="datetime-local" id="tenantCreateDate" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Duration (minutes):</label>
+              <input type="number" id="tenantCreateDuration" placeholder="30" />
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>Visitor Name:</label>
+                <input
+                  type="text"
+                  id="tenantCreateVisitorName"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Email:</label>
+                <input
+                  type="email"
+                  id="tenantCreateVisitorEmail"
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Phone:</label>
+                <input
+                  type="tel"
+                  id="tenantCreateVisitorPhone"
+                  placeholder="+1234567890"
+                />
+              </div>
+            </div>
+            <button class="btn" onclick="createTenantSchedule()">
+              Create Schedule
+            </button>
+            <div
+              id="tenantCreateResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Get Single Schedule for Tenant -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              Get Single Schedule for Tenant (/api/schedules/tenant/{id})
+            </div>
+            <div class="form-group">
+              <label>Schedule ID:</label>
+              <input
+                type="text"
+                id="tenantGetId"
+                placeholder="Enter schedule ID"
+              />
+            </div>
+            <button class="btn" onclick="getTenantSchedule()">
+              Get Schedule
+            </button>
+            <div
+              id="tenantGetResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Update Schedule for Tenant -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-put">PUT</span>
+              Update Schedule for Tenant (/api/schedules/tenant/{id})
+            </div>
+            <div class="form-group">
+              <label>Schedule ID:</label>
+              <input
+                type="text"
+                id="tenantUpdateId"
+                placeholder="Enter schedule ID"
+              />
+            </div>
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="tenantUpdateSendEmail" />
+              <label>Send Notification Email</label>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>PIN:</label>
+                <input
+                  type="number"
+                  id="tenantUpdatePin"
+                  placeholder="123456"
+                />
+              </div>
+              <div class="form-group">
+                <label>Date & Time:</label>
+                <input type="datetime-local" id="tenantUpdateDate" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Duration (minutes):</label>
+              <input type="number" id="tenantUpdateDuration" placeholder="30" />
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>Visitor Name:</label>
+                <input
+                  type="text"
+                  id="tenantUpdateVisitorName"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Email:</label>
+                <input
+                  type="email"
+                  id="tenantUpdateVisitorEmail"
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div class="form-group">
+                <label>Visitor Phone:</label>
+                <input
+                  type="tel"
+                  id="tenantUpdateVisitorPhone"
+                  placeholder="+1234567890"
+                />
+              </div>
+            </div>
+            <button class="btn" onclick="updateTenantSchedule()">
+              Update Schedule
+            </button>
+            <div
+              id="tenantUpdateResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Delete Schedule for Tenant -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-delete">DELETE</span>
+              Delete Schedule for Tenant (/api/schedules/tenant/{id})
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Schedule ID:</label>
+                <input
+                  type="text"
+                  id="tenantDeleteId"
+                  placeholder="Enter schedule ID"
+                />
+              </div>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="tenantDeleteSendEmail" />
+                <label>Send Notification Email</label>
+              </div>
+            </div>
+            <button class="btn btn-danger" onclick="deleteTenantSchedule()">
+              Delete Schedule
+            </button>
+            <div
+              id="tenantDeleteResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Get Schedules by Period for Tenant -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              Get Schedules by Period for Tenant
+              (/api/schedules/tenant/{from}/{to})
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>From Date & Time:</label>
+                <input type="datetime-local" id="tenantPeriodFrom" />
+              </div>
+              <div class="form-group">
+                <label>To Date & Time:</label>
+                <input type="datetime-local" id="tenantPeriodTo" />
+              </div>
+              <div class="form-group">
+                <label>Agent Email (Optional):</label>
+                <input
+                  type="email"
+                  id="tenantPeriodAgentEmail"
+                  placeholder="filter by agent"
+                />
+              </div>
+            </div>
+            <button class="btn" onclick="getTenantSchedulesByPeriod()">
+              Get Schedules
+            </button>
+            <div
+              id="tenantPeriodResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Deprecated Legacy API -->
+        <div class="api-section">
+          <h2 class="section-title">Legacy API (Deprecated)</h2>
+
+          <div class="endpoint-group deprecated">
+            <div class="endpoint-title">
+              <span class="method-badge method-post">POST</span>
+              Create Schedule (Legacy) (/schedules/create)
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>PIN:</label>
+                <input type="number" id="legacyPin" placeholder="123456" />
+              </div>
+              <div class="form-group">
+                <label>Account:</label>
+                <input
+                  type="text"
+                  id="legacyAccount"
+                  placeholder="Account ID"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>JSON Data:</label>
+              <textarea
+                id="legacyJson"
+                placeholder='{"date": 1672531200, "duration": 30, "visitor": {"name": "John Doe"}}'
+              ></textarea>
+            </div>
+            <button class="btn" onclick="createLegacySchedule()">
+              Create Schedule (Legacy)
+            </button>
+            <div
+              id="legacyResponse"
+              class="response-section"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const BASE_URL = "https://dev.videoengager.com";
+      let authToken = null;
+
+      // Utility functions
+      function showResponse(elementId, response, status) {
+        const element = document.getElementById(elementId);
+        element.style.display = "block";
+
+        const statusText = status >= 200 && status < 300 ? "SUCCESS" : "ERROR";
+        const statusColor =
+          status >= 200 && status < 300 ? "#28a745" : "#dc3545";
+
+        element.innerHTML = `
+                <div style="color: ${statusColor}; font-weight: bold; margin-bottom: 10px;">
+                    ${statusText} (${status})
+                </div>
+                <pre>${JSON.stringify(response, null, 2)}</pre>
+            `;
+      }
+
+      function updateAuthStatus(authenticated) {
+        const statusDot = document.getElementById("authStatus");
+        const statusText = document.getElementById("authStatusText");
+
+        if (authenticated) {
+          statusDot.classList.add("authenticated");
+          statusText.textContent = "Authenticated";
+        } else {
+          statusDot.classList.remove("authenticated");
+          statusText.textContent = "Not Authenticated";
+        }
+      }
+
+      function makeRequest(method, url, data = null, queryParams = {}) {
+        const queryString = Object.keys(queryParams)
+          .filter(
+            (key) =>
+              queryParams[key] !== "" &&
+              queryParams[key] !== null &&
+              queryParams[key] !== undefined
+          )
+          .map(
+            (key) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(
+                queryParams[key]
+              )}`
+          )
+          .join("&");
+
+        const fullUrl = queryString ? `${url}?${queryString}` : url;
+
+        const options = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+
+        if (authToken) {
+          options.headers["Authorization"] = `Bearer ${authToken}`;
+        }
+
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+
+        return fetch(fullUrl, options)
+          .then((response) => {
+            return response.json().then((data) => ({
+              status: response.status,
+              data: data,
+            }));
+          })
+          .catch((error) => ({
+            status: 0,
+            data: { error: error.message },
+          }));
+      }
+
+      // Authentication functions
+      async function localLogin() {
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+
+        const response = await makeRequest("POST", `${BASE_URL}/auth/local`, {
+          email,
+          password,
+        });
+
+        if (response.status === 200 && response.data.token) {
+          authToken = response.data.token;
+          updateAuthStatus(true);
+        }
+
+        showResponse("loginResponse", response.data, response.status);
+      }
+
+      async function pakLogin() {
+        const pak = document.getElementById("pakKey").value;
+        const externalId = document.getElementById("pakExternalId").value;
+        const email = document.getElementById("pakEmail").value;
+
+        const response = await makeRequest(
+          "GET",
+          `${BASE_URL}/api/partners/impersonate/${pak}/${externalId}/${email}`
+        );
+
+        if (response.status === 200 && response.data.token) {
+          authToken = response.data.token;
+          updateAuthStatus(true);
+        }
+
+        showResponse("pakResponse", response.data, response.status);
+      }
+
+      function logout() {
+        authToken = null;
+        updateAuthStatus(false);
+
+        // Clear all response sections
+        const responseSections = document.querySelectorAll(".response-section");
+        responseSections.forEach((section) => {
+          section.style.display = "none";
+        });
+      }
+
+      // Agent API functions
+      async function createAgentSchedule() {
+        const data = {
+          pin: parseInt(document.getElementById("agentCreatePin").value),
+          date: new Date(
+            document.getElementById("agentCreateDate").value
+          ).getTime(),
+          duration: parseInt(
+            document.getElementById("agentCreateDuration").value
+          ),
+          visitor: {
+            name: document.getElementById("agentCreateVisitorName").value,
+            email: document.getElementById("agentCreateVisitorEmail").value,
+            phone: document.getElementById("agentCreateVisitorPhone").value,
+          },
+        };
+
+        const queryParams = {};
+        if (document.getElementById("agentCreateSendEmail").checked) {
+          queryParams.sendNotificationEmail = true;
+        }
+
+        const response = await makeRequest(
+          "POST",
+          `${BASE_URL}/api/schedules/my/`,
+          data,
+          queryParams
+        );
+        showResponse("agentCreateResponse", response.data, response.status);
+      }
+
+      async function getAgentSchedule() {
+        const id = document.getElementById("agentGetId").value;
+        const response = await makeRequest(
+          "GET",
+          `${BASE_URL}/api/schedules/my/${id}`
+        );
+        showResponse("agentGetResponse", response.data, response.status);
+      }
+
+      async function updateAgentSchedule() {
+        const id = document.getElementById("agentUpdateId").value;
+        const data = {
+          pin: parseInt(document.getElementById("agentUpdatePin").value),
+          date: new Date(
+            document.getElementById("agentUpdateDate").value
+          ).getTime(),
+          duration: parseInt(
+            document.getElementById("agentUpdateDuration").value
+          ),
+          visitor: {
+            name: document.getElementById("agentUpdateVisitorName").value,
+            email: document.getElementById("agentUpdateVisitorEmail").value,
+            phone: document.getElementById("agentUpdateVisitorPhone").value,
+          },
+        };
+
+        const queryParams = {};
+        if (document.getElementById("agentUpdateSendEmail").checked) {
+          queryParams.sendNotificationEmail = true;
+        }
+
+        const response = await makeRequest(
+          "PUT",
+          `${BASE_URL}/api/schedules/my/${id}`,
+          data,
+          queryParams
+        );
+        showResponse("agentUpdateResponse", response.data, response.status);
+      }
+
+      async function deleteAgentSchedule() {
+        const id = document.getElementById("agentDeleteId").value;
+        const queryParams = {};
+        if (document.getElementById("agentDeleteSendEmail").checked) {
+          queryParams.sendNotificationEmail = true;
+        }
+
+        const response = await makeRequest(
+          "DELETE",
+          `${BASE_URL}/api/schedules/my/${id}`,
+          null,
+          queryParams
+        );
+        showResponse("agentDeleteResponse", response.data, response.status);
+      }
+
+      async function getAgentSchedulesByPeriod() {
+        const from = new Date(
+          document.getElementById("agentPeriodFrom").value
+        ).getTime();
+        const to = new Date(
+          document.getElementById("agentPeriodTo").value
+        ).getTime();
+
+        const response = await makeRequest(
+          "GET",
+          `${BASE_URL}/api/schedules/my/${from}/${to}`
+        );
+        showResponse("agentPeriodResponse", response.data, response.status);
+      }
+
+      // Tenant API functions
+      async function createTenantSchedule() {
+        const data = {
+          pin: parseInt(document.getElementById("tenantCreatePin").value),
+          date: new Date(
+            document.getElementById("tenantCreateDate").value
+          ).getTime(),
+          duration: parseInt(
+            document.getElementById("tenantCreateDuration").value
+          ),
+          visitor: {
+            name: document.getElementById("tenantCreateVisitorName").value,
+            email: document.getElementById("tenantCreateVisitorEmail").value,
+            phone: document.getElementById("tenantCreateVisitorPhone").value,
+          },
+        };
+
+        const queryParams = {
+          agentEmail: document.getElementById("tenantCreateAgentEmail").value,
+        };
+        if (document.getElementById("tenantCreateSendEmail").checked) {
+          queryParams.sendNotificationEmail = true;
+        }
+
+        const response = await makeRequest(
+          "POST",
+          `${BASE_URL}/api/schedules/tenant/`,
+          data,
+          queryParams
+        );
+        showResponse("tenantCreateResponse", response.data, response.status);
+      }
+
+      async function getTenantSchedule() {
+        const id = document.getElementById("tenantGetId").value;
+        const response = await makeRequest(
+          "GET",
+          `${BASE_URL}/api/schedules/tenant/${id}`
+        );
+        showResponse("tenantGetResponse", response.data, response.status);
+      }
+
+      async function updateTenantSchedule() {
+        const id = document.getElementById("tenantUpdateId").value;
+        const data = {
+          pin: parseInt(document.getElementById("tenantUpdatePin").value),
+          date: new Date(
+            document.getElementById("tenantUpdateDate").value
+          ).getTime(),
+          duration: parseInt(
+            document.getElementById("tenantUpdateDuration").value
+          ),
+          visitor: {
+            name: document.getElementById("tenantUpdateVisitorName").value,
+            email: document.getElementById("tenantUpdateVisitorEmail").value,
+            phone: document.getElementById("tenantUpdateVisitorPhone").value,
+          },
+        };
+
+        const queryParams = {};
+        if (document.getElementById("tenantUpdateSendEmail").checked) {
+          queryParams.sendNotificationEmail = true;
+        }
+
+        const response = await makeRequest(
+          "PUT",
+          `${BASE_URL}/api/schedules/tenant/${id}`,
+          data,
+          queryParams
+        );
+        showResponse("tenantUpdateResponse", response.data, response.status);
+      }
+
+      async function deleteTenantSchedule() {
+        const id = document.getElementById("tenantDeleteId").value;
+        const queryParams = {};
+        if (document.getElementById("tenantDeleteSendEmail").checked) {
+          queryParams.sendNotificationEmail = true;
+        }
+
+        const response = await makeRequest(
+          "DELETE",
+          `${BASE_URL}/api/schedules/tenant/${id}`,
+          null,
+          queryParams
+        );
+        showResponse("tenantDeleteResponse", response.data, response.status);
+      }
+
+      async function getTenantSchedulesByPeriod() {
+        const from = document.getElementById("tenantPeriodFrom").value;
+        const to = document.getElementById("tenantPeriodTo").value;
+        const agentEmail = document.getElementById(
+          "tenantPeriodAgentEmail"
+        ).value;
+
+        const queryParams = {};
+        if (agentEmail) {
+          queryParams.agentEmail = agentEmail;
+        }
+
+        const response = await makeRequest(
+          "GET",
+          `${BASE_URL}/api/schedules/tenant/${from}/${to}`,
+          null,
+          queryParams
+        );
+        showResponse("tenantPeriodResponse", response.data, response.status);
+      }
+
+      // Legacy API function
+      async function createLegacySchedule() {
+        const data = {
+          pin: parseInt(document.getElementById("legacyPin").value),
+          _account: document.getElementById("legacyAccount").value,
+          json: JSON.parse(document.getElementById("legacyJson").value || "{}"),
+        };
+
+        const response = await makeRequest(
+          "POST",
+          `${BASE_URL}/schedules/create`,
+          data
+        );
+        showResponse("legacyResponse", response.data, response.status);
+      }
+
+      // Initialize current timestamps for convenience
+      window.onload = function () {
+        const now = Math.floor(Date.now() / 1000);
+        const oneHourLater = now + 3600;
+        const oneDayLater = now + 86400;
+
+        // Set default timestamps for date fields
+        document.getElementById("agentCreateDate").value = oneHourLater;
+        document.getElementById("agentUpdateDate").value = oneHourLater;
+        document.getElementById("tenantCreateDate").value = oneHourLater;
+        document.getElementById("tenantUpdateDate").value = oneHourLater;
+
+        // Set default period ranges
+        document.getElementById("agentPeriodFrom").value = now;
+        document.getElementById("agentPeriodTo").value = oneDayLater;
+        document.getElementById("tenantPeriodFrom").value = now;
+        document.getElementById("tenantPeriodTo").value = oneDayLater;
+      };
+    </script>
+  </body>
+</html>

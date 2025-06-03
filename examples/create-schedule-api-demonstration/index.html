@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meeting Scheduler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <header class="bg-gray-100 border-b border-gray-200 px-4 py-3">
+      <div class="flex justify-end gap-4 items-center max-w-7xl mx-auto">
+        <a
+          href="https://videoengager.github.io"
+          title="Back to Demos Index"
+          class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+        >
+          Index
+        </a>
+        <a
+          href="https://github.com/VideoEngager/videoengager.github.io/blob/master/examples/create-schedule-api-demonstration"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View Source on GitHub"
+          class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+        >
+          View Source
+        </a>
+      </div>
+    </header>
+    <div class="max-w-2xl mx-auto px-4 mt-5">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Meeting Scheduler</h1>
+        <p class="text-gray-600">
+          Authenticate and schedule meetings with agents
+        </p>
+      </div>
+
+      <!-- Authentication Section -->
+      <div id="authSection" class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex items-center mb-4">
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-3"
+          >
+            GET
+          </span>
+          <h2 class="text-xl font-semibold text-gray-900">
+            PAK Authentication
+          </h2>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label
+              for="pakKey"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Partner API Key
+            </label>
+            <input
+              type="text"
+              id="pakKey"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter PAK"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              for="pakExternalId"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              External ID
+            </label>
+            <input
+              type="text"
+              id="pakExternalId"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="External ID"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              for="pakEmail"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="pakEmail"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="partner@email.com"
+              required
+            />
+          </div>
+
+          <button
+            type="button"
+            id="authenticateBtn"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            onclick="pakLogin()"
+          >
+            Authenticate
+          </button>
+
+          <div id="pakResponse" class="hidden mt-4 p-4 rounded-md">
+            <div id="pakResponseContent"></div>
+          </div>
+
+          <!-- Authentication Status -->
+          <div
+            id="authStatus"
+            class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-md"
+          >
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg
+                  class="h-5 w-5 text-green-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-green-800">
+                  Successfully authenticated! Loading agents...
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agent Loading Status -->
+          <div
+            id="agentLoadingStatus"
+            class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md"
+          >
+            <div class="flex items-center">
+              <svg
+                class="animate-spin h-5 w-5 text-blue-600 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <p class="text-sm font-medium text-blue-800">Loading agents...</p>
+            </div>
+          </div>
+
+          <!-- Agent Error Status -->
+          <div
+            id="agentErrorStatus"
+            class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-md"
+          >
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg
+                  class="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                  Failed to load agents
+                </h3>
+                <p id="agentErrorMessage" class="mt-1 text-sm text-red-700"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Form -->
+      <div
+        id="schedulingSection"
+        class="hidden bg-white rounded-lg shadow-md p-6 mb-6"
+      >
+        <div class="flex items-center mb-6">
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-3"
+          >
+            POST
+          </span>
+          <h2 class="text-xl font-semibold text-gray-900">Schedule Meeting</h2>
+        </div>
+
+        <form id="meetingForm" class="space-y-6">
+          <!-- Agent Selection -->
+          <div>
+            <label
+              for="agentSelect"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Select Agent
+            </label>
+            <select
+              id="agentSelect"
+              name="agentSelect"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
+              <option value="">Choose an agent...</option>
+            </select>
+          </div>
+
+          <!-- Meeting Title -->
+          <div>
+            <label
+              for="meetingTitle"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Meeting Title
+            </label>
+            <input
+              type="text"
+              id="meetingTitle"
+              name="meetingTitle"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter meeting title"
+              required
+            />
+          </div>
+
+          <!-- Date, Time and Duration -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Start Time -->
+            <div>
+              <label
+                for="startTime"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Start Date & Time
+              </label>
+              <input
+                type="datetime-local"
+                id="startTime"
+                name="startTime"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <!-- Duration -->
+            <div>
+              <label
+                for="duration"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Duration (minutes)
+              </label>
+              <input
+                type="number"
+                id="duration"
+                name="duration"
+                min="1"
+                max="480"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="30"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Visitor Information -->
+          <div class="space-y-4">
+            <h3
+              class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2"
+            >
+              Visitor Information
+            </h3>
+
+            <!-- Visitor Name -->
+            <div>
+              <label
+                for="visitorName"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Visitor Name
+              </label>
+              <input
+                type="text"
+                id="visitorName"
+                name="visitorName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter visitor name"
+                required
+              />
+            </div>
+
+            <!-- Visitor Email and Phone -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="visitorEmail"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Visitor Email
+                </label>
+                <input
+                  type="email"
+                  id="visitorEmail"
+                  name="visitorEmail"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="visitor@example.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label
+                  for="visitorPhone"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Visitor Phone
+                </label>
+                <input
+                  type="tel"
+                  id="visitorPhone"
+                  name="visitorPhone"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="+1234567890"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification Settings -->
+          <div class="space-y-4">
+            <h3
+              class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2"
+            >
+              Notification Settings
+            </h3>
+
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="sendNotificationEmail"
+                name="sendNotificationEmail"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                for="sendNotificationEmail"
+                class="ml-2 block text-sm text-gray-700"
+              >
+                Send notification email
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-4">
+            <button
+              type="submit"
+              id="scheduleBtn"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Schedule Meeting
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Hidden Results Container -->
+      <div
+        id="resultsContainer"
+        class="hidden bg-white rounded-lg shadow-md p-6 mb-6"
+      >
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+          Meeting Scheduled Successfully!
+        </h2>
+
+        <!-- Meeting Details -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <h3 class="text-sm font-medium text-gray-700 mb-2">
+            Meeting Details
+          </h3>
+          <div class="text-sm text-gray-600 space-y-1">
+            <p>
+              <span class="font-medium">Meeting ID:</span>
+              <span id="meetingId"></span>
+            </p>
+            <p>
+              <span class="font-medium">Date:</span>
+              <span id="scheduledDate"></span>
+            </p>
+            <p>
+              <span class="font-medium">Duration:</span>
+              <span id="scheduledDuration"></span> minutes
+            </p>
+            <p>
+              <span class="font-medium">Visitor:</span>
+              <span id="scheduledVisitor"></span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Meeting URLs -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Agent Meeting URL
+            </label>
+            <div class="flex">
+              <input
+                type="text"
+                id="agentUrl"
+                readonly
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm"
+                placeholder="Agent URL will appear here"
+              />
+              <button
+                type="button"
+                id="copyAgentUrl"
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-l-0 border-gray-300 rounded-r-md text-sm font-medium text-gray-700 transition duration-200"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Visitor Meeting URL
+            </label>
+            <div class="flex">
+              <input
+                type="text"
+                id="visitorUrl"
+                readonly
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm"
+                placeholder="Visitor URL will appear here"
+              />
+              <button
+                type="button"
+                id="copyVisitorUrl"
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-l-0 border-gray-300 rounded-r-md text-sm font-medium text-gray-700 transition duration-200"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden ICS Download Container -->
+      <div id="icsContainer" class="hidden bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          Calendar Invite
+        </h3>
+        <p class="text-gray-600 mb-4">
+          Download the calendar invite to add this meeting to your calendar.
+        </p>
+
+        <button
+          type="button"
+          id="downloadIcs"
+          class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          Download ICS File
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div
+        id="loadingState"
+        class="hidden bg-white rounded-lg shadow-md p-6 text-center"
+      >
+        <div class="inline-flex items-center">
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span class="text-gray-700">Scheduling meeting...</span>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div
+        id="errorState"
+        class="hidden bg-red-50 border border-red-200 rounded-lg p-4"
+      >
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-5 w-5 text-red-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Error</h3>
+            <p id="errorMessage" class="mt-1 text-sm text-red-700"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Configuration
+      const BASE_URL = "https://dev.videoengager.com"; // Updated to match Swagger spec
+      let authToken = null; // Will be set after PAK authentication
+      let agents = []; // Will store the list of agents
+
+      // Utility function to make API requests
+      function makeRequest(method, url, data = null, queryParams = {}) {
+        const queryString = Object.keys(queryParams)
+          .filter(
+            (key) =>
+              queryParams[key] !== "" &&
+              queryParams[key] !== null &&
+              queryParams[key] !== undefined
+          )
+          .map(
+            (key) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(
+                queryParams[key]
+              )}`
+          )
+          .join("&");
+
+        const fullUrl = queryString ? `${url}?${queryString}` : url;
+
+        const options = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+
+        if (authToken) {
+          options.headers["Authorization"] = `Bearer ${authToken}`;
+        }
+
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+
+        return fetch(fullUrl, options)
+          .then((response) => {
+            return response.json().then((data) => ({
+              status: response.status,
+              data: data,
+            }));
+          })
+          .catch((error) => ({
+            status: 0,
+            data: { error: error.message },
+          }));
+      }
+
+      // Function to fetch agents
+      async function fetchAgents() {
+        const agentLoadingStatus =
+          document.getElementById("agentLoadingStatus");
+        const agentErrorStatus = document.getElementById("agentErrorStatus");
+
+        // Show loading status
+        agentLoadingStatus.classList.remove("hidden");
+        agentErrorStatus.classList.add("hidden");
+
+        try {
+          const response = await makeRequest(
+            "GET",
+            `${BASE_URL}/api/brokerages/agents`
+          );
+
+          // Hide loading status
+          agentLoadingStatus.classList.add("hidden");
+
+          if (response.status === 200 && response.data) {
+            agents = Array.isArray(response.data)
+              ? response.data
+              : [response.data];
+            populateAgentDropdown();
+            updateAuthStatus(true); // Show the scheduling section
+          } else {
+            showAgentError(
+              response.data.error ||
+                response.data.message ||
+                "Failed to fetch agents"
+            );
+          }
+        } catch (error) {
+          agentLoadingStatus.classList.add("hidden");
+          showAgentError("Network error: " + error.message);
+        }
+      }
+
+      // Function to show agent loading error
+      function showAgentError(message) {
+        document.getElementById("agentErrorMessage").textContent = message;
+        document.getElementById("agentErrorStatus").classList.remove("hidden");
+      }
+
+      // Function to populate the agent dropdown
+      function populateAgentDropdown() {
+        const agentSelect = document.getElementById("agentSelect");
+
+        // Clear existing options except the first one
+        agentSelect.innerHTML = '<option value="">Choose an agent...</option>';
+
+        // Add agents to dropdown
+        agents.forEach((agent) => {
+          const option = document.createElement("option");
+          option.value =
+            agent._account.contactEmail || agent._account.email || undefined;
+          option.textContent = `${agent.firstName} ${agent.lastName}`;
+          agentSelect.appendChild(option);
+        });
+      }
+
+      // PAK Authentication function
+      async function pakLogin() {
+        const pak = document.getElementById("pakKey").value;
+        const externalId = document.getElementById("pakExternalId").value;
+        const email = document.getElementById("pakEmail").value;
+
+        if (!pak || !externalId || !email) {
+          showResponse(
+            "pakResponse",
+            { error: "All fields are required" },
+            400
+          );
+          return;
+        }
+
+        // Show loading on authenticate button
+        const authBtn = document.getElementById("authenticateBtn");
+        const originalText = authBtn.textContent;
+        authBtn.textContent = "Authenticating...";
+        authBtn.disabled = true;
+
+        const response = await makeRequest(
+          "GET",
+          `${BASE_URL}/api/partners/impersonate/${pak}/${externalId}/${email}`
+        );
+
+        // Reset button
+        authBtn.textContent = originalText;
+        authBtn.disabled = false;
+
+        if (response.status === 200 && response.data.token) {
+          authToken = response.data.token;
+          document.getElementById("authStatus").classList.remove("hidden");
+
+          // Fetch agents immediately after successful authentication
+          await fetchAgents();
+        }
+
+        showResponse("pakResponse", response.data, response.status);
+      }
+
+      // Function to show API response
+      function showResponse(elementId, data, status) {
+        const responseElement = document.getElementById(elementId);
+        const contentElement = document.getElementById(elementId + "Content");
+
+        let bgColor, textColor, statusText;
+
+        if (status >= 200 && status < 300) {
+          bgColor = "bg-green-50 border-green-200";
+          textColor = "text-green-800";
+          statusText = "Success";
+        } else {
+          bgColor = "bg-red-50 border-red-200";
+          textColor = "text-red-800";
+          statusText = "Error";
+        }
+
+        responseElement.className = `mt-4 p-4 rounded-md border ${bgColor}`;
+        contentElement.innerHTML = `
+                <h4 class="font-medium ${textColor} mb-2">${statusText} (${status})</h4>
+                <pre class="text-sm ${textColor} break-words whitespace-pre-wrap">${JSON.stringify(
+          data,
+          null,
+          2
+        )}</pre>
+            `;
+
+        responseElement.classList.remove("hidden");
+      }
+
+      // Function to update authentication status
+      function updateAuthStatus(isAuthenticated) {
+        const schedulingSection = document.getElementById("schedulingSection");
+
+        if (isAuthenticated) {
+          schedulingSection.classList.remove("hidden");
+
+          // Smooth scroll to scheduling section
+          setTimeout(() => {
+            schedulingSection.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        } else {
+          schedulingSection.classList.add("hidden");
+        }
+      }
+
+      // Function to create schedule using Agent API
+      async function createSchedule() {
+        const data = {
+          date: new Date(document.getElementById("startTime").value).getTime(),
+          duration: parseInt(document.getElementById("duration").value),
+          visitor: {
+            name: document.getElementById("visitorName").value,
+            email: document.getElementById("visitorEmail").value,
+            phone: document.getElementById("visitorPhone").value,
+          },
+          json: {
+            subject: document.getElementById("meetingTitle").value,
+          },
+        };
+
+        const queryParams = {
+          agentEmail: document.getElementById("agentSelect").value,
+        };
+
+        if (document.getElementById("sendNotificationEmail").checked) {
+          queryParams.sendNotificationEmail = true;
+        }
+
+        const response = await makeRequest(
+          "POST",
+          `${BASE_URL}/api/schedules/tenant/`,
+          data,
+          queryParams
+        );
+
+        return response;
+      }
+
+      // Function to show loading state
+      function showLoading() {
+        document.getElementById("loadingState").classList.remove("hidden");
+        document.getElementById("resultsContainer").classList.add("hidden");
+        document.getElementById("icsContainer").classList.add("hidden");
+        document.getElementById("errorState").classList.add("hidden");
+      }
+
+      // Function to hide loading state
+      function hideLoading() {
+        document.getElementById("loadingState").classList.add("hidden");
+      }
+
+      // Function to show error
+      function showError(message) {
+        document.getElementById("errorMessage").textContent = message;
+        document.getElementById("errorState").classList.remove("hidden");
+        document.getElementById("resultsContainer").classList.add("hidden");
+        document.getElementById("icsContainer").classList.add("hidden");
+      }
+
+      // Function to show results
+      function showResults(responseData) {
+        // Fill in meeting details
+        document.getElementById("meetingId").textContent = responseData._id;
+
+        const startDate = new Date(responseData.date);
+        const endDate = new Date(
+          responseData.date + responseData.duration * 60 * 1000
+        );
+
+        document.getElementById("scheduledDate").textContent =
+          startDate.toLocaleString() + " - " + endDate.toLocaleString();
+        document.getElementById("scheduledDuration").textContent =
+          responseData.duration;
+        document.getElementById("scheduledVisitor").textContent =
+          responseData.visitor.name;
+
+        // Fill in URLs
+        document.getElementById("agentUrl").value =
+          responseData.agent.meetingUrl;
+        document.getElementById("visitorUrl").value =
+          responseData.visitor.meetingUrl;
+
+        // Show results and ICS download
+        document.getElementById("resultsContainer").classList.remove("hidden");
+        document.getElementById("icsContainer").classList.remove("hidden");
+        document.getElementById("errorState").classList.add("hidden");
+      }
+
+      // Form submission handler
+      document
+        .getElementById("meetingForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          if (!authToken) {
+            showError("Please authenticate first");
+            return;
+          }
+
+          // Check if an agent is selected
+          const selectedAgent = document.getElementById("agentSelect").value;
+          if (!selectedAgent) {
+            showError("Please select an agent");
+            return;
+          }
+
+          // Validate that end time is after start time
+          const startTime = new Date(
+            document.getElementById("startTime").value
+          );
+          const duration = parseInt(document.getElementById("duration").value);
+
+          if (!duration || duration <= 0) {
+            showError("Please enter a valid duration");
+            return;
+          }
+
+          showLoading();
+
+          try {
+            const response = await createSchedule();
+
+            hideLoading();
+
+            if (response.status === 200 || response.status === 201) {
+              showResults(response.data);
+            } else {
+              showError(
+                response.data.error ||
+                  response.data.message ||
+                  "Failed to schedule meeting"
+              );
+            }
+          } catch (error) {
+            hideLoading();
+            showError("Network error: " + error.message);
+          }
+        });
+
+      // Copy button functionality
+      document
+        .getElementById("copyAgentUrl")
+        .addEventListener("click", function () {
+          const urlInput = document.getElementById("agentUrl");
+          urlInput.select();
+          navigator.clipboard.writeText(urlInput.value).then(() => {
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = "Copied!";
+            setTimeout(() => {
+              button.textContent = originalText;
+            }, 2000);
+          });
+        });
+
+      document
+        .getElementById("copyVisitorUrl")
+        .addEventListener("click", function () {
+          const urlInput = document.getElementById("visitorUrl");
+          urlInput.select();
+          navigator.clipboard.writeText(urlInput.value).then(() => {
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = "Copied!";
+            setTimeout(() => {
+              button.textContent = originalText;
+            }, 2000);
+          });
+        });
+
+      // ICS download functionality
+      document
+        .getElementById("downloadIcs")
+        .addEventListener("click", function () {
+          const agentUrl = document.getElementById("agentUrl").value;
+          if (!agentUrl) {
+            alert("No meeting data available");
+            return;
+          }
+
+          const meetingId = document.getElementById("meetingId").textContent;
+          const meetingTitle = document.getElementById("meetingTitle").value;
+          const startTime = new Date(
+            document.getElementById("startTime").value
+          );
+          const duration = parseInt(document.getElementById("duration").value);
+          const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+
+          const formatDate = (date) => {
+            return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+          };
+
+          const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Meeting Scheduler//Meeting Scheduler//EN
+BEGIN:VEVENT
+UID:${meetingId}@videoengager.com
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${formatDate(startTime)}
+DTEND:${formatDate(endTime)}
+SUMMARY:${meetingTitle}
+DESCRIPTION:Video meeting scheduled\\nMeeting URL: ${
+            document.getElementById("visitorUrl").value
+          }
+LOCATION:Video Conference
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+          const blob = new Blob([icsContent], { type: "text/calendar" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${meetingTitle
+            .replace(/[^a-z0-9]/gi, "_")
+            .toLowerCase()}-${meetingId}.ics`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+    </script>
+  </body>
+</html>

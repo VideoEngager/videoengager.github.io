@@ -14,7 +14,15 @@ This documentation explains how to use the VideoEngager Meeting Scheduler API fo
 
 The Meeting Scheduler allows partners to authenticate using PAK (Partner API Key) authentication and create scheduled meetings with agents. This example demonstrates the complete flow from authentication to meeting creation.
 
-**Base URL:** `https://videome.leadsecure.com`
+**Base URL:** `https://dev.videoengager.com`
+
+You can manipulate that by using env param
+| Pattern | Environment |
+|---------|-------------|
+| `?env=dev` | Development |
+| `?env=staging`| Staging |
+| `?env=production` | Production |
+| Everything else | Development |
 
 ## Authentication
 

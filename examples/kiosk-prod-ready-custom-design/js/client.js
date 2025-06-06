@@ -285,6 +285,7 @@ export class VideoEngagerClient {
       "GenesysChat.started",
       "GenesysChat.ended",
       "GenesysChat.error",
+      "onMessage"
     ];
 
     events.forEach((eventName) => {

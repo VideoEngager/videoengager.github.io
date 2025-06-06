@@ -16,8 +16,7 @@ export class KioskApplication {
     this.waitroomMediator = new WaitroomEventMediator();
     this.currentScreen = "initial";
     this.isInitialized = false;
-
-    // Configuration
+    this.systemNotificationElement = null;
     this.timeouts = {
       call: 1000 * 60 * 3, // 3 minutes
       inactivity: 1000 * 60 * 60, // 1 hour
@@ -206,6 +205,13 @@ export class KioskApplication {
         this.log("VIDEOCLIENT: Video call ended");
         this.handleVideoCallEnded();
       });
+
+      // Listen for system notifications
+      this.videoEngagerClient.on("onMessage", (data) => {
+        this.log(`VIDEOCLIENT: Received message: ${JSON.stringify(data)}`);
+        this.handleSystemMessage(data);
+      });
+
       this.log("VIDEOCLIENT: VideoEngager client initialized successfully");
     } catch (error) {
       this.log(`VIDEOCLIENT: Failed to initialize: ${error.message}`);
@@ -261,6 +267,9 @@ export class KioskApplication {
 
     // Clear call timeout
     this.timeoutManager.clear("call");
+    
+    // Clear system notification
+    this.clearSystemNotification();
 
     // End video call if active
     if (this.videoEngagerClient) {
@@ -283,6 +292,254 @@ export class KioskApplication {
   }
 
   /**
+   * Handles system messages for system notifications.
+   * Processes messages to extract system notifications and display them in the waitroom.
+   * @param {object} data - The message data from VideoEngager client.
+   */
+  handleSystemMessage(data) {
+    const { message } = data;
+
+    // Check if this is an inbound system notification
+    if (
+      message &&
+      message.direction === "Inbound" &&
+      message.content &&
+      message.content.type === "Text" &&
+      message.content.text &&
+      message.content.text.startsWith("System Notification:")
+    ) {
+      this.log(`SYSTEM: Received system notification: ${message.content.text}`);
+
+      // Extract the notification text (remove "System Notification: " prefix)
+      const notificationText = message.content.text
+        .replace("System Notification: ", "")
+        .trim();
+
+      // Display the notification in the waitroom
+      this.displaySystemNotification(notificationText);
+    }
+  }
+
+  /**
+   * Displays system notification in the waitroom.
+   * @param {string} notificationText - The notification text to display.
+   */
+  displaySystemNotification(notificationText) {
+    this.log(`SYSTEM: Displaying notification: ${notificationText}`);
+
+    // Only show notifications when in loading/waitroom screen
+    if (this.currentScreen !== "loading") {
+      return;
+    }
+
+    // Find or create the notification element
+    this.createSystemNotificationElement();
+
+    if (this.systemNotificationElement) {
+      // Update the notification text
+      this.systemNotificationElement.textContent = notificationText;
+
+      // Make sure it's visible with slide-in animation
+      this.systemNotificationElement.style.display = 'block';
+      
+      // Reset any existing animation classes
+      this.systemNotificationElement.classList.remove('notification-update');
+      
+      // Trigger slide-in animation if first time showing
+      if (!this.systemNotificationElement.style.opacity || this.systemNotificationElement.style.opacity === '0') {
+        this.systemNotificationElement.classList.add('system-notification');
+      }
+      
+      // Add update pulse animation after a brief delay
+      setTimeout(() => {
+        if (this.systemNotificationElement) {
+          this.systemNotificationElement.classList.add('notification-update');
+        }
+      }, 100);
+
+      this.log('SYSTEM NOTIFICATION: Displayed notification: ' + notificationText);
+    }
+  }
+
+  /**
+   * Clears the system notification display.
+   */
+  clearSystemNotification () {
+    if (this.systemNotificationElement && this.systemNotificationElement.style.display !== 'none') {
+      // Add fade-out animation
+      this.systemNotificationElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+      this.systemNotificationElement.style.opacity = '0';
+      this.systemNotificationElement.style.transform = 'translateX(-50%) translateY(-20px)';
+      
+      // Hide completely after animation
+      setTimeout(() => {
+        if (this.systemNotificationElement) {
+          this.systemNotificationElement.style.display = 'none';
+          this.systemNotificationElement.style.opacity = '';
+          this.systemNotificationElement.style.transform = '';
+          this.systemNotificationElement.classList.remove('notification-update', 'system-notification');
+        }
+      }, 300);
+      
+      this.log('SYSTEM: System notification cleared');
+    }
+  }
+
+  /**
+   * Creates the system notification element if it doesn't exist.
+   */
+  createSystemNotificationElement () {
+    if (this.systemNotificationElement) {
+      return; // Already exists
+    }
+
+    const oncallScreen = document.getElementById('oncall-screen');
+    if (!oncallScreen) {
+      this.log('SYSTEM NOTIFICATION: oncall-screen element not found');
+      return;
+    }
+
+    // Create notification element
+    this.systemNotificationElement = document.createElement('div');
+    this.systemNotificationElement.id = 'system-notification';
+    this.systemNotificationElement.className = 'system-notification';
+    
+    // Add ARIA attributes for accessibility
+    this.systemNotificationElement.setAttribute('role', 'alert');
+    this.systemNotificationElement.setAttribute('aria-live', 'assertive');
+    this.systemNotificationElement.setAttribute('aria-label', 'System notification');
+    this.systemNotificationElement.setAttribute('tabindex', '0');
+    this.systemNotificationElement.style.cssText = `
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 32px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(102, 126, 234, 0.4);
+      z-index: 10000;
+      display: none;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 90%;
+      min-width: 300px;
+      word-wrap: break-word;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    `;
+
+    // Add to oncall screen
+    oncallScreen.appendChild(this.systemNotificationElement);
+
+    // Add CSS animation class
+    const style = document.createElement('style');
+    style.textContent = `
+      .system-notification {
+        animation: slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .notification-update {
+        animation: notificationPulse 0.8s ease-out;
+      }
+
+      /* Enhanced accessibility and visibility */
+      .system-notification:focus {
+        outline: 3px solid rgba(255, 255, 255, 0.7);
+        outline-offset: 2px;
+      }
+
+      /* Subtle glow effect for better visibility */
+      .system-notification::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 18px;
+        z-index: -1;
+        filter: blur(8px);
+        opacity: 0.7;
+      }
+
+      @keyframes slideInFromTop {
+        0% {
+          transform: translateX(-50%) translateY(-100px);
+          opacity: 0;
+        }
+        100% {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes notificationPulse {
+        0% {
+          transform: translateX(-50%) scale(1);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+        50% {
+          transform: translateX(-50%) scale(1.05);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(102, 126, 234, 0.6);
+        }
+        100% {
+          transform: translateX(-50%) scale(1);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+      }
+
+      /* High contrast mode support */
+      @media (prefers-contrast: high) {
+        .system-notification {
+          background: #000000 !important;
+          color: #ffffff !important;
+          border: 2px solid #ffffff !important;
+        }
+      }
+
+      /* Reduced motion preference */
+      @media (prefers-reduced-motion: reduce) {
+        .system-notification,
+        .notification-update {
+          animation: none !important;
+        }
+      }
+
+      /* Mobile responsive design */
+      @media (max-width: 768px) {
+        .system-notification {
+          top: 20px !important;
+          max-width: 95% !important;
+          min-width: 280px !important;
+          font-size: 16px !important;
+          padding: 16px 24px !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .system-notification {
+          top: 15px !important;
+          max-width: 98% !important;
+          min-width: 260px !important;
+          font-size: 15px !important;
+          padding: 14px 20px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    this.log('SYSTEM NOTIFICATION: System notification element created');
+  }
+
+  /**
    * Handles the video call started event.
    * Updates the UI to show the video call screen and clears the call timeout.
    */
@@ -291,6 +548,9 @@ export class KioskApplication {
 
     // Clear call timeout
     this.timeoutManager.clear("call");
+    
+    // Clear system notification
+    this.clearSystemNotification();
 
     // Show video screen
     this.showScreen("video");
@@ -301,6 +561,9 @@ export class KioskApplication {
 
     // Clear any active timeouts
     this.timeoutManager.clear("call");
+    
+    // Clear system notification
+    this.clearSystemNotification();
 
     // Return to initial screen
     this.showScreen("initial");

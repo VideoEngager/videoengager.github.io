@@ -17,7 +17,7 @@ export class EnvironmentConfig {
     const urlParams = new URLSearchParams(window.location.search);
     const envParam = urlParams.get("env");
     
-    const validEnvs = ["dev", "staging", "production"];
+    const validEnvs = ["dev", "staging", "production", "uae"];
     return (envParam && validEnvs.includes(envParam)) ? envParam : (() => {
       const patterns = {
         dev: /(dev|localhost|127\.0\.0\.1|192\.168)/,

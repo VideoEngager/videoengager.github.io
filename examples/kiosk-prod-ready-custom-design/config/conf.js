@@ -38,6 +38,18 @@ const configs = {
       domain: 'mypurecloud.com',
     },
     useGenesysMessengerChat: false
+  },
+  uae: {
+    videoEngager: {
+      tenantId: 'tjgaLJugv7IgWfiL',
+      veEnv: 'uae.leadsecure.com',
+      isPopup: false,
+    },
+    genesys: {
+      deploymentId: '2bda922a-8386-4c23-b28d-cae56cd68689',
+      domain: 'mypurecloud.ie',
+    },
+    useGenesysMessengerChat: false
   }
 };
 

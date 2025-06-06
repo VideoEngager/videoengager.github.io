@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 /**
  * @typedef {Object} ThemeConfig
@@ -54,9 +54,9 @@
  */
 
 export class VECarouselWaitroom extends HTMLElement {
-  constructor() {
+  constructor () {
     super();
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
     /** @type {number} */
     this.currentSlideIndex = 0;
 
@@ -68,7 +68,7 @@ export class VECarouselWaitroom extends HTMLElement {
 
     /** @type {boolean} */
     this.reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      '(prefers-reduced-motion: reduce)'
     ).matches;
 
     /** @type {IntersectionObserver | null} */
@@ -78,7 +78,7 @@ export class VECarouselWaitroom extends HTMLElement {
     this.mediaObserver = null;
   }
 
-  async init() {
+  async init () {
     try {
       await this.loadConfig();
       await this.loadStyles();
@@ -89,26 +89,26 @@ export class VECarouselWaitroom extends HTMLElement {
 
       // Emit ready event
       this.dispatchEvent(
-        new CustomEvent("waitroom:ready", {
-          detail: { component: this },
+        new CustomEvent('waitroom:ready', {
+          detail: { component: this }
         })
       );
     } catch (error) {
-      console.error("Initialization failed:", error);
+      console.error('Initialization failed:', error);
       this.dispatchEvent(
-        new CustomEvent("waitroom:configError", {
+        new CustomEvent('waitroom:configError', {
           detail: {
-            message: `Failed to initialize carousel: ${error.message}`,
-          },
+            message: `Failed to initialize carousel: ${error.message}`
+          }
         })
       );
     }
   }
 
-  async loadStyles() {
+  async loadStyles () {
     if (!this.shadowRoot) return;
     try {
-      const response = await fetch("../css/carousel.css");
+      const response = await fetch('css/carousel.css');
       const cssText = await response.text();
 
       const styleSheet = new CSSStyleSheet();
@@ -116,12 +116,12 @@ export class VECarouselWaitroom extends HTMLElement {
 
       this.shadowRoot.adoptedStyleSheets = [styleSheet];
     } catch (error) {
-      console.error("Failed to load styles:", error);
+      console.error('Failed to load styles:', error);
     }
   }
 
-  async loadConfig() {
-    const configSrc = this.getAttribute("config-src");
+  async loadConfig () {
+    const configSrc = this.getAttribute('config-src');
     if (!configSrc) return;
 
     try {
@@ -129,23 +129,23 @@ export class VECarouselWaitroom extends HTMLElement {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      console.log("Loading config from:", configSrc);
+      console.log('Loading config from:', configSrc);
       this.config = await response.json();
     } catch (error) {
-      console.warn("Failed to load config, using defaults:", error);
+      console.warn('Failed to load config, using defaults:', error);
       throw new Error(
-        "Failed to load configuration. Please ensure the config-src attribute is set correctly."
+        'Failed to load configuration. Please ensure the config-src attribute is set correctly.'
       );
     }
   }
 
-  render() {
+  render () {
     const template = `
               <div class="waitroom-container">
                   <div class="carousel-wrapper">
                       ${this.config.carousel.slides
                         .map((slide, index) => this.renderSlide(slide, index))
-                        .join("")}
+                        .join('')}
                   </div>
                   
                   <button class="cancel-button" 
@@ -176,64 +176,64 @@ export class VECarouselWaitroom extends HTMLElement {
    * @param {number} index
    * @returns {string}
    */
-  renderSlide(slide, index) {
+  renderSlide (slide, index) {
     const isActive = index === 0;
-    const baseClasses = `slide ${isActive ? "active" : ""} ${
-      this.reducedMotion ? "reduced-motion" : ""
+    const baseClasses = `slide ${isActive ? 'active' : ''} ${
+      this.reducedMotion ? 'reduced-motion' : ''
     }`;
 
     switch (slide.type) {
-      case "image":
+      case 'image':
         return `
                       <div class="${baseClasses} media-slide"
                            role="img"
                            aria-label="${
-                             slide.title || slide.alt || "Slide image"
+                             slide.title || slide.alt || 'Slide image'
                            }">
                           <div class="loading-placeholder" data-slide-index="${index}">
                               <div class="loading-spinner-media"></div>
                           </div>
                           <img class="slide-image" 
-                               data-src="${slide.src || ""}" 
+                               data-src="${slide.src || ''}" 
                                alt="${
-                                 slide.alt || slide.title || "Slide image"
+                                 slide.alt || slide.title || 'Slide image'
                                }"
                                style="display: none;">
                           <div class="slide-content">
                               ${
                                 slide.title
                                   ? `<h2 class="slide-title">${slide.title}</h2>`
-                                  : ""
+                                  : ''
                               }
                               ${
                                 slide.description
                                   ? `<p class="slide-description">${slide.description}</p>`
-                                  : ""
+                                  : ''
                               }
                           </div>
                       </div>
                   `;
 
-      case "video":
+      case 'video':
         return `
                       <div class="${baseClasses} media-slide"
                            role="img"
                            style="background: ${
                              slide.background || this.config.theme.primaryColor
                            }"
-                           aria-label="${slide.title || "Slide video"}">
+                           aria-label="${slide.title || 'Slide video'}">
                           <div class="loading-placeholder" data-slide-index="${index}">
                               <div class="loading-spinner-media"></div>
                           </div>
                           <video class="slide-video" 
-                                 data-src="${slide.src || ""}"
+                                 data-src="${slide.src || ''}"
                                  ${
                                    slide.poster
                                      ? `poster="${slide.poster}"`
-                                     : ""
+                                     : ''
                                  }
-                                 ${slide.muted ? "muted" : ""}
-                                 ${slide.loop ? "loop" : ""}
+                                 ${slide.muted ? 'muted' : ''}
+                                 ${slide.loop ? 'loop' : ''}
                                  playsinline
                                  preload="metadata"
                                  style="display: none;">
@@ -243,12 +243,12 @@ export class VECarouselWaitroom extends HTMLElement {
                               ${
                                 slide.title
                                   ? `<h2 class="slide-title">${slide.title}</h2>`
-                                  : ""
+                                  : ''
                               }
                               ${
                                 slide.description
                                   ? `<p class="slide-description">${slide.description}</p>`
-                                  : ""
+                                  : ''
                               }
                           </div>
                       </div>
@@ -273,19 +273,19 @@ export class VECarouselWaitroom extends HTMLElement {
     }
   }
 
-  setupLazyLoading() {
+  setupLazyLoading () {
     // Load the first slide immediately
     this.loadSlideMedia(0);
 
     // Set up intersection observer for lazy loading
-    if ("IntersectionObserver" in window && this.shadowRoot) {
+    if ('IntersectionObserver' in window && this.shadowRoot) {
       this.mediaObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               const slideIndex = parseInt(
                 /** @type {HTMLElement} */ (entry.target).dataset.slideIndex ||
-                  "0"
+                  '0'
               );
               this.loadSlideMedia(slideIndex);
             }
@@ -296,7 +296,7 @@ export class VECarouselWaitroom extends HTMLElement {
 
       // Observe loading placeholders
       const placeholders = this.shadowRoot.querySelectorAll(
-        ".loading-placeholder"
+        '.loading-placeholder'
       );
       placeholders.forEach((placeholder) => {
         this.mediaObserver?.observe(placeholder);
@@ -307,21 +307,21 @@ export class VECarouselWaitroom extends HTMLElement {
   /**
    * @param {number} slideIndex
    */
-  async loadSlideMedia(slideIndex) {
+  async loadSlideMedia (slideIndex) {
     const slide = this.config.carousel.slides[slideIndex];
     if (
       !slide ||
-      (slide.type !== "image" && slide.type !== "video") ||
+      (slide.type !== 'image' && slide.type !== 'video') ||
       !this.shadowRoot
     )
-      return;
+      {return;}
 
-    const slideElement = this.shadowRoot.querySelectorAll(".slide")[slideIndex];
+    const slideElement = this.shadowRoot.querySelectorAll('.slide')[slideIndex];
     if (!slideElement) return;
 
-    const placeholder = slideElement.querySelector(".loading-placeholder");
+    const placeholder = slideElement.querySelector('.loading-placeholder');
     const mediaElement = slideElement.querySelector(
-      slide.type === "image" ? ".slide-image" : ".slide-video"
+      slide.type === 'image' ? '.slide-image' : '.slide-video'
     );
 
     if (
@@ -329,13 +329,13 @@ export class VECarouselWaitroom extends HTMLElement {
       (mediaElement instanceof HTMLImageElement && mediaElement.src) ||
       (mediaElement instanceof HTMLVideoElement && mediaElement.src)
     )
-      return; // Already loaded
+      {return;} // Already loaded
 
     try {
-      if (slide.type === "image" && mediaElement instanceof HTMLImageElement) {
+      if (slide.type === 'image' && mediaElement instanceof HTMLImageElement) {
         await this.loadImage(mediaElement, slide);
       } else if (
-        slide.type === "video" &&
+        slide.type === 'video' &&
         mediaElement instanceof HTMLVideoElement
       ) {
         await this.loadVideo(mediaElement, slide);
@@ -343,10 +343,10 @@ export class VECarouselWaitroom extends HTMLElement {
 
       // Hide placeholder and show media
       if (placeholder instanceof HTMLElement) {
-        placeholder.style.display = "none";
+        placeholder.style.display = 'none';
       }
       if (mediaElement instanceof HTMLElement) {
-        mediaElement.style.display = "block";
+        mediaElement.style.display = 'block';
       }
     } catch (error) {
       console.warn(`Failed to load ${slide.type}:`, error);
@@ -359,11 +359,11 @@ export class VECarouselWaitroom extends HTMLElement {
    * @param {SlideConfig} slide
    * @returns {Promise<void>}
    */
-  loadImage(imgElement, slide) {
+  loadImage (imgElement, slide) {
     return new Promise((resolve, reject) => {
       imgElement.onload = () => resolve();
-      imgElement.onerror = () => reject(new Error("Image failed to load"));
-      imgElement.src = slide.src || "";
+      imgElement.onerror = () => reject(new Error('Image failed to load'));
+      imgElement.src = slide.src || '';
     });
   }
 
@@ -372,7 +372,7 @@ export class VECarouselWaitroom extends HTMLElement {
    * @param {SlideConfig} slide
    * @returns {Promise<void>}
    */
-  loadVideo(videoElement, slide) {
+  loadVideo (videoElement, slide) {
     return new Promise((resolve, reject) => {
       videoElement.onloadedmetadata = () => {
         // Auto-play if muted and loop is enabled
@@ -383,8 +383,8 @@ export class VECarouselWaitroom extends HTMLElement {
         }
         resolve();
       };
-      videoElement.onerror = () => reject(new Error("Video failed to load"));
-      videoElement.src = slide.src || "";
+      videoElement.onerror = () => reject(new Error('Video failed to load'));
+      videoElement.src = slide.src || '';
     });
   }
 
@@ -393,36 +393,36 @@ export class VECarouselWaitroom extends HTMLElement {
    * @param {SlideConfig} slide
    * @param {Error} error
    */
-  handleMediaError(slideElement, slide, error) {
-    const placeholder = slideElement.querySelector(".loading-placeholder");
+  handleMediaError (slideElement, slide, error) {
+    const placeholder = slideElement.querySelector('.loading-placeholder');
     if (placeholder) {
       placeholder.innerHTML = `
               <div style="text-align: center; color: rgba(255,255,255,0.8);">
                   <p>Unable to load ${slide.type}</p>
-                  <small>${slide.title || "Media content"}</small>
+                  <small>${slide.title || 'Media content'}</small>
               </div>
           `;
     }
   }
 
-  setupEventListeners() {
+  setupEventListeners () {
     if (!this.shadowRoot) return;
 
-    const cancelButton = this.shadowRoot.querySelector(".cancel-button");
+    const cancelButton = this.shadowRoot.querySelector('.cancel-button');
     if (cancelButton) {
-      cancelButton.addEventListener("click", this.handleCancel.bind(this));
+      cancelButton.addEventListener('click', this.handleCancel.bind(this));
     }
 
     // Listen for external events
-    window.addEventListener("botMessage", this.handleBotMessage.bind(this));
+    window.addEventListener('botMessage', this.handleBotMessage.bind(this));
     window.addEventListener(
-      "systemInterrupt",
+      'systemInterrupt',
       this.handleSystemInterrupt.bind(this)
     );
 
     // Touch events for mobile autoplay recovery
     this.shadowRoot.addEventListener(
-      "touchstart",
+      'touchstart',
       this.handleTouchStart.bind(this)
     );
 
@@ -430,29 +430,29 @@ export class VECarouselWaitroom extends HTMLElement {
     this.setupIntersectionObserver();
   }
 
-  setupAccessibility() {
+  setupAccessibility () {
     // Set ARIA attributes
-    this.setAttribute("role", "region");
-    this.setAttribute("aria-label", "Waitroom carousel");
+    this.setAttribute('role', 'region');
+    this.setAttribute('aria-label', 'Waitroom carousel');
 
     // Handle reduced motion preference changes
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    mediaQuery.addEventListener("change", (e) => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    mediaQuery.addEventListener('change', (e) => {
       this.reducedMotion = e.matches;
       this.updateReducedMotionState();
     });
   }
 
-  updateReducedMotionState() {
+  updateReducedMotionState () {
     if (!this.shadowRoot) return;
-    const slides = this.shadowRoot.querySelectorAll(".slide");
+    const slides = this.shadowRoot.querySelectorAll('.slide');
     slides.forEach((slide) => {
-      slide.classList.toggle("reduced-motion", this.reducedMotion);
+      slide.classList.toggle('reduced-motion', this.reducedMotion);
     });
   }
 
-  setupIntersectionObserver() {
-    if ("IntersectionObserver" in window) {
+  setupIntersectionObserver () {
+    if ('IntersectionObserver' in window) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
@@ -468,7 +468,7 @@ export class VECarouselWaitroom extends HTMLElement {
     }
   }
 
-  startCarousel() {
+  startCarousel () {
     if (!this.isPlaying || this.intervalId) return;
 
     this.intervalId = setInterval(() => {
@@ -476,29 +476,29 @@ export class VECarouselWaitroom extends HTMLElement {
     }, this.config.carousel.interval);
   }
 
-  pauseCarousel() {
+  pauseCarousel () {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
   }
 
-  nextSlide() {
+  nextSlide () {
     if (!this.shadowRoot) return;
-    const slides = this.shadowRoot.querySelectorAll(".slide");
+    const slides = this.shadowRoot.querySelectorAll('.slide');
     if (slides.length === 0) return;
 
-    slides[this.currentSlideIndex].classList.remove("active");
+    slides[this.currentSlideIndex].classList.remove('active');
 
     // Pause current video if playing
-    const currentVideo = slides[this.currentSlideIndex].querySelector("video");
+    const currentVideo = slides[this.currentSlideIndex].querySelector('video');
     if (currentVideo instanceof HTMLVideoElement && !currentVideo.paused) {
       currentVideo.pause();
     }
 
     this.currentSlideIndex = (this.currentSlideIndex + 1) % slides.length;
 
-    slides[this.currentSlideIndex].classList.add("active");
+    slides[this.currentSlideIndex].classList.add('active');
 
     // Load next slide media if not already loaded
     this.loadSlideMedia(this.currentSlideIndex);
@@ -508,7 +508,7 @@ export class VECarouselWaitroom extends HTMLElement {
     this.loadSlideMedia(nextIndex);
 
     // Auto-play video if it's the new active slide
-    const newVideo = slides[this.currentSlideIndex].querySelector("video");
+    const newVideo = slides[this.currentSlideIndex].querySelector('video');
     if (newVideo instanceof HTMLVideoElement && newVideo.src) {
       newVideo.play().catch(() => {
         // Autoplay failed, that's okay
@@ -517,11 +517,11 @@ export class VECarouselWaitroom extends HTMLElement {
 
     // Emit slide change event
     this.dispatchEvent(
-      new CustomEvent("waitroom:slideChanged", {
+      new CustomEvent('waitroom:slideChanged', {
         detail: {
           currentIndex: this.currentSlideIndex,
-          slide: this.config.carousel.slides[this.currentSlideIndex],
-        },
+          slide: this.config.carousel.slides[this.currentSlideIndex]
+        }
       })
     );
   }
@@ -531,40 +531,40 @@ export class VECarouselWaitroom extends HTMLElement {
    * @param {string} tier
    * @param {number} duration
    */
-  showBotMessage(message, tier = "low", duration = 5000) {
+  showBotMessage (message, tier = 'low', duration = 5000) {
     if (!this.shadowRoot) return;
-    const overlay = this.shadowRoot.querySelector(".bot-message-overlay");
-    const textElement = overlay?.querySelector(".bot-message-text");
+    const overlay = this.shadowRoot.querySelector('.bot-message-overlay');
+    const textElement = overlay?.querySelector('.bot-message-text');
 
     if (!overlay || !textElement) return;
 
     // Reset classes
-    overlay.className = "bot-message-overlay";
+    overlay.className = 'bot-message-overlay';
     overlay.classList.add(`tier-${tier}`);
 
     textElement.textContent = message;
-    overlay.classList.add("visible");
+    overlay.classList.add('visible');
 
     // Auto-hide after duration (except critical messages)
-    if (tier !== "critical") {
+    if (tier !== 'critical') {
       setTimeout(() => {
-        overlay.classList.remove("visible");
+        overlay.classList.remove('visible');
       }, duration);
     }
 
     // Emit event
     this.dispatchEvent(
-      new CustomEvent("waitroom:botMessage", {
-        detail: { message, tier, duration },
+      new CustomEvent('waitroom:botMessage', {
+        detail: { message, tier, duration }
       })
     );
   }
 
-  handleCancel() {
+  handleCancel () {
     this.pauseCarousel();
     this.dispatchEvent(
-      new CustomEvent("waitroom:userCancelled", {
-        detail: { timestamp: Date.now() },
+      new CustomEvent('waitroom:userCancelled', {
+        detail: { timestamp: Date.now() }
       })
     );
   }
@@ -572,8 +572,8 @@ export class VECarouselWaitroom extends HTMLElement {
   /**
    * @param {Event & { detail?: { message?: string; tier?: string; duration?: number } }} event
    */
-  handleBotMessage(event) {
-    const { message, tier = "low", duration = 5000 } = event.detail || {};
+  handleBotMessage (event) {
+    const { message, tier = 'low', duration = 5000 } = event.detail || {};
     if (message) {
       this.showBotMessage(message, tier, duration);
     }
@@ -582,19 +582,19 @@ export class VECarouselWaitroom extends HTMLElement {
   /**
    * @param {Event & { detail?: { message?: string } }} event
    */
-  handleSystemInterrupt(event) {
+  handleSystemInterrupt (event) {
     this.pauseCarousel();
     const { message } = event.detail || {};
     this.showBotMessage(
-      message || "System maintenance in progress. Please wait.",
-      "critical"
+      message || 'System maintenance in progress. Please wait.',
+      'critical'
     );
   }
 
-  handleTouchStart() {
+  handleTouchStart () {
     if (!this.shadowRoot) return;
     // Attempt to re-enable autoplay for videos if blocked
-    const videos = this.shadowRoot.querySelectorAll("video");
+    const videos = this.shadowRoot.querySelectorAll('video');
     videos.forEach((video) => {
       if (video instanceof HTMLVideoElement && video.paused && video.src) {
         video.play().catch(() => {
@@ -605,12 +605,12 @@ export class VECarouselWaitroom extends HTMLElement {
   }
 
   // Public API methods
-  play() {
+  play () {
     this.isPlaying = true;
     this.startCarousel();
   }
 
-  pause() {
+  pause () {
     this.isPlaying = false;
     this.pauseCarousel();
   }
@@ -618,27 +618,27 @@ export class VECarouselWaitroom extends HTMLElement {
   /**
    * @param {number} index
    */
-  goToSlide(index) {
+  goToSlide (index) {
     if (!this.shadowRoot) return;
-    const slides = this.shadowRoot.querySelectorAll(".slide");
+    const slides = this.shadowRoot.querySelectorAll('.slide');
     if (index >= 0 && index < slides.length) {
-      slides[this.currentSlideIndex].classList.remove("active");
+      slides[this.currentSlideIndex].classList.remove('active');
       this.currentSlideIndex = index;
-      slides[this.currentSlideIndex].classList.add("active");
+      slides[this.currentSlideIndex].classList.add('active');
     }
   }
 
   /**
    * @param {Partial<ComponentConfig>} newConfig
    */
-  updateConfig(newConfig) {
+  updateConfig (newConfig) {
     this.config = { ...this.config, ...newConfig };
     this.render();
     this.setupEventListeners();
   }
 
   // Cleanup
-  disconnectedCallback() {
+  disconnectedCallback () {
     this.pauseCarousel();
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect();
@@ -649,7 +649,7 @@ export class VECarouselWaitroom extends HTMLElement {
 
     // Pause all videos
     if (this.shadowRoot) {
-      const videos = this.shadowRoot.querySelectorAll("video");
+      const videos = this.shadowRoot.querySelectorAll('video');
       videos.forEach((video) => {
         if (video instanceof HTMLVideoElement) {
           video.pause();
@@ -657,10 +657,10 @@ export class VECarouselWaitroom extends HTMLElement {
       });
     }
 
-    window.removeEventListener("botMessage", this.handleBotMessage);
-    window.removeEventListener("systemInterrupt", this.handleSystemInterrupt);
+    window.removeEventListener('botMessage', this.handleBotMessage);
+    window.removeEventListener('systemInterrupt', this.handleSystemInterrupt);
   }
 }
 
 // Register the custom element
-customElements.define("ve-carousel-waitroom", VECarouselWaitroom);
+customElements.define('ve-carousel-waitroom', VECarouselWaitroom);

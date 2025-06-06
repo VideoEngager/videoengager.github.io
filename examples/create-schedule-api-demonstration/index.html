@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -31,7 +31,9 @@
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Meeting Scheduler</h1>
-        <p class="text-gray-600">Authenticate and schedule meetings with agents</p>
+        <p class="text-gray-600">
+          Authenticate and schedule meetings with agents
+        </p>
       </div>
 
       <!-- Authentication Section -->
@@ -42,12 +44,19 @@
           >
             GET
           </span>
-          <h2 class="text-xl font-semibold text-gray-900">PAK Authentication</h2>
+          <h2 class="text-xl font-semibold text-gray-900">
+            PAK Authentication
+          </h2>
         </div>
 
         <div class="space-y-4">
           <div>
-            <label for="pakKey" class="block text-sm font-medium text-gray-700 mb-2"> Partner API Key </label>
+            <label
+              for="pakKey"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Partner API Key
+            </label>
             <input
               type="text"
               id="pakKey"
@@ -58,7 +67,12 @@
           </div>
 
           <div>
-            <label for="pakExternalId" class="block text-sm font-medium text-gray-700 mb-2"> External ID </label>
+            <label
+              for="pakExternalId"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              External ID
+            </label>
             <input
               type="text"
               id="pakExternalId"
@@ -69,7 +83,12 @@
           </div>
 
           <div>
-            <label for="pakEmail" class="block text-sm font-medium text-gray-700 mb-2"> Email </label>
+            <label
+              for="pakEmail"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Email
+            </label>
             <input
               type="email"
               id="pakEmail"
@@ -93,10 +112,17 @@
           </div>
 
           <!-- Authentication Status -->
-          <div id="authStatus" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+          <div
+            id="authStatus"
+            class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-md"
+          >
             <div class="flex">
               <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg
+                  class="h-5 w-5 text-green-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
                   <path
                     fill-rule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -105,13 +131,18 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm font-medium text-green-800">Successfully authenticated! Loading agents...</p>
+                <p class="text-sm font-medium text-green-800">
+                  Successfully authenticated! Loading agents...
+                </p>
               </div>
             </div>
           </div>
 
           <!-- Agent Loading Status -->
-          <div id="agentLoadingStatus" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <div
+            id="agentLoadingStatus"
+            class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md"
+          >
             <div class="flex items-center">
               <svg
                 class="animate-spin h-5 w-5 text-blue-600 mr-2"
@@ -119,7 +150,14 @@
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
                 <path
                   class="opacity-75"
                   fill="currentColor"
@@ -131,10 +169,17 @@
           </div>
 
           <!-- Agent Error Status -->
-          <div id="agentErrorStatus" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div
+            id="agentErrorStatus"
+            class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-md"
+          >
             <div class="flex">
               <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg
+                  class="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
                   <path
                     fill-rule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -143,7 +188,9 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">Failed to load agents</h3>
+                <h3 class="text-sm font-medium text-red-800">
+                  Failed to load agents
+                </h3>
                 <p id="agentErrorMessage" class="mt-1 text-sm text-red-700"></p>
               </div>
             </div>
@@ -152,7 +199,10 @@
       </div>
 
       <!-- Main Form -->
-      <div id="schedulingSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+      <div
+        id="schedulingSection"
+        class="hidden bg-white rounded-lg shadow-md p-6 mb-6"
+      >
         <div class="flex items-center mb-6">
           <span
             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-3"
@@ -165,7 +215,12 @@
         <form id="meetingForm" class="space-y-6">
           <!-- Agent Selection -->
           <div>
-            <label for="agentSelect" class="block text-sm font-medium text-gray-700 mb-2"> Select Agent </label>
+            <label
+              for="agentSelect"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Select Agent
+            </label>
             <select
               id="agentSelect"
               name="agentSelect"
@@ -178,7 +233,12 @@
 
           <!-- Meeting Title -->
           <div>
-            <label for="meetingTitle" class="block text-sm font-medium text-gray-700 mb-2"> Meeting Title </label>
+            <label
+              for="meetingTitle"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Meeting Title
+            </label>
             <input
               type="text"
               id="meetingTitle"
@@ -193,7 +253,12 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Start Time -->
             <div>
-              <label for="startTime" class="block text-sm font-medium text-gray-700 mb-2"> Start Date & Time </label>
+              <label
+                for="startTime"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Start Date & Time
+              </label>
               <input
                 type="datetime-local"
                 id="startTime"
@@ -205,7 +270,12 @@
 
             <!-- Duration -->
             <div>
-              <label for="duration" class="block text-sm font-medium text-gray-700 mb-2"> Duration (minutes) </label>
+              <label
+                for="duration"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Duration (minutes)
+              </label>
               <input
                 type="number"
                 id="duration"
@@ -221,11 +291,20 @@
 
           <!-- Visitor Information -->
           <div class="space-y-4">
-            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Visitor Information</h3>
+            <h3
+              class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2"
+            >
+              Visitor Information
+            </h3>
 
             <!-- Visitor Name -->
             <div>
-              <label for="visitorName" class="block text-sm font-medium text-gray-700 mb-2"> Visitor Name </label>
+              <label
+                for="visitorName"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Visitor Name
+              </label>
               <input
                 type="text"
                 id="visitorName"
@@ -239,7 +318,12 @@
             <!-- Visitor Email and Phone -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="visitorEmail" class="block text-sm font-medium text-gray-700 mb-2"> Visitor Email </label>
+                <label
+                  for="visitorEmail"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Visitor Email
+                </label>
                 <input
                   type="email"
                   id="visitorEmail"
@@ -251,7 +335,12 @@
               </div>
 
               <div>
-                <label for="visitorPhone" class="block text-sm font-medium text-gray-700 mb-2"> Visitor Phone </label>
+                <label
+                  for="visitorPhone"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Visitor Phone
+                </label>
                 <input
                   type="tel"
                   id="visitorPhone"
@@ -266,7 +355,11 @@
 
           <!-- Notification Settings -->
           <div class="space-y-4">
-            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Notification Settings</h3>
+            <h3
+              class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2"
+            >
+              Notification Settings
+            </h3>
 
             <div class="flex items-center">
               <input
@@ -275,7 +368,10 @@
                 name="sendNotificationEmail"
                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label for="sendNotificationEmail" class="ml-2 block text-sm text-gray-700">
+              <label
+                for="sendNotificationEmail"
+                class="ml-2 block text-sm text-gray-700"
+              >
                 Send notification email
               </label>
             </div>
@@ -295,24 +391,45 @@
       </div>
 
       <!-- Hidden Results Container -->
-      <div id="resultsContainer" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Meeting Scheduled Successfully!</h2>
+      <div
+        id="resultsContainer"
+        class="hidden bg-white rounded-lg shadow-md p-6 mb-6"
+      >
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+          Meeting Scheduled Successfully!
+        </h2>
 
         <!-- Meeting Details -->
         <div class="bg-gray-50 rounded-lg p-4 mb-6">
-          <h3 class="text-sm font-medium text-gray-700 mb-2">Meeting Details</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-2">
+            Meeting Details
+          </h3>
           <div class="text-sm text-gray-600 space-y-1">
-            <p><span class="font-medium">Meeting ID:</span> <span id="meetingId"></span></p>
-            <p><span class="font-medium">Date:</span> <span id="scheduledDate"></span></p>
-            <p><span class="font-medium">Duration:</span> <span id="scheduledDuration"></span> minutes</p>
-            <p><span class="font-medium">Visitor:</span> <span id="scheduledVisitor"></span></p>
+            <p>
+              <span class="font-medium">Meeting ID:</span>
+              <span id="meetingId"></span>
+            </p>
+            <p>
+              <span class="font-medium">Date:</span>
+              <span id="scheduledDate"></span>
+            </p>
+            <p>
+              <span class="font-medium">Duration:</span>
+              <span id="scheduledDuration"></span> minutes
+            </p>
+            <p>
+              <span class="font-medium">Visitor:</span>
+              <span id="scheduledVisitor"></span>
+            </p>
           </div>
         </div>
 
         <!-- Meeting URLs -->
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"> Agent Meeting URL </label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Agent Meeting URL
+            </label>
             <div class="flex">
               <input
                 type="text"
@@ -332,7 +449,9 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"> Visitor Meeting URL </label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Visitor Meeting URL
+            </label>
             <div class="flex">
               <input
                 type="text"
@@ -366,30 +485,11 @@
         </div>
       </div>
 
-      <!-- Hidden ICS Download Container -->
-      <div id="icsContainer" class="hidden bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Calendar Invite</h3>
-        <p class="text-gray-600 mb-4">Download the calendar invite to add this meeting to your calendar.</p>
-
-        <button
-          type="button"
-          id="downloadIcs"
-          class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-        >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            ></path>
-          </svg>
-          Download ICS File
-        </button>
-      </div>
-
       <!-- Loading State -->
-      <div id="loadingState" class="hidden bg-white rounded-lg shadow-md p-6 text-center">
+      <div
+        id="loadingState"
+        class="hidden bg-white rounded-lg shadow-md p-6 text-center"
+      >
         <div class="inline-flex items-center">
           <svg
             class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600"
@@ -397,7 +497,14 @@
             fill="none"
             viewBox="0 0 24 24"
           >
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
             <path
               class="opacity-75"
               fill="currentColor"
@@ -409,10 +516,17 @@
       </div>
 
       <!-- Error State -->
-      <div id="errorState" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+      <div
+        id="errorState"
+        class="hidden bg-red-50 border border-red-200 rounded-lg p-4"
+      >
         <div class="flex">
           <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <svg
+              class="h-5 w-5 text-red-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
               <path
                 fill-rule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -430,33 +544,63 @@
 
     <script>
       // Configuration
-      const BASE_URL = 'https://dev.videoengager.com' // Updated to match Swagger spec
-      let authToken = null // Will be set after PAK authentication
-      let agents = [] // Will store the list of agents
-      let currentMeetingData = null // Will store the current meeting data
+      const urlParams = new URLSearchParams(window.location.search);
+      const envParam = urlParams.get("env");
+
+      const validEnvs = ["dev", "staging", "production"];
+      const config = {
+        dev: {
+          baseUrl: "https://dev.videoengager.com",
+        },
+        staging: {
+          baseUrl: "https://staging.videoengager.com",
+        },
+        production: {
+          baseUrl: "https://videoengager.com",
+        },
+      };
+      const BASE_URL =
+        envParam && validEnvs.includes(envParam)
+          ? config[envParam]?.baseUrl
+          : config["dev"]?.baseUrl; // Updated to match Swagger spec
+
+      console.log("Loaded base url:", BASE_URL);
+      let authToken = null; // Will be set after PAK authentication
+      let agents = []; // Will store the list of agents
+      let currentMeetingData = null; // Will store the current meeting data
 
       // Utility function to make API requests
       function makeRequest(method, url, data = null, queryParams = {}) {
         const queryString = Object.keys(queryParams)
-          .filter((key) => queryParams[key] !== '' && queryParams[key] !== null && queryParams[key] !== undefined)
-          .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
-          .join('&')
+          .filter(
+            (key) =>
+              queryParams[key] !== "" &&
+              queryParams[key] !== null &&
+              queryParams[key] !== undefined
+          )
+          .map(
+            (key) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(
+                queryParams[key]
+              )}`
+          )
+          .join("&");
 
-        const fullUrl = queryString ? `${url}?${queryString}` : url
+        const fullUrl = queryString ? `${url}?${queryString}` : url;
 
         const options = {
           method,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        }
+        };
 
         if (authToken) {
-          options.headers['Authorization'] = `Bearer ${authToken}`
+          options.headers["Authorization"] = `Bearer ${authToken}`;
         }
 
         if (data) {
-          options.body = JSON.stringify(data)
+          options.body = JSON.stringify(data);
         }
 
         return fetch(fullUrl, options)
@@ -464,378 +608,377 @@
             return response.json().then((data) => ({
               status: response.status,
               data: data,
-            }))
+            }));
           })
           .catch((error) => ({
             status: 0,
             data: { error: error.message },
-          }))
+          }));
       }
 
       // Function to fetch agents
       async function fetchAgents() {
-        const agentLoadingStatus = document.getElementById('agentLoadingStatus')
-        const agentErrorStatus = document.getElementById('agentErrorStatus')
+        const agentLoadingStatus =
+          document.getElementById("agentLoadingStatus");
+        const agentErrorStatus = document.getElementById("agentErrorStatus");
 
         // Show loading status
-        agentLoadingStatus.classList.remove('hidden')
-        agentErrorStatus.classList.add('hidden')
+        agentLoadingStatus.classList.remove("hidden");
+        agentErrorStatus.classList.add("hidden");
 
         try {
-          const response = await makeRequest('GET', `${BASE_URL}/api/brokerages/agents`)
+          const response = await makeRequest(
+            "GET",
+            `${BASE_URL}/api/brokerages/agents`
+          );
 
           // Hide loading status
-          agentLoadingStatus.classList.add('hidden')
+          agentLoadingStatus.classList.add("hidden");
 
           if (response.status === 200 && response.data) {
-            agents = Array.isArray(response.data) ? response.data : [response.data]
-            populateAgentDropdown()
-            updateAuthStatus(true) // Show the scheduling section
+            agents = Array.isArray(response.data)
+              ? response.data
+              : [response.data];
+            populateAgentDropdown();
+            updateAuthStatus(true); // Show the scheduling section
           } else {
-            showAgentError(response.data.error || response.data.message || 'Failed to fetch agents')
+            showAgentError(
+              response.data.error ||
+                response.data.message ||
+                "Failed to fetch agents"
+            );
           }
         } catch (error) {
-          agentLoadingStatus.classList.add('hidden')
-          showAgentError('Network error: ' + error.message)
+          agentLoadingStatus.classList.add("hidden");
+          showAgentError("Network error: " + error.message);
         }
       }
 
       // Function to show agent loading error
       function showAgentError(message) {
-        document.getElementById('agentErrorMessage').textContent = message
-        document.getElementById('agentErrorStatus').classList.remove('hidden')
+        document.getElementById("agentErrorMessage").textContent = message;
+        document.getElementById("agentErrorStatus").classList.remove("hidden");
       }
 
       // Function to populate the agent dropdown
       function populateAgentDropdown() {
-        const agentSelect = document.getElementById('agentSelect')
+        const agentSelect = document.getElementById("agentSelect");
 
         // Clear existing options except the first one
-        agentSelect.innerHTML = '<option value="">Choose an agent...</option>'
+        agentSelect.innerHTML = '<option value="">Choose an agent...</option>';
 
         // Add agents to dropdown
         agents.forEach((agent) => {
-          const option = document.createElement('option')
-          option.value = agent._account.email || undefined
-          option.textContent = `${agent.firstName} ${agent.lastName}`
-          agentSelect.appendChild(option)
-        })
+          const option = document.createElement("option");
+          if (!agent._account) return;
+          option.value = agent._account.email || undefined;
+          option.textContent = `${agent.firstName} ${agent.lastName}`;
+          agentSelect.appendChild(option);
+        });
       }
 
       // PAK Authentication function
       async function pakLogin() {
-        const pak = document.getElementById('pakKey').value
-        const externalId = document.getElementById('pakExternalId').value
-        const email = document.getElementById('pakEmail').value
+        const pak = document.getElementById("pakKey").value;
+        const externalId = document.getElementById("pakExternalId").value;
+        const email = document.getElementById("pakEmail").value;
 
         if (!pak || !externalId || !email) {
-          showResponse('pakResponse', { error: 'All fields are required' }, 400)
-          return
+          showResponse(
+            "pakResponse",
+            { error: "All fields are required" },
+            400
+          );
+          return;
         }
 
         // Show loading on authenticate button
-        const authBtn = document.getElementById('authenticateBtn')
-        const originalText = authBtn.textContent
-        authBtn.textContent = 'Authenticating...'
-        authBtn.disabled = true
+        const authBtn = document.getElementById("authenticateBtn");
+        const originalText = authBtn.textContent;
+        authBtn.textContent = "Authenticating...";
+        authBtn.disabled = true;
 
         try {
           // Call the pure authentication function
-          const response = await authenticateWithPak(pak, externalId, email)
+          const response = await authenticateWithPak(pak, externalId, email);
 
           if (response.status === 200 && response.data.token) {
-            authToken = response.data.token
-            document.getElementById('authStatus').classList.remove('hidden')
+            authToken = response.data.token;
+            document.getElementById("authStatus").classList.remove("hidden");
 
             // Fetch agents immediately after successful authentication
-            await fetchAgents()
+            await fetchAgents();
           }
 
-          showResponse('pakResponse', response.data, response.status)
+          showResponse("pakResponse", response.data, response.status);
         } finally {
           // Reset button
-          authBtn.textContent = originalText
-          authBtn.disabled = false
+          authBtn.textContent = originalText;
+          authBtn.disabled = false;
         }
       }
 
       // Function to authenticate with PAK
       async function authenticateWithPak(pak, externalId, email) {
-        const url = `${BASE_URL}/api/partners/impersonate/${pak}/${externalId}/${email}`
-        return await makeRequest('GET', url)
+        const url = `${BASE_URL}/api/partners/impersonate/${pak}/${externalId}/${email}`;
+        return await makeRequest("GET", url);
       }
 
       // Function to show API response
       function showResponse(elementId, data, status) {
-        const responseElement = document.getElementById(elementId)
-        const contentElement = document.getElementById(elementId + 'Content')
+        const responseElement = document.getElementById(elementId);
+        const contentElement = document.getElementById(elementId + "Content");
 
-        let bgColor, textColor, statusText
+        let bgColor, textColor, statusText;
 
         if (status >= 200 && status < 300) {
-          bgColor = 'bg-green-50 border-green-200'
-          textColor = 'text-green-800'
-          statusText = 'Success'
+          bgColor = "bg-green-50 border-green-200";
+          textColor = "text-green-800";
+          statusText = "Success";
         } else {
-          bgColor = 'bg-red-50 border-red-200'
-          textColor = 'text-red-800'
-          statusText = 'Error'
+          bgColor = "bg-red-50 border-red-200";
+          textColor = "text-red-800";
+          statusText = "Error";
         }
 
-        responseElement.className = `mt-4 p-4 rounded-md border ${bgColor}`
+        responseElement.className = `mt-4 p-4 rounded-md border ${bgColor}`;
         contentElement.innerHTML = `
                 <h4 class="font-medium ${textColor} mb-2">${statusText} (${status})</h4>
-                <pre class="text-sm ${textColor} break-words whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>
-            `
+                <pre class="text-sm ${textColor} break-words whitespace-pre-wrap">${JSON.stringify(
+          data,
+          null,
+          2
+        )}</pre>
+            `;
 
-        responseElement.classList.remove('hidden')
+        responseElement.classList.remove("hidden");
       }
 
       // Function to update authentication status
       function updateAuthStatus(isAuthenticated) {
-        const schedulingSection = document.getElementById('schedulingSection')
+        const schedulingSection = document.getElementById("schedulingSection");
 
         if (isAuthenticated) {
-          schedulingSection.classList.remove('hidden')
+          schedulingSection.classList.remove("hidden");
 
           // Smooth scroll to scheduling section
           setTimeout(() => {
-            schedulingSection.scrollIntoView({ behavior: 'smooth' })
-          }, 100)
+            schedulingSection.scrollIntoView({ behavior: "smooth" });
+          }, 100);
         } else {
-          schedulingSection.classList.add('hidden')
+          schedulingSection.classList.add("hidden");
         }
       }
 
       // Function to create schedule using Agent API
       async function createSchedule() {
         const data = {
-          date: new Date(document.getElementById('startTime').value).getTime(),
-          duration: parseInt(document.getElementById('duration').value),
+          date: new Date(document.getElementById("startTime").value).getTime(),
+          duration: parseInt(document.getElementById("duration").value),
           visitor: {
-            name: document.getElementById('visitorName').value,
-            email: document.getElementById('visitorEmail').value,
-            phone: document.getElementById('visitorPhone').value,
-          },
-          json: {
-            subject: document.getElementById('meetingTitle').value,
-          },
-        }
+            name: document.getElementById("visitorName").value,
+            email: document.getElementById("visitorEmail").value,
+            phone: document.getElementById("visitorPhone").value,
+            subject: document.getElementById("meetingTitle").value,
+          }
+        };
 
         const queryParams = {
-          agentEmail: document.getElementById('agentSelect').value,
+          agentEmail: document.getElementById("agentSelect").value,
+        };
+
+        if (document.getElementById("sendNotificationEmail").checked) {
+          queryParams.sendNotificationEmail = true;
         }
 
-        if (document.getElementById('sendNotificationEmail').checked) {
-          queryParams.sendNotificationEmail = true
-        }
+        const response = await makeRequest(
+          "POST",
+          `${BASE_URL}/api/schedules/tenant/`,
+          data,
+          queryParams
+        );
 
-        const response = await makeRequest('POST', `${BASE_URL}/api/schedules/tenant/`, data, queryParams)
-
-        return response
+        return response;
       }
 
       // Function to show loading state
       function showLoading() {
-        document.getElementById('loadingState').classList.remove('hidden')
-        document.getElementById('resultsContainer').classList.add('hidden')
-        document.getElementById('icsContainer').classList.add('hidden')
-        document.getElementById('errorState').classList.add('hidden')
+        document.getElementById("loadingState").classList.remove("hidden");
+        document.getElementById("resultsContainer").classList.add("hidden");
+        document.getElementById("errorState").classList.add("hidden");
       }
 
       // Function to hide loading state
       function hideLoading() {
-        document.getElementById('loadingState').classList.add('hidden')
+        document.getElementById("loadingState").classList.add("hidden");
       }
 
       // Function to show error
       function showError(message) {
-        document.getElementById('errorMessage').textContent = message
-        document.getElementById('errorState').classList.remove('hidden')
-        document.getElementById('resultsContainer').classList.add('hidden')
-        document.getElementById('icsContainer').classList.add('hidden')
+        document.getElementById("errorMessage").textContent = message;
+        document.getElementById("errorState").classList.remove("hidden");
+        document.getElementById("resultsContainer").classList.add("hidden");
       }
 
       // Function to show results
       function showResults(responseData) {
-        currentMeetingData = responseData // Store the current meeting data
+        currentMeetingData = responseData; // Store the current meeting data
         // Fill in meeting details
-        document.getElementById('meetingId').textContent = responseData._id
+        document.getElementById("meetingId").textContent = responseData._id;
 
-        const startDate = new Date(responseData.date)
-        const endDate = new Date(responseData.date + responseData.duration * 60 * 1000)
+        const startDate = new Date(responseData.date);
+        const endDate = new Date(
+          responseData.date + responseData.duration * 60 * 1000
+        );
 
-        document.getElementById('scheduledDate').textContent =
-          startDate.toLocaleString() + ' - ' + endDate.toLocaleString()
-        document.getElementById('scheduledDuration').textContent = responseData.duration
-        document.getElementById('scheduledVisitor').textContent = responseData.visitor.name
+        document.getElementById("scheduledDate").textContent =
+          startDate.toLocaleString() + " - " + endDate.toLocaleString();
+        document.getElementById("scheduledDuration").textContent =
+          responseData.duration;
+        document.getElementById("scheduledVisitor").textContent =
+          responseData.visitor.name;
 
         // Fill in URLs
-        document.getElementById('agentUrl').value = responseData.agent.meetingUrl
-        document.getElementById('visitorUrl').value = responseData.visitor.meetingUrl
+        document.getElementById("agentUrl").value =
+          responseData.agent.meetingUrl;
+        document.getElementById("visitorUrl").value =
+          responseData.visitor.meetingUrl;
 
         // Show results and ICS download
-        document.getElementById('resultsContainer').classList.remove('hidden')
-        document.getElementById('icsContainer').classList.remove('hidden')
-        document.getElementById('errorState').classList.add('hidden')
+        document.getElementById("resultsContainer").classList.remove("hidden");
+        document.getElementById("errorState").classList.add("hidden");
       }
 
       async function joinVideoMeeting(event) {
-        event.preventDefault()
-        const { currentTarget } = event
-        currentTarget.style.disabled = true
-        currentTarget.textContent = 'Joining meeting...'
-        const pak = document.getElementById('pakKey').value
-        const externalId = document.getElementById('pakExternalId').value
-        const email = currentMeetingData.agentId
+        event.preventDefault();
+        const { currentTarget } = event;
+        currentTarget.style.disabled = true;
+        currentTarget.textContent = "Joining meeting...";
+        const pak = document.getElementById("pakKey").value;
+        const externalId = document.getElementById("pakExternalId").value;
+        const email = currentMeetingData.agentId;
 
-        const agentUrl = currentMeetingData.agent.fullUrl
+        const agentUrl = currentMeetingData.agent.fullUrl;
         if (!agentUrl) {
-          showError('No full URL available for the agent')
-          return
+          showError("No full URL available for the agent");
+          return;
         }
 
         try {
           // Authenticate the agent
-          const response = await authenticateWithPak(pak, externalId, email)
+          const response = await authenticateWithPak(pak, externalId, email);
 
           if (response.status === 200 && response.data.token) {
             // Create URL with token parameter
-            const urlWithToken = new URL(agentUrl)
-            urlWithToken.searchParams.set('token', response.data.token)
+            const urlWithToken = new URL(agentUrl);
+            urlWithToken.searchParams.set("token", response.data.token);
 
             // Open the agent meeting URL with token in a new tab
-            window.open(urlWithToken.toString(), '_blank')
+            window.open(urlWithToken.toString(), "_blank");
           } else {
             // Handle authentication failure
             const errorMessage =
-              response.data?.error || response.data?.message || `Authentication failed with status ${response.status}`
-            showError('Failed to join meeting: ' + errorMessage)
+              response.data?.error ||
+              response.data?.message ||
+              `Authentication failed with status ${response.status}`;
+            showError("Failed to join meeting: " + errorMessage);
           }
         } catch (error) {
           // Handle network errors or other exceptions
-          console.error('Error joining meeting:', error)
-          showError('Failed to join meeting: ' + (error.message || 'Network error occurred'))
+          console.error("Error joining meeting:", error);
+          showError(
+            "Failed to join meeting: " +
+              (error.message || "Network error occurred")
+          );
         } finally {
           // Reset button state
-          currentTarget.style.disabled = false
-          currentTarget.textContent = 'Join Video Meeting As Agent'
+          currentTarget.style.disabled = false;
+          currentTarget.textContent = "Join Video Meeting As Agent";
         }
       }
 
       // Form submission handler
-      document.getElementById('meetingForm').addEventListener('submit', async function (e) {
-        e.preventDefault()
+      document
+        .getElementById("meetingForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-        if (!authToken) {
-          showError('Please authenticate first')
-          return
-        }
-
-        // Check if an agent is selected
-        const selectedAgent = document.getElementById('agentSelect').value
-        if (!selectedAgent) {
-          showError('Please select an agent')
-          return
-        }
-
-        // Validate that end time is after start time
-        const startTime = new Date(document.getElementById('startTime').value)
-        const duration = parseInt(document.getElementById('duration').value)
-
-        if (!duration || duration <= 0) {
-          showError('Please enter a valid duration')
-          return
-        }
-
-        showLoading()
-
-        try {
-          const response = await createSchedule()
-
-          hideLoading()
-
-          if (response.status === 200 || response.status === 201) {
-            showResults(response.data)
-          } else {
-            showError(response.data.error || response.data.message || 'Failed to schedule meeting')
+          if (!authToken) {
+            showError("Please authenticate first");
+            return;
           }
-        } catch (error) {
-          hideLoading()
-          showError('Network error: ' + error.message)
-        }
-      })
+
+          // Check if an agent is selected
+          const selectedAgent = document.getElementById("agentSelect").value;
+          if (!selectedAgent) {
+            showError("Please select an agent");
+            return;
+          }
+
+          // Validate that end time is after start time
+          const startTime = new Date(
+            document.getElementById("startTime").value
+          );
+          const duration = parseInt(document.getElementById("duration").value);
+
+          if (!duration || duration <= 0) {
+            showError("Please enter a valid duration");
+            return;
+          }
+
+          showLoading();
+
+          try {
+            const response = await createSchedule();
+
+            hideLoading();
+
+            if (response.status === 200 || response.status === 201) {
+              showResults(response.data);
+            } else {
+              showError(
+                response.data.error ||
+                  response.data.message ||
+                  "Failed to schedule meeting"
+              );
+            }
+          } catch (error) {
+            hideLoading();
+            showError("Network error: " + error.message);
+          }
+        });
 
       // Copy button functionality
-      document.getElementById('copyAgentUrl').addEventListener('click', function () {
-        const urlInput = document.getElementById('agentUrl')
-        urlInput.select()
-        navigator.clipboard.writeText(urlInput.value).then(() => {
-          const button = this
-          const originalText = button.textContent
-          button.textContent = 'Copied!'
-          setTimeout(() => {
-            button.textContent = originalText
-          }, 2000)
-        })
-      })
+      document
+        .getElementById("copyAgentUrl")
+        .addEventListener("click", function () {
+          const urlInput = document.getElementById("agentUrl");
+          urlInput.select();
+          navigator.clipboard.writeText(urlInput.value).then(() => {
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = "Copied!";
+            setTimeout(() => {
+              button.textContent = originalText;
+            }, 2000);
+          });
+        });
 
-      document.getElementById('copyVisitorUrl').addEventListener('click', function () {
-        const urlInput = document.getElementById('visitorUrl')
-        urlInput.select()
-        navigator.clipboard.writeText(urlInput.value).then(() => {
-          const button = this
-          const originalText = button.textContent
-          button.textContent = 'Copied!'
-          setTimeout(() => {
-            button.textContent = originalText
-          }, 2000)
-        })
-      })
+      document
+        .getElementById("copyVisitorUrl")
+        .addEventListener("click", function () {
+          const urlInput = document.getElementById("visitorUrl");
+          urlInput.select();
+          navigator.clipboard.writeText(urlInput.value).then(() => {
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = "Copied!";
+            setTimeout(() => {
+              button.textContent = originalText;
+            }, 2000);
+          });
+        });
 
-      // ICS download functionality
-      document.getElementById('downloadIcs').addEventListener('click', function () {
-        const agentUrl = document.getElementById('agentUrl').value
-        if (!agentUrl) {
-          alert('No meeting data available')
-          return
-        }
-
-        const meetingId = document.getElementById('meetingId').textContent
-        const meetingTitle = document.getElementById('meetingTitle').value
-        const startTime = new Date(document.getElementById('startTime').value)
-        const duration = parseInt(document.getElementById('duration').value)
-        const endTime = new Date(startTime.getTime() + duration * 60 * 1000)
-
-        const formatDate = (date) => {
-          return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
-        }
-
-        const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Meeting Scheduler//Meeting Scheduler//EN
-BEGIN:VEVENT
-UID:${meetingId}@videoengager.com
-DTSTAMP:${formatDate(new Date())}
-DTSTART:${formatDate(startTime)}
-DTEND:${formatDate(endTime)}
-SUMMARY:${meetingTitle}
-DESCRIPTION:Video meeting scheduled\\nMeeting URL: ${document.getElementById('visitorUrl').value}
-LOCATION:Video Conference
-STATUS:CONFIRMED
-END:VEVENT
-END:VCALENDAR`
-
-        const blob = new Blob([icsContent], { type: 'text/calendar' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${meetingTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-${meetingId}.ics`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-      })
     </script>
   </body>
 </html>

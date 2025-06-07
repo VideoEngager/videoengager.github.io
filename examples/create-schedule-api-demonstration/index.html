@@ -482,6 +482,33 @@
               ></div>
             </button>
           </div>
+          <div class="text-center mt-4">
+            <button
+              id="generateAgentSmartvideoURLBtn"
+              onclick="generateAgentSmartvideoURLClickHandler(event)"
+              class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group"
+            >
+              Generate Agent Smartvideo URL
+              <div
+                class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-500"
+              ></div>
+            </button>
+            <div class="flex">
+            <input 
+              type="text"
+              id="agentUrlSmartVideo"
+              readonly
+              class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+              placeholder="Agent Smartvideo URL will appear here"
+            />
+            <button
+              type="button"
+              id="copyAgentSmartVideoUrl"
+              class="ml-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md text-sm font-medium text-gray-700 transition duration-200"
+            >
+              Copy
+            </button>
+            </div>
         </div>
       </div>
 
@@ -843,6 +870,7 @@
           responseData.agent.meetingUrl;
         document.getElementById("visitorUrl").value =
           responseData.visitor.meetingUrl;
+        document.getElementById('agentUrlSmartVideo').value  = '';
 
         // Show results and ICS download
         document.getElementById("resultsContainer").classList.remove("hidden");
@@ -896,7 +924,128 @@
           currentTarget.textContent = "Join Video Meeting As Agent";
         }
       }
+      /**
+       * Build a SmartVideo URL for an agent.
+       *
+       * @param {Object}  opts
+       * @param {Object}  opts.impersonateBody – Payload sent to /impersonateCreate, e.g. { pak, email }
+       * @param {string}  opts.interactionId   – Genesys / VE interaction id
+       * @param {string}  opts.baseUrl         – Absolute base URL of your VideoEngager instance
+       * @param {number=} opts.timeoutMs       – Optional fetch timeout in ms (default 8 000)
+       * @returns {Promise<string>}            – Fully-formed SmartVideo URL
+       */
+      async function generateAgentSmartvideoURL ({
+        impersonateBody,
+        interactionId,
+        baseUrl,
+        timeoutMs = 8_000
+      }) {
+        /* ───── Guards ─────────────────────────────────────────────────────────── */
+        if (!impersonateBody || typeof impersonateBody !== 'object') {
+          throw new Error('`impersonateBody` must be an object');
+        }
+        if (!impersonateBody.pak)   throw new Error('`impersonateBody.pak` is required');
+        if (!impersonateBody.email) throw new Error('`impersonateBody.email` is required');
+        if (!interactionId)         throw new Error('`interactionId` is required');
+        if (!baseUrl)               throw new Error('`baseUrl` is required');
+      
+        let base;
+        try { base = new URL(baseUrl); }
+        catch { throw new Error('`baseUrl` must be an absolute URL'); }
+      
+        /* ───── Compose endpoint & set up timeout ─────────────────────────────── */
+        const endpoint   = new URL('/api/partners/impersonateCreate', base);
+        const controller = new AbortController();
+        const timer      = setTimeout(() => controller.abort(), timeoutMs);
+      
+        try {
+          /* ─── 1. Fetch token ────────────────────────────────────────────────── */
+          const res = await fetch(endpoint, {
+            method : 'POST',
+            headers: { 'content-type': 'application/json' },
+            body   : JSON.stringify(impersonateBody),
+            signal : controller.signal
+          });
+        
+          if (!res.ok) {
+            // Extract the most helpful error we can
+            const ctype = res.headers.get('content-type') ?? '';
+            let detail  = '';
+          
+            if (ctype.includes('application/json')) {
+              try { detail = (await res.json()).message ?? ''; } catch { /* ignore */ }
+            }
+            if (!detail) {
+              try { detail = (await res.text()).trim(); } catch { /* ignore */ }
+            }
+            if (!detail) detail = `${res.status} ${res.statusText}`;
+          
+            throw new Error(`Token endpoint responded ${res.status} – ${detail}`);
+          }
+        
+          const data = await res.json();
+          const token = data?.token;
+          if (!token) throw new Error('Response JSON missing required `token` field');
+        
+          /* ─── 2. Assemble agent URL ─────────────────────────────────────────── */
+          const agentUrl = new URL('/nextjs/single/smartvideo/', base);
+          agentUrl.searchParams.set('token',         token);
+          agentUrl.searchParams.set('veinteraction', interactionId);
+        
+          return agentUrl.toString();
+        
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            throw new Error(`Token request timed out after ${timeoutMs} ms`);
+          }
+          throw err;                       // re-throw anything else
+        } finally {
+          clearTimeout(timer);             // tidy up the timeout
+        }
+      }
 
+
+      async function generateAgentSmartvideoURLClickHandler(event) {
+        event.preventDefault()
+        const { currentTarget } = event
+        currentTarget.style.disabled = true
+        currentTarget.textContent = 'Generating URL'
+        const pak = document.getElementById('pakKey').value
+        const email = currentMeetingData.agentId
+        const agentSmartVideoURL = document.getElementById('agentUrlSmartVideo');
+        if (!pak || !email) {
+          showError('PAK and email are required to generate the Smartvideo URL')
+          return
+        }
+        const agentUrl = currentMeetingData.agent.fullUrl
+        if (!agentUrl) {
+          showError('No full URL available for the agent')
+          return
+        }
+
+        try {
+          // Authenticate the agent
+          const agentSmartvideoUrl = await generateAgentSmartvideoURL({
+            impersonateBody: {
+              pak: pak,
+              email: email
+            },
+            interactionId: currentMeetingData._id,
+            baseUrl: BASE_URL
+          });
+          // Show the generated URL in the input field
+          agentSmartVideoURL.value = agentSmartvideoUrl
+          agentSmartVideoURL.classList.remove('hidden')
+        } catch (error) {
+          // Handle network errors or other exceptions
+          console.error('Error joining meeting:', error)
+          showError('Failed to join meeting: ' + (error.message || 'Network error occurred'))
+        } finally {
+          // Reset button state
+          currentTarget.style.disabled = false
+          currentTarget.textContent = 'Generate Agent Smartvideo URL'
+        }
+      }
       // Form submission handler
       document
         .getElementById("meetingForm")
@@ -978,7 +1127,18 @@
             }, 2000);
           });
         });
-
+      document.getElementById('copyAgentSmartVideoUrl').addEventListener('click', function () {
+        const urlInput = document.getElementById('agentUrlSmartVideo')
+        urlInput.select()
+        navigator.clipboard.writeText(urlInput.value).then(() => {
+          const button = this
+          const originalText = button.textContent
+          button.textContent = 'Copied!'
+          setTimeout(() => {
+            button.textContent = originalText
+          }, 2000)
+        })
+      });
     </script>
   </body>
 </html>

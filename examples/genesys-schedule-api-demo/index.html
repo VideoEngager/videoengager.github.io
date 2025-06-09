@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VideoEngager Genesys API Test Harness</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .demo-header {
+        background: rgb(243, 244, 246);
+        color: white;
+        padding: 15px 20px;
+        text-align: end;
+        font-size: 1.2rem;
+      }
+
+      .demo-header a {
+        color: #007bff;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        margin-top: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 300;
+      }
+
+      .header p {
+        opacity: 0.8;
+        font-size: 1.1rem;
+      }
+
+      .auth-section {
+        background: #f8f9fa;
+        padding: 25px;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .auth-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #dc3545;
+      }
+
+      .status-dot.authenticated {
+        background: #28a745;
+      }
+
+      .auth-forms {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .main-content {
+        padding: 30px;
+      }
+
+      .api-section {
+        margin-bottom: 40px;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #3498db;
+        display: inline-block;
+      }
+
+      .endpoint-group {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+      }
+
+      .endpoint-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .method-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      .method-get {
+        background: #28a745;
+        color: white;
+      }
+      .method-post {
+        background: #007bff;
+        color: white;
+      }
+      .method-put {
+        background: #ffc107;
+        color: black;
+      }
+      .method-patch {
+        background: #17a2b8;
+        color: white;
+      }
+      .method-delete {
+        background: #dc3545;
+        color: white;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      .form-group textarea {
+        height: 100px;
+        resize: vertical;
+        font-family: 'Courier New', monospace;
+      }
+
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .checkbox-group input[type='checkbox'] {
+        width: auto;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 120px;
+        justify-content: center;
+      }
+
+      .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+      }
+
+      .btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-auth {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      }
+
+      .loading-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .response-section {
+        margin-top: 20px;
+        padding: 15px;
+        background: #2c3e50;
+        border-radius: 6px;
+        color: white;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .response-section pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+      }
+
+      .deprecated {
+        opacity: 0.6;
+        position: relative;
+      }
+
+      .deprecated::before {
+        content: 'DEPRECATED';
+        position: absolute;
+        top: -5px;
+        right: 0;
+        background: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        font-size: 10px;
+        border-radius: 3px;
+      }
+
+      @media (max-width: 768px) {
+        .auth-forms,
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="demo-header">
+      <a href="https://videoengager.github.io" title="Back to Demos Index">Index</a>
+      <a
+        href="https://github.com/VideoEngager/videoengager.github.io/blob/master/examples/genesys-schedule-api-demo"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="View Source on GitHub"
+        >View Source</a
+      >
+    </header>
+    <div class="container">
+      <div class="header">
+        <h1>VideoEngager Genesys API</h1>
+        <p>Comprehensive Test Harness v1.0.0</p>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-status">
+          <div class="status-indicator">
+            <div class="status-dot" id="authStatus"></div>
+            <span id="authStatusText">Not Authenticated</span>
+          </div>
+          <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="auth-forms">
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-post">POST</span>
+              Local Authentication
+            </div>
+            <div class="form-group">
+              <label>Email:</label>
+              <input type="email" id="loginEmail" placeholder="email@user.email.com" />
+            </div>
+            <div class="form-group">
+              <label>Password:</label>
+              <input type="password" id="loginPassword" placeholder="passwd" />
+            </div>
+            <button class="btn btn-auth" id="loginBtn" onclick="localLogin()">
+              <span>Login</span>
+            </button>
+            <div id="loginResponse" class="response-section" style="display: none"></div>
+          </div>
+
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              PAK Authentication
+            </div>
+            <div class="form-group">
+              <label>Partner API Key:</label>
+              <input type="text" id="pakKey" placeholder="Enter PAK" />
+            </div>
+            <div class="form-group">
+              <label>External ID:</label>
+              <input type="text" id="pakExternalId" placeholder="External ID" />
+            </div>
+            <div class="form-group">
+              <label>Email:</label>
+              <input type="email" id="pakEmail" placeholder="partner@email.com" />
+            </div>
+            <button class="btn btn-auth" id="pakBtn" onclick="pakLogin()">
+              <span>Authenticate</span>
+            </button>
+            <div id="pakResponse" class="response-section" style="display: none"></div>
+          </div>
+        </div>
+      </div>
+      <div class="main-content">
+        <!-- Public API Endpoints (No Auth Required) -->
+        <div class="api-section">
+          <h2 class="section-title">Public API (No Authentication)</h2>
+
+          <!-- Get Availability -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              Get Availability (/api/genesys/callback/{tenantId}/availability)
+            </div>
+            <div class="form-group">
+              <label>Tenant ID:</label>
+              <input type="text" id="availabilityTenantId" placeholder="Enter tenant ID" />
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Start Date:</label>
+                <input type="datetime-local" id="availabilityStart" />
+              </div>
+              <div class="form-group">
+                <label>Number of Days:</label>
+                <input type="number" id="availabilityDays" placeholder="1" value="1" min="1" max="30" />
+              </div>
+            </div>
+            <button class="btn" id="availabilityBtn" onclick="getAvailability()">
+              <span>Get Availability</span>
+            </button>
+            <div id="availabilityResponse" class="response-section" style="display: none"></div>
+          </div>
+        </div>
+      </div>
+      <div class="main-content">
+        <!-- API Endpoints -->
+        <div class="api-section">
+          <h2 class="section-title">API (Tenant Members)</h2>
+
+          <!-- Create Callback (Tenant) -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-post">POST</span>
+              Create Callback (Tenant) (/api/genesys/callback/tenant/{tenantId})
+            </div>
+            <div class="form-group">
+              <label>Tenant ID:</label>
+              <input type="text" id="tenantCreateTenantId" placeholder="Enter tenant ID" />
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>First Name:</label>
+                <input type="text" id="tenantCreateFirstname" placeholder="John" />
+              </div>
+              <div class="form-group">
+                <label>Last Name:</label>
+                <input type="text" id="tenantCreateLastname" placeholder="Doe" />
+              </div>
+              <div class="form-group">
+                <label>Customer Number:</label>
+                <input type="tel" id="tenantCreateNumber" placeholder="+1234567890" />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Customer Email:</label>
+                <input type="email" id="tenantCreateEmail" placeholder="john@example.com" />
+              </div>
+              <div class="form-group">
+                <label>Desired Time:</label>
+                <input type="datetime-local" id="tenantCreateTime" />
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>Duration (minutes):</label>
+                <input type="number" id="tenantCreateDuration" placeholder="30" value="30" />
+              </div>
+              <div class="form-group">
+                <label>Queue ID (optional):</label>
+                <input type="text" id="tenantCreateQueueId" placeholder="Queue ID" />
+              </div>
+              <div class="form-group">
+                <label>Script ID (optional):</label>
+                <input type="text" id="tenantCreateScriptId" placeholder="Script ID" />
+              </div>
+            </div>
+            <button class="btn" id="tenantCreateBtn" onclick="createTenantCallback()">
+              <span>Create Callback (Tenant)</span>
+            </button>
+            <div id="tenantCreateResponse" class="response-section" style="display: none"></div>
+          </div>
+
+          <!-- Delete Callback (Tenant) -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-delete">DELETE</span>
+              Delete Callback (Tenant) (/api/genesys/callback/tenant/{tenantId}/{conversationId})
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Tenant ID:</label>
+                <input type="text" id="tenantDeleteTenantId" placeholder="Enter tenant ID" />
+              </div>
+              <div class="form-group">
+                <label>Conversation ID:</label>
+                <input type="text" id="tenantDeleteConversationId" placeholder="Enter conversation ID" />
+              </div>
+            </div>
+            <button class="btn btn-danger" id="tenantDeleteBtn" onclick="deleteTenantCallback()">
+              <span>Delete Callback (Tenant)</span>
+            </button>
+            <div id="tenantDeleteResponse" class="response-section" style="display: none"></div>
+          </div>
+
+          <!-- Delete by Schedule ID (Tenant) -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-delete">DELETE</span>
+              Delete by Schedule ID (Tenant) (/api/genesys/callback/byScheduleId/tenant/{tenantId}/{scheduleId})
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Tenant ID:</label>
+                <input type="text" id="tenantDeleteScheduleTenantId" placeholder="Enter tenant ID" />
+              </div>
+              <div class="form-group">
+                <label>Schedule ID:</label>
+                <input type="text" id="tenantDeleteScheduleId" placeholder="Enter schedule ID" />
+              </div>
+            </div>
+            <button class="btn btn-danger" id="tenantDeleteScheduleBtn" onclick="deleteTenantByScheduleId()">
+              <span>Delete by Schedule ID (Tenant)</span>
+            </button>
+            <div id="tenantDeleteScheduleResponse" class="response-section" style="display: none"></div>
+          </div>
+
+          <!-- List Callbacks for Tenant -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              List Callbacks for Tenant (/api/genesys/callback/list/tenant/{tenantId}/{from}/{to})
+            </div>
+            <div class="form-group">
+              <label>Tenant ID:</label>
+              <input type="text" id="listTenantId" placeholder="Enter tenant ID" />
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>From Date & Time:</label>
+                <input type="datetime-local" id="listFromDate" />
+              </div>
+              <div class="form-group">
+                <label>To Date & Time:</label>
+                <input type="datetime-local" id="listToDate" />
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>Preferred Agent (optional):</label>
+                <input type="text" id="listPrefAgent" placeholder="Agent ID" />
+              </div>
+              <div class="form-group">
+                <label>Order By:</label>
+                <select id="listOrderBy">
+                  <option value="date">Date</option>
+                  <option value="created">Created</option>
+                  <option value="name">Name</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Page Size:</label>
+                <input type="number" id="listPageSize" placeholder="100" value="100" />
+              </div>
+            </div>
+            <button class="btn" id="listBtn" onclick="listCallbacksForTenant()">
+              <span>List Callbacks</span>
+            </button>
+            <div id="listResponse" class="response-section" style="display: none"></div>
+          </div>
+
+          <!-- Get Single Callback (Tenant) -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-get">GET</span>
+              Get Single Callback (Tenant) (/api/genesys/callback/tenant/{tenantId}/{conversationId})
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Tenant ID:</label>
+                <input type="text" id="tenantReadTenantId" placeholder="Enter tenant ID" />
+              </div>
+              <div class="form-group">
+                <label>Conversation ID:</label>
+                <input type="text" id="tenantReadConversationId" placeholder="Enter conversation ID" />
+              </div>
+            </div>
+            <button class="btn" id="tenantReadBtn" onclick="readTenantCallback()">
+              <span>Get Callback (Tenant)</span>
+            </button>
+            <div id="tenantReadResponse" class="response-section" style="display: none"></div>
+          </div>
+
+          <!-- Update Callback by Conversation ID -->
+          <div class="endpoint-group">
+            <div class="endpoint-title">
+              <span class="method-badge method-patch">PATCH</span>
+              Update Callback (/api/genesys/callback/tenant/{tenantId}/{conversationId})
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Tenant ID:</label>
+                <input type="text" id="updateTenantId" placeholder="Enter tenant ID" />
+              </div>
+              <div class="form-group">
+                <label>Conversation ID:</label>
+                <input type="text" id="updateConversationId" placeholder="Enter conversation ID" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>New Date & Time:</label>
+              <input type="datetime-local" id="updateDate" />
+            </div>
+            <button class="btn" id="updateBtn" onclick="updateCallback()">
+              <span>Update Callback</span>
+            </button>
+            <div id="updateResponse" class="response-section" style="display: none"></div>
+          </div>
+        </div>
+
+        <!-- Deprecated Legacy API -->
+        <div class="api-section">
+          <h2 class="section-title">Legacy API (Deprecated)</h2>
+
+          <div class="endpoint-group deprecated">
+            <div class="endpoint-title">
+              <span class="method-badge method-post">POST</span>
+              Create Callback (Legacy) (/api/genesys/callback)
+            </div>
+            <div class="grid-3">
+              <div class="form-group">
+                <label>First Name:</label>
+                <input type="text" id="legacyFirstname" placeholder="John" />
+              </div>
+              <div class="form-group">
+                <label>Last Name:</label>
+                <input type="text" id="legacyLastname" placeholder="Doe" />
+              </div>
+              <div class="form-group">
+                <label>Customer Number:</label>
+                <input type="tel" id="legacyNumber" placeholder="+1234567890" />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Customer Email:</label>
+                <input type="email" id="legacyEmail" placeholder="john@example.com" />
+              </div>
+              <div class="form-group">
+                <label>Tenant ID:</label>
+                <input type="text" id="legacyTenantId" placeholder="Enter tenant ID" />
+              </div>
+            </div>
+            <button class="btn" id="legacyBtn" onclick="createLegacyCallback()">
+              <span>Create Callback (Legacy)</span>
+            </button>
+            <div id="legacyResponse" class="response-section" style="display: none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Configuration
+      const urlParams = new URLSearchParams(window.location.search)
+      const envParam = urlParams.get('env')
+
+      const validEnvs = ['dev', 'staging', 'production']
+      const config = {
+        dev: {
+          baseUrl: 'https://dev.videoengager.com',
+        },
+        staging: {
+          baseUrl: 'https://staging.videoengager.com',
+        },
+        production: {
+          baseUrl: 'https://videoengager.com',
+        },
+      }
+      const BASE_URL = envParam && validEnvs.includes(envParam) ? config[envParam]?.baseUrl : config['dev']?.baseUrl
+
+      console.log('Loaded base url:', BASE_URL)
+      let authToken = null
+
+      // Utility functions
+      function showResponse(elementId, response, status) {
+        const element = document.getElementById(elementId)
+        element.style.display = 'block'
+
+        const statusText = status >= 200 && status < 300 ? 'SUCCESS' : 'ERROR'
+        const statusColor = status >= 200 && status < 300 ? '#28a745' : '#dc3545'
+
+        element.innerHTML = `
+          <div style="color: ${statusColor}; font-weight: bold; margin-bottom: 10px;">
+            ${statusText} (${status})
+          </div>
+          <pre>${JSON.stringify(response, null, 2)}</pre>
+        `
+      }
+
+      function updateAuthStatus(authenticated) {
+        const statusDot = document.getElementById('authStatus')
+        const statusText = document.getElementById('authStatusText')
+
+        if (authenticated) {
+          statusDot.classList.add('authenticated')
+          statusText.textContent = 'Authenticated'
+        } else {
+          statusDot.classList.remove('authenticated')
+          statusText.textContent = 'Not Authenticated'
+        }
+      }
+
+      function setButtonLoading(buttonId, isLoading) {
+        const button = document.getElementById(buttonId)
+
+        if (isLoading) {
+          // Store the original text before changing it
+          const span = button.querySelector('span')
+          if (span) {
+            button.dataset.originalText = span.textContent
+          }
+          button.disabled = true
+          button.innerHTML = '<div class="loading-spinner"></div>Loading...'
+        } else {
+          button.disabled = false
+          // Restore the original text
+          const originalText = button.dataset.originalText || 'Submit'
+          button.innerHTML = `<span>${originalText}</span>`
+        }
+      }
+
+      function makeRequest(method, url, data = null, queryParams = {}) {
+        const queryString = Object.keys(queryParams)
+          .filter((key) => queryParams[key] !== '' && queryParams[key] !== null && queryParams[key] !== undefined)
+          .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
+          .join('&')
+
+        const fullUrl = queryString ? `${url}?${queryString}` : url
+
+        const options = {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+
+        if (authToken) {
+          options.headers['Authorization'] = `Bearer ${authToken}`
+        }
+
+        if (data) {
+          options.body = JSON.stringify(data)
+        }
+
+        return fetch(fullUrl, options)
+          .then((response) => {
+            return response.json().then((data) => ({
+              status: response.status,
+              data: data,
+            }))
+          })
+          .catch((error) => ({
+            status: 0,
+            data: { error: error.message },
+          }))
+      }
+
+      // Authentication functions
+      async function localLogin() {
+        setButtonLoading('loginBtn', true)
+
+        try {
+          const email = document.getElementById('loginEmail').value
+          const password = document.getElementById('loginPassword').value
+
+          const response = await makeRequest('POST', `${BASE_URL}/auth/local`, {
+            email,
+            password,
+          })
+
+          if (response.status === 200 && response.data.token) {
+            authToken = response.data.token
+            updateAuthStatus(true)
+          }
+
+          showResponse('loginResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('loginBtn', false)
+        }
+      }
+
+      async function pakLogin() {
+        setButtonLoading('pakBtn', true)
+
+        try {
+          const pak = document.getElementById('pakKey').value
+          const externalId = document.getElementById('pakExternalId').value
+          const email = document.getElementById('pakEmail').value
+
+          const response = await makeRequest(
+            'GET',
+            `${BASE_URL}/api/partners/impersonate/${pak}/${externalId}/${email}`,
+          )
+
+          if (response.status === 200 && response.data.token) {
+            authToken = response.data.token
+            updateAuthStatus(true)
+          }
+
+          showResponse('pakResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('pakBtn', false)
+        }
+      }
+
+      function logout() {
+        authToken = null
+        updateAuthStatus(false)
+
+        // Clear all response sections
+        const responseSections = document.querySelectorAll('.response-section')
+        responseSections.forEach((section) => {
+          section.style.display = 'none'
+        })
+      }
+
+      async function getAvailability() {
+        setButtonLoading('availabilityBtn', true)
+
+        try {
+          const tenantId = document.getElementById('availabilityTenantId').value
+          const startDate = document.getElementById('availabilityStart').value
+          const numberOfDays = document.getElementById('availabilityDays').value
+
+          const queryParams = {}
+          if (startDate) queryParams.start = new Date(startDate).toISOString()
+          if (numberOfDays) queryParams['number-of-days'] = numberOfDays
+
+          const response = await makeRequest(
+            'GET',
+            `${BASE_URL}/api/genesys/callback/${tenantId}/availability`,
+            null,
+            queryParams,
+          )
+          showResponse('availabilityResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('availabilityBtn', false)
+        }
+      }
+
+      // Tenant API functions (require authentication)
+      async function createTenantCallback() {
+        setButtonLoading('tenantCreateBtn', true)
+
+        try {
+          const tenantId = document.getElementById('tenantCreateTenantId').value
+          const desiredTime = document.getElementById('tenantCreateTime').value
+
+          const data = {
+            firstname: document.getElementById('tenantCreateFirstname').value,
+            lastname: document.getElementById('tenantCreateLastname').value,
+            _customer_number: document.getElementById('tenantCreateNumber').value,
+            customer_email: document.getElementById('tenantCreateEmail').value,
+            _desired_time: desiredTime ? new Date(desiredTime).toISOString() : new Date().toISOString(),
+            duration: parseInt(document.getElementById('tenantCreateDuration').value) || 30,
+            creator: 'agent',
+          }
+
+          // Add optional fields
+          const queueId = document.getElementById('tenantCreateQueueId').value
+          const scriptId = document.getElementById('tenantCreateScriptId').value
+
+          if (queueId) data.queueId = queueId
+          if (scriptId) data.scriptId = scriptId
+
+          const response = await makeRequest('POST', `${BASE_URL}/api/genesys/callback/tenant/${tenantId}`, data)
+          showResponse('tenantCreateResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('tenantCreateBtn', false)
+        }
+      }
+
+      async function deleteTenantCallback() {
+        setButtonLoading('tenantDeleteBtn', true)
+
+        try {
+          const tenantId = document.getElementById('tenantDeleteTenantId').value
+          const conversationId = document.getElementById('tenantDeleteConversationId').value
+          const response = await makeRequest(
+            'DELETE',
+            `${BASE_URL}/api/genesys/callback/tenant/${tenantId}/${conversationId}`,
+          )
+          showResponse('tenantDeleteResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('tenantDeleteBtn', false)
+        }
+      }
+
+      async function deleteTenantByScheduleId() {
+        setButtonLoading('tenantDeleteScheduleBtn', true)
+
+        try {
+          const tenantId = document.getElementById('tenantDeleteScheduleTenantId').value
+          const scheduleId = document.getElementById('tenantDeleteScheduleId').value
+          const response = await makeRequest(
+            'DELETE',
+            `${BASE_URL}/api/genesys/callback/byScheduleId/tenant/${tenantId}/${scheduleId}`,
+          )
+          showResponse('tenantDeleteScheduleResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('tenantDeleteScheduleBtn', false)
+        }
+      }
+
+      async function listCallbacksForTenant() {
+        setButtonLoading('listBtn', true)
+
+        try {
+          const tenantId = document.getElementById('listTenantId').value
+          const fromDate = document.getElementById('listFromDate').value
+          const toDate = document.getElementById('listToDate').value
+
+          const queryParams = {}
+          const prefAgent = document.getElementById('listPrefAgent').value
+          const orderBy = document.getElementById('listOrderBy').value
+          const pageSize = document.getElementById('listPageSize').value
+
+          if (prefAgent) queryParams.preferedAgent = prefAgent
+          if (orderBy) queryParams.orderBy = orderBy
+          if (pageSize) queryParams.pageSize = pageSize
+
+          const fromISO = fromDate ? new Date(fromDate).toISOString() : new Date().toISOString()
+          const toISO = toDate ? new Date(toDate).toISOString() : new Date(Date.now() + 86400000).toISOString()
+
+          const response = await makeRequest(
+            'GET',
+            `${BASE_URL}/api/genesys/callback/list/tenant/${tenantId}/${fromISO}/${toISO}`,
+            null,
+            queryParams,
+          )
+          showResponse('listResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('listBtn', false)
+        }
+      }
+
+      async function readTenantCallback() {
+        setButtonLoading('tenantReadBtn', true)
+
+        try {
+          const tenantId = document.getElementById('tenantReadTenantId').value
+          const conversationId = document.getElementById('tenantReadConversationId').value
+          const response = await makeRequest(
+            'GET',
+            `${BASE_URL}/api/genesys/callback/tenant/${tenantId}/${conversationId}`,
+          )
+          showResponse('tenantReadResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('tenantReadBtn', false)
+        }
+      }
+
+      async function updateCallback() {
+        setButtonLoading('updateBtn', true)
+
+        try {
+          const tenantId = document.getElementById('updateTenantId').value
+          const conversationId = document.getElementById('updateConversationId').value
+          const newDate = document.getElementById('updateDate').value
+
+          const data = {
+            date: new Date(newDate).toISOString(),
+          }
+
+          const response = await makeRequest(
+            'PATCH',
+            `${BASE_URL}/api/genesys/callback/tenant/${tenantId}/${conversationId}`,
+            data,
+          )
+          showResponse('updateResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('updateBtn', false)
+        }
+      }
+
+      // Legacy API function
+      async function createLegacyCallback() {
+        setButtonLoading('legacyBtn', true)
+
+        try {
+          const data = {
+            firstname: document.getElementById('legacyFirstname').value,
+            lastname: document.getElementById('legacyLastname').value,
+            _customer_number: document.getElementById('legacyNumber').value,
+            customer_email: document.getElementById('legacyEmail').value,
+            tennantId: document.getElementById('legacyTenantId').value,
+            _desired_time: new Date().toISOString(),
+            duration: 30,
+          }
+
+          const response = await makeRequest('POST', `${BASE_URL}/api/genesys/callback`, data)
+          showResponse('legacyResponse', response.data, response.status)
+        } finally {
+          setButtonLoading('legacyBtn', false)
+        }
+      }
+
+      // Initialize default values
+      window.onload = function () {
+        const now = new Date()
+        const oneHourLater = new Date(now.getTime() + 3600000)
+        const oneDayLater = new Date(now.getTime() + 86400000)
+
+        // Set default datetime values
+        const datetimeInputs = [
+          'publicCreateTime',
+          'tenantCreateTime',
+          'availabilityStart',
+          'listFromDate',
+          'updateDate',
+        ]
+
+        datetimeInputs.forEach((id) => {
+          const element = document.getElementById(id)
+          if (element) {
+            element.value = oneHourLater.toISOString().slice(0, 16)
+          }
+        })
+
+        // Set list end date to one day later
+        const listToElement = document.getElementById('listToDate')
+        if (listToElement) {
+          listToElement.value = oneDayLater.toISOString().slice(0, 16)
+        }
+      }
+    </script>
+  </body>
+</html>

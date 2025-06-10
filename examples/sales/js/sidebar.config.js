@@ -15,6 +15,7 @@ window._genesys.widgets = {
     ]
   },
   videoengager: {
+    enableCalendarAPI: true,
     callHolder: '', // provides a place/div/ where the VideoEngager widget should be inserted. Otherwise, popup winddow will be open.
     platform: 'purecloud', // one of 'engage' or 'purecloud'
     tenantId: '', // VideoEngager tenantId

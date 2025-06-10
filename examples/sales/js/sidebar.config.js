@@ -107,7 +107,7 @@ window._genesys.widgets = {
     numberOfDays: 7,
     hideUnavailableTimeSlots: true,
     calendarHours: {
-      interval: 20,
+      interval: 15,
       allDay: {
         openTime: '00:00',
         closeTime: '23:59'

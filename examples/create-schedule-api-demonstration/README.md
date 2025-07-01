@@ -108,9 +108,9 @@ Content-Type: application/json
 | ------------- | ------- | --------------------------------------------------- | -------- |
 | date          | integer | Meeting start time as Unix timestamp (milliseconds) | ✅       |
 | duration      | integer | Meeting duration in minutes                         | ✅       |
-| visitor.name  | string  | Visitor's full name                                 | ✅       |
-| visitor.email | string  | Visitor's email address                             | ✅       |
-| visitor.phone | string  | Visitor's phone number                              | ✅       |
+| visitor.name  | string  | Visitor's full name                                 | ❌       |
+| visitor.email | string  | Visitor's email address                             | ❌       |
+| visitor.phone | string  | Visitor's phone number                              | ❌       |
 
 ### Example Request
 
@@ -345,7 +345,7 @@ The HTML form includes the following fields:
 - **Agent Selection**: Dropdown populated with available agents
 - **Meeting Title**: Title/subject of the meeting
 - **Start Date & Time**: When the meeting should start
-- **Duration**: Meeting length in minutes (1-480)
+- **Duration**: Meeting length in minutes (15-1440)
 
 ### Visitor Information
 
@@ -360,7 +360,7 @@ The HTML form includes the following fields:
 ## Notes
 
 - All date/time values should be in UTC
-- Duration is specified in minutes with a maximum of 480 minutes (8 hours)
+- Duration is specified in minutes with a maximum of 1440 minutes (24 hours)
 - The `sendNotificationEmail` parameter is optional and defaults to false - when enabled, sends notifications to both visitor and agent
 - Authentication tokens should be included in the `Authorization` header as `Bearer {token}`
 - Agent email must be valid and exist in the system

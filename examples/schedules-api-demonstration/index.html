@@ -883,7 +883,27 @@
     </div>
 
     <script>
-      const BASE_URL = "https://dev.videoengager.com";
+      const urlParams = new URLSearchParams(window.location.search);
+      const envParam = urlParams.get("env");
+
+      const validEnvs = ["dev", "staging", "production"];
+      const config = {
+        dev: {
+          baseUrl: "https://dev.videoengager.com",
+        },
+        staging: {
+          baseUrl: "https://staging.videoengager.com",
+        },
+        production: {
+          baseUrl: "https://videome.leadsecure.com",
+        },
+      };
+      const BASE_URL =
+        envParam && validEnvs.includes(envParam)
+          ? config[envParam]?.baseUrl
+          : config["dev"]?.baseUrl;
+
+      console.log("Loaded base url:", BASE_URL);
       let authToken = null;
 
       // Utility functions

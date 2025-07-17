@@ -348,11 +348,13 @@ enhancedLogger.info('Logger initialized', {
 process.on('SIGTERM', () => {
     enhancedLogger.info('Received SIGTERM, shutting down gracefully');
     logger.end();
+    process.exit(0);
 });
 
 process.on('SIGINT', () => {
     enhancedLogger.info('Received SIGINT, shutting down gracefully');
     logger.end();
+    process.exit(0);
 });
 
 /**

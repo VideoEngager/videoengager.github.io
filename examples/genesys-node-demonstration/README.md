@@ -37,8 +37,8 @@ Before you begin, ensure you have:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd videoengager-genesys-integration
+git clone https://github.com/VideoEngager/videoengager.github.io.git
+cd examples/genesys-node-demonstration
 
 # Install dependencies
 npm install
@@ -90,9 +90,7 @@ The server will start on `http://localhost:3002` (or your configured PORT).
 ### VideoEngager Setup
 
 1. **Obtain Credentials**:
-   - Contact VideoEngager support for your PAK (Partner Access Key)
-   - Get your External ID from your VideoEngager admin panel
-   - Ensure your email is authorized for API access
+   - Contact VideoEngager support for your VideoEngager credentials at <a href="mailto:support@videoengager.com">support@videoengager.com</a>
 
 2. **Domain Selection**:
    - `dev.videoengager.com` - Development/testing

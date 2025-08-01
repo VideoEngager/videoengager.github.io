@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesys Scheduled Meeting Wizard</title>
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better visual appeal and specific overrides */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+        .container {
+            display: flex;
+            background-color: #ffffff;
+            border-radius: 1rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+            max-width: 1200px;
+            margin: 2rem auto;
+            overflow: hidden;
+            min-height: 700px; /* Ensure minimum height */
+        }
+        .sidebar {
+            width: 35%; /* Slightly wider sidebar */
+            padding: 2rem;
+            background-color: #f9fafb; /* Lighter sidebar background */
+            border-right: 1px solid #e5e7eb; /* Subtle border */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .main-content {
+            width: 65%; /* Adjusted main content width */
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .calendar-grid div {
+            border-radius: 0.5rem; /* Rounded days */
+        }
+        .day-number.selected {
+            background-color: #2563eb; /* Blue for selected day */
+            color: white;
+        }
+        .slot-button {
+            transition: all 0.2s ease-in-out;
+            padding: 0.75rem 1.25rem; /* Larger buttons */
+            border: 1px solid #0078d4; /* Genesys blue */
+            background-color: #fff;
+            color: #0078d4;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .slot-button.selected {
+            background-color: #0078d4;
+            color: white;
+            border-color: #0078d4;
+        }
+        .slot-button:hover:not(.selected):not(.disabled) {
+            background-color: #e0f2fe; /* Light blue hover */
+            color: #0078d4;
+        }
+        .slot-button.next-button {
+            background-color: #0078d4;
+            color: white;
+            border-color: #0078d4;
+            font-weight: bold;
+            margin-top: 1rem; /* Add some space */
+        }
+        .calendly-powered {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #374151; /* Darker gray */
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            border-bottom-left-radius: 1rem;
+            z-index: 10;
+        }
+        .calendly-powered a {
+            color: white;
+            text-decoration: none;
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 1rem;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #0078d4; /* Genesys blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Form specific styles from index5.html, adapted to Tailwind */
+        .form-fieldset {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+        }
+        .form-legend {
+            font-weight: bold;
+            padding: 0 0.5rem;
+        }
+        .form-label {
+            display: inline-block;
+            min-width: 110px;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: #495057;
+        }
+        .form-input, .form-select {
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.6rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+            width: calc(100% - 120px); /* Adjust for label width */
+        }
+        .form-button {
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+            background: #0078d4;
+            color: #fff;
+            border-radius: 0.25rem;
+            padding: 0.6rem 1rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .form-button:hover {
+            background: #005bb5;
+        }
+        .log-display {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 0.6rem;
+            height: 180px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .sidebar, .main-content {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .sidebar {
+                padding-bottom: 4rem; /* Make space for footer links */
+            }
+            .sidebar .footer-links {
+                position: static;
+                margin-top: 2rem;
+            }
+            .form-input, .form-select {
+                width: 100%; /* Full width on small screens */
+            }
+            .form-label {
+                min-width: unset;
+                display: block;
+            }
+        }
+        /* DEMO Disclaimer Styling */
+        .demo-disclaimer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ef4444; /* Red background */
+            color: white;
+            text-align: center;
+            padding: 0.5rem 0;
+            font-size: 0.875rem; /* text-sm */
+            font-weight: bold;
+            z-index: 100; /* Ensure it's on top of everything */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        /* Powered by VideoEngager Badge Styling (fixed to page corner) */
+        .videoengager-powered { /* Renamed from stripe-powered for clarity */
+            position: fixed; /* Fixed position relative to the viewport */
+            top: 0;
+            right: 0;
+            background-color: #6772e5; /* Stripe's primary blue color */
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem; /* text-xs */
+            font-weight: bold;
+            z-index: 9999; /* Higher than other elements to ensure visibility */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: rotate(45deg); /* Rotate the element */
+            transform-origin: 100% 0%; /* Rotate from the top-right corner */
+            width: 200px; /* Adjust width to ensure text fits after rotation */
+            text-align: center;
+            line-height: 1.2; /* Adjust line height for better appearance */
+            padding-top: 1.5rem; /* Add more padding to the top after rotation */
+            padding-bottom: 0.5rem; /* Adjust bottom padding */
+            right: -34px; /* Adjust position to move it into the corner */
+            top: 110px; /* Adjust position */
+        }
+
+        .videoengager-powered a {
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <!-- DEMO Disclaimer -->
+ <!--    <div class="demo-disclaimer">
+        DEMO - FOR DEMONSTRATION PURPOSES ONLY. NOT FOR PRODUCTION USE.
+    </div> -->
+    <!-- Powered by VideoEngager Badge (fixed to page corner) -->
+    <div class="videoengager-powered">
+        Powered by <a href="https://videoengager.com" target="_blank" class="hover:underline">VideoEngager</a>
+    </div>
+
+    <div class="container rounded-2xl shadow-xl">
+        <!-- Sidebar Section -->
+        <div class="sidebar relative">
+            <div class="flex items-center mb-6">
+                <!-- Back Arrow Icon -->
+                <svg class="w-6 h-6 text-gray-500 mr-2 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <!-- Money Canvas Logo -->
+                <img src="https://d3v0px0pttie1i.cloudfront.net/uploads/branding/logo/1963a26d-c832-48fe-ba93-8960f1462fa0/35e5e122.png" alt="Money Canvas Logo" class="w-36 h-20 rounded-full mb-4">
+<!--                 <h3 class="text-xl font-semibold text-gray-800">Money Canvas<sup>®</sup></h3>
+ -->            </div>
+
+            <div class="session-info flex flex-col items-start">
+                <!-- Money Canvas Dot Icon -->
+                <img src="https://d3v0px0pttie1i.cloudfront.net/uploads/team/avatar/396172/b68dcda0.png" alt="Money Canvas Icon" class="w-8 h-8 rounded-full mr-3">
+                <p class="text-gray-600 text-sm mb-1">Money Canvas<sup>®</sup> by Thrivent</p>
+                <h2 id="session-title" class="text-2xl font-bold text-gray-900 mb-4">Session 1: Paint Picture</h2>
+
+                <div class="flex items-center text-gray-700 text-sm mb-2">
+                    <!-- Clock Icon -->
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="session-duration">1 hr</span>
+                </div>
+
+                <div id="selected-date-time-display" class="hidden items-center text-gray-700 text-sm mb-2">
+                    <!-- Calendar Icon -->
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span id="display-date-time"></span>
+                </div>
+
+                <div id="selected-timezone-display" class="hidden items-center text-gray-700 text-sm mb-4">
+                    <!-- Globe Icon -->
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h2m-2 2h4m-4 0h4m-9-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="display-timezone">Eastern European Time</span>
+                </div>
+            </div>
+
+            <div class="details text-gray-700 text-sm mt-8 flex-grow">
+                <p class="mb-2">Do you know where your money is going?</p>
+                <p class="mb-4">Paint a clear picture of where your money goes each month and spark new motivation to put your money towards your biggest priorities.</p>
+                <h4 class="font-semibold text-gray-800">Video Meeting | 1:1 Coaching | Free</h4>
+            </div>
+
+            <div class="footer-links flex justify-between text-xs text-blue-600 mt-8">
+                <a href="#" class="hover:underline">Cookie settings</a>
+                <a href="#" class="hover:underline">Report abuse</a>
+            </div>
+
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="main-content relative">
+            <div id="loading-overlay" class="loading-overlay hidden">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Step 1: Select Date & Time -->
+            <div id="select-date-time-step" class="flex flex-col flex-grow">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Select a Date & Time</h1>
+
+                <!-- Tenant ID field (conditionally visible) -->
+                <div id="tenant-id-group" class="form-group mb-4 hidden">
+                    <label for="tenant-id" class="block text-sm font-medium text-gray-700 mb-1">Tenant ID <span class="text-red-500">*</span></label>
+                    <input type="text" id="tenant-id" placeholder="Enter Tenant ID" value="0FphTk091nt7G1W7" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div class="calendar-nav flex justify-between items-center mb-6">
+                    <button id="prev-month" class="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    <h2 id="current-month-year" class="text-xl font-semibold text-gray-800"></h2>
+                    <button id="next-month" class="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="calendar-grid" class="grid grid-cols-7 gap-2 text-center text-sm mb-8">
+                    <div class="day-name font-semibold text-gray-600 py-2">MON</div>
+                    <div class="day-name font-semibold text-gray-600 py-2">TUE</div>
+                    <div class="day-name font-semibold text-gray-600 py-2">WED</div>
+                    <div class="day-name font-semibold text-gray-600 py-2">THU</div>
+                    <div class="day-name font-semibold text-gray-600 py-2">FRI</div>
+                    <div class="day-name font-semibold text-gray-600 py-2">SAT</div>
+                    <div class="day-name font-semibold text-gray-600 py-2">SUN</div>
+                    <!-- Calendar days will be rendered here by JavaScript -->
+                </div>
+
+                <div class="time-zone flex items-center text-gray-700 text-sm mb-8">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h2m-2 2h4m-4 0h4m-9-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <label for="timezone-display-text" class="mr-2">Time zone</label>
+                    <span id="timezone-display-text" class="p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"></span>
+                </div>
+
+                <div class="time-slots flex flex-col md:flex-row gap-4 flex-grow">
+                    <div id="selected-date-display" class="font-bold text-gray-800 text-lg md:w-1/3 text-center md:text-left"></div>
+                    <div id="slots-list" class="flex flex-wrap gap-3 flex-grow md:w-2/3">
+                        <!-- Time slots will be rendered here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Enter Details -->
+            <div id="enter-details-step" class="hidden flex-col flex-grow">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Enter Customer Data</h1>
+                <form id="customer-data-form" class="flex flex-col flex-grow">
+                    <fieldset class="form-fieldset">
+                        <legend class="form-legend">Customer Data</legend>
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input id="firstName" class="form-input" placeholder="Jofn" type="text" autocomplete="given-name" /><br />
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input id="lastName" class="form-input" placeholder="Smith" type="text" autocomplete="family-name" /><br />
+                        <label for="email" class="form-label">Email</label>
+                        <input id="email" class="form-input" placeholder="john@example.com" type="email" autocomplete="email" /><br />
+                        <label for="phone" class="form-label">Phone</label>
+                        <input id="phone" class="form-input" placeholder="+1xxxxxxxxx" type="tel" autocomplete="tel" /><br />
+                    </fieldset>
+
+                    <button type="submit" id="btnSchedule" class="form-button px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors self-start">Schedule Meeting</button>
+                </form>
+                <!-- Log display section (conditionally visible) -->
+                <h3 id="log-heading" class="mt-4 text-xl font-bold text-gray-900 hidden">Log / Response</h3>
+                <div id="log" class="log-display hidden"></div>
+
+                <!-- Meeting Details Section (initially hidden) -->
+                <fieldset id="detailsFieldset" class="form-fieldset mt-4 hidden">
+                    <legend class="form-legend">Meeting Details</legend>
+                    <p class="mb-2"><strong>Meeting URL:</strong> <a id="meetingUrl" href="#" target="_blank" class="text-blue-600 hover:underline"></a></p>
+                    <p class="mb-2"><strong>Access Code:</strong> <span id="meetingCode"></span></p>
+                    <p class="mb-2"><strong>Scheduled Time:</strong> <span id="meetingTime"></span></p>
+                    <p><a id="downloadIcs" class="form-button" href="#" download="meeting.ics">Download Calendar Invite</a></p>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports (standard setup, though not directly used for Genesys API calls)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase config and app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth, userId;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let selectedDate = null; // Stores the selected date object (local date, no time)
+        let selectedTimeSlot = null; // Stores the selected time slot string (e.g., "00:30")
+        let selectedDateTimeISO = null; // Stores the original UTC ISO string from API for booking
+
+        const calendarGridEl = document.getElementById('calendar-grid');
+        const currentMonthYearEl = document.getElementById('current-month-year');
+        const slotsListEl = document.getElementById('slots-list');
+        const selectDateTimeStepEl = document.getElementById('select-date-time-step');
+        const enterDetailsStepEl = document.getElementById('enter-details-step');
+        const loadingOverlayEl = document.getElementById('loading-overlay');
+        const selectedDateDisplayEl = document.getElementById('selected-date-display');
+        const displayDateTimeEl = document.getElementById('display-date-time');
+        const displayTimezoneTextEl = document.getElementById('timezone-display-text'); // New element for read-only timezone
+        const tenantIdInput = document.getElementById('tenant-id');
+        const tenantIdGroup = document.getElementById('tenant-id-group'); // Parent div for tenant ID input
+        const logEl = document.getElementById("log"); // Log display element
+        const logHeadingEl = document.getElementById("log-heading"); // Log heading element
+
+        // Genesys API Configuration from index5.html
+        const BASE_URL = "https://videome.leadsecure.com/api"; // Genesys API Gateway URL
+
+        // --- Firebase Initialization ---
+        async function initFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                console.log('Firebase initialized. User ID:', userId);
+            } catch (error) {
+                console.error('Error initializing Firebase:', error);
+            }
+        }
+
+        // --- Utility functions ---
+        // Simple log helper (from index5.html)
+        const log = (...args) => {
+            const line = document.createElement("div");
+            line.textContent = args.map(a => typeof a === "object" ? JSON.stringify(a, null, 2) : a).join(" ");
+            logEl.prepend(line); // Add to top
+            console.log(...args);
+        };
+
+        // Custom alert/confirm replacement (as per instructions)
+        function showCustomAlert(message) {
+            // In a real app, this would be a custom modal. For simplicity, using console.log.
+            console.warn("Custom Alert:", message);
+            // You could also render a temporary message in a dedicated UI element
+            // For now, we'll use a simple alert as a fallback for immediate user feedback.
+            alert(message);
+        }
+
+        function showLoading() {
+            loadingOverlayEl.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            loadingOverlayEl.classList.add('hidden');
+        }
+
+        /**
+         * Converts a timezone ID to a user-friendly name.
+         * @param {string} timeZone - IANA timezone ID (e.g., 'America/New_York').
+         * @returns {string} User-friendly timezone name (e.g., 'Eastern Daylight Time').
+         */
+        function getFriendlyTimezoneName(timeZone) {
+            try {
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    timeZoneName: 'long',
+                    timeZone
+                });
+                const parts = formatter.formatToParts(new Date());
+                const tzPart = parts.find(part => part.type === 'timeZoneName');
+                return tzPart ? tzPart.value : timeZone.replace(/_/g, ' ');
+            } catch {
+                return timeZone.replace(/_/g, ' '); // Fallback
+            }
+        }
+
+        // --- Genesys API Calls (adapted from index5.html) ---
+
+        /**
+         * Fetches availability data from Genesys API.
+         * Corresponds to GET /genesys/callback/{tenantId}/availability
+         * @param {string} tenantId
+         * @param {Date} dateForRequest - A Date object representing the *local* date for which to fetch availability.
+         * @param {number} numberOfDays - How many days to fetch availability for.
+         * @returns {Promise<Object>} The availability data (map of UTC ISO strings to available seats).
+         */
+        async function fetchGenesysAvailability(tenantId, dateForRequest, numberOfDays = 7) {
+            showLoading();
+
+            // FIX: Construct the ISO string for the *exact midnight UTC* of the selected calendar day.
+            // This ensures the API request is for the correct 24-hour UTC block.
+            const startUTC = new Date(Date.UTC(dateForRequest.getFullYear(), dateForRequest.getMonth(), dateForRequest.getDate()));
+            const startISO = startUTC.toISOString();
+
+            // Calculate the end of the requested period (e.g., 1 day later) in UTC.
+            const endUTC = new Date(Date.UTC(dateForRequest.getFullYear(), dateForRequest.getMonth(), dateForRequest.getDate() + numberOfDays));
+            const endISO = endUTC.toISOString();
+
+            const url = `${BASE_URL}/genesys/callback/${tenantId}/availability?start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
+            log(`Fetching availability for local date: ${dateForRequest.toLocaleDateString()} (Requesting UTC window: ${startISO} to ${endISO})`);
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw errorData;
+                }
+                const data = await res.json();
+                log("Availability loaded:", data);
+                return data;
+            } catch (err) {
+                log("⚠️ Availability error:", err);
+                showCustomAlert("Failed to load availability. Please check Tenant ID and API connectivity.");
+                throw err;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        /**
+         * Schedules a meeting using the Genesys API.
+         * Corresponds to POST /genesys/callback/{tenantId}
+         * @param {string} tenantId
+         * @param {Object} customerData - { firstName, lastName, email, phone }
+         * @param {string} desiredTimeISO - ISO string of the selected slot time (should be UTC from API response).
+         * @returns {Promise<Object>} The scheduled meeting details.
+         */
+        async function scheduleGenesysMeeting(tenantId, customerData, desiredTimeISO) {
+            showLoading();
+            const body = {
+                firstname: customerData.firstName,
+                lastname: customerData.lastName,
+                customer_email: customerData.email,
+                _customer_number: customerData.phone,
+                _desired_time: desiredTimeISO, // This is the UTC ISO string from the selected slot
+                creator: "visitor"
+            };
+            const url = `${BASE_URL}/genesys/callback/${tenantId}`;
+            log("Scheduling meeting with payload:", body, "to URL:", url);
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw errorData;
+                }
+                const data = await res.json();
+                log("✅ Scheduled!", data);
+                return data;
+            } catch (err) {
+                log("⚠️ Schedule error:", err);
+                showCustomAlert("Failed to schedule meeting: " + (err.message || JSON.stringify(err)));
+                throw err;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- Calendar Rendering ---
+        function renderCalendar(year, month) {
+            calendarGridEl.innerHTML = `
+                <div class="day-name font-semibold text-gray-600 py-2">MON</div>
+                <div class="day-name font-semibold text-gray-600 py-2">TUE</div>
+                <div class="day-name font-semibold text-gray-600 py-2">WED</div>
+                <div class="day-name font-semibold text-gray-600 py-2">THU</div>
+                <div class="day-name font-semibold text-gray-600 py-2">FRI</div>
+                <div class="day-name font-semibold text-gray-600 py-2">SAT</div>
+                <div class="day-name font-semibold text-gray-600 py-2">SUN</div>
+            `;
+
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const numDaysInMonth = lastDayOfMonth.getDate();
+            const firstDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7; // Adjust for Monday start
+
+            // Add empty divs for leading blank days
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                calendarGridEl.innerHTML += `<div class="py-2"></div>`;
+            }
+
+            for (let day = 1; day <= numDaysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Normalize today's date
+
+                let classes = 'day-number py-2 cursor-pointer border border-gray-200 hover:bg-blue-50 transition-colors';
+                if (date < today) {
+                    classes += ' disabled text-gray-400 cursor-not-allowed bg-gray-50';
+                } else if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
+                    classes += ' selected bg-blue-600 text-white';
+                }
+
+                // FIX: Ensure data-date is set to the local YYYY-MM-DD string
+                const localDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                calendarGridEl.innerHTML += `
+                    <div class="${classes}" data-date="${localDateString}">
+                        ${day}
+                    </div>
+                `;
+            }
+
+            currentMonthYearEl.textContent = new Date(year, month).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+            // Add event listeners to newly rendered days
+            calendarGridEl.querySelectorAll('.day-number:not(.disabled)').forEach(dayEl => {
+                dayEl.addEventListener('click', (event) => {
+                    const previouslySelected = calendarGridEl.querySelector('.day-number.selected');
+                    if (previouslySelected) {
+                        previouslySelected.classList.remove('selected', 'bg-blue-600', 'text-white');
+                        previouslySelected.classList.add('bg-white', 'text-gray-800');
+                    }
+                    event.currentTarget.classList.add('selected', 'bg-blue-600', 'text-white');
+
+                    // FIX: Create selectedDate directly as a local Date object from components
+                    // This ensures selectedDate is at local midnight of the clicked day.
+                    const [year, month, day] = event.currentTarget.dataset.date.split('-').map(Number);
+                    selectedDate = new Date(year, month - 1, day); // month is 0-indexed for Date constructor
+
+                    selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                    updateTimeSlots();
+                });
+            });
+        }
+
+        // --- Time Slot Rendering ---
+        async function updateTimeSlots() {
+            const tenantId = tenantIdInput.value;
+            if (!selectedDate) {
+                slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+                return;
+            }
+            if (!tenantId) {
+                slotsListEl.innerHTML = '<p class="text-red-500">Please enter a Tenant ID.</p>';
+                return;
+            }
+
+            slotsListEl.innerHTML = ''; // Clear existing slots
+
+            try {
+                // Fetch availability for 1 day starting from the selectedDate
+                const availabilityMap = await fetchGenesysAvailability(tenantId, selectedDate, 1);
+
+                const now = new Date();
+                let hasSlotsForSelectedDate = false;
+
+                // FIX: Correctly get the YYYY-MM-DD string for the *selected local date*
+                // This ensures selectedLocalDayString accurately reflects the calendar day.
+                const selectedLocalDayString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+
+
+                // Iterate over the availability map
+                for (const isoDateTime in availabilityMap) {
+                    if (availabilityMap.hasOwnProperty(isoDateTime)) {
+                        const availableSeats = availabilityMap[isoDateTime];
+                        const slotDateTimeUTC = new Date(isoDateTime); // This is the slot time in UTC from the API
+
+                        // Convert the UTC slot time to the user's local time for comparison and display
+                        // This creates a new Date object representing the same moment in the local timezone.
+                        const slotDateTimeLocal = new Date(slotDateTimeUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
+
+                        // Check if the local slot date matches the selected local calendar date
+                        if (slotDateTimeLocal.toISOString().split('T')[0] === selectedLocalDayString) {
+                            hasSlotsForSelectedDate = true;
+                            const isPast = slotDateTimeLocal < now; // Compare local slot time with local current time
+                            const isAvailable = availableSeats > 0;
+
+                            let classes = 'slot-button';
+                            let isDisabled = false;
+
+                            if (isPast || !isAvailable) {
+                                classes += ' disabled text-gray-400 border-gray-300 cursor-not-allowed bg-gray-50';
+                                isDisabled = true;
+                            }
+
+                            const button = document.createElement('button');
+                            button.className = classes;
+                            // Display time in local format for user readability
+                            button.textContent = slotDateTimeLocal.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                            button.disabled = isDisabled;
+                            // Store the original UTC ISO string from the API for booking, as the API expects UTC.
+                            button.dataset.slotDateTimeISO = isoDateTime;
+
+                            if (!isDisabled) {
+                                button.addEventListener('click', (event) => {
+                                    const previouslySelectedSlot = slotsListEl.querySelector('.slot-button.selected');
+                                    if (previouslySelectedSlot) {
+                                        previouslySelectedSlot.classList.remove('selected');
+                                    }
+                                    event.currentTarget.classList.add('selected');
+                                    selectedTimeSlot = event.currentTarget.textContent;
+                                    selectedDateTimeISO = event.currentTarget.dataset.slotDateTimeISO; // This is the UTC ISO string
+                                    renderNextButton();
+                                });
+                            }
+                            slotsListEl.appendChild(button);
+                        }
+                    }
+                }
+
+                if (!hasSlotsForSelectedDate) {
+                    slotsListEl.innerHTML = '<p class="text-gray-500">No available slots for this day.</p>';
+                }
+            } catch (error) {
+                // Error already logged by fetchGenesysAvailability
+                slotsListEl.innerHTML = '<p class="text-red-500">Failed to load slots. Please check Tenant ID and try again.</p>';
+            }
+        }
+
+        function renderNextButton() {
+            const existingNextButton = slotsListEl.querySelector('.next-button');
+            if (existingNextButton) {
+                existingNextButton.remove();
+            }
+
+            if (selectedDate && selectedTimeSlot && selectedDateTimeISO) {
+                const nextButton = document.createElement('button');
+                nextButton.className = 'slot-button next-button px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors ml-4';
+                nextButton.textContent = 'Next';
+                nextButton.onclick = goToDetailsStep;
+                slotsListEl.appendChild(nextButton);
+            }
+        }
+
+        // --- Wizard Navigation ---
+        function goToDetailsStep() {
+            if (!selectedDate || !selectedTimeSlot || !selectedDateTimeISO) {
+                showCustomAlert('Please select both a date and a time slot.');
+                return;
+            }
+
+            // Update sidebar with selected date and time
+            const displayDate = new Date(selectedDateTimeISO);
+            const formattedDateTime = displayDate.toLocaleString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            displayDateTimeEl.textContent = formattedDateTime;
+            // Correctly get the selected timezone text
+            displayTimezoneTextEl.textContent = getFriendlyTimezoneName(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+
+            document.getElementById('selected-date-time-display').classList.remove('hidden');
+            document.getElementById('selected-date-time-display').classList.add('flex');
+            document.getElementById('selected-timezone-display').classList.remove('hidden');
+            document.getElementById('selected-timezone-display').classList.add('flex');
+
+            selectDateTimeStepEl.classList.add('hidden');
+            enterDetailsStepEl.classList.remove('hidden');
+            enterDetailsStepEl.classList.add('flex'); // Ensure flex display for the form
+        }
+
+        // --- Event Listeners and Initial Load ---
+        document.getElementById('prev-month').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar(currentYear, currentMonth);
+            selectedDate = null; // Reset selected date on month change
+            selectedTimeSlot = null;
+            selectedDateTimeISO = null;
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+            selectedDateDisplayEl.textContent = '';
+            renderNextButton(); // Hide next button if no slot is selected
+        });
+
+        document.getElementById('next-month').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar(currentYear, currentMonth);
+            selectedDate = null; // Reset selected date on month change
+            selectedTimeSlot = null;
+            selectedDateTimeISO = null;
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+            selectedDateDisplayEl.textContent = '';
+            renderNextButton(); // Hide next button if no slot is selected
+        });
+
+        // Handle form submission for scheduling the meeting
+        document.getElementById('customer-data-form').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const tenantId = tenantIdInput.value;
+            if (!tenantId) {
+                showCustomAlert("Please enter a Tenant ID.");
+                return;
+            }
+            if (!selectedDateTimeISO) {
+                showCustomAlert("No time slot selected. Please go back to the first page and select one.");
+                return;
+            }
+
+            const customerData = {
+                firstName: document.getElementById("firstName").value,
+                lastName: document.getElementById("lastName").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+            };
+
+            // Basic validation for required fields
+            if (!customerData.firstName || !customerData.lastName || !customerData.email) {
+                showCustomAlert("Please fill in all required customer data fields (First Name, Last Name, Email).");
+                return;
+            }
+
+            try {
+                const result = await scheduleGenesysMeeting(tenantId, customerData, selectedDateTimeISO);
+
+                // Update Meeting Details section
+                // Note: conversationId is not part of the customer form, but it's used for management later
+                // document.getElementById("conversationId").value = result.genesys.id || result.videoengager.scheduleId || '';
+                document.getElementById("meetingUrl").textContent = result.videoengager.meetingUrl || 'N/A';
+                document.getElementById("meetingUrl").href = result.videoengager.meetingUrl || '#';
+                document.getElementById("meetingCode").textContent = result.videoengager.code || 'N/A';
+                document.getElementById("meetingTime").textContent = new Date(result.videoengager.date).toLocaleString() || 'N/A';
+                document.getElementById("detailsFieldset").classList.remove('hidden');
+
+                // Generate and set ICS download link
+                if (result.icsCalendarData) {
+                    const blob = new Blob([result.icsCalendarData], { type: 'text/calendar' });
+                    const icsUrl = URL.createObjectURL(blob);
+                    document.getElementById("downloadIcs").href = icsUrl;
+                } else {
+                    document.getElementById("downloadIcs").classList.add('hidden'); // Hide if no ICS data
+                }
+
+            } catch (error) {
+                // Error already handled by scheduleGenesysMeeting
+            }
+        });
+
+
+        // Initial setup on window load
+        window.onload = async function() {
+            await initFirebase(); // Initialize Firebase
+            renderCalendar(currentYear, currentMonth);
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
+
+            // Set initial friendly timezone name
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            displayTimezoneTextEl.textContent = getFriendlyTimezoneName(userTimezone);
+
+
+            // Add event listener to tenant ID input to re-fetch slots when it changes
+            tenantIdInput.addEventListener('change', () => {
+                if (selectedDate) { // Only re-fetch if a date is already selected
+                    updateTimeSlots();
+                }
+            });
+
+            // Check for ?dev param and toggle visibility
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('dev')) {
+                tenantIdGroup.classList.remove('hidden');
+                logHeadingEl.classList.remove('hidden');
+                logEl.classList.remove('hidden');
+            } else {
+                tenantIdGroup.classList.add('hidden');
+                logHeadingEl.classList.add('hidden');
+                logEl.classList.add('hidden');
+            }
+        };
+    </script>
+</body>
+</html>

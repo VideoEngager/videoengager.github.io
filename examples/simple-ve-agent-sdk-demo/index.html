@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VideoEngager Agent SDK Demo</title>
+  </head>
+  <body>
+    <div id="video-container" class="video-container">
+      <span id="video-containet-text"
+        >VideoEngager widget will appear here when a call is started</span
+      >
+    </div>
+
+    <script type="module">
+      import * as videoengagerAgentSdk from "https://unpkg.com/videoengager-agent-sdk@latest/dist/index.mjs";
+      window.VideoEngagerAgent = videoengagerAgentSdk;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const domain = urlParams.get("domain");
+      const agentEmail = urlParams.get("agentEmail");
+      const apiKey = urlParams.get("apiKey");
+      const organizationId = urlParams.get("organizationId");
+
+      async function handleVideoEngagerSDKStart() {
+        await window.VideoEngagerAgent.init({
+          authMethod: "generic",
+          apiKey: apiKey,
+          domain: domain,
+          agentEmail: agentEmail,
+          organizationId: organizationId ? organizationId : undefined,
+        });
+
+        await window.VideoEngagerAgent.call();
+      }
+
+      // Wrap the await call in an async IIFE
+      (async () => {
+        await handleVideoEngagerSDKStart();
+      })();
+    </script>
+  </body>
+</html>

@@ -182,6 +182,17 @@ Each response includes:
 - These endpoints may be removed in future versions
 - Use the new Agent/Tenant API endpoints for new integrations
 
+## Environment Configuration
+
+The application supports multiple environments that can be configured via URL parameters:
+
+| Parameter | Environment | Base URL |
+|-----------|-------------|----------|
+| `?env=dev` | Development | `https://dev.videoengager.com` |
+| `?env=staging` | Staging | `https://staging.videoengager.com` |
+| `?env=production` | Production | `https://videome.leadsecure.com` |
+| *default* | Development | `https://dev.videoengager.com` |
+
 ## 🔧 Troubleshooting
 
 ### Common Issues

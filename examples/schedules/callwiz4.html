@@ -243,8 +243,8 @@
         DEMO - FOR DEMONSTRATION PURPOSES ONLY. NOT FOR PRODUCTION USE.
     </div> -->
     <!-- Powered by VideoEngager Badge (fixed to page corner) -->
-    <div class="videoengager-powered">
-        Powered by <a href="https://videoengager.com" target="_blank" class="hover:underline">VideoEngager</a>
+    <div id="powered-by-service" class="videoengager-powered">
+        Powered by <a id="powered-by-service-link" href="" target="_blank" class="hover:underline">Powered by service</a>
     </div>
 
     <div class="container rounded-2xl shadow-xl">
@@ -256,15 +256,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 <!-- Money Canvas Logo -->
-                <img src="https://d3v0px0pttie1i.cloudfront.net/uploads/branding/logo/1963a26d-c832-48fe-ba93-8960f1462fa0/35e5e122.png" alt="Money Canvas Logo" class="w-36 h-20 rounded-full mb-4">
-<!--                 <h3 class="text-xl font-semibold text-gray-800">Money Canvas<sup>®</sup></h3>
- -->            </div>
+                <img id="main-logo" src="" alt="Main logo alt" class="w-36 h-20 rounded-full mb-4">
+                    <!-- <h3 id="main-title" class="text-xl font-semibold text-gray-800">Main title<sup>®</sup></h3> -->
+               </div>
 
             <div class="session-info flex flex-col items-start">
                 <!-- Money Canvas Dot Icon -->
-                <img src="https://d3v0px0pttie1i.cloudfront.net/uploads/team/avatar/396172/b68dcda0.png" alt="Money Canvas Icon" class="w-8 h-8 rounded-full mr-3">
-                <p class="text-gray-600 text-sm mb-1">Money Canvas<sup>®</sup> by Thrivent</p>
-                <h2 id="session-title" class="text-2xl font-bold text-gray-900 mb-4">Session 1: Paint Picture</h2>
+                <img id="dot-icon" src="" alt="dot icon alt" class="w-8 h-8 rounded-full mr-3">
+                <p id="subtitle" class="text-gray-600 text-sm mb-1">Subtitle</p>
+                <h2 id="session-title" class="text-2xl font-bold text-gray-900 mb-4">Session Title</h2>
 
                 <div class="flex items-center text-gray-700 text-sm mb-2">
                     <!-- Clock Icon -->
@@ -292,9 +292,9 @@
             </div>
 
             <div class="details text-gray-700 text-sm mt-8 flex-grow">
-                <p class="mb-2">Do you know where your money is going?</p>
-                <p class="mb-4">Paint a clear picture of where your money goes each month and spark new motivation to put your money towards your biggest priorities.</p>
-                <h4 class="font-semibold text-gray-800">Video Meeting | 1:1 Coaching | Free</h4>
+                <p id="description-p1" class="mb-2">Description paragraph 1</p>
+                <p id="description-p2" class="mb-4">Description paragraph 2</p>
+                <h4 id="meeting-type" class="font-semibold text-gray-800">Meeting type</h4>
             </div>
 
             <div class="footer-links flex justify-between text-xs text-blue-600 mt-8">
@@ -429,6 +429,22 @@
 
         // Genesys API Configuration from index5.html
         const BASE_URL = "https://videome.leadsecure.com/api"; // Genesys API Gateway URL
+
+        // Property for every brand specific element in the html
+        const brandingConfig = {
+            mainLogoUrl: "https://d3v0px0pttie1i.cloudfront.net/uploads/branding/logo/1963a26d-c832-48fe-ba93-8960f1462fa0/35e5e122.png",
+            mainLogoAlt: "Money Canvas Logo",
+            mainTitle: "Money Canvas<sup>®</sup>",
+            dotIconUrl: "https://d3v0px0pttie1i.cloudfront.net/uploads/team/avatar/396172/b68dcda0.png",
+            dotIconAlt: "Money Canvas Icon",
+            subtitle: "Money Canvas<sup>®</sup> by Thrivent",
+            sessionTitle: "Session 1: Paint Picture",
+            descriptionParagraph1: "Do you know where your money is going?",
+            descriptionParagraph2: "Paint a clear picture of where your money goes each month and spark new motivation to put your money towards your biggest priorities.",
+            meetingType: "Video Meeting | 1:1 Coaching | Free",
+            poweredByService: "Calendly", // or "VideoEngager"
+            poweredByServiceUrl: "https://calendly.com" // or "https://videoengager.com"
+        };
 
         // --- Firebase Initialization ---
         async function initFirebase() {
@@ -862,6 +878,29 @@
             }
         });
 
+        const initBranding = () => {
+            document.getElementById('main-logo').src = brandingConfig.mainLogoUrl;
+            document.getElementById('main-logo').alt = brandingConfig.mainLogoAlt;
+            document.getElementById('dot-icon').src = brandingConfig.dotIconUrl;
+            document.getElementById('dot-icon').alt = brandingConfig.dotIconAlt;
+            document.getElementById('subtitle').innerHTML = brandingConfig.subtitle;
+            document.getElementById('session-title').textContent = brandingConfig.sessionTitle;
+            document.getElementById('description-p1').textContent = brandingConfig.descriptionParagraph1;
+            document.getElementById('description-p2').textContent = brandingConfig.descriptionParagraph2;
+            document.getElementById('meeting-type').textContent = brandingConfig.meetingType;
+
+            const poweredByServiceEl = document.getElementById('powered-by-service');
+            const poweredByServiceLinkEl = document.getElementById('powered-by-service-link');
+            if (poweredByServiceEl && poweredByServiceLinkEl) {
+                poweredByServiceLinkEl.textContent = brandingConfig.poweredByService;
+                poweredByServiceLinkEl.href = brandingConfig.poweredByServiceUrl;
+                poweredByServiceEl.innerHTML = `Powered by ${poweredByServiceLinkEl.outerHTML}`; // Re-insert link
+            }
+
+            // main-title was originally commented out, so i made it conditional depending on if we want it in or not.
+            const mainTitle = document.getElementById('main-title')
+            if (mainTitle) mainTitle.innerHTML = brandingConfig.mainTitle; // Use innerHTML for <sup> tag
+        };
 
         // Initial setup on window load
         window.onload = async function() {
@@ -873,6 +912,7 @@
             const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             displayTimezoneTextEl.textContent = getFriendlyTimezoneName(userTimezone);
 
+            initBranding(); // Call initBranding to set branding elements dynamically
 
             // Add event listener to tenant ID input to re-fetch slots when it changes
             tenantIdInput.addEventListener('change', () => {
@@ -895,4 +935,5 @@
         };
     </script>
 </body>
+</html>
 </html>

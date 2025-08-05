@@ -5,7 +5,15 @@ Template css file for all branding elements.
 */
 
 #main-logo {
-    /* Add brand-specific styles here */
+    /* Ensures the image scales down to fit the container without distortion */
+    object-fit: contain; 
+    
+    /* Specifies how the image should be positioned within the box; center is usually best */
+    object-position: center; 
+
+    /* Ensures the element doesn't exceed the size of its parent container */
+    max-width: 100%;
+    max-height: 100%;
 }
 
 #dot-icon {

@@ -1,11 +1,13 @@
 // @ts-check
 /// <reference types="../types/ve-window.d.ts" />
 import { EnvironmentConfig } from "../config/environment.js";
+import { configs, metadata } from '../config/conf.js'; // Use 'production' as the base
 import { VideoEngagerClient } from "./client.js";
 import { ErrorHandler, ErrorTypes } from "./error-handler.js";
 import { Utils } from "./utils.js";
 import { TimeoutManager } from "./timeout-manager.js";
 import { WaitroomEventMediator } from "./waitroom-event-mediator.js";
+import { ConfigManager } from './config-manager.js';
 
 export class KioskApplication {
   constructor() {
@@ -22,6 +24,9 @@ export class KioskApplication {
       inactivity: 1000 * 60 * 60, // 1 hour
       retry: 1000 * 5, // 5 seconds
     };
+    const defaultConfig = { ...configs.production, metadata: metadata };
+
+    this.configManager = new ConfigManager(defaultConfig); // Pass in the default config
 
     // Language configurations
     this.languages = {
@@ -67,11 +72,12 @@ export class KioskApplication {
       this.log("APP: Starting secure kiosk application initialization");
 
       // Set up environment configuration
-      this.environmentConfig = new EnvironmentConfig();
-      this.config = this.environmentConfig.getConfig();
+      // this.environmentConfig = new EnvironmentConfig();
+      // this.config = this.environmentConfig.getConfig();
+      this.config = await this.configManager.load();
 
       this.log(
-        `APP: Environment detected: ${this.environmentConfig.getEnvironment()}`
+        `APP: Environment detected: ${this.config}`
       );
 
       // Initialize UI
@@ -683,12 +689,12 @@ export class KioskApplication {
   }
 
   setupBackgroundImage() {
-    if (!this.environmentConfig?.metadata.backgroundImage) return;
+    if (!this.config?.metadata.backgroundImage) return;
 
     // Validate URL
     if (
-      !Utils.validateURL(this.environmentConfig?.metadata.backgroundImage) &&
-      !this.environmentConfig?.metadata.backgroundImage.startsWith("img/")
+      !Utils.validateURL(this.config?.metadata.backgroundImage) &&
+      !this.config?.metadata.backgroundImage.startsWith("img/")
     ) {
       this.log("BACKGROUND: Invalid background image URL");
       return;
@@ -696,7 +702,7 @@ export class KioskApplication {
 
     const elem = document.getElementById("initial-screen");
     if (elem) {
-      elem.style.backgroundImage = `url(${this.environmentConfig?.metadata.backgroundImage})`;
+      elem.style.backgroundImage = `url(${this.config?.metadata.backgroundImage})`;
       this.log("BACKGROUND: Background image applied");
     }
   }

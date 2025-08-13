@@ -234,6 +234,27 @@
         .videoengager-powered a {
             color: white;
         }
+
+        #schedule-asap {
+            padding: 0.5rem 0.9rem; 
+            border: 1px solid #0078d4;
+            border-radius: 0.5rem;
+            background-color: #0078d4;
+            color: #fff; 
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
+            margin-left: 0.75rem; 
+        }
+        #schedule-asap:hover {
+            background-color: #005bb5; 
+            border-color: #005bb5;
+        }
+        #schedule-asap:focus-visible { /* styling on button focus */
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.35); 
+        }
     </style>
 </head>
 <link rel="stylesheet" href="./brandstyles.css">
@@ -352,6 +373,7 @@
                     </svg>
                     <label for="timezone-display-text" class="mr-2">Time zone</label>
                     <span id="timezone-display-text" class="p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"></span>
+                    <button id="schedule-asap">Schedule next possible date</button>
                 </div>
 
                 <div class="time-slots flex flex-col md:flex-row gap-4 flex-grow">
@@ -674,6 +696,21 @@
             });
         }
 
+        // Event handler for schedule asap button - largely similar to event handler for the other dates, but selects the next available date (today)
+        const scheduleAsapButton = document.getElementById('schedule-asap');
+        scheduleAsapButton.addEventListener('click', (event) => {
+            const previouslySelected = calendarGridEl.querySelector('.day-number.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected', 'bg-blue-600', 'text-white');
+                previouslySelected.classList.add('bg-white', 'text-gray-800');
+            }
+            const firstEnabled = document.querySelector('.day-number:not(.disabled)');
+            firstEnabled.classList.add('selected', 'bg-blue-600', 'text-white');
+            selectedDate = new Date();
+            selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            updateTimeSlots();
+        });
+
         // --- Time Slot Rendering ---
         async function updateTimeSlots() {
             const tenantId = tenantIdInput.value;
@@ -818,7 +855,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -833,7 +870,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });

@@ -701,19 +701,30 @@
         scheduleAsapButton.addEventListener('click', async () => {
             // Try today
             selectedDate = new Date();
+            renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth()); 
+            selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            await updateTimeSlots();
+
+            // Auto-select the first available slot for today
+            let firstAvailable = slotsListEl.querySelector('.slot-button:not(.disabled):not(.next-button)');
+            if (firstAvailable) {
+                firstAvailable.click();
+                return; // Found a slot today; stop here
+            }
+
+            // Try tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            selectedDate = tomorrow;
+            // Uses renderCalendar instead of just changing classes like dayEl listener does, for cases where next availbe day is in the next month
             renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
             selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
             await updateTimeSlots();
 
-            const hasTodaySlots = !!slotsListEl.querySelector('.slot-button:not(.disabled)'); // If false, there are no current time slots 
-            if (!hasTodaySlots) {
-                // Try tomorrow
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                selectedDate = tomorrow;
-                renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-                selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-                await updateTimeSlots();
+            // Auto-select the first available slot for tomorrow if any
+            firstAvailable = slotsListEl.querySelector('.slot-button:not(.disabled):not(.next-button)');
+            if (firstAvailable) {
+                firstAvailable.click();
             }
         });
 

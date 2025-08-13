@@ -391,7 +391,7 @@
                     <fieldset class="form-fieldset">
                         <legend class="form-legend">Customer Data</legend>
                         <label for="firstName" class="form-label">First Name</label>
-                        <input id="firstName" class="form-input" placeholder="Jofn" type="text" autocomplete="given-name" /><br />
+                        <input id="firstName" class="form-input" placeholder="John" type="text" autocomplete="given-name" /><br />
                         <label for="lastName" class="form-label">Last Name</label>
                         <input id="lastName" class="form-input" placeholder="Smith" type="text" autocomplete="family-name" /><br />
                         <label for="email" class="form-label">Email</label>
@@ -696,19 +696,25 @@
             });
         }
 
-        // Event handler for schedule asap button - largely similar to event handler for the other dates, but selects the next available date (today)
+        // Event handler for schedule asap button - try today, otherwise tomorrow
         const scheduleAsapButton = document.getElementById('schedule-asap');
-        scheduleAsapButton.addEventListener('click', (event) => {
-            const previouslySelected = calendarGridEl.querySelector('.day-number.selected');
-            if (previouslySelected) {
-                previouslySelected.classList.remove('selected', 'bg-blue-600', 'text-white');
-                previouslySelected.classList.add('bg-white', 'text-gray-800');
-            }
-            const firstEnabled = document.querySelector('.day-number:not(.disabled)');
-            firstEnabled.classList.add('selected', 'bg-blue-600', 'text-white');
+        scheduleAsapButton.addEventListener('click', async () => {
+            // Try today
             selectedDate = new Date();
+            renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
             selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            updateTimeSlots();
+            await updateTimeSlots();
+
+            const hasTodaySlots = !!slotsListEl.querySelector('.slot-button:not(.disabled)'); // If false, there are no current time slots 
+            if (!hasTodaySlots) {
+                // Try tomorrow
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                selectedDate = tomorrow;
+                renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
+                selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                await updateTimeSlots();
+            }
         });
 
         // --- Time Slot Rendering ---

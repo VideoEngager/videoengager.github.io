@@ -699,33 +699,11 @@
         // Event handler for schedule asap button - try today, otherwise tomorrow
         const scheduleAsapButton = document.getElementById('schedule-asap');
         scheduleAsapButton.addEventListener('click', async () => {
-            // Try today
-            selectedDate = new Date();
-            renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth()); 
-            selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            await updateTimeSlots();
-
-            // Auto-select the first available slot for today
-            let firstAvailable = slotsListEl.querySelector('.slot-button:not(.disabled):not(.next-button)');
-            if (firstAvailable) {
-                firstAvailable.click();
-                return; // Found a slot today; stop here
-            }
-
-            // Try tomorrow
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            selectedDate = tomorrow;
-            // Uses renderCalendar instead of just changing classes like dayEl listener does, for cases where next availbe day is in the next month
-            renderCalendar(selectedDate.getFullYear(), selectedDate.getMonth());
-            selectedDateDisplayEl.textContent = selectedDate.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            await updateTimeSlots();
-
-            // Auto-select the first available slot for tomorrow if any
-            firstAvailable = slotsListEl.querySelector('.slot-button:not(.disabled):not(.next-button)');
-            if (firstAvailable) {
-                firstAvailable.click();
-            }
+            selectedDate = "ASAP";
+            selectedTimeSlot = "ASAP"
+            selectedDateTimeISO = "ASAP";
+            
+            goToDetailsStep();
         });
 
         // --- Time Slot Rendering ---
@@ -835,7 +813,12 @@
             }
 
             // Update sidebar with selected date and time
-            const displayDate = new Date(selectedDateTimeISO);
+            let displayDate = "";
+            if (selectedDateTimeISO === "ASAP") {
+                displayDate = "ASAP";
+            } else {
+                displayDate = new Date(selectedDateTimeISO);
+            }
             const formattedDateTime = displayDate.toLocaleString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -920,8 +903,18 @@
             }
 
             try {
+                // Checks if asap button was pressed - If it was, set time variables to NOW
+                if (selectedDateTimeISO === "ASAP") {
+                    const now = new Date();
+                    const finalDateTimeISO = now.toISOString();
+                    const finalTimeSlot = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    
+                    selectedDateTimeISO = finalDateTimeISO;
+                    selectedTimeSlot = finalTimeSlot;
+                }
+            
                 const result = await scheduleGenesysMeeting(tenantId, customerData, selectedDateTimeISO);
-
+                
                 // Update Meeting Details section
                 // Note: conversationId is not part of the customer form, but it's used for management later
                 // document.getElementById("conversationId").value = result.genesys.id || result.videoengager.scheduleId || '';

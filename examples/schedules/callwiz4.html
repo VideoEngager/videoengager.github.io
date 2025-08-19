@@ -234,6 +234,27 @@
         .videoengager-powered a {
             color: white;
         }
+
+        #schedule-asap {
+            padding: 0.5rem 0.9rem; 
+            border: 1px solid #0078d4;
+            border-radius: 0.5rem;
+            background-color: #0078d4;
+            color: #fff; 
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
+            margin-left: 0.75rem; 
+        }
+        #schedule-asap:hover {
+            background-color: #005bb5; 
+            border-color: #005bb5;
+        }
+        #schedule-asap:focus-visible { /* styling on button focus */
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.35); 
+        }
     </style>
 </head>
 <link rel="stylesheet" href="./brandstyles.css">
@@ -352,6 +373,7 @@
                     </svg>
                     <label for="timezone-display-text" class="mr-2">Time zone</label>
                     <span id="timezone-display-text" class="p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"></span>
+                    <button id="schedule-asap">Schedule next possible date</button>
                 </div>
 
                 <div class="time-slots flex flex-col md:flex-row gap-4 flex-grow">
@@ -369,7 +391,7 @@
                     <fieldset class="form-fieldset">
                         <legend class="form-legend">Customer Data</legend>
                         <label for="firstName" class="form-label">First Name</label>
-                        <input id="firstName" class="form-input" placeholder="Jofn" type="text" autocomplete="given-name" /><br />
+                        <input id="firstName" class="form-input" placeholder="John" type="text" autocomplete="given-name" /><br />
                         <label for="lastName" class="form-label">Last Name</label>
                         <input id="lastName" class="form-input" placeholder="Smith" type="text" autocomplete="family-name" /><br />
                         <label for="email" class="form-label">Email</label>
@@ -674,6 +696,16 @@
             });
         }
 
+        // Event handler for schedule asap button - try today, otherwise tomorrow
+        const scheduleAsapButton = document.getElementById('schedule-asap');
+        scheduleAsapButton.addEventListener('click', async () => {
+            selectedDate = "ASAP";
+            selectedTimeSlot = "ASAP"
+            selectedDateTimeISO = "ASAP";
+            
+            goToDetailsStep();
+        });
+
         // --- Time Slot Rendering ---
         async function updateTimeSlots() {
             const tenantId = tenantIdInput.value;
@@ -781,7 +813,12 @@
             }
 
             // Update sidebar with selected date and time
-            const displayDate = new Date(selectedDateTimeISO);
+            let displayDate = "";
+            if (selectedDateTimeISO === "ASAP") {
+                displayDate = "ASAP";
+            } else {
+                displayDate = new Date(selectedDateTimeISO);
+            }
             const formattedDateTime = displayDate.toLocaleString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -818,7 +855,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -833,7 +870,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -866,8 +903,18 @@
             }
 
             try {
+                // Checks if asap button was pressed - If it was, set time variables to NOW
+                if (selectedDateTimeISO === "ASAP") {
+                    const now = new Date();
+                    const finalDateTimeISO = now.toISOString();
+                    const finalTimeSlot = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    
+                    selectedDateTimeISO = finalDateTimeISO;
+                    selectedTimeSlot = finalTimeSlot;
+                }
+            
                 const result = await scheduleGenesysMeeting(tenantId, customerData, selectedDateTimeISO);
-
+                
                 // Update Meeting Details section
                 // Note: conversationId is not part of the customer form, but it's used for management later
                 // document.getElementById("conversationId").value = result.genesys.id || result.videoengager.scheduleId || '';

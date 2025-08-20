@@ -38,6 +38,8 @@ waitForElementByClass('genesys-mxg-frame', function(genesysFrame) {
         rightCircle.appendChild(genesysFrame);
         console.log('Genesys frame moved to right-circle!');
     } else {
-        console.log('Right circle not found');
+        // Genesys frame moved to right-circle
+    } else {
+        // Right circle not found
     }
 });

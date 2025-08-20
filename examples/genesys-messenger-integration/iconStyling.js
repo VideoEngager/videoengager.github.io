@@ -26,7 +26,9 @@ waitForElement('ve-launcher', function(launcher) {
         leftCircle.appendChild(launcher);
         console.log('VE Launcher moved to left-circle!');
     } else {
-        console.log('Left circle not found');
+        // VE Launcher moved to left-circle
+    } else {
+        // Left circle not found
     }
 });
 

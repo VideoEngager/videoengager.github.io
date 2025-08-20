@@ -24,7 +24,6 @@ waitForElement('ve-launcher', function(launcher) {
     if (leftCircle) {
         // Move the launcher inside the left-circle
         leftCircle.appendChild(launcher);
-        console.log('VE Launcher moved to left-circle!');
     }
 });
 
@@ -34,6 +33,5 @@ waitForElementByClass('genesys-mxg-frame', function(genesysFrame) {
     if (rightCircle) {
         // Move the genesys frame inside the right-circle
         rightCircle.appendChild(genesysFrame);
-        console.log('Genesys frame moved to right-circle!');
     }
 });

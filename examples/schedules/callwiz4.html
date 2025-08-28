@@ -237,6 +237,7 @@
 
         #schedule-asap {
             padding: 0.5rem 0.9rem; 
+            margin-top: 8px;
             border: 1px solid #0078d4;
             border-radius: 0.5rem;
             background-color: #0078d4;
@@ -246,6 +247,7 @@
             line-height: 1.25rem;
             transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
             margin-left: 0.75rem; 
+            max-width: 300px;
         }
         #schedule-asap:hover {
             background-color: #005bb5; 
@@ -373,14 +375,19 @@
                     </svg>
                     <label for="timezone-display-text" class="mr-2">Time zone</label>
                     <span id="timezone-display-text" class="p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"></span>
-                    <button id="schedule-asap">Schedule next possible date</button>
+
                 </div>
 
                 <div class="time-slots flex flex-col md:flex-row gap-4 flex-grow">
                     <div id="selected-date-display" class="font-bold text-gray-800 text-lg md:w-1/3 text-center md:text-left"></div>
-                    <div id="slots-list" class="flex flex-wrap gap-3 flex-grow md:w-2/3">
-                        <!-- Time slots will be rendered here by JavaScript -->
+
+                    <div id="slots-container" class="flex flex-grow md:w-2/3 flex-col">
+                        <div id="slots-list" class="flex flex-wrap gap-3">
+                            <!-- Time slots will be rendered here by JavaScript -->
+                        </div>
+                        <button id="schedule-asap">Schedule next possible date</button>
                     </div>
+
                 </div>
             </div>
 
@@ -855,7 +862,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -870,7 +877,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -991,7 +998,7 @@
         window.onload = async function() {
             await initFirebase(); // Initialize Firebase
             renderCalendar(currentYear, currentMonth);
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots.</p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
 
             // Set initial friendly timezone name
             const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;

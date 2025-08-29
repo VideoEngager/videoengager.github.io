@@ -385,7 +385,7 @@
                         <div id="slots-list" class="flex flex-wrap gap-3">
                             <!-- Time slots will be rendered here by JavaScript -->
                         </div>
-                        <button id="schedule-asap">Schedule next possible date</button>
+                        <button id="schedule-asap">Schedule as soon as possible</button>
                     </div>
 
                 </div>
@@ -862,7 +862,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -877,7 +877,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -998,7 +998,7 @@
         window.onload = async function() {
             await initFirebase(); // Initialize Firebase
             renderCalendar(currentYear, currentMonth);
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
 
             // Set initial friendly timezone name
             const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;

@@ -276,7 +276,7 @@
         <div class="sidebar relative">
             <div class="flex items-center mb-6">
                 <!-- Back Arrow Icon -->
-                <svg class="w-6 h-6 text-gray-500 mr-2 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg id="back-arrow" class="w-6 h-6 text-gray-500 mr-2 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 <!-- Money Canvas Logo -->
@@ -477,6 +477,12 @@
             "poweredByService": "VideoEngager",
             "poweredByServiceUrl": "https://videoengager.com"
         }
+
+        // Makes back arrow refresh page, since every step uses the same path, this is all it takes to go back to first step
+        document.getElementById('back-arrow').addEventListener('click', () => {
+            window.location.reload(); // Refresh the page
+        });
+
         // Load config from localStorage or use default. JSON.parse safely.
         let brandingConfig = defaultBrandingConfig; // Start with default
         try {
@@ -717,15 +723,18 @@
         async function updateTimeSlots() {
             const tenantId = tenantIdInput.value;
             if (!selectedDate) {
-                slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date.</p>';
+                slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+                scheduleAsapButton.classList.remove('hidden'); 
                 return;
             }
             if (!tenantId) {
                 slotsListEl.innerHTML = '<p class="text-red-500">Please enter a Tenant ID.</p>';
+                scheduleAsapButton.classList.remove('hidden'); 
                 return;
             }
 
             slotsListEl.innerHTML = ''; // Clear existing slots
+            scheduleAsapButton.classList.add('hidden'); 
 
             try {
                 // Fetch availability for 1 day starting from the selectedDate
@@ -737,7 +746,6 @@
                 // FIX: Correctly get the YYYY-MM-DD string for the *selected local date*
                 // This ensures selectedLocalDayString accurately reflects the calendar day.
                 const selectedLocalDayString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-
 
                 // Iterate over the availability map
                 for (const isoDateTime in availabilityMap) {
@@ -790,10 +798,17 @@
 
                 if (!hasSlotsForSelectedDate) {
                     slotsListEl.innerHTML = '<p class="text-gray-500">No available slots for this day.</p>';
+                    scheduleAsapButton.classList.remove('hidden'); // Show the button if no slots are available
                 }
             } catch (error) {
                 // Error already logged by fetchGenesysAvailability
                 slotsListEl.innerHTML = '<p class="text-red-500">Failed to load slots. Please check Tenant ID and try again.</p>';
+                scheduleAsapButton.classList.remove('hidden');
+            }
+
+            // Ensure the button is unhidden if the specific text is set
+            if (slotsListEl.innerHTML.includes('Please select a date to see available slots')) {
+                scheduleAsapButton.classList.remove('hidden');
             }
         }
 
@@ -863,6 +878,7 @@
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
             slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+            scheduleAsapButton.classList.remove('hidden'); 
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -878,6 +894,7 @@
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
             slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+            scheduleAsapButton.classList.remove('hidden'); // Show the button
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
         });
@@ -999,6 +1016,7 @@
             await initFirebase(); // Initialize Firebase
             renderCalendar(currentYear, currentMonth);
             slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+            scheduleAsapButton.classList.remove('hidden'); // Show the button
 
             // Set initial friendly timezone name
             const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;

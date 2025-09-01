@@ -723,7 +723,7 @@
         async function updateTimeSlots() {
             const tenantId = tenantIdInput.value;
             if (!selectedDate) {
-                slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+                slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
                 scheduleAsapButton.classList.remove('hidden'); 
                 return;
             }
@@ -877,7 +877,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
             scheduleAsapButton.classList.remove('hidden'); 
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
@@ -893,7 +893,7 @@
             selectedDate = null; // Reset selected date on month change
             selectedTimeSlot = null;
             selectedDateTimeISO = null;
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
             scheduleAsapButton.classList.remove('hidden'); // Show the button
             selectedDateDisplayEl.textContent = '';
             renderNextButton(); // Hide next button if no slot is selected
@@ -1015,7 +1015,7 @@
         window.onload = async function() {
             await initFirebase(); // Initialize Firebase
             renderCalendar(currentYear, currentMonth);
-            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i><b>or</b></i></p>';
+            slotsListEl.innerHTML = '<p class="text-gray-500">Please select a date to see available slots, <i>or</i></p>';
             scheduleAsapButton.classList.remove('hidden'); // Show the button
 
             // Set initial friendly timezone name

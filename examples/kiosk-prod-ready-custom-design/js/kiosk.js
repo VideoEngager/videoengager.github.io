@@ -165,9 +165,9 @@ export class KioskApplication {
     this.log("WAITROOM: Setting up waitroom event listeners");
 
     // Listen for user cancellation
-    this.waitroomMediator.on("userCancelled", (detail) => {
+    this.waitroomMediator.on("userCancelled", async (detail) => {
       this.log("WAITROOM: User cancelled from waitroom");
-      this.handleCancelCall.bind(this)(detail);
+      await this.handleCancelCall.bind(this)(detail);
     });
 
     this.waitroomMediator.on("error", (detail) => {
@@ -207,9 +207,41 @@ export class KioskApplication {
         this.handleVideoCallStarted();
       });
 
-      this.videoEngagerClient.on("VideoEngagerCall.ended", () => {
+      this.videoEngagerClient.on("GenesysMessenger.conversationStarted", async () => {
+          console.log('[berat]', "useGenesysMessengerChat", this.config?.useGenesysMessengerChat)
+        if(this.config?.useGenesysMessengerChat) {
+          console.log('[berat]', "conversation started")
+          setTimeout(async () => {
+          console.log('[berat]', "starting video call")
+            await this.videoEngagerClient?.startVideo();
+          }, 1000)
+        }
+      });
+
+      this.videoEngagerClient.on("GenesysMessenger.conversationEnded", async () => {
+        /**
+        * @type {HTMLDivElement | null}
+        */
+        const genesysMessengerContainer = document.querySelector('#genesys-messenger');
+        if(genesysMessengerContainer) {
+          genesysMessengerContainer.style.display = 'none';
+        }
+        await this.handleVideoCallEnded();
+      })
+
+      this.videoEngagerClient.on("onMessage", async () => {
+        /**
+        * @type {HTMLDivElement | null}
+        */
+        const genesysMessengerContainer = document.querySelector('#genesys-messenger');
+        if(genesysMessengerContainer) {
+          genesysMessengerContainer.style.display = 'block';
+        }
+      })
+
+      this.videoEngagerClient.on("VideoEngagerCall.ended", async () => {
         this.log("VIDEOCLIENT: Video call ended");
-        this.handleVideoCallEnded();
+        await this.handleVideoCallEnded();
       });
 
       // Listen for system notifications
@@ -242,16 +274,21 @@ export class KioskApplication {
       // Set call timeout
       this.timeoutManager.set(
         "call",
-        () => {
+        async () => {
           this.log("CALL: Call timeout reached");
-          this.handleCallTimeout();
+          await this.handleCallTimeout();
         },
         this.timeouts.call
       );
 
+      await this.videoEngagerClient?.waitForReady();
       // Start video call
       if (this.videoEngagerClient && this.videoEngagerClient.isReady()) {
-        await this.videoEngagerClient.startVideo();
+        if (this.config?.useGenesysMessengerChat) {
+          await this.videoEngagerClient.startGenesysChat();
+        } else {
+          await this.videoEngagerClient?.startVideo();
+        }
       } else {
         throw new Error("VideoEngager client not ready");
       }
@@ -267,7 +304,7 @@ export class KioskApplication {
    * Cancels the call, clears the timeout, and returns to the initial screen.
    * @param {Event} event - The click event.
    */
-  handleCancelCall(event) {
+  async handleCancelCall(event) {
     event.preventDefault();
     this.log("CALL: Cancel call requested");
 
@@ -282,6 +319,11 @@ export class KioskApplication {
       this.videoEngagerClient.endVideo().catch((error) => {
         this.log(`CALL: Error ending video call: ${error.message}`);
       });
+      if (this.config?.useGenesysMessengerChat) {
+        await this.videoEngagerClient?.endGenesysChat().catch((error) => {
+          this.log(`CALL: Error ending video call: ${error.message}`);
+        });
+      }
     }
 
     // Return to initial screen
@@ -560,9 +602,13 @@ export class KioskApplication {
 
     // Show video screen
     this.showScreen("video");
+    // Hide the Genesys chat but only when useGenesysMessengerChat is enabled
+    if(this.config?.useGenesysMessengerChat) {
+      this.videoEngagerClient?.hideGenesysChat();
+    }
   }
 
-  handleVideoCallEnded() {
+  async handleVideoCallEnded() {
     this.log("CALL: Video call ended");
 
     // Clear any active timeouts
@@ -570,12 +616,16 @@ export class KioskApplication {
     
     // Clear system notification
     this.clearSystemNotification();
-
+    if (this.config?.useGenesysMessengerChat) {
+      await this.videoEngagerClient?.endGenesysChat().catch((error) => {
+          this.log(`CALL: Error ending video call: ${error.message}`);
+        });
+    }
     // Return to initial screen
     this.showScreen("initial");
   }
 
-  handleVideoCallError(error) {
+  async handleVideoCallError(error) {
     this.log(`CALL: Video call error: ${error.message}`);
 
     // Clear call timeout
@@ -584,11 +634,17 @@ export class KioskApplication {
     // Handle the error
     this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
 
+    if (this.config?.useGenesysMessengerChat) {
+      await this.videoEngagerClient?.endGenesysChat().catch((error) => {
+        this.log(`CALL: Error ending video call: ${error.message}`);
+      });
+    }
+
     // Return to initial screen
     this.showScreen("initial");
   }
 
-  handleCallTimeout() {
+  async handleCallTimeout() {
     this.log("CALL: Call timeout - ending call");
 
     // End video call
@@ -596,6 +652,11 @@ export class KioskApplication {
       this.videoEngagerClient.endVideo().catch((error) => {
         this.log(`CALL: Error ending timed out call: ${error.message}`);
       });
+      if (this.config?.useGenesysMessengerChat) {
+        await this.videoEngagerClient.endGenesysChat().catch((error) => {
+          this.log(`CALL: Error ending video call: ${error.message}`);
+        });
+      }
     }
 
     // Show timeout error

@@ -30,7 +30,7 @@ export class ConfigManager {
 
     // 2. Load from localStorage
     const storedConfig = this.loadFromStorage();
-    this.config = deepMerge (this.config, storedConfig );
+    this.config = deepMerge(this.config, storedConfig );
 
     // 3. Load from URL parameters (highest precedence)
     const urlConfig = this.loadFromUrl();
@@ -51,7 +51,8 @@ export class ConfigManager {
         'genesysDeploymentId': 'genesys.deploymentId',
         'genesysDomain':       'genesys.domain',
         'veTenantId':          'videoEngager.tenantId',
-        'veEnv':               'videoEngager.veEnv'
+        'veEnv':               'videoEngager.veEnv',
+        'interactive':         'useGenesysMessengerChat'
     };
 
     // Helper function to safely set a value in a nested object.
@@ -65,7 +66,11 @@ export class ConfigManager {
             current = current[key];
         }
         // Set the final value.
-        current[keys[keys.length - 1]] = value;
+        if (value === 'true' || value === 'false') {
+          current[keys[keys.length - 1]] = value === 'true'; 
+        } else {
+          current[keys[keys.length - 1]] = value;
+        }
     };
 
     // Process each mapped parameter that exists in the URL.

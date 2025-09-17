@@ -633,3 +633,7 @@
   align-items: center;
   justify-content: center;
 }
+
+#genesys-messenger {
+  display: none;
+}

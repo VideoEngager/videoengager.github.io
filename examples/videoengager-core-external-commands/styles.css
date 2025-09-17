@@ -1,0 +1,282 @@
+ * {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+ }
+
+ body {
+     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+     min-height: 100vh;
+     display: flex;
+     align-items: center;
+     flex-direction: column;
+     justify-content: center;
+     flex-direction: column;
+     padding: 20px;
+     background: linear-gradient(135deg, #fafbff 0%, #e9ecff 100%);
+     gap: 20px;
+ }
+
+ .container {
+     background: white;
+     border-radius: 12px;
+     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+     max-width: 600px;
+     width: 100%;
+     padding: 2rem;
+ }
+
+ .header {
+     text-align: center;
+     margin-bottom: 2rem;
+ }
+
+ .header h1 {
+     color: #2d3748;
+     font-size: 2rem;
+     margin-bottom: 0.5rem;
+ }
+
+ .header p {
+     color: #718096;
+     font-size: 1rem;
+ }
+
+ .status-section {
+     background: #f7fafc;
+     padding: 1.5rem;
+     border-radius: 8px;
+     margin-bottom: 2rem;
+ }
+
+ .status-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+     gap: 1rem;
+ }
+
+ .status-item {
+     display: flex;
+     align-items: center;
+     gap: 0.5rem;
+ }
+
+ .status-indicator {
+     width: 12px;
+     height: 12px;
+     border-radius: 50%;
+     background: #e2e8f0;
+     transition: all 0.3s ease;
+ }
+
+ .status-indicator.active {
+     background: #48bb78;
+     box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+ }
+
+ .status-indicator.error {
+     background: #f56565;
+     box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.2);
+ }
+
+ .controls-section {
+     margin-bottom: 2rem;
+ }
+
+ .controls-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+     gap: 1rem;
+ }
+
+ .video-actions-section {
+     background: #f7fafc;
+     padding: 1.5rem;
+     border-radius: 8px;
+     margin-bottom: 1rem;
+ }
+
+ .video-actions-grid {
+     display: flex;
+     justify-content: center;
+     gap: 2rem;
+     flex-wrap: wrap;
+ }
+
+ .action-btn-group {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     gap: 0.5rem;
+ }
+
+ .action-btn {
+     background: white;
+     border: none;
+     width: 60px;
+     height: 60px;
+     border-radius: 50%;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     cursor: pointer;
+     transition: all 0.2s ease;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+     font-size: 1.5rem;
+ }
+
+ .action-btn:hover:not(:disabled) {
+     background: #f7fafc;
+     transform: translateY(-2px);
+     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+ }
+
+ .action-btn:disabled {
+     opacity: 0.5;
+     cursor: not-allowed;
+     transform: none;
+ }
+
+ .action-btn.active {
+     background: #e2e8f0;
+ }
+
+ .action-btn.muted {
+     background: #fed7d7;
+     color: #c53030;
+ }
+
+ .action-label {
+     font-size: 0.875rem;
+     color: #718096;
+     text-align: center;
+ }
+
+ .btn {
+     background: #4299e1;
+     color: white;
+     border: none;
+     padding: 0.75rem 1.5rem;
+     border-radius: 6px;
+     font-size: 0.875rem;
+     font-weight: 500;
+     cursor: pointer;
+     transition: all 0.2s ease;
+     min-height: 44px;
+ }
+
+ .btn:hover:not(:disabled) {
+     background: #3182ce;
+     transform: translateY(-1px);
+ }
+
+ .btn:disabled {
+     background: #a0aec0;
+     cursor: not-allowed;
+     transform: none;
+ }
+
+ .btn.btn-danger {
+     background: #e53e3e;
+ }
+
+ .btn.btn-danger:hover:not(:disabled) {
+     background: #c53030;
+ }
+
+ .config-info {
+     background: #ebf8ff;
+     border: 1px solid #bee3f8;
+     border-radius: 6px;
+     padding: 1rem;
+     margin-bottom: 2rem;
+     font-size: 0.875rem;
+     word-break: break-all;
+ }
+
+ .config-info h3 {
+     color: #2b6cb0;
+     margin-bottom: 0.5rem;
+ }
+
+ #videoIframe {
+
+     width: 100%;
+     height: 75vh;
+     border: none;
+     z-index: 1000;
+     display: none;
+ }
+
+ #videoIframe.active {
+     display: block;
+ }
+
+ /* Video controls overlay */
+ .video-controls-overlay {
+     position: fixed;
+     bottom: 20px;
+     left: 50%;
+     transform: translateX(-50%);
+     z-index: 1001;
+     background: rgba(0, 0, 0, 0.8);
+     backdrop-filter: blur(10px);
+     border-radius: 12px;
+     padding: 1rem;
+     display: none;
+ }
+
+ .video-controls-overlay.active {
+     display: block;
+ }
+
+ .video-controls-overlay .video-actions-grid {
+     gap: 1rem;
+ }
+
+ .video-controls-overlay .action-btn {
+     width: 50px;
+     height: 50px;
+     background: rgba(255, 255, 255, 0.9);
+ }
+
+ .video-controls-overlay .action-btn:hover:not(:disabled) {
+     background: rgba(255, 255, 255, 1);
+ }
+
+ .video-controls-overlay .action-label {
+     color: white;
+     font-size: 0.75rem;
+ }
+
+ @media (max-width: 768px) {
+     .container {
+         margin: 1rem;
+         padding: 1rem;
+     }
+
+     .controls-grid {
+         grid-template-columns: 1fr;
+     }
+
+     .status-grid {
+         grid-template-columns: 1fr;
+     }
+ }
+
+ .github-btn-container {
+     position: fixed;
+     top: 20px;
+     right: 20px;
+ }
+
+ .btn-dark {
+     background: #010508;
+     display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+ }
+  .btn-dark.btn:hover:not(:disabled) {
+     background: #42484c;
+ }

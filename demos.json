@@ -1,0 +1,270 @@
+[
+  {
+    "title": "Click to Video",
+    "href": "/examples/genesys-messenger-integration/index.html",
+    "desc": "Full messenger integration example.",
+    "category": "Integrations: Genesys",
+    "tags": [
+      "genesys",
+      "messenger"
+    ],
+    "featured": true
+  },
+  {
+    "title": "Genesys Messenger UMD",
+    "href": "/examples/messaging/",
+    "desc": "Custom deployment selector implementation.",
+    "category": "Integrations: Genesys",
+    "tags": [
+      "genesys",
+      "messenger",
+      "umd"
+    ]
+  },
+  {
+    "title": "App Foundry Version",
+    "href": "/examples/genesys-selector-demo-for-app-foundry.html",
+    "desc": "Selector optimized for Genesys AppFoundry.",
+    "category": "Integrations: Genesys",
+    "tags": [
+      "genesys",
+      "appfoundry",
+      "selector"
+    ]
+  },
+  {
+    "title": "Agent Interactions",
+    "href": "/examples/agent-interactions-demo-gui.html",
+    "desc": "Agent-facing interface: accept/reject, mute/unmute, more.",
+    "category": "API Usage: Interactions",
+    "tags": [
+      "agent",
+      "interactions",
+      "ui"
+    ]
+  },
+  {
+    "title": "External Interactions",
+    "href": "/examples/external-interactions-demo-gui.html",
+    "desc": "Customer-facing interaction flows.",
+    "category": "API Usage: Interactions",
+    "tags": [
+      "external",
+      "interactions",
+      "customer"
+    ]
+  },
+  {
+    "title": "Single Button",
+    "href": "/examples/single-button-genesys-demo.html",
+    "desc": "Minimalist one-click call start.",
+    "category": "API Usage: Interactions",
+    "tags": [
+      "minimal",
+      "button"
+    ]
+  },
+  {
+    "title": "Single Button + Chat",
+    "href": "/examples/single-button-genesys-demo.html?enableChat=true",
+    "desc": "One-click with integrated chat.",
+    "category": "API Usage: Interactions",
+    "tags": [
+      "chat",
+      "button"
+    ]
+  },
+  {
+    "title": "Genesys Node Scheduling",
+    "href": "/examples/genesys-node-demonstration",
+    "desc": "Schedule video meetings and callbacks while keeping PII on your servers.",
+    "category": "Integrations: Genesys",
+    "tags": [
+      "genesys",
+      "scheduling",
+      "node"
+    ]
+  },
+  {
+    "title": "Genesys Schedule API Demo",
+    "href": "/examples/genesys-schedule-api-demo/index.html",
+    "desc": "Genesys schedule CRUD demonstration.",
+    "category": "Integrations: Genesys",
+    "tags": [
+      "genesys",
+      "schedule",
+      "api"
+    ]
+  },
+  {
+    "title": "Scheduling — Create API",
+    "href": "/examples/create-schedule-api-demonstration/index.html",
+    "desc": "Create schedules with the scheduling API.",
+    "category": "Scheduling Suite",
+    "tags": [
+      "scheduling",
+      "api",
+      "create"
+    ]
+  },
+  {
+    "title": "Scheduling — API Demonstration",
+    "href": "/examples/schedules-api-demonstration/index.html",
+    "desc": "Explore scheduling API functionality.",
+    "category": "Scheduling Suite",
+    "tags": [
+      "scheduling",
+      "api"
+    ]
+  },
+  {
+    "title": "Scheduling — General Demo",
+    "href": "/examples/schedules/index.html",
+    "desc": "Practical scheduling API demo.",
+    "category": "Scheduling Suite",
+    "tags": [
+      "scheduling",
+      "api",
+      "demo"
+    ]
+  },
+  {
+    "title": "Schedule Verification",
+    "href": "/examples/scheduleVerification/index.html",
+    "desc": "Advanced schedule validation.",
+    "category": "Scheduling Suite",
+    "tags": [
+      "scheduling",
+      "validation"
+    ]
+  },
+  {
+    "title": "Scheduling (Legacy Example)",
+    "href": "/examples/schedule_example.html",
+    "desc": "Legacy scheduling example.",
+    "category": "Scheduling Suite",
+    "tags": [
+      "legacy",
+      "scheduling"
+    ]
+  },
+  {
+    "title": "Kiosk Mode",
+    "href": "/examples/kiosk-new/messenger/index.html",
+    "desc": "Public terminal implementation.",
+    "category": "Kiosk",
+    "tags": [
+      "kiosk",
+      "messenger"
+    ]
+  },
+  {
+    "title": "Kiosk Video Demo",
+    "href": "/examples/kiosk-new-messenger/index.html",
+    "desc": "Showcase of a kiosk UI.",
+    "category": "Kiosk",
+    "tags": [
+      "kiosk",
+      "video"
+    ]
+  },
+  {
+    "title": "Kiosk — Production Ready",
+    "href": "/examples/kiosk-production-ready/index.html",
+    "desc": "Production-ready kiosk implementation.",
+    "category": "Kiosk",
+    "tags": [
+      "kiosk",
+      "production"
+    ]
+  },
+  {
+    "title": "Kiosk Demo",
+    "href": "/examples/kiosk-prod-ready-custom-design/index.html",
+    "desc": "Production-ready kiosk with configurable waiting room.",
+    "category": "Kiosk",
+    "tags": [
+      "kiosk",
+      "waiting-room",
+      "production"
+    ],
+    "featured": true
+  },
+  {
+    "title": "Standalone Co-browsing",
+    "href": "/examples/standaloneCobrowse/index.html",
+    "desc": "Independent co-browsing implementation.",
+    "category": "Co-browsing",
+    "tags": [
+      "cobrowse",
+      "standalone"
+    ]
+  },
+  {
+    "title": "Simple Co-browsing",
+    "href": "/examples/simpleCobrowse/index.html",
+    "desc": "Minimal co-browsing example.",
+    "category": "Co-browsing",
+    "tags": [
+      "cobrowse",
+      "simple"
+    ]
+  },
+  {
+    "title": "VideoEngager Agent SDK Demo",
+    "href": "/examples/ve-agent-sdk-demo/index.html",
+    "desc": "Comprehensive Agent SDK demonstration.",
+    "category": "Agent SDK",
+    "tags": [
+      "agent-sdk",
+      "advanced"
+    ]
+  },
+  {
+    "title": "Simple Agent SDK Demo",
+    "href": "/examples/simple-ve-agent-sdk-demo/index.html",
+    "desc": "Simple Agent SDK demo.",
+    "category": "Agent SDK",
+    "tags": [
+      "agent-sdk",
+      "simple"
+    ]
+  },
+  {
+    "title": "Clean Example",
+    "href": "/examples/clean/index.html",
+    "desc": "Minimal implementation template.",
+    "category": "Samples & Templates",
+    "tags": [
+      "template",
+      "minimal"
+    ]
+  },
+  {
+    "title": "Selector with Callback",
+    "href": "/examples/genesys-selector-wtih-callback.html",
+    "desc": "Advanced selector with callback handling.",
+    "category": "Samples & Templates",
+    "tags": [
+      "selector",
+      "callback"
+    ]
+  },
+  {
+    "title": "Sales Demo",
+    "href": "/examples/sales/index.html",
+    "desc": "Sales-focused implementation.",
+    "category": "Samples & Templates",
+    "tags": [
+      "sales"
+    ]
+  },
+  {
+  "title": "Schedule a Meeting",
+  "href": "https://videoengager.github.io/examples/schedules/callwiz4.html",
+  "category": "Scheduling Suite",
+  "desc": "Two-page scheduling wizard that lets agents configure branding, collect customer details, and generate a meeting link and calendar invite with timezone support.",
+  "tags": ["scheduling", "wizard", "genesys", "meeting", "calendar", "branding"],
+  "featured": true
+}
+]

@@ -1,417 +1,368 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
- <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>
-   VideoEngager SDK Demos
-  </title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VideoEngager Demos & Tutorials</title>
+  <meta name="description" content="Task-based documentation and runnable demos for VideoEngager integrations, API usage, and SDK examples.">
+  <meta property="og:title" content="VideoEngager Demos & Tutorials">
+  <meta property="og:description" content="Explore runnable demos: Genesys integrations, Scheduling Suite, Co-browsing, Kiosk, Agent SDK, and Samples.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="">
+  <meta name="theme-color" content="#0f1e2e">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
-   :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --gray-light: #f4f5f7;
-      --gray-medium: #e5e7eb;
-      --gray-dark: #374151;
-      --text-color: #1f2937;
-      --border-radius: 12px;
+    :root {
+      --bg: #0b1220;
+      --fg: #eaf0ff;
+      --muted: #a9b3c7;
+      --card: #121a2b;
+      --chip: #1d2a44;
+      --accent: #6aa1ff;
+      --border: #26334d;
+      --focus: #9ec1ff;
     }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--fg); }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding: 1rem 0 2rem; }
+    header .brand { font-weight: 700; letter-spacing: 0.3px; }
+    nav a { opacity: 0.9; }
+    .skip-link { position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus { position:static; width:auto; height:auto; padding:0.5rem; background:#fff; color:#000; }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    .hero { display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; align-items:center; padding: 1.5rem 0 2rem; }
+    .hero h1 { margin:0 0 0.5rem; font-size: clamp(1.8rem, 2.4vw, 2.4rem); line-height:1.15; }
+    .hero p { color: var(--muted); margin: 0.5rem 0 1rem; }
+    .btns { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .btn { display:inline-block; padding: .6rem .9rem; background: var(--accent); color:#0a0a0a; border-radius: 10px; font-weight:600; }
+    .btn.secondary { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .panel { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid var(--border); border-radius: 14px; padding: 1rem; }
+
+    .controls { display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; padding: 1rem 0; }
+    .search { flex:1 1 320px; display:flex; flex-direction:column; gap:.35rem; }
+    .search input { width:100%; padding: .65rem .8rem; background:#0f1628; color:var(--fg); border:1px solid var(--border); border-radius:10px; outline:none; }
+    .chips { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .chip { background: var(--chip); border:1px solid var(--border); color: var(--fg); padding:.45rem .7rem; border-radius: 999px; cursor:pointer; font-size:.9rem; }
+    .chip.active { background: var(--accent); color:#0a0a0a; border-color: transparent; }
+    .chip:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+
+    h2.cat { margin: 2rem 0 0.75rem; font-size:1.2rem; font-weight:700; letter-spacing:.2px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: .9rem; }
+    .card { background: var(--card); border:1px solid var(--border); border-radius: 12px; padding: .9rem; display:flex; flex-direction:column; gap:.5rem; }
+    .card a.title { font-weight:600; }
+    .card p { margin:0; color: var(--muted); font-size:.95rem; }
+    .card .meta { font-size:.8rem; color: var(--muted); display:flex; gap:.5rem; flex-wrap:wrap; }
+    .empty { display:none; margin:1rem 0 0; color: var(--muted); }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
     }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--gray-light);
-      color: var(--text-color);
-      line-height: 1.6;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      border-bottom: 2px solid var(--gray-medium);
-      padding-bottom: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      background-color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1.25rem;
-      color: white;
-    }
-
-    header h1 {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1.75rem;
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+    .starred { margin: 0 0 1rem; }
+    .starred h2 { margin: 0 0 .6rem; font-size: 1.25rem; }
+    .starred-links { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .starred-btn {
+      flex: 1 1 220px;
+      text-align: center;
+      padding: .85rem 1rem;
+      border-radius: 12px;
       font-weight: 700;
-      color: var(--primary-dark);
+      background: var(--accent);
+      color: #0a0a0a;
+      border: 0;
     }
-
-    .subtitle {
-      font-size: 1rem;
-      color: var(--gray-dark);
-    }
-
-    .category {
-      margin-top: 2.5rem;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      color: var(--gray-dark);
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--gray-medium);
-      padding-bottom: 0.25rem;
-    }
-
-    .demo-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .demo-card {
-      background: white;
-      border: 1px solid var(--gray-medium);
-      border-radius: var(--border-radius);
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      text-decoration: none;
-      transition: border-color 0.2s;
-    }
-
-    .demo-card:hover {
-      border-color: var(--primary-dark);
-    }
-
-    .demo-card h3 {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1.125rem;
-      color: var(--primary-dark);
-    }
-
-    .demo-card p {
-      font-size: 0.95rem;
-      color: var(--gray-dark);
-    }
-
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  
-
-.search-wrapper {
-  margin: 2rem 0 1rem;
-  display: flex;
-  justify-content: center;
-}
-#searchInput {
-  width: 100%;
-  max-width: 400px;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid var(--gray-medium);
-  border-radius: 8px;
-  background-color: white;
-}
+    .starred-btn:hover { filter: brightness(1.05); }
+    .starred-tip { margin-top: .4rem; color: var(--muted); font-size: .9rem; }
+    [hidden] { display: none !important; }
   </style>
- </head>
- <body>
-  <div class="container">
-   <header>
-    <div class="logo">
-     VE
+</head>
+<body>
+<a href="#content" class="skip-link">Skip to content</a>
+<div class="container">
+  <header role="banner">
+    <div class="brand">VideoEngager • Demos & Docs</div>
+    <nav aria-label="Primary">
+      <a href="https://github.com/VideoEngager/videoengager.github.io" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+  <section class="starred panel" id="starred">
+    <h2>⭐ Quick Access: Featured Demos</h2>
+    <div class="starred-links" id="starredLinks" role="navigation" aria-label="Live demo quick links"></div>
+  </section>
+
+  <section class="hero panel">
+    <div>
+      <h1>Runnable demos, clear tutorials.</h1>
+      <p>Explore integrations, API usage, and SDK examples. Filter by tag, search by keyword, and jump straight to the category you need.</p>
+      <div class="btns" role="navigation" aria-label="Jump to category">
+        <a class="btn" href="#api-usage">API Usage</a>
+        <a class="btn secondary" href="#integrations">Integrations</a>
+        <a class="btn secondary" href="#agent-sdk">Agent SDK</a>
+        <a class="btn secondary" href="#scheduling">Scheduling</a>
+      </div>
     </div>
     <div>
-     <h1>
-      VideoEngager SDK Demos
-     </h1>
-     <p class="subtitle">
-      Interactive examples showcasing integration possibilities
-     </p>
+      <div class="panel">
+        <strong>Tips</strong>
+        <ul>
+          <li>Use the search to find demos across all categories.</li>
+          <li>Click a tag chip to filter; click again to clear.</li>
+          <li>Cards open in a new tab. Keep this page as your hub.</li>
+        </ul>
+      </div>
     </div>
-   </header>
-   <div class="search-wrapper">
-    <input id="searchInput" placeholder="Search demos..." type="text"/>
-   </div>
-   <section>
-    <h2 class="category">
-     Core Integrations
-    </h2>
-    <div class="demo-grid">
-     <a class="demo-card" href="/examples/genesys-messenger-integration/index.html">
-      <h3>
-       Genesys Messenger
-      </h3>
-      <p>
-       Full messenger integration example
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/messaging/">
-      <h3>
-       Genesys Messenger UMD
-      </h3>
-      <p>
-       Custom deployment selector implementation
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/genesys-selector-demo-for-app-foundry.html">
-      <h3>
-       App Foundry Version
-      </h3>
-      <p>
-       Selector optimized for Genesys AppFoundry
-      </p>
-     </a>
-    </div>
-   </section>
-   <section>
-    <h2 class="category">
-     Interaction Demos
-    </h2>
-    <div class="demo-grid">
-     <a class="demo-card" href="/examples/agent-interactions-demo-gui.html">
-      <h3>
-       Agent Interactions
-      </h3>
-      <p>
-       Demo of agent-facing interface
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/external-interactions-demo-gui.html">
-      <h3>
-       External Interactions
-      </h3>
-      <p>
-       Customer-facing interaction demo
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/single-button-genesys-demo.html">
-      <h3>
-       Single Button
-      </h3>
-      <p>
-       Minimalist one-click implementation
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/single-button-genesys-demo.html?enableChat=true">
-      <h3>
-       Single Button + Chat
-      </h3>
-      <p>
-       With integrated chat functionality
-      </p>
-     </a>
-    </div>
-   </section>
-   <section>
-    <h2 class="category">
-     Specialized Demos
-    </h2>
-    <div class="demo-grid">
-      <a class="demo-card" href="/examples/genesys-node-demonstration">
-      <h3>
-       Genesys Node Scheduling
-      </h3>
-      <p>
-       Seamlessly schedule video meetings and callbacks simultaneously while keeping customer data secure on your servers.
-      </p>
-     </a>
-      <a class="demo-card" href="/examples/ve-agent-sdk-demo/index.html">
-      <h3>
-       VideoEngager Agent SDK Demo
-      </h3>
-      <p>
-        Demonstration of the VideoEngager Agent SDK
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/simple-ve-agent-sdk-demo/index.html">
-      <h3>
-       Simple VideoEngager Agent SDK Demo
-      </h3>
-      <p>
-        Simple demonstration of the VideoEngager Agent SDK
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/schedule_example.html">
-      <h3>
-       Scheduling
-      </h3>
-      <p>
-       Meeting scheduling implementation
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/genesys-schedule-api-demo/index.html">
-      <h3>
-       Genesys Schedule API Demo
-      </h3>
-      <p>
-       Genesys CRUD Schedule API demonstration
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/create-schedule-api-demonstration/index.html">
-      <h3>
-       Scheduling - Create API
-      </h3>
-      <p>
-       Demonstration of creating a schedule using the scheduling API
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/schedules-api-demonstration/index.html">
-      <h3>
-       Scheduling - API Demonstration
-      </h3>
-      <p>
-       Demonstration of the scheduling API functionality
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/schedules/index.html">
-      <h3>
-       Scheduling API Demostration
-      </h3>
-      <p>
-       A practical demonstration of scheduling API functionality
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/scheduleVerification/index.html">
-      <h3>
-       Schedule Verification
-      </h3>
-      <p>
-       Advanced scheduling validation
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/kiosk-new/messenger/index.html">
-      <h3>
-       Kiosk Mode
-      </h3>
-      <p>
-       Public terminal implementation
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/kiosk-new-messenger/index.html">
-      <h3>
-       Kiosk Video Demo
-      </h3>
-      <p>
-       A demonstration showcasing the functionality and user interface of a kiosk
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/kiosk-production-ready/index.html">
-      <h3>
-       Kiosk Production Demo
-      </h3>
-      <p>
-        A production-ready kiosk implementation demostrantion
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/kiosk-prod-ready-custom-design/index.html">
-      <h3>
-       Kiosk Production Demo with Waiting Room
-      </h3>
-      <p>
-        A production-ready kiosk implementation demostrantion with configurable waiting room
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/sales/index.html">
-      <h3>
-       Sales Demo
-      </h3>
-      <p>
-       Sales-focused implementation
-      </p>
-     </a>
-    </div>
-   </section>
-   <section>
-    <h2 class="category">
-     Co-browsing Demos
-    </h2>
-    <div class="demo-grid">
-     <a class="demo-card" href="/examples/standaloneCobrowse/index.html">
-      <h3>
-       Standalone Co-browsing
-      </h3>
-      <p>
-       Independent co-browsing implementation
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/simpleCobrowse/index.html">
-      <h3>
-       Simple Co-browsing
-      </h3>
-      <p>
-       Minimal co-browsing example
-      </p>
-     </a>
-    </div>
-   </section>
-   <section>
-    <h2 class="category">
-     Other Examples
-    </h2>
-    <div class="demo-grid">
-     <a class="demo-card" href="/examples/clean/index.html">
-      <h3>
-       Clean Example
-      </h3>
-      <p>
-       Minimal implementation template
-      </p>
-     </a>
-     <a class="demo-card" href="/examples/genesys-selector-wtih-callback.html">
-      <h3>
-       Selector with Callback
-      </h3>
-      <p>
-       Advanced selector with callback handling
-      </p>
-     </a>
-    </div>
-   </section>
-  </div>
-  <script>
-   document.getElementById('searchInput').addEventListener('input', function(e) {
-  const query = e.target.value.toLowerCase();
-  const cards = document.querySelectorAll('.demo-card');
-  let anyVisible = false;
+  </section>
 
-  cards.forEach(card => {
-    const text = card.textContent.toLowerCase();
-    if (text.includes(query)) {
-      card.style.display = '';
-      anyVisible = true;
-    } else {
-      card.style.display = 'none';
-    }
+  <section class="controls" aria-labelledby="filters-heading">
+    <h2 id="filters-heading" class="sr-only">Filters</h2>
+    <div class="search">
+      <label for="searchInput">Search demos</label>
+      <input id="searchInput" type="text" placeholder="e.g. genesys, kiosk, scheduling" aria-describedby="searchHelp">
+      <small id="searchHelp" class="muted">Search looks at titles and descriptions.</small>
+    </div>
+    <div class="chips" id="chips" role="toolbar" aria-label="Filter by tag"></div>
+  </section>
+
+  <main id="content"></main>
+  <p id="empty" class="empty" role="status">No demos match your filters.</p>
+</div>
+
+<script>
+// Canonical category order + explicit slugs for stable anchors
+const CATEGORY_ORDER = [
+  "API Usage: Interactions",
+  "Integrations: Genesys",
+  "Scheduling Suite",
+  "Co-browsing",
+  "Kiosk",
+  "Agent SDK",
+  "Samples & Templates"
+];
+const SLUGS = {
+  "API Usage: Interactions": "api-usage",
+  "Integrations: Genesys": "integrations",
+  "Scheduling Suite": "scheduling",
+  "Co-browsing": "co-browsing",
+  "Kiosk": "kiosk",
+  "Agent SDK": "agent-sdk",
+  "Samples & Templates": "samples"
+};
+
+let demos = [];
+let activeTag = null;
+let query = "";
+
+const $chips = document.getElementById('chips');
+const $search = document.getElementById('searchInput');
+const $content = document.getElementById('content');
+const $empty = document.getElementById('empty');
+
+function slugifyCategory(cat){ return SLUGS[cat] || cat.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z\-]/g,''); }
+
+function groupByCategory(list){
+  const map = new Map();
+  CATEGORY_ORDER.forEach(c => map.set(c, []));
+  list.forEach(d => {
+    if(!map.has(d.category)) map.set(d.category, []);
+    map.get(d.category).push(d);
   });
+  return [...map.entries()];
+}
 
-  // Optionally handle "no results" message here
-});
-  </script>
- </body>
+function renderChips(allTags){
+  $chips.innerHTML = '';
+  const mk = (label, tagVal) => {
+    const btn = document.createElement('button');
+    const isActive = activeTag === tagVal;
+    btn.className = 'chip' + (isActive ? ' active' : '');
+    btn.type = 'button';
+    btn.textContent = label;
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    btn.addEventListener('click', () => {
+      activeTag = isActive ? null : tagVal;
+      update();
+    });
+    return btn;
+  };
+  $chips.appendChild(mk('All', null));
+  allTags.forEach(t => $chips.appendChild(mk(t, t)));
+}
+
+function cardTemplate(d){
+  const a = document.createElement('a');
+  a.href = d.href;
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.className = "title";
+  a.textContent = d.title;
+
+  const p = document.createElement('p');
+  p.textContent = d.desc || '';
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  if (Array.isArray(d.tags)) {
+    d.tags.forEach(tag => {
+      const span = document.createElement('span');
+      span.textContent = '#' + tag;
+      meta.appendChild(span);
+    });
+  }
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.appendChild(a);
+  if (p.textContent) card.appendChild(p);
+  if (meta.childElementCount) card.appendChild(meta);
+  return card;
+}
+
+function sectionTemplate(category, items){
+  const sec = document.createElement('section');
+  const h2 = document.createElement('h2');
+  h2.id = slugifyCategory(category);
+  h2.className = 'cat';
+  h2.textContent = category;
+  sec.appendChild(h2);
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  items.forEach(d => grid.appendChild(cardTemplate(d)));
+  sec.appendChild(grid);
+  return sec;
+}
+
+function applyFilters(){
+  return demos.filter(d => {
+    const matchesTag = !activeTag || (Array.isArray(d.tags) && d.tags.includes(activeTag));
+    const q = query.trim().toLowerCase();
+    const matchesQuery = !q || (d.title.toLowerCase().includes(q) || (d.desc||'').toLowerCase().includes(q));
+    return matchesTag && matchesQuery;
+  });
+}
+
+function update(){
+  const filtered = applyFilters();
+  $content.innerHTML = '';
+  const grouped = groupByCategory(filtered);
+  let any = 0;
+  grouped.forEach(([cat, items]) => {
+    if (!items.length) return;
+    any += items.length;
+    $content.appendChild(sectionTemplate(cat, items));
+  });
+  $empty.style.display = any ? 'none' : 'block';
+
+  // refresh chip aria-pressed
+  [...$chips.querySelectorAll('.chip')].forEach(btn => {
+    const label = btn.textContent;
+    const tagVal = (label === 'All') ? null : label;
+    const isActive = activeTag === tagVal;
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    btn.classList.toggle('active', isActive);
+  });
+}
+function renderStarred(list){
+  const container = document.getElementById('starredLinks');
+  container.innerHTML = '';
+  list.slice(0, 5).forEach(d => {
+    const a = document.createElement('a');
+    a.className = 'starred-btn';
+    a.href = d.href;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = d.title;
+    a.setAttribute('aria-label', 'Launch demo: ' + d.title);
+    container.appendChild(a);
+  });
+}
+
+function isSalesView() {
+  const viewParam = new URLSearchParams(location.search).get('view');
+  return viewParam ? viewParam.toLowerCase() === 'sales' : false;
+}
+
+function applySalesView(){
+  if (!isSalesView()) return;
+  // Hide search/filters and main lists; leave only the starred panel
+  document.querySelector('.controls')?.setAttribute('hidden', 'true');
+  document.querySelector('.hero')?.setAttribute('hidden', 'true');
+  document.getElementById('content')?.setAttribute('hidden', 'true');
+  document.getElementById('empty')?.setAttribute('hidden', 'true');
+  // Nudge focus to starred links for instant access
+  // ADDITION: Create and add a "back to full site" link
+  const backLink = document.createElement('p');
+  backLink.innerHTML = '🔍 Need code samples or technical tutorials? <a href="?">Switch to the full developer index</a>';
+  backLink.className = 'starred-tip';
+  backLink.style.textAlign = 'center';
+  document.getElementById('starred')?.appendChild(backLink);
+
+
+  document.getElementById('starred').scrollIntoView({ behavior: 'instant', block: 'start' });
+}
+
+async function init(){
+  try {
+    const res = await fetch('./demos.json', { cache: 'no-store' });
+    demos = await res.json();
+
+    // Build tag index, etc. (existing code) …
+    const known = new Set(CATEGORY_ORDER);
+    const unknown = [...new Set(demos.map(d => d.category).filter(c => !known.has(c)))];
+    unknown.forEach(u => CATEGORY_ORDER.push(u));
+
+    const tagSet = new Set();
+    demos.forEach(d => (d.tags||[]).forEach(t => tagSet.add(t)));
+    const allTags = [...tagSet].sort((a,b)=>a.localeCompare(b));
+    renderChips(allTags);
+
+    // NEW: render starred quick links from featured demos (exclude archived if you use that flag)
+    const featured = demos.filter(d => d.featured && !d.archived);
+    if (featured.length > 0) {
+        renderStarred(featured);
+    } else {
+        // Hide the section if there are no featured demos
+        document.querySelector('.starred')?.setAttribute('hidden', 'true');;
+    }
+
+    update();      // your existing render pipeline for the full index
+    applySalesView();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('empty').textContent = "Failed to load demos.json";
+    document.getElementById('empty').style.display = 'block';
+  }
+}
+
+// async function init(){
+//   try {
+//     const res = await fetch('./demos.json', { cache: 'no-store' });
+//     demos = await res.json();
+//     // Normalize: ensure categories exist in order; unknown categories appended
+//     const known = new Set(CATEGORY_ORDER);
+//     const unknown = [...new Set(demos.map(d => d.category).filter(c => !known.has(c)))];
+//     unknown.forEach(u => CATEGORY_ORDER.push(u));
+
+//     // Build tag index
+//     const tagSet = new Set();
+//     demos.forEach(d => (d.tags||[]).forEach(t => tagSet.add(t)));
+//     const allTags = [...tagSet].sort((a,b)=>a.localeCompare(b));
+//     renderChips(allTags);
+
+//     update();
+//   } catch (e) {
+//     console.error(e);
+//     $empty.textContent = "Failed to load demos.json";
+//     $empty.style.display = 'block';
+//   }
+// }
+
+$search.addEventListener('input', (e) => { query = e.target.value; update(); });
+init();
+</script>
+</body>
 </html>

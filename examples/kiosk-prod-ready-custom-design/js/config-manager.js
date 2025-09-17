@@ -23,21 +23,35 @@ export class ConfigManager {
     this.defaultConfig = defaultConfig;
     this.config = {};
   }
-
+  validateCustomerConfig(cfg) {
+    // Minimal schema checks; your client also validates them.
+    const need = [["videoEngager","tenantId"],["videoEngager","veEnv"],["genesys","deploymentId"],["genesys","domain"]];
+    for (const [a,b] of need) {
+      if (!cfg?.[a]?.[b]) throw new Error(`Missing ${a}.${b}`);
+    }
+    return cfg;
+  }
   async load() {
     // 1. Start with the default config
     this.config = { ...this.defaultConfig };
 
-    // 2. Load from localStorage
-    const storedConfig = this.loadFromStorage();
-    this.config = deepMerge(this.config, storedConfig );
+    // // @TODO Validate need for local torage 2. Load from localStorage
 
     // 3. Load from URL parameters (highest precedence)
+    const p = new URLSearchParams(location.search);
+    if (p.get("config")) {
+      try {
+        const res = await fetch(p.get("config"), { cache: "no-store" });
+        const ext = await res.json();
+        this.config = deepMerge(this.config, this.validateCustomerConfig(ext));
+      } catch (e) {
+        console.warn("External config failed:", e);
+      }
+    }
     const urlConfig = this.loadFromUrl();
     this.config = deepMerge(this.config, urlConfig);
     
-    // 4. Save the merged config back to localStorage for persistence
-    this.saveToStorage();
+    // @TODO Validate need for local torage, it creates issues. 4. Save the merged config back to localStorage for persistence. 
 
     return this.config;
   }

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>VideoEngager Kiosk – Configurator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --fg:#111; --muted:#666; --bg:#fafafa; --card:#fff; --accent:#2563eb; --danger:#b91c1c; --ok:#065f46; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+    header { padding:16px 20px; background:#fff; border-bottom:1px solid #eee; position:sticky; top:0; z-index:5; }
+    header h1 { margin:0 0 4px; font-size:18px; }
+    header p { margin:0; color:var(--muted); }
+    main { padding:20px; max-width:1080px; margin:0 auto; display:grid; gap:16px; grid-template-columns:1fr 380px; }
+    section.card, .aside-card { background:var(--card); border:1px solid #eee; border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+    section.card h2 { margin:0 0 12px; font-size:16px; }
+    .row { display:grid; grid-template-columns:220px 1fr; gap:12px; align-items:center; margin:10px 0; }
+    label { color:#333; font-weight:600; }
+    input[type=text], input[type=url], select, textarea {
+      width:100%; padding:8px 10px; border-radius:8px; border:1px solid #ddd; outline:none;
+    }
+    textarea { min-height:90px; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    .muted { color:var(--muted); font-size:12px; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .btnbar { display:flex; gap:10px; flex-wrap:wrap; }
+    button, .btn {
+      appearance:none; border:1px solid #ddd; background:#fff; padding:8px 12px; border-radius:10px; cursor:pointer;
+    }
+    .primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .danger { background:var(--danger); border-color:var(--danger); color:#fff; }
+    .ok { background:var(--ok); border-color:var(--ok); color:#fff; }
+    .out { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+           background:#0b1021; color:#e5e7eb; border-radius:10px; padding:12px; overflow:auto; }
+    .pill { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#eef2ff; color:#1e40af; font-weight:600; }
+    .error { color:var(--danger); font-weight:600; }
+    .good  { color:var(--ok); font-weight:600; }
+    .aside-card h3 { margin:0 0 8px; font-size:15px; }
+    .small { font-size:12px; }
+    .sep { height:1px; background:#eee; margin:10px 0; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Configurator → Kiosk Demo</h1>
+  <p>Generate a safe, customer-specific config and a shareable link. No secrets; no persistence.</p>
+</header>
+
+<main>
+  <!-- LEFT: form panels -->
+  <div class="stack">
+    <section class="card">
+      <h2>Flow preset & language</h2>
+      <div class="row">
+        <label for="preset">Preset (flow)</label>
+        <select id="preset">
+          <option value="kiosk">Kiosk</option>
+          <option value="click2video">Click to Video</option>
+          <option value="messenger-only">Messenger First</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="interactive">Interactive</label>
+        <select id="interactive">
+          <option value="false">false</option>
+          <option value="true">true</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="lang">Language</label>
+        <select id="lang">
+          <option value="">(use default)</option>
+          <option value="en">English (en)</option>
+          <option value="bg">Bulgarian (bg)</option>
+          <option value="es">Spanish (es)</option>
+          <option value="de">German (de)</option>
+          <option value="fr">French (fr)</option>
+        </select>
+      </div>
+      <p class="muted">Presets define <em>flows</em>; language is a UI convenience (does not change backends).</p>
+    </section>
+
+    <section class="card">
+      <h2>Customer → Genesys & VideoEngager</h2>
+      <div class="row">
+        <label for="genesysDomain">Genesys domain</label>
+        <input id="genesysDomain" type="text" placeholder="e.g. mypurecloud.com" />
+      </div>
+      <div class="row">
+        <label for="genesysDeploymentId">Genesys deploymentId</label>
+        <input id="genesysDeploymentId" type="text" placeholder="UUID (deployment id)" />
+      </div>
+      <div class="row">
+        <label for="veEnv">VE environment (host)</label>
+        <input id="veEnv" type="text" placeholder="e.g. videome.leadsecure.com" />
+      </div>
+      <div class="row">
+        <label for="veTenantId">VE tenantId</label>
+        <input id="veTenantId" type="text" placeholder="public tenant id (non-secret)" />
+      </div>
+      <p class="muted">These four are required. We validate format and include them only in the generated config.</p>
+    </section>
+
+    <section class="card">
+      <h2>Branding (waitroom visuals)</h2>
+      <div class="grid2">
+        <div class="row">
+          <label for="logo">Logo URL</label>
+          <input id="logo" type="url" placeholder="https://…/logo.svg" />
+        </div>
+        <div class="row">
+          <label for="primaryColor">Primary color</label>
+          <input id="primaryColor" type="text" placeholder="#2563eb" />
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="row">
+          <label for="font">Font family</label>
+          <input id="font" type="text" placeholder="Inter, system-ui, sans-serif" />
+        </div>
+        <div class="row">
+          <label for="themeMode">Theme mode</label>
+          <select id="themeMode">
+            <option value="">(default)</option>
+            <option>light</option>
+            <option>dark</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <label for="banner">Banner text (optional)</label>
+        <input id="banner" type="text" placeholder="Welcome to our kiosk demo" />
+      </div>
+      <p class="muted">Branding values are optional and safe. You can also point the carousel to an external JSON.</p>
+    </section>
+
+    <section class="card">
+      <h2>Carousel content</h2>
+      <div class="row">
+        <label for="carouselSrc">config-src (JSON URL)</label>
+        <input id="carouselSrc" type="url" placeholder="https://…/waitroom-carousel.json" />
+      </div>
+      <p class="muted">If set, the waitroom carousel loads this JSON (title, description, media URL, type).</p>
+    </section>
+  </div>
+
+  <!-- RIGHT: outputs & helpers -->
+  <aside class="aside-card">
+    <h3>Status</h3>
+    <div id="status" class="small muted">Fill required fields to enable actions.</div>
+    <div class="sep"></div>
+
+    <h3>Generated config.json</h3>
+    <pre id="jsonOut" class="out" aria-live="polite">{}</pre>
+
+    <div class="btnbar" style="margin-top:10px;">
+      <button id="btnDownload" class="btn" disabled>Download config.json</button>
+      <button id="btnPreview"  class="btn ok" disabled>Preview now</button>
+    </div>
+
+    <div class="sep"></div>
+    <h3>Shareable link</h3>
+    <div class="grid2">
+      <input id="linkOut" type="text" readonly />
+      <button id="btnCopy" class="btn" disabled>Copy</button>
+    </div>
+    <p class="small muted">Link includes <span class="pill">?config=</span> and optional <span class="pill">preset</span>, <span class="pill">interactive</span>, <span class="pill">lang</span>.</p>
+
+    <div class="sep"></div>
+    <details>
+      <summary><strong>CSP tip</strong> (recommended)</summary>
+      <p class="small">On the kiosk page, set a Content-Security-Policy <code>connect-src</code> that includes your chosen <em>Genesys domain</em> and <em>VE environment host</em> to prevent rogue connections.</p>
+    </details>
+  </aside>
+</main>
+
+<script>
+  // ---- helpers
+  const $ = (id) => document.getElementById(id);
+  const UUIDish = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const DOMAIN = /^(?!-)(?:[a-z0-9-]{1,63}\.)+[a-z]{2,63}$/i;
+  const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+  // Adjust if your kiosk path differs:
+  const KIOSK_DEMO_PATH = "/examples/kiosk-prod-ready-custom-design/";
+
+  function safeStr(v){ return (v ?? "").toString().trim(); }
+  function isNonEmpty(v){ return !!safeStr(v); }
+
+  function buildConfig() {
+    // required
+    const genesys = {
+      domain: safeStr($("genesysDomain").value),
+      deploymentId: safeStr($("genesysDeploymentId").value)
+    };
+    const videoEngager = {
+      veEnv: safeStr($("veEnv").value),
+      tenantId: safeStr($("veTenantId").value)
+    };
+
+    // optional branding
+    const theme = {};
+    const logo = safeStr($("logo").value);
+    const primaryColor = safeStr($("primaryColor").value);
+    const font = safeStr($("font").value);
+    const mode = safeStr($("themeMode").value);
+
+    if (logo) theme.logo = logo;
+    if (primaryColor && (HEX.test(primaryColor) || primaryColor.startsWith("var("))) theme.primaryColor = primaryColor;
+    if (font) theme.font = font;
+    if (mode) theme.mode = mode;
+
+    const metadata = {};
+    const bannerText = safeStr($("banner").value);
+    if (bannerText) metadata.bannerText = bannerText;
+
+    // carousel
+    const carouselSrc = safeStr($("carouselSrc").value);
+
+    const cfg = {
+      genesys, videoEngager,
+      ...(Object.keys(theme).length ? { theme } : {}),
+      ...(Object.keys(metadata).length ? { metadata } : {}),
+      ...(carouselSrc ? { waitroom: { carousel: { configSrc: carouselSrc } } } : {})
+    };
+    return cfg;
+  }
+
+  function validateConfig(cfg) {
+    const errs = [];
+    if (!isNonEmpty(cfg?.genesys?.domain) || !DOMAIN.test(cfg.genesys.domain)) errs.push("Invalid Genesys domain (e.g., mypurecloud.com)");
+    if (!isNonEmpty(cfg?.genesys?.deploymentId) || !UUIDish.test(cfg.genesys.deploymentId)) errs.push("Invalid Genesys deploymentId (UUID v4)");
+    if (!isNonEmpty(cfg?.videoEngager?.veEnv) || !DOMAIN.test(cfg.videoEngager.veEnv)) errs.push("Invalid VE environment host (domain)");
+    if (!isNonEmpty(cfg?.videoEngager?.tenantId)) errs.push("Missing VE tenantId");
+
+    // optional URLs
+    const logo = cfg?.theme?.logo;
+    if (logo && !/^https?:\/\//i.test(logo)) errs.push("Logo must be an absolute https:// URL");
+
+    const cs = cfg?.waitroom?.carousel?.configSrc;
+    if (cs && !/^https?:\/\//i.test(cs)) errs.push("Carousel config-src must be an absolute https:// URL");
+
+    return errs;
+  }
+
+  function pretty(obj){ return JSON.stringify(obj, null, 2); }
+
+  function update() {
+    const cfg = buildConfig();
+    const errs = validateConfig(cfg);
+    $("jsonOut").textContent = pretty(cfg);
+
+    const ok = errs.length === 0;
+    $("status").innerHTML = ok
+      ? `<span class="good">✓ Ready</span> — config looks valid`
+      : `<span class="error">⚠ Please fix:</span><br><span class="small">${errs.map(e=>`• ${e}`).join("<br>")}</span>`;
+
+    $("btnDownload").disabled = !ok;
+    $("btnPreview").disabled = !ok;
+
+    // build shareable link (no Blob yet)
+    const url = new URL(location.origin + KIOSK_DEMO_PATH);
+    // you will host config.json somewhere; here we default to relative "config.json"
+    // for same-session demo, Preview will overwrite with a Blob URL
+    url.searchParams.set("config", "config.json");
+
+    const preset = $("preset").value;
+    const interactive = $("interactive").value;
+    const lang = $("lang").value;
+
+    if (preset) url.searchParams.set("preset", preset);
+    if (interactive) url.searchParams.set("interactive", interactive);
+    if (lang) url.searchParams.set("lang", lang);
+
+    $("linkOut").value = url.toString();
+    $("btnCopy").disabled = false;
+  }
+
+  // actions
+  $("preset").onchange = update;
+  $("interactive").onchange = update;
+  $("lang").onchange = update;
+  ["genesysDomain","genesysDeploymentId","veEnv","veTenantId","logo","primaryColor","font","themeMode","banner","carouselSrc"].forEach(id=>{
+    $(id).addEventListener("input", update);
+  });
+
+  $("btnCopy").onclick = async () => {
+    $("linkOut").select();
+    try { await navigator.clipboard.writeText($("linkOut").value); $("status").innerHTML = `<span class="good">✓ Copied link</span>`; }
+    catch { document.execCommand("copy"); }
+  };
+
+  $("btnDownload").onclick = () => {
+    const cfg = buildConfig();
+    const blob = new Blob([pretty(cfg)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "config.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  $("btnPreview").onclick = () => {
+    // Same-session preview using Blob URL for ?config=
+    const cfg = buildConfig();
+    const blob = new Blob([pretty(cfg)], { type: "application/json" });
+    const objectUrl = URL.createObjectURL(blob);
+
+    const url = new URL(location.origin + KIOSK_DEMO_PATH);
+    url.searchParams.set("config", objectUrl);
+    const preset = $("preset").value;
+    const interactive = $("interactive").value;
+    const lang = $("lang").value;
+    if (preset) url.searchParams.set("preset", preset);
+    if (interactive) url.searchParams.set("interactive", interactive);
+    if (lang) url.searchParams.set("lang", lang);
+
+    window.open(url.toString(), "_blank", "noopener");
+  };
+
+  update();
+</script>
+</body>
+</html>

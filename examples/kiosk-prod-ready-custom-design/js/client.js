@@ -202,7 +202,7 @@ export class VideoEngagerClient {
 
         const script = document.createElement("script");
         script.src =
-          "https://cdn.videoengager.com/widget/latest/browser/genesys-hub.umd.js";
+          "https://cdn.videoengager.com/widget/v2.0.10/browser/genesys-hub.umd.js";
         script.async = true;
 
         // Add integrity check if available (you should get the actual hash from VideoEngager)
@@ -282,8 +282,8 @@ export class VideoEngagerClient {
       "VideoEngagerCall.agentJoined",
       "VideoEngagerCall.ended",
       "VideoEngagerCall.error",
-      "GenesysChat.started",
-      "GenesysChat.ended",
+      "GenesysMessenger.conversationStarted",
+      "GenesysMessenger.conversationEnded",
       "GenesysChat.error",
       "onMessage"
     ];
@@ -297,6 +297,19 @@ export class VideoEngagerClient {
         console.warn(`Failed to set up listener for ${eventName}:`, error);
       }
     });
+  }
+
+  async startGenesysChat() {
+    await window.VideoEngager.startGenesysChat();
+  }
+  
+  hideGenesysChat() {
+    // @ts-ignore
+    window.Genesys('command', 'Messenger.close');
+  }
+
+  async endGenesysChat() { 
+    await window.VideoEngager.endGenesysChat();
   }
 
   /**

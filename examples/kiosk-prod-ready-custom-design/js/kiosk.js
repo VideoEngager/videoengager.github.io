@@ -219,6 +219,7 @@ export class KioskApplication {
       });
 
       this.videoEngagerClient.on("GenesysMessenger.conversationEnded", async () => {
+        window.location.reload();
         /**
         * @type {HTMLDivElement | null}
         */

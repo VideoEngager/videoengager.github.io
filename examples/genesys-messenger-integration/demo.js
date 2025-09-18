@@ -2,6 +2,7 @@ const config = {
   prod: {
     envUrl: 'https://apps.mypurecloud.com',
     veUrl: 'https://videome.leadsecure.com',
+    deploymentId: '7720f9af-b75d-4eaf-a3e4-a4e2636157a2',
     tenantId: '0FphTk091nt7G1W7'
   },
   staging: {
@@ -41,3 +42,4 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   window.videoEngagerInstance = videoEngagerInstance;
 });
+

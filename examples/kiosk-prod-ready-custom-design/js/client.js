@@ -141,13 +141,16 @@ export class VideoEngagerClient {
         deploymentId: this.config.videoEngager.deploymentId,
         isPopup: Boolean(this.config.videoEngager.isPopup),
         veHttps: this.config.videoEngager.veHttps !== false,
+        debug: this.config.debug === true
       },
       genesys: {
         deploymentId: this.config.genesys.deploymentId,
         domain: this.config.genesys.domain,
         hideGenesysLauncher: Boolean(this.config.genesys.hideGenesysLauncher),
+        debug: this.config.debug === true
       },
       useGenesysMessengerChat: Boolean(this.config.useGenesysMessengerChat),
+      logger: this.config.debug === true
     };
 
     // Set up secure proxy queue
@@ -253,7 +256,7 @@ export class VideoEngagerClient {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error("VideoEngager ready timeout"));
-      }, 10000);
+      }, 60000);
 
       if (
         window.VideoEngager &&

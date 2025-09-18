@@ -146,7 +146,7 @@ export class KioskApplication {
     await this.initializeWaitroom();
 
     // Message listener for video call events
-    window.addEventListener("message", this.handleMessage.bind(this));
+    // window.addEventListener("message", this.handleMessage.bind(this));
 
     // Activity detection for inactivity timer
     ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
@@ -208,23 +208,17 @@ export class KioskApplication {
       });
 
       this.videoEngagerClient.on("GenesysMessenger.conversationStarted", async () => {
-          console.log('[berat]', "useGenesysMessengerChat", this.config?.useGenesysMessengerChat)
-        if(this.config?.useGenesysMessengerChat) {
-          console.log('[berat]', "conversation started")
-          setTimeout(async () => {
-          console.log('[berat]', "starting video call")
-            await this.videoEngagerClient?.startVideo();
-          }, 1000)
-        }
+        console.log('[berat]', "useGenesysMessengerChat", this.config?.useGenesysMessengerChat)
+        this.timeoutManager.extend("call", this.timeouts.call);
       });
 
       this.videoEngagerClient.on("GenesysMessenger.conversationEnded", async () => {
-        window.location.reload();
+        // window.location.reload();
         /**
         * @type {HTMLDivElement | null}
         */
         const genesysMessengerContainer = document.querySelector('#genesys-messenger');
-        if(genesysMessengerContainer) {
+        if (genesysMessengerContainer) {
           genesysMessengerContainer.style.display = 'none';
         }
         await this.handleVideoCallEnded();
@@ -235,7 +229,7 @@ export class KioskApplication {
         * @type {HTMLDivElement | null}
         */
         const genesysMessengerContainer = document.querySelector('#genesys-messenger');
-        if(genesysMessengerContainer) {
+        if (genesysMessengerContainer) {
           genesysMessengerContainer.style.display = 'block';
         }
       })
@@ -249,6 +243,7 @@ export class KioskApplication {
       this.videoEngagerClient.on("onMessage", (data) => {
         this.log(`VIDEOCLIENT: Received message: ${JSON.stringify(data)}`);
         this.handleSystemMessage(data);
+        this.timeoutManager.extend("call", this.timeouts.call);
       });
 
       this.log("VIDEOCLIENT: VideoEngager client initialized successfully");
@@ -286,7 +281,18 @@ export class KioskApplication {
       // Start video call
       if (this.videoEngagerClient && this.videoEngagerClient.isReady()) {
         if (this.config?.useGenesysMessengerChat) {
+          await this.videoEngagerClient?.startVideo();
           await this.videoEngagerClient.startGenesysChat();
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          window.Genesys("command", "MessagingService.fetchHistory",
+            {},
+            function () {
+              /*fulfilled callback*/
+            },
+            function () {
+              /*rejected callback*/
+            }
+          );
         } else {
           await this.videoEngagerClient?.startVideo();
         }
@@ -311,7 +317,7 @@ export class KioskApplication {
 
     // Clear call timeout
     this.timeoutManager.clear("call");
-    
+
     // Clear system notification
     this.clearSystemNotification();
 
@@ -390,15 +396,15 @@ export class KioskApplication {
 
       // Make sure it's visible with slide-in animation
       this.systemNotificationElement.style.display = 'block';
-      
+
       // Reset any existing animation classes
       this.systemNotificationElement.classList.remove('notification-update');
-      
+
       // Trigger slide-in animation if first time showing
       if (!this.systemNotificationElement.style.opacity || this.systemNotificationElement.style.opacity === '0') {
         this.systemNotificationElement.classList.add('system-notification');
       }
-      
+
       // Add update pulse animation after a brief delay
       setTimeout(() => {
         if (this.systemNotificationElement) {
@@ -413,13 +419,13 @@ export class KioskApplication {
   /**
    * Clears the system notification display.
    */
-  clearSystemNotification () {
+  clearSystemNotification() {
     if (this.systemNotificationElement && this.systemNotificationElement.style.display !== 'none') {
       // Add fade-out animation
       this.systemNotificationElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
       this.systemNotificationElement.style.opacity = '0';
       this.systemNotificationElement.style.transform = 'translateX(-50%) translateY(-20px)';
-      
+
       // Hide completely after animation
       setTimeout(() => {
         if (this.systemNotificationElement) {
@@ -429,7 +435,7 @@ export class KioskApplication {
           this.systemNotificationElement.classList.remove('notification-update', 'system-notification');
         }
       }, 300);
-      
+
       this.log('SYSTEM: System notification cleared');
     }
   }
@@ -437,7 +443,7 @@ export class KioskApplication {
   /**
    * Creates the system notification element if it doesn't exist.
    */
-  createSystemNotificationElement () {
+  createSystemNotificationElement() {
     if (this.systemNotificationElement) {
       return; // Already exists
     }
@@ -452,7 +458,7 @@ export class KioskApplication {
     this.systemNotificationElement = document.createElement('div');
     this.systemNotificationElement.id = 'system-notification';
     this.systemNotificationElement.className = 'system-notification';
-    
+
     // Add ARIA attributes for accessibility
     this.systemNotificationElement.setAttribute('role', 'alert');
     this.systemNotificationElement.setAttribute('aria-live', 'assertive');
@@ -597,14 +603,14 @@ export class KioskApplication {
 
     // Clear call timeout
     this.timeoutManager.clear("call");
-    
+
     // Clear system notification
     this.clearSystemNotification();
 
     // Show video screen
     this.showScreen("video");
     // Hide the Genesys chat but only when useGenesysMessengerChat is enabled
-    if(this.config?.useGenesysMessengerChat) {
+    if (this.config?.useGenesysMessengerChat) {
       this.videoEngagerClient?.hideGenesysChat();
     }
   }
@@ -614,13 +620,13 @@ export class KioskApplication {
 
     // Clear any active timeouts
     this.timeoutManager.clear("call");
-    
+
     // Clear system notification
     this.clearSystemNotification();
     if (this.config?.useGenesysMessengerChat) {
       await this.videoEngagerClient?.endGenesysChat().catch((error) => {
-          this.log(`CALL: Error ending video call: ${error.message}`);
-        });
+        this.log(`CALL: Error ending video call: ${error.message}`);
+      });
     }
     // Return to initial screen
     this.showScreen("initial");
@@ -799,7 +805,11 @@ export class KioskApplication {
    */
   log(message) {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${message}`);
+    const stackTrace = new Error().stack;
+    const stackTraceLine = stackTrace ? stackTrace.split("\n")[2].trim() : "unknown source";
+    console.log(`[${timestamp}] ${message}`, {
+      source: stackTraceLine
+    });
 
     // In development, also log to potential debug element
     if (this.environmentConfig?.getEnvironment() === "development") {
@@ -831,7 +841,7 @@ export class KioskApplication {
       document.removeEventListener(event, this.resetInactivityTimer.bind(this));
     });
 
-    window.removeEventListener("message", this.handleMessage.bind(this));
+    // window.removeEventListener("message", this.handleMessage.bind(this));
   }
 }
 

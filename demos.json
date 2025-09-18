@@ -1,7 +1,7 @@
 [
   {
     "title": "Click to Video",
-    "href": "/examples/genesys-messenger-integration/index.html",
+    "href": "/examples/genesys-messenger-integration/index.html?env=prod",
     "desc": "Full messenger integration example.",
     "category": "Integrations: Genesys",
     "tags": [

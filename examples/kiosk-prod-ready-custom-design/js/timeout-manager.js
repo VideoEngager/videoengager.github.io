@@ -32,6 +32,21 @@ export class TimeoutManager {
   }
 
   /**
+   * Extends the delay of an existing timeout.
+   * @param {string} name - Unique identifier for the timeout to be extended.
+   * @param {number} additionalDelay - Additional delay in milliseconds to add to the timeout.
+   * @returns {NodeJS.Timeout | null} - The ID of the extended timeout, or null if the timeout does not exist.
+   */
+  extend(name, additionalDelay) {
+    const timeout = this.timeouts.get(name);
+    if (timeout) {
+      this.clear(name);
+      return this.set(name, timeout.callback, timeout.delay + additionalDelay);
+    }
+    return null;
+  }
+
+  /**
    * Clears the timeout associated with the given name.
    * @param {string} name - Unique identifier for the timeout to be cleared.
    */

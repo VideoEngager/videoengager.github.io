@@ -1,7 +1,7 @@
 // @ts-check
 /// <reference types="../types/ve-window.d.ts" />
-import { ErrorHandler, ErrorTypes } from "./error-handler.js";
-import { Utils } from "./utils.js";
+import { ErrorHandler, ErrorTypes } from './error-handler.js';
+import { Utils } from './utils.js';
 
 export class VideoEngagerClient {
   /**
@@ -21,11 +21,11 @@ export class VideoEngagerClient {
    * @param {boolean} [config.monitoring.enabled=true] - Whether monitoring is enabled.
    * @param {string} [config.monitoring.level='info'] - The logging level for monitoring.
    */
-  constructor(config) {
+  constructor (config) {
     this.config = this.validateAndSanitizeConfig(config);
     this.errorHandler = new ErrorHandler();
     this.eventEmitter = new EventTarget();
-    this.connectionState = "disconnected";
+    this.connectionState = 'disconnected';
     this.retryCount = 0;
     this.maxRetries = 3;
     this.scriptIntegrityCheck = true;
@@ -50,25 +50,25 @@ export class VideoEngagerClient {
    * @param {boolean} [config.monitoring.enabled=true] - Whether monitoring is enabled.
    * @param {string} [config.monitoring.level='info'] - The logging level for monitoring.
    */
-  validateAndSanitizeConfig(config) {
-    if (!config || typeof config !== "object") {
-      throw new Error("Configuration is required");
+  validateAndSanitizeConfig (config) {
+    if (!config || typeof config !== 'object') {
+      throw new Error('Configuration is required');
     }
 
     // Validate required sections
-    const required = ["videoEngager", "genesys"];
+    const required = ['videoEngager', 'genesys'];
     const missing = required.filter((section) => !config[section]);
 
     if (missing.length > 0) {
       throw new Error(
-        `Missing required configuration sections: ${missing.join(", ")}`
+        `Missing required configuration sections: ${missing.join(', ')}`
       );
     }
 
     // Validate required fields
     const requiredFields = {
-      videoEngager: ["tenantId", "veEnv"],
-      genesys: ["deploymentId", "domain"],
+      videoEngager: ['tenantId', 'veEnv'],
+      genesys: ['deploymentId', 'domain']
     };
 
     Object.entries(requiredFields).forEach(([section, fields]) => {
@@ -87,7 +87,7 @@ export class VideoEngagerClient {
       sanitizedConfig.videoEngager.veEnv &&
       !sanitizedConfig.videoEngager.veEnv.match(/^[\w.-]+$/)
     ) {
-      throw new Error("Invalid videoEngager environment format");
+      throw new Error('Invalid videoEngager environment format');
     }
 
     return sanitizedConfig;
@@ -99,22 +99,22 @@ export class VideoEngagerClient {
    * @returns {Promise<boolean>} - Returns true if initialization is successful.
    * @throws {Error} - Throws an error if initialization fails.
    */
-  async init() {
+  async init () {
     try {
-      this.connectionState = "connecting";
+      this.connectionState = 'connecting';
 
       await this.setupConfigProxy();
       await this.loadDependencies();
       await this.waitForReady();
 
       this.setupEventListeners();
-      this.connectionState = "connected";
+      this.connectionState = 'connected';
       this.retryCount = 0;
 
-      this.emit("client:ready", {});
+      this.emit('client:ready', {});
       return true;
     } catch (error) {
-      this.connectionState = "error";
+      this.connectionState = 'error';
       this.handleInitError(error);
       throw error;
     }
@@ -127,7 +127,7 @@ export class VideoEngagerClient {
    * @returns {Promise<void>} - Resolves when the configuration proxy is set up.
    * @throws {Error} - Throws an error if the setup fails.
    */
-  async setupConfigProxy() {
+  async setupConfigProxy () {
     // Clean up any existing global variables
     delete window.__VideoEngagerConfigs;
     delete window.__VideoEngagerQueue;
@@ -160,28 +160,28 @@ export class VideoEngagerClient {
       {
         get:
           (_, method) =>
-          (...args) => {
-            return new Promise((resolve, reject) => {
-              const timeoutId = setTimeout(() => {
-                reject(
-                  new Error(`VideoEngager method '${String(method)}' timed out`)
-                );
-              }, 30000); // 30 second timeout
+            (...args) => {
+              return new Promise((resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                  reject(
+                    new Error(`VideoEngager method '${String(method)}' timed out`)
+                  );
+                }, 30000); // 30 second timeout
 
-              window.__VideoEngagerQueue?.push({
-                m: method,
-                a: args,
-                r: (result) => {
-                  clearTimeout(timeoutId);
-                  resolve(result);
-                },
-                rj: (error) => {
-                  clearTimeout(timeoutId);
-                  reject(error);
-                },
+                window.__VideoEngagerQueue?.push({
+                  m: method,
+                  a: args,
+                  r: (result) => {
+                    clearTimeout(timeoutId);
+                    resolve(result);
+                  },
+                  rj: (error) => {
+                    clearTimeout(timeoutId);
+                    reject(error);
+                  }
+                });
               });
-            });
-          },
+            }
       }
     );
   }
@@ -192,7 +192,7 @@ export class VideoEngagerClient {
    * @returns {Promise<void>} - Resolves when the script is loaded successfully.
    * @throws {Error} - Throws an error if the script fails to load or times out.
    */
-  async loadDependencies() {
+  async loadDependencies () {
     return new Promise((resolve, reject) => {
       try {
         // Remove any existing script
@@ -203,9 +203,9 @@ export class VideoEngagerClient {
           existingScript.remove();
         }
 
-        const script = document.createElement("script");
+        const script = document.createElement('script');
         script.src =
-          "https://cdn.videoengager.com/widget/v2.0.10/browser/genesys-hub.umd.js";
+          'https://cdn.videoengager.com/widget/v3.0.1/browser/genesys-hub.umd.js';
         script.async = true;
 
         // Add integrity check if available (you should get the actual hash from VideoEngager)
@@ -213,7 +213,7 @@ export class VideoEngagerClient {
 
         const timeout = setTimeout(() => {
           cleanup();
-          reject(new Error("Script load timeout"));
+          reject(new Error('Script load timeout'));
         }, 15000);
 
         const cleanup = () => {
@@ -226,8 +226,8 @@ export class VideoEngagerClient {
           cleanup();
 
           // Verify the script loaded correctly
-          if (typeof window.VideoEngager !== "object") {
-            reject(new Error("VideoEngager library not properly initialized"));
+          if (typeof window.VideoEngager !== 'object') {
+            reject(new Error('VideoEngager library not properly initialized'));
             return;
           }
 
@@ -236,7 +236,7 @@ export class VideoEngagerClient {
 
         script.onerror = (error) => {
           cleanup();
-          reject(new Error("Failed to load VideoEngager script"));
+          reject(new Error('Failed to load VideoEngager script'));
         };
 
         document.head.appendChild(script);
@@ -252,15 +252,15 @@ export class VideoEngagerClient {
    * @returns {Promise<void>} - Resolves when VideoEngager is ready.
    * @throws {Error} - Throws an error if VideoEngager is not ready within the timeout.
    */
-  async waitForReady() {
+  async waitForReady () {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error("VideoEngager ready timeout"));
+        reject(new Error('VideoEngager ready timeout'));
       }, 60000);
 
       if (
         window.VideoEngager &&
-        typeof window.VideoEngager.onReady === "function"
+        typeof window.VideoEngager.onReady === 'function'
       ) {
         window.VideoEngager.onReady(() => {
           clearTimeout(timeout);
@@ -268,7 +268,7 @@ export class VideoEngagerClient {
         });
       } else {
         clearTimeout(timeout);
-        reject(new Error("VideoEngager onReady method not available"));
+        reject(new Error('VideoEngager onReady method not available'));
       }
     });
   }
@@ -278,17 +278,17 @@ export class VideoEngagerClient {
    * This method listens for various events from VideoEngager and emits them using the event emitter.
    * It also includes error handling for setting up listeners.
    */
-  setupEventListeners() {
+  setupEventListeners () {
     // Set up VideoEngager event listeners with error handling
     const events = [
-      "VideoEngagerCall.started",
-      "VideoEngagerCall.agentJoined",
-      "VideoEngagerCall.ended",
-      "VideoEngagerCall.error",
-      "GenesysMessenger.conversationStarted",
-      "GenesysMessenger.conversationEnded",
-      "GenesysChat.error",
-      "onMessage"
+      'VideoEngagerCall.started',
+      'VideoEngagerCall.agentJoined',
+      'VideoEngagerCall.ended',
+      'VideoEngagerCall.error',
+      'GenesysMessenger.conversationStarted',
+      'GenesysMessenger.conversationEnded',
+      'GenesysChat.error',
+      'onMessage'
     ];
 
     events.forEach((eventName) => {
@@ -302,16 +302,16 @@ export class VideoEngagerClient {
     });
   }
 
-  async startGenesysChat() {
+  async startGenesysChat () {
     await window.VideoEngager.startGenesysChat();
   }
-  
-  hideGenesysChat() {
+
+  hideGenesysChat () {
     // @ts-ignore
     window.Genesys('command', 'Messenger.close');
   }
 
-  async endGenesysChat() { 
+  async endGenesysChat () {
     await window.VideoEngager.endGenesysChat();
   }
 
@@ -321,21 +321,21 @@ export class VideoEngagerClient {
    * @returns {Promise<Object>} - Resolves with the result of the video chat session.
    * @throws {Error} - Throws an error if the client is not ready or if the VideoEngager API call fails.
    */
-  async startVideo() {
-    if (this.connectionState !== "connected") {
-      throw new Error("Client not ready. Call init() first.");
+  async startVideo () {
+    if (this.connectionState !== 'connected') {
+      throw new Error('Client not ready. Call init() first.');
     }
 
     try {
       const result = await window.VideoEngager.startVideoChatSession();
-      this.emit("video:started", result);
+      this.emit('video:started', result);
       return result;
     } catch (error) {
       const errorId = this.errorHandler.handleError(
         ErrorTypes.INTERNAL_ERROR,
         error
       );
-      this.emit("video:error", { error, errorId });
+      this.emit('video:error', { error, errorId });
       throw error;
     }
   }
@@ -346,13 +346,13 @@ export class VideoEngagerClient {
    * @returns {Promise<Object>} - Resolves with the result of ending the video chat session.
    * @throws {Error} - Throws an error if the VideoEngager API call fails.
    */
-  async endVideo() {
+  async endVideo () {
     try {
       const result = await window.VideoEngager.endVideoChatSession();
-      this.emit("video:ended", result);
+      this.emit('video:ended', result);
       return result;
     } catch (error) {
-      this.emit("video:error", { error });
+      this.emit('video:error', { error });
       throw error;
     }
   }
@@ -363,21 +363,21 @@ export class VideoEngagerClient {
    * @returns {Promise<Object>} - Resolves with the result of the Genesys chat session.
    * @throws {Error} - Throws an error if the client is not ready or if the VideoEngager API call fails.
    */
-  async startChat() {
-    if (this.connectionState !== "connected") {
-      throw new Error("Client not ready. Call init() first.");
+  async startChat () {
+    if (this.connectionState !== 'connected') {
+      throw new Error('Client not ready. Call init() first.');
     }
 
     try {
       const result = await window.VideoEngager.startGenesysChat();
-      this.emit("chat:started", result);
+      this.emit('chat:started', result);
       return result;
     } catch (error) {
       const errorId = this.errorHandler.handleError(
         ErrorTypes.INTERNAL_ERROR,
         error
       );
-      this.emit("chat:error", { error, errorId });
+      this.emit('chat:error', { error, errorId });
       throw error;
     }
   }
@@ -388,13 +388,13 @@ export class VideoEngagerClient {
    * @returns {Promise<Object>} - Resolves with the result of ending the Genesys chat session.
    * @throws {Error} - Throws an error if the VideoEngager API call fails.
    */
-  async endChat() {
+  async endChat () {
     try {
       const result = await window.VideoEngager.endGenesysChat();
-      this.emit("chat:ended", result);
+      this.emit('chat:ended', result);
       return result;
     } catch (error) {
-      this.emit("chat:error", { error });
+      this.emit('chat:error', { error });
       throw error;
     }
   }
@@ -405,13 +405,13 @@ export class VideoEngagerClient {
    * @param {string} eventName - The name of the event to emit.
    * @param {Object} data - The data to include in the event.
    */
-  emit(eventName, data) {
+  emit (eventName, data) {
     const event = new CustomEvent(eventName, {
       detail: {
         ...data,
         timestamp: Date.now(),
-        clientId: this.config._clientId || Utils.generateId(),
-      },
+        clientId: this.config._clientId || Utils.generateId()
+      }
     });
     this.eventEmitter.dispatchEvent(event);
   }
@@ -423,12 +423,12 @@ export class VideoEngagerClient {
    * @param {Function} callback - The callback function to execute when the event is emitted.
    * @returns {Function} - A function to remove the event listener.
    */
-  on(eventName, callback) {
+  on (eventName, callback) {
     const wrappedCallback = (event) => {
       try {
         callback(event.detail);
       } catch (error) {
-        this.errorHandler.logError("Event Handler Error", error, { eventName });
+        this.errorHandler.logError('Event Handler Error', error, { eventName });
       }
     };
     this.eventEmitter.addEventListener(eventName, wrappedCallback);
@@ -442,7 +442,7 @@ export class VideoEngagerClient {
    * @param {string} eventName - The name of the event to stop listening for.
    * @param {EventListenerOrEventListenerObject | null} callback - The callback function to remove.
    */
-  off(eventName, callback) {
+  off (eventName, callback) {
     this.eventEmitter.removeEventListener(eventName, callback);
   }
 
@@ -451,14 +451,14 @@ export class VideoEngagerClient {
    * This method checks the error message to determine the type of error and calls the error handler accordingly.
    * @param {Error} error - The error that occurred during initialization.
    */
-  handleInitError(error) {
+  handleInitError (error) {
     this.retryCount++;
 
-    if (error.message.includes("timeout")) {
+    if (error.message.includes('timeout')) {
       this.errorHandler.handleError(ErrorTypes.NETWORK_ERROR, error);
-    } else if (error.message.includes("configuration")) {
+    } else if (error.message.includes('configuration')) {
       this.errorHandler.handleError(ErrorTypes.CONFIG_INVALID, error);
-    } else if (error.message.includes("script")) {
+    } else if (error.message.includes('script')) {
       this.errorHandler.handleError(ErrorTypes.LIBRARY_LOAD_FAILED, error);
     } else {
       this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
@@ -470,7 +470,7 @@ export class VideoEngagerClient {
    * This method returns the current connection state, which can be "disconnected", "connecting", "connected", or "error".
    * @returns {string} - The current connection state.
    */
-  getConnectionState() {
+  getConnectionState () {
     return this.connectionState;
   }
 
@@ -479,8 +479,8 @@ export class VideoEngagerClient {
    * This method returns true if the client is in the "connected" state, otherwise false.
    * @returns {boolean} - True if the client is ready, false otherwise.
    */
-  isReady() {
-    return this.connectionState === "connected";
+  isReady () {
+    return this.connectionState === 'connected';
   }
 
   /**
@@ -488,8 +488,8 @@ export class VideoEngagerClient {
    * This method sets the connection state to "disconnected", removes global variables,
    * and cleans up the script element from the document.
    */
-  destroy() {
-    this.connectionState = "disconnected";
+  destroy () {
+    this.connectionState = 'disconnected';
 
     // Clean up global variables
     delete window.__VideoEngagerConfigs;

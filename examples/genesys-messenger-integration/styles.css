@@ -93,8 +93,8 @@ p {
 }
 
 .genesys-mxg-frame {
-  position: relative !important;
-  bottom: -6% !important;
+  /* position: relative !important; */
+  /* bottom: -6% !important; */
   right: auto !important;
 }
 

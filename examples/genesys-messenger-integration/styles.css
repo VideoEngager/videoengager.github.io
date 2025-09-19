@@ -85,6 +85,218 @@ p {
   justify-content: center;
   animation: pulse 2s infinite ease-in-out;
 }
+/* styles.css */
+
+/* styles.css */
+
+.launcher-overlay-circle {
+  --circle-size: 90px;
+  width: var(--circle-size);
+  height: var(--circle-size);
+  position: fixed;
+  right: 11px;
+  bottom: 6px;
+  border: 3px solid red;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: pulse 2s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* --- Step 2: Define the animation for the spinning motion --- */
+@keyframes orbitAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Step 3: Style the invisible spinning container --- */
+.orbit-container {
+  /* This container will spin, carrying the dot with it */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  
+  /* Apply the animation */
+  animation: orbitAnimation 4s linear infinite; /* 4s duration, smooth, endless loop */
+}
+
+.orbit-container.active-orbit {
+  display: block;
+}
+/* --- Step 4: Style the visible red dot --- */
+.orbiting-dot {
+  /* This is the "planet" */
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  
+  /* Position the dot on the edge of the spinning container */
+  /* We place it at the top and shift it up by half its height */
+  top: -6px; 
+  left: 50%;
+  transform: translateX(-50%);
+  animation: pulseAnimation 2s ease-in-out infinite;
+
+}
+.dev-avatar {
+  width: 60px; /* Avatar size */
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #E94560;
+  
+  /* Position it in the center of the dot */
+  position: absolute;
+
+  /* Hide it by default */
+  opacity: 0;
+  transform: scale(0);
+  
+  /* Animate the pop-up effect */
+  transition: transform 150ms ease-out, opacity 150ms ease-out;
+}
+
+/* This class will be toggled by JavaScript to show the avatar */
+.dev-avatar.show-avatar {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes pulseAnimation {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.8);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.trail-particle {
+  /* This ensures it doesn't block mouse clicks */
+  pointer-events: none;
+  
+  /* Shape and color */
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #E94560; /* A color that matches the avatar border */
+  border-radius: 50%;
+  
+  /* Initial state */
+  opacity: 1;
+  transform: scale(1);
+  
+  /* Animation settings */
+  transition: transform 1s ease-out, opacity 1s ease-out;
+}
+
+/* This class will be added by JavaScript to trigger the animation */
+.trail-particle.fade-out {
+  opacity: 0;
+  transform: scale(0);
+}
+
+#eyes-emoji {
+  position: fixed; /* Allows it to be placed anywhere on the screen */
+  font-size: 36px;
+  z-index: 10000; /* Ensures it appears on top of everything */
+  pointer-events: none; /* So it doesn't block mouse clicks */
+
+  /* Hide it by default and center it on its coordinates */
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  
+  /* Animate the pop-up effect */
+  transition: transform 150ms ease-out, opacity 150ms ease-out;
+}
+
+/* This class will be toggled by JavaScript to show the emoji */
+#eyes-emoji.show-eyes {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.avatar-container {
+  position: absolute;
+  bottom: 90%; /* Position above the circle */
+  left: 50%;
+  transform: translateX(-50%) scale(0); /* Hide by default */
+  transform-origin: bottom center;
+  transition: transform 0.3s ease-out;
+  opacity: 0;
+}
+
+.avatar-container.show {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+.avatar-container img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.speech-bubble {
+  position: absolute;
+  bottom: 90%; /* Position above the avatar head */
+  transform: translateX(-50%);
+  background-color: white;
+  color: black;
+  padding: 10px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-family: sans-serif;
+  width: 150px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* This creates the little triangle pointer for the bubble */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: white transparent transparent transparent;
+}
+
+/* Nudge the RIGHT bubble (Avatar 1) to the LEFT */
+#avatar1 .speech-bubble {
+  left: 100%; /* Pushes the bubble left from its center */
+}
+
+/* Adjust its triangle pointer */
+/* #avatar1 .speech-bubble::after {
+  left: 80%;
+} */
+
+/* Nudge the LEFT bubble (Avatar 2) to the RIGHT */
+#avatar2 .speech-bubble {
+  left: 10%; /* Pushes the bubble right from its center */
+}
+
+/* Adjust its triangle pointer
+#avatar2 .speech-bubble::after {
+  left: 20%;
+} */
 
 #ve-launcher {
   position: relative !important;
@@ -92,11 +304,11 @@ p {
   left: auto !important;
 }
 
-.genesys-mxg-frame {
-  /* position: relative !important; */
-  /* bottom: -6% !important; */
+/* .genesys-mxg-launcher-frame {
+  position: relative !important; 
+  bottom: -6% !important;
   right: auto !important;
-}
+} */
 
 .widget-functionalities {
   text-align: start;

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="acme">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Genesys Messenger Integration</title>
+        <link rel="stylesheet" href="tokens.css">    
+    <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="tokens-bridge.css">    
+<!--     <link rel="stylesheet" href="theme-acme.css">    
+ -->    <script type="text/javascript" src="videoengager-genesys-messenger.js"></script>
+    <script type="text/javascript" src="demo.js"></script>
+    <script type="text/javascript" src="iconStyling.js"></script>
+</head>
+<body>
+    <header class="pro-header">
+    <h1>VideoEngager & Genesys Messenger</h1>
+    <p>Experience a seamless video and chat integration. Two effortless paths to help.</p>
+</header>
+  <!-- New muted user-story copy (add right after </header>) -->
+  <div class="demo-stories muted-text" aria-hidden="true">
+    <p>Start a chat with an agent or bot — escalate to video when needed.</p>
+    <p>Start a direct video call — connect instantly with a live person.</p>
+  </div>
+<!-- CONTEXT CARD (drop-in) -->
+<section id="context-card" aria-label="Demo Context" class="ctx-card">
+  <header class="ctx-head">
+    <strong>Context</strong>
+    <div class="ctx-actions">
+      <label for="ctx-preset">Preset:</label>
+      <select id="ctx-preset">
+        <option value="travel">Travel / Aviation</option>
+        <option value="banking">Banking</option>
+        <option value="healthcare">Healthcare</option>
+        <option value="telco">Telecom</option>
+        <option value="custom">Custom</option>
+      </select>
+      <button id="ctx-apply" type="button" title="Apply context to session">Apply</button>
+    </div>
+  </header>
+
+  <form id="ctx-form" class="ctx-grid" autocomplete="off">
+      <!-- Add inside #ctx-form grid -->
+    <label>name <input name="firstName" value="Ava Rossi"></label>
+    <label>email <input name="emailAddress" value="ava.rossi@example.com"></label>
+    <label>phone <input name="phoneNumber" value="+39 02 1234 5678"></label>
+    <label>sessionId <input name="sessionId" value="ve_demo_001"></label>
+    <label>customerId <input name="customerId" value="CUST-9988"></label>
+    <label>caseId <input name="caseId" value="CASE-2025-0912"></label>
+    <label>productSKU <input name="productSKU" value="SKU-12345"></label>
+    <label>deviceModel <input name="deviceModel" value="Model-X"></label>
+    <label>priority
+      <select name="priority">
+        <option>low</option><option>normal</option><option selected>high</option>
+      </select>
+    </label>
+    <label>locale <input name="locale" value="it-IT"></label>
+    <label>consentFlag
+      <select name="consentFlag">
+        <option value="true" selected>true</option>
+        <option value="false">false</option>
+      </select>
+    </label>
+    <label class="ctx-notes">notes
+      <textarea name="notes" rows="2">Video freezes after 2 minutes</textarea>
+    </label>
+  </form>
+
+  <details class="ctx-preview" open>
+    <summary>Preview JSON</summary>
+    <pre id="ctx-json"></pre>
+  </details>
+</section>
+
+
+    <div class="main-container">
+        <h1 class="main-title">VideoEngager</h1>
+        <h2>Genesys Messenger Integration</h2>
+    </div>
+    <div id="welcome-box">
+        <p id="welcome-text"></p>
+    </div>
+        <div class="left-circle">
+            <div id="avatar1" class="avatar-container">
+                    <img src="https://img.freepik.com/premium-photo/funny-crazy-guy-with-glasses-passing-sarcastic-smile_508977-4.jpg" alt="Developer Avatar"> 
+                    <div class="speech-bubble"></div>
+            </div>
+        </div>
+        <!-- <div class="right-circle"></div> -->
+        <div class="launcher-overlay-circle">
+            <div id="avatar2" class="avatar-container">
+                <img src="https://thumbs.dreamstime.com/b/geek-girl-face-avatar-student-web-programmer-developer-young-woman-glasses-red-hair-smiling-vector-geek-girl-face-avatar-157905459.jpg" alt="Developer Avatar">
+                <div class="speech-bubble"></div>
+            </div>
+            <div class="orbit-container">
+                <div class="orbiting-dot">
+                    <!-- <img src="https://img.freepik.com/premium-photo/funny-crazy-guy-with-glasses-passing-sarcastic-smile_508977-4.jpg" alt="Developer Avatar" class="dev-avatar">                    <img src="https://placehold.co/100x100/E94560/white?text=Dev" alt="Developer Avatar" class="dev-avatar">
+                    <img src="https://thumbs.dreamstime.com/b/geek-girl-face-avatar-student-web-programmer-developer-young-woman-glasses-red-hair-smiling-vector-geek-girl-face-avatar-157905459.jpg" alt="Developer Avatar" class="dev-avatar">                    <img src="https://placehold.co/100x100/E94560/white?text=Dev" alt="Developer Avatar" class="dev-avatar"> -->
+                </div>
+              </div>
+        </div>
+        <div id="eyes-emoji">👀</div>
+
+        <script src="fun-mode.js"></script>
+        <footer> &copy; 2025 VideoEngager
+    <a href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/genesys-messenger-integration" target="_blank" class="github-source-btn">
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="16" alt="GitHub">
+        View Source on GitHub
+    </a>
+</footer>
+<!-- <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { console.error("STT not supported."); return; }
+
+  // DOM
+  const videoButton = document.querySelector('.left-circle');
+  const chatButton  = document.querySelector('.launcher-overlay-circle');
+
+  // Config
+  const COMMAND_COOLDOWN = 3000;
+
+  // State
+  let recognition = null;
+  let isRunning = false;
+  let restartTimer = null;
+  let attempts = 0;
+  let lastVideoAt = 0;
+  let lastChatAt  = 0;
+  let stableTokens = [];
+  let lastInterimTokens = [];
+
+  // Helpers
+  function safeGlow(el) { if (!el) return; el.classList.add('highlight-glow'); setTimeout(()=> el && el.classList && el.classList.remove('highlight-glow'), 2000); }
+  function canRestart() { return document.visibilityState === 'visible'; }
+  function clearRestart(){ if (restartTimer){ clearTimeout(restartTimer); restartTimer = null; } }
+  function jitterDelay(base, attempt, max = 8000){ const expo = Math.min(max, base * Math.pow(2, attempt)); return Math.floor(Math.random() * expo); }
+  function scheduleRestart(base=300, reason='unknown'){ clearRestart(); if (!canRestart()) { isRunning=false; return; } attempts = Math.min(attempts+1, 6); const d=jitterDelay(base, attempts); console.warn(`STT: backoff(${reason}) ~${d}ms (#${attempts})`); restartTimer=setTimeout(()=>{ restartTimer=null; if (attempts>=6){ console.error('STT circuit open'); return; } initRecognition(); }, d); }
+
+  function tokenize(s){ return s.normalize('NFKC').toLowerCase().split(/[\p{Separator}\p{Punctuation}]+/u).filter(Boolean); }
+  function diffNewTokens(cur, prev){ let i=0, n=Math.min(cur.length, prev.length); while(i<n && cur[i]===prev[i]) i++; return cur.slice(i); }
+
+  function detectKeywords(text, t){
+    if (/\bvideo\b/i.test(text) && t - lastVideoAt > COMMAND_COOLDOWN) { lastVideoAt = t; console.log("STT: Highlight 'video'"); safeGlow(videoButton); }
+    if (/\bchat\b/i.test(text)  && t - lastChatAt  > COMMAND_COOLDOWN) { lastChatAt  = t; console.log("STT: Highlight 'chat'");  safeGlow(chatButton);  }
+  }
+
+  function processInterim(transcript){
+    const now = Date.now();
+    const tokens = tokenize(transcript);
+    const agg = stableTokens.concat(tokens);
+    const newFromStable = diffNewTokens(agg, stableTokens);
+    if (newFromStable.length) detectKeywords(newFromStable.join(' '), now);
+    lastInterimTokens = tokens;
+  }
+  function processFinal(transcript){
+    const now = Date.now();
+    stableTokens = tokenize(transcript);
+    lastInterimTokens = [];
+    detectKeywords(transcript, now);
+  }
+
+  function cleanup(){
+    clearRestart();
+    if (recognition){
+      recognition.onresult = recognition.onend = recognition.onerror = null;
+      try { recognition.stop(); } catch {}
+      recognition = null;
+    }
+    isRunning = false;
+  }
+
+  function initRecognition(){
+    cleanup();
+    attempts = 0;
+
+    recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (e) => {
+      const i = Math.max(e.resultIndex, e.results.length - 1);
+      const r = e.results[i];
+      const text = r?.[0]?.transcript?.trim();
+      if (!text) return;
+      if (r.isFinal) processFinal(text);
+      else processInterim(text);
+    };
+
+    recognition.onend = () => {
+      console.log("STT: end");
+      isRunning = false;
+      if (canRestart()) scheduleRestart(300, 'end');
+    };
+
+    recognition.onerror = (ev) => {
+      console.error('STT error:', ev.error);
+      isRunning = false;
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') { clearRestart(); return; }
+      const base = ev.error === 'network' ? 700 : ev.error === 'no-speech' ? 400 : ev.error === 'aborted' ? 300 : 500;
+      if (canRestart()) scheduleRestart(base, ev.error || 'error');
+    };
+
+    try {
+      recognition.start();
+      isRunning = true;
+      console.log("STT: started");
+    } catch (e) {
+      console.error("STT: start failed", e);
+      isRunning = false;
+      if (canRestart()) scheduleRestart(400, 'start-fail');
+    }
+  }
+
+  // Visibility-aware
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') cleanup();
+    else if (!isRunning && !restartTimer) scheduleRestart(200, 'visible');
+  });
+
+  // Start only after a user gesture (better permission UX)
+  function armStartOnce(){
+    const once = () => { document.removeEventListener('click', once, true); initRecognition(); };
+    document.addEventListener('click', once, true);
+  }
+  armStartOnce();
+
+  // Cleanup for SPA/mobile
+  window.addEventListener('pagehide', cleanup);
+  window.addEventListener('beforeunload', cleanup);
+});
+</script> -->
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    console.error("STT not supported.");
+    return;
+  }
+
+  // --- DOM ELEMENTS ---
+  const videoButton = document.querySelector('.left-circle');
+  const chatButton = document.querySelector('.launcher-overlay-circle');
+
+  // --- COOLDOWN CONFIGURATION ---
+  const COMMAND_COOLDOWN = 3000;
+  let lastVideoTimestamp = 0;
+  let lastChatTimestamp = 0;
+
+  // --- STATE TRACKING ---
+  let recognition = null;
+  let isRunning = false;
+  let restartTimeout = null;
+
+  // --- ALGORITHM EXPLANATION ---
+  // 1. Process ONLY interim results (real-time, not waiting for final)
+  // 2. Track the last processed transcript to detect NEW words only
+  // 3. Extract and process only the newest parts of speech
+  // 4. Use cooldown to prevent repeated triggers
+  // 5. Smooth restart with delay to prevent busy loops
+
+  let lastProcessedTranscript = "";
+
+  function processNewWords(currentTranscript) {
+    const now = Date.now();
+    
+    // Algorithm: Find what's new since last processing
+    let newText = "";
+    if (currentTranscript.startsWith(lastProcessedTranscript)) {
+      // Extract only the new portion at the end
+      newText = currentTranscript.slice(lastProcessedTranscript.length).trim();
+    } else {
+      // If doesn't start with previous, process everything (reset scenario)
+      newText = currentTranscript;
+    }
+    
+    // Update last processed
+    lastProcessedTranscript = currentTranscript;
+    
+    if (!newText) return;
+    
+    console.log("NEW WORDS:", newText);
+    
+    // Keyword detection on new text only
+    if (newText.includes('video') && now - lastVideoTimestamp > COMMAND_COOLDOWN) {
+      console.log("STT: Highlighting 'video'");
+      lastVideoTimestamp = now;
+      videoButton.classList.add('highlight-glow');
+      setTimeout(() => videoButton.classList.remove('highlight-glow'), 2000);
+    }
+
+    if (newText.includes('chat') && now - lastChatTimestamp > COMMAND_COOLDOWN) {
+      console.log("STT: Highlighting 'chat'");
+      lastChatTimestamp = now;
+      chatButton.classList.add('highlight-glow');
+      setTimeout(() => chatButton.classList.remove('highlight-glow'), 2000);
+    }
+  }
+
+  function startRecognition() {
+    if (isRunning) return;
+    
+    // Clean up any previous instance
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (e) {
+        // Ignore
+      }
+    }
+    
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true; // CRITICAL: Get real-time results
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      // Algorithm: Process ONLY the latest interim result for real-time assistance
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        
+        // Focus on interim results only (not final)
+        if (!result.isFinal) {
+          const transcript = result[0].transcript.trim().toLowerCase();
+          if (transcript) {
+            processNewWords(transcript);
+          }
+        }
+      }
+    };
+
+    recognition.onend = () => {
+      console.log("STT: Session ended");
+      isRunning = false;
+      
+      // Smooth restart with delay to prevent busy loop
+      restartTimeout = setTimeout(() => {
+        console.log("STT: Restarting...");
+        startRecognition();
+      }, 300);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('STT Error:', event.error);
+      isRunning = false;
+      
+      // Handle errors with appropriate delays
+      const delay = event.error === 'not-allowed' ? 5000 : 1000;
+      restartTimeout = setTimeout(() => {
+        console.log("STT: Restarting after error...");
+        startRecognition();
+      }, delay);
+    };
+
+    try {
+      recognition.start();
+      isRunning = true;
+      console.log("STT: Service started - listening for interim results");
+    } catch (e) {
+      console.error("STT: Start failed", e);
+      isRunning = false;
+      restartTimeout = setTimeout(startRecognition, 1000);
+    }
+  }
+
+  function stopRecognition() {
+    if (restartTimeout) {
+      clearTimeout(restartTimeout);
+      restartTimeout = null;
+    }
+    
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (e) {
+        // Ignore
+      }
+      recognition = null;
+    }
+    isRunning = false;
+  }
+
+  // Initialize
+  startRecognition();
+
+  // Clean up on page unload
+  window.addEventListener('beforeunload', stopRecognition);
+});
+</script>
+<!-- <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    console.error("STT not supported.");
+    return;
+  }
+
+  // --- DOM ELEMENTS ---
+  const videoButton = document.querySelector('.left-circle');
+  const chatButton = document.querySelector('.launcher-overlay-circle');
+
+  // --- COOLDOWN CONFIGURATION ---
+  const COMMAND_COOLDOWN = 3000; // 3 seconds in milliseconds
+  let lastVideoTimestamp = 0;
+  let lastChatTimestamp = 0;
+
+  // This is the master function that creates and starts a new STT session.
+  function startSttService() {
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      const now = Date.now();
+
+      // Loop through all new results since the last event for maximum accuracy.
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript.trim().toLowerCase();
+        
+        if (transcript.length === 0) continue;
+
+        console.log("STT: transcript", transcript);
+
+        // Check for "video" keyword if cooldown has passed
+        if (transcript.includes('video')) {
+          if (now - lastVideoTimestamp > COMMAND_COOLDOWN) {
+              console.log("STT: Highlighting 'video'");
+              lastVideoTimestamp = now; // Update the timestamp
+              videoButton.classList.add('highlight-glow');
+              setTimeout(() => videoButton.classList.remove('highlight-glow'), 2000);
+          } else {
+              console.warn("STT: On Cooldown 'video'");
+          }
+        }
+
+        // Check for "chat" keyword if cooldown has passed
+        if (transcript.includes('chat')) {
+          if(now - lastChatTimestamp > COMMAND_COOLDOWN) {
+              console.log("STT: Highlighting 'chat'");
+              lastChatTimestamp = now; // Update the timestamp
+              chatButton.classList.add('highlight-glow');
+              setTimeout(() => chatButton.classList.remove('highlight-glow'), 2000);
+            } else {
+              console.warn("STT: On Cooldown 'chat'");
+            }
+        }
+      }
+    };
+
+    // If the service ends for any reason, create a new one to ensure it's always on.
+    recognition.onend = () => {
+      console.log("STT session ended. Creating a new session.");
+      startSttService();
+    };
+
+    recognition.onerror = (event) => {
+      console.error('STT Error:', event.error);
+      // 'onend' will fire after an error, which handles the restart.
+    };
+
+    try {
+      recognition.start();
+      console.log("STT service started for continuous narration.");
+    } catch (e) {
+      console.error("STT could not be started:", e);
+    }
+  }
+
+  // --- INITIAL START ---
+  startSttService();
+});
+</script> -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const textLines = [
+    "Welcome to the VideoEngager & Genesys Messenger Demo.",
+    "Two paths: start a chat (escalate to video) or start a direct video call."
+  ];
+  const speed = 50; // The speed/duration of the effect in milliseconds
+
+  const welcomeBox = document.getElementById('welcome-box');
+  const textElement = document.getElementById('welcome-text');
+
+  let lineIndex = 0;
+  let charIndex = 0;
+
+  function typeWriter() {
+    if (lineIndex < textLines.length) {
+      if (charIndex < textLines[lineIndex].length) {
+        textElement.innerHTML += textLines[lineIndex].charAt(charIndex);
+        charIndex++;
+        setTimeout(typeWriter, speed);
+      } else {
+        // End of a line, add a line break and move to the next line
+        textElement.innerHTML += '<br><br>';
+        lineIndex++;
+        charIndex = 0;
+        setTimeout(typeWriter, speed * 10); // Pause briefly before starting next line
+      }
+    } else {
+      // All lines have been typed
+      finishedTyping();
+    }
+  }
+
+  function finishedTyping() {
+    // 1. Wait a moment, then hide the cursor
+    setTimeout(() => {
+      welcomeBox.classList.add('typing-done');
+    }, 1000); // 1-second pause
+
+    // 2. Wait a bit longer, then fade the entire box out
+    setTimeout(() => {
+      welcomeBox.classList.add('fade-out');
+    }, 4000); // 4-second pause after typing finishes
+
+    // 3. After the fade-out transition is complete, remove the box from the layout
+    setTimeout(() => {
+      welcomeBox.style.display = 'none';
+    }, 4800); // Must be longer than the fade-out duration (4000ms + 800ms)
+  }
+
+  // Start the effect
+  typeWriter();
+});
+</script>
+<!-- include after your other scripts -->
+<script src="context-bridge.js"></script>
+
+</body>
+</html>

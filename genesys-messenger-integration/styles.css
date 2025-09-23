@@ -1,0 +1,497 @@
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle, #e6effc 0%, #ffffff 100%);
+}
+
+.main-container {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(25, 108, 177, 0.96), rgba(17, 76, 129, 0.96));
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 48px 40px;
+  width: min(820px, calc(100% - 48px));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  display: none;
+}
+
+.main-title {
+  color: white;
+  font-size: clamp(2rem, 2.5vw + 1rem, 3rem);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin: 0 0 5px 0;
+}
+
+.pro-header {
+    text-align: center;
+    padding: 40px 20px;
+    color: #333; /* A professional, readable dark grey */
+}
+.pro-header h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.pro-header p {
+    font-size: 1.1rem;
+    color: #555;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+h2 {
+    font-weight: 500;
+    font-size: clamp(1.25rem, 1.2vw + 1rem, 1.75rem);
+    margin: 0 0 15px 0;
+    color: #e6f3ff;
+    opacity: 0.95;
+}
+
+h3 {
+    font-weight: 400;
+    margin: 0 0 15px 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+.muted-text {
+  color: rgba(0,0,0,0.55);
+  font-size: 0.95rem;
+  font-style: italic;
+  text-align: center;
+  margin: 8px auto 0;
+}
+
+/* In styles.css, replace the pulse animation */
+@keyframes soft-glow {
+  0% {
+    box-shadow: 0 0 4px 0px rgba(0, 123, 255, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 8px 8px rgba(0, 123, 255, 0.3);
+
+  }
+  100% {
+    box-shadow: 0 0 4px 0px rgba(0, 123, 255, 0.1);
+  }
+}
+
+.left-circle {
+  position: fixed;
+  bottom: 0.8%;
+  left: 1%;
+  width: 80px;
+  height: 80px;
+  background-color: transparent;
+  border: 2px solid #007BFF; /* A professional blue */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: none;
+  transition: transform 0.2s ease-in-out;
+}
+
+
+
+.launcher-overlay-circle {
+  --circle-size: 90px;
+  width: var(--circle-size);
+  height: var(--circle-size);
+  position: fixed;
+  right: 11px;
+  bottom: 6px;
+  border: 2px solid #007BFF; /* A professional blue */
+  border-radius: 50%;
+  box-sizing: border-box;
+  transition: transform 0.2s ease-in-out;
+  pointer-events: none;
+  z-index: 9999;
+}
+/* Add a subtle glow to draw the eye without being annoying */
+.left-circle::after, .launcher-overlay-circle::after {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    border-radius: 50%;
+    z-index: 0;
+}
+@keyframes enhanced-glow {
+  /* Start and end states are the same for a perfect loop */
+  0%, 100% {
+    box-shadow: 0 0 6px 3px rgba(0, 123, 255, 0.7);
+  }
+  /* The peak of the glow is now larger and more visible before fading */
+  50% {
+    box-shadow: 0 0 12px 14px rgba(0, 123, 255, 0);
+  }
+}
+@keyframes strong-pulse {
+  0% {
+    /* Starts with a solid, highly visible red ring */
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.9); /* Changed to RED with higher opacity */
+  }
+  70% {
+    /* Expands to a larger 20px spread while fading out */
+    box-shadow: 0 0 0 100px rgba(220, 53, 69, 0); /* Changed to RED and increased size */
+  }
+  100% {
+    /* Ends completely invisible */
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}
+/* This new class will be added by JavaScript to trigger the glow */
+.highlight-glow::after {
+  animation: strong-pulse 2.5s infinite ease-out;
+}
+
+/* Add a hover effect for interactivity */
+.left-circle:hover, .launcher-overlay-circle:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+/* --- Step 2: Define the animation for the spinning motion --- */
+@keyframes orbitAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Step 3: Style the invisible spinning container --- */
+.orbit-container {
+  /* This container will spin, carrying the dot with it */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  
+  /* Apply the animation */
+  animation: orbitAnimation 4s linear infinite; /* 4s duration, smooth, endless loop */
+}
+
+.orbit-container.active-orbit {
+  display: block;
+}
+/* --- Step 4: Style the visible red dot --- */
+.orbiting-dot {
+  /* This is the "planet" */
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  
+  /* Position the dot on the edge of the spinning container */
+  /* We place it at the top and shift it up by half its height */
+  top: -6px; 
+  left: 50%;
+  transform: translateX(-50%);
+  animation: pulseAnimation 2s ease-in-out infinite;
+
+}
+.dev-avatar {
+  width: 60px; /* Avatar size */
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #E94560;
+  
+  /* Position it in the center of the dot */
+  position: absolute;
+
+  /* Hide it by default */
+  opacity: 0;
+  transform: scale(0);
+  
+  /* Animate the pop-up effect */
+  transition: transform 150ms ease-out, opacity 150ms ease-out;
+}
+
+/* This class will be toggled by JavaScript to show the avatar */
+.dev-avatar.show-avatar {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes pulseAnimation {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.8);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.trail-particle {
+  /* This ensures it doesn't block mouse clicks */
+  pointer-events: none;
+  
+  /* Shape and color */
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #E94560; /* A color that matches the avatar border */
+  border-radius: 50%;
+  
+  /* Initial state */
+  opacity: 1;
+  transform: scale(1);
+  
+  /* Animation settings */
+  transition: transform 1s ease-out, opacity 1s ease-out;
+}
+
+/* This class will be added by JavaScript to trigger the animation */
+.trail-particle.fade-out {
+  opacity: 0;
+  transform: scale(0);
+}
+
+#eyes-emoji {
+  position: fixed; /* Allows it to be placed anywhere on the screen */
+  font-size: 36px;
+  z-index: 10000; /* Ensures it appears on top of everything */
+  pointer-events: none; /* So it doesn't block mouse clicks */
+
+  /* Hide it by default and center it on its coordinates */
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  
+  /* Animate the pop-up effect */
+  transition: transform 150ms ease-out, opacity 150ms ease-out;
+}
+
+/* This class will be toggled by JavaScript to show the emoji */
+#eyes-emoji.show-eyes {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.avatar-container {
+  position: absolute;
+  bottom: 90%; /* Position above the circle */
+  left: 50%;
+  transform: translateX(-50%) scale(0); /* Hide by default */
+  transform-origin: bottom center;
+  transition: transform 0.3s ease-out;
+  opacity: 0;
+}
+
+.avatar-container.show {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+.avatar-container img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.speech-bubble {
+  position: absolute;
+  bottom: 90%; /* Position above the avatar head */
+  transform: translateX(-50%);
+  background-color: white;
+  color: black;
+  padding: 10px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-family: sans-serif;
+  width: 150px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* This creates the little triangle pointer for the bubble */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: white transparent transparent transparent;
+}
+
+/* Nudge the RIGHT bubble (Avatar 1) to the LEFT */
+#avatar1 .speech-bubble {
+  left: 100%; /* Pushes the bubble left from its center */
+}
+
+/* Adjust its triangle pointer */
+/* #avatar1 .speech-bubble::after {
+  left: 80%;
+} */
+
+/* Nudge the LEFT bubble (Avatar 2) to the RIGHT */
+#avatar2 .speech-bubble {
+  left: 10%; /* Pushes the bubble right from its center */
+}
+
+/* Adjust its triangle pointer
+#avatar2 .speech-bubble::after {
+  left: 20%;
+} */
+
+#ve-launcher {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  color: #28a745 !important;
+}
+
+/* Subtle divider under headings */
+.main-container .main-title + h2 {
+  position: relative;
+  padding-bottom: 8px;
+}
+.main-container .main-title + h2::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #7dd3fc, transparent);
+  opacity: 0.9;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .main-container {
+    padding: 28px 22px;
+  }
+  .widget-functionalities > li {
+    margin: 8px 0;
+  }
+}
+
+/* In styles.css */
+footer {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.github-source-btn {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+.github-source-btn:hover {
+    color: #007BFF; /* Match the CTA blue on hover */
+}
+.github-source-btn img {
+    vertical-align: middle;
+    margin-right: 5px;
+    opacity: 0.7;
+}
+
+#welcome-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(600px, 90vw);
+  background-color: rgba(20, 30, 40, 0.9); /* A modern, semi-transparent dark background */
+  color: #f0f0f0;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10001; /* Ensure it's on top */
+  opacity: 1;
+  transition: opacity 0.8s ease-in-out; /* For the fade-out effect */
+}
+
+#welcome-box p {
+  font-family: 'Courier New', Courier, monospace; /* Classic typewriter font */
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin: 0;
+  min-height: 100px; /* Prevents the box from resizing as text types */
+}
+
+/* The blinking cursor effect */
+#welcome-text::after {
+  content: '▋'; /* Using a block character for the cursor */
+  opacity: 1;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { color: transparent; }
+  50% { color: #f0f0f0; }
+}
+
+/* Class to hide the cursor after typing is done */
+#welcome-box.typing-done #welcome-text::after {
+  animation: none;
+  display: none;
+}
+
+/* Class to trigger the fade-out */
+#welcome-box.fade-out {
+  opacity: 0;
+}
+
+/* === CONTEXT CARD === */
+.ctx-card{
+  max-width: 920px; margin: 12px auto; padding: 12px 14px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-lg, 10px);
+  background: color-mix(in oklab, var(--color-surface, #1c1c1c), white 8%);
+  box-shadow: var(--shadow-sm, 0 0 5px rgba(0,0,0,.2));
+  color: var(--color-text, #e6f3ff);
+}
+.ctx-head{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+}
+.ctx-head strong{ font-size: 1rem; }
+.ctx-actions{ display:flex; gap:8px; align-items:center; }
+#ctx-apply{
+  padding: 6px 10px; border-radius: 8px; cursor:pointer;
+  background: var(--color-brand-500, #009EDB); color:#fff; border:none;
+}
+#ctx-apply:hover{ filter:brightness(0.95); }
+.ctx-grid{
+  display:grid; grid-template-columns: repeat(4, minmax(160px,1fr)); gap:8px;
+}
+.ctx-grid label{ display:flex; flex-direction:column; font-size:.85rem; gap:4px; opacity:.95; }
+.ctx-grid input, .ctx-grid select, .ctx-grid textarea{
+  padding:6px 8px; border-radius:8px; border:1px solid var(--color-border, #e5e7eb);
+  background:#fff; color:#000;
+}
+.ctx-grid .ctx-notes{ grid-column: 1 / -1; }
+.ctx-preview{ margin-top:8px; font-size:.85rem; opacity:.85; }
+#ctx-json{ max-height:180px; overflow:auto; background:#0b0b0b; color:#e6f3ff; padding:8px; border-radius:8px; }
+@media (max-width: 860px){ .ctx-grid{ grid-template-columns: repeat(2, minmax(160px,1fr)); } }

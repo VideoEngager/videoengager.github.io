@@ -1,0 +1,8 @@
+/* theme-acme.css */
+@layer tokens {
+  :root {
+    --color-brand-500: #4A90E2;
+    --ring-video:      #4A90E2;
+    --color-text:      #4a90e2;
+  }
+}

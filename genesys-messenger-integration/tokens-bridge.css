@@ -1,0 +1,58 @@
+/* tokens-bridge.css */
+@layer overrides {
+  /* Global typography defaults (non-invasive) */
+  body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+/*    color: var(--color-text);
+*/  }
+
+  /* Your center card (when present) */
+  .main-container {
+    background: linear-gradient(135deg, rgba(25,108,177,0.96), rgba(17,76,129,0.96));
+    /* If you want it fully tokenized, uncomment next line: */
+    /* background: linear-gradient(135deg, color-mix(in oklab, var(--color-brand-500), white 10%), color-mix(in oklab, var(--color-brand-700), black 5%)); */
+    border: 1px solid color-mix(in oklab, var(--color-text), transparent 75%);
+    box-shadow: var(--shadow-lg);
+  }
+  .main-title { color: var(--color-text-strong); }
+  h2 { color: color-mix(in oklab, var(--color-text), white 10%); }
+
+  /* Launcher highlight rings */
+  .left-circle,
+  .launcher-overlay-circle {
+    border-width: 3px;
+    border-style: solid;
+  }
+  .left-circle { border-color: var(--ring-video); }
+  .launcher-overlay-circle { border-color: var(--ring-chat); }
+
+  /* Orbiting dot & trail in fun mode */
+  .orbiting-dot { background-color: var(--color-accent); }
+  .trail-particle { background-color: var(--particle); }
+
+  /* Speech bubbles & avatar borders */
+  .speech-bubble {
+    background-color: #fff;
+    color: #000;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .avatar-container img {
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  /* Widget bullets */
+  .widget-functionalities > li::before {
+    background: var(--color-brand-300);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-brand-300), transparent 75%);
+  }
+
+  /* Respect reduced motion (nice-to-have) */
+  @media (prefers-reduced-motion: reduce) {
+    .left-circle, .launcher-overlay-circle { animation: none !important; }
+  }
+}

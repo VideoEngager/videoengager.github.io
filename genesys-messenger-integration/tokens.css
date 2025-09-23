@@ -1,0 +1,77 @@
+/* tokens.css */
+@layer tokens {
+  :root {
+    /* BRAND + STATUS */
+    --color-brand-300: #21c7ed;
+    --color-brand-500: #009EDB;      /* primary brand */
+    --color-brand-700: #0056b3;
+
+    --color-success-500: #28a745;
+    --color-warning-500: #FF8C00;
+    --color-danger-500:  #e63946;
+
+    /* SURFACES + TEXT */
+    --color-bg-canvas:   #0b1a2b;    /* page bg (if used) */
+    --color-surface:     #1c1c1c;    /* panels/cards */
+    --color-surface-2:   #162336;    /* subtle alt */
+    --color-border:      #e5e7eb;
+    --color-text:        #e6f3ff;    /* on dark surfaces */
+    --color-text-muted:  #adb5bd;
+    --color-text-strong: #ffffff;
+
+    /* RINGS (your two launchers) */
+    --ring-video: #0b7cff;           /* left */
+    --ring-chat:  #a7b2bd;           /* right (muted in pro) */
+
+    /* ACCENTS used in fun mode */
+    --color-accent:      var(--color-brand-500);
+
+    /* TYPOGRAPHY */
+    --font-family:       Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    --font-size-base:    14px;
+    --line-height-base:  1.6;
+
+    /* RADIUS */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --radius-xl: 12px;
+    --radius-pill: 50px;
+    --radius-full: 9999px;
+
+    /* SPACING */
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+
+    /* SHADOWS */
+    --shadow-sm:   0 0 5px rgba(0,0,0,0.2);
+    --shadow-md:   0 0 16px rgba(0,0,0,0.37);
+    --shadow-lg:   0 8px 32px rgba(0,0,0,0.45);
+    --shadow-modal:0 20px 60px rgba(0,0,0,0.30);
+
+    /* MOTION */
+    --dur-quick: 150ms;
+    --dur-fast:  200ms;
+    --dur-base:  300ms;
+
+    /* FUN MODE particles */
+    --particle:   var(--color-accent);
+  }
+
+  /* Theme hook (example: <html data-theme="acme">) */
+  [data-theme="acme"] {
+    --color-brand-500: #4A90E2;
+    --ring-video:      #4A90E2;
+    --color-text:      #eaf2ff;
+  }
+
+  /* Another sample */
+  [data-theme="zen"] {
+    --color-brand-500: #00B8A9;
+    --ring-video:      #00B8A9;
+    --color-text:      #e8fffb;
+  }
+}

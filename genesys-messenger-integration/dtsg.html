@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Design System Documentation</title>
+    <style>
+        :root {
+            --color-brand-300: #21c7ed;
+            --color-brand-500: #009EDB;
+            --color-brand-700: #0056b3;
+            --color-success-500: #28a745;
+            --color-warning-500: #FF8C00;
+            --color-danger-500: #e63946;
+            --color-bg-canvas: #0b1a2b;
+            --color-surface: #1c1c1c;
+            --color-surface-2: #162336;
+            --color-border: #e5e7eb;
+            --color-text: #e6f3ff;
+            --color-text-muted: #adb5bd;
+            --color-text-strong: #ffffff;
+            --ring-video: #0b7cff;
+            --ring-chat: #a7b2bd;
+            --color-accent: var(--color-brand-500);
+            --font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            --font-size-base: 14px;
+            --line-height-base: 1.6;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 10px;
+            --radius-xl: 12px;
+            --radius-pill: 50px;
+            --radius-full: 9999px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --shadow-sm: 0 0 5px rgba(0,0,0,0.2);
+            --shadow-md: 0 0 16px rgba(0,0,0,0.37);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.45);
+            --shadow-modal: 0 20px 60px rgba(0,0,0,0.30);
+            --dur-quick: 150ms;
+            --dur-fast: 200ms;
+            --dur-base: 300ms;
+            --particle: var(--color-accent);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-base);
+            color: var(--color-text);
+            background: linear-gradient(135deg, var(--color-bg-canvas), var(--color-surface-2));
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-6);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--space-6);
+        }
+
+        header {
+            background: var(--color-surface);
+            padding: var(--space-5);
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: var(--space-6);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-text-strong);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .logo span.accent {
+            color: var(--color-brand-500);
+        }
+
+        .sidebar {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            position: sticky;
+            top: var(--space-6);
+            height: fit-content;
+            max-height: calc(100vh - 2 * var(--space-6));
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: var(--color-text-strong);
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-2);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: var(--space-2);
+        }
+
+        .sidebar a {
+            color: var(--color-text);
+            text-decoration: none;
+            display: block;
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-sm);
+            transition: background-color var(--dur-fast);
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--color-text-strong);
+        }
+
+        .main-content {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+        }
+
+        h1 {
+            color: var(--color-text-strong);
+            margin-bottom: var(--space-4);
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: var(--color-text-strong);
+            margin: var(--space-5) 0 var(--space-4);
+            padding-bottom: var(--space-2);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        h3 {
+            color: var(--color-text-strong);
+            margin: var(--space-4) 0 var(--space-3);
+        }
+
+        p {
+            margin-bottom: var(--space-4);
+            line-height: 1.7;
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--color-brand-700), var(--color-brand-500));
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+        }
+
+        .card {
+            background: var(--color-surface-2);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-bottom: var(--space-5);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-4) 0;
+        }
+
+        .token-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            border-left: 4px solid var(--color-brand-500);
+        }
+
+        .token-name {
+            font-weight: 600;
+            color: var(--color-text-strong);
+            margin-bottom: var(--space-2);
+        }
+
+        .token-value {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: var(--space-2);
+            border-radius: var(--radius-sm);
+            display: inline-block;
+            margin-top: var(--space-2);
+        }
+
+        .color-swatch {
+            height: 40px;
+            width: 100%;
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: white;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .example-component {
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin: var(--space-4) 0;
+            background: var(--color-surface-2);
+        }
+
+        .button {
+            display: inline-block;
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-pill);
+            background: var(--color-brand-500);
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color var(--dur-fast);
+            margin-right: var(--space-3);
+            margin-bottom: var(--space-3);
+        }
+
+        .button:hover {
+            background: var(--color-brand-700);
+        }
+
+        .button-secondary {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        .button-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .theme-switcher {
+            display: flex;
+            gap: var(--space-3);
+            margin: var(--space-4) 0;
+        }
+
+        .theme-button {
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-pill);
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            cursor: pointer;
+        }
+
+        .theme-button.active {
+            background: var(--color-brand-500);
+            color: white;
+            border-color: var(--color-brand-500);
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            margin: var(--space-4) 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .usage-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0;
+        }
+
+        .usage-table th, .usage-table td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .usage-table th {
+            color: var(--color-text-strong);
+            font-weight: 600;
+        }
+
+        .do-dont {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+            margin: var(--space-4) 0;
+        }
+
+        .do, .dont {
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+        }
+
+        .do {
+            background: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid var(--color-success-500);
+        }
+
+        .dont {
+            background: rgba(230, 57, 70, 0.1);
+            border-left: 4px solid var(--color-danger-500);
+        }
+
+        .do h4, .dont h4 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-3);
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                margin-bottom: var(--space-5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span>VideoEngager</span>
+            <span class="accent">Design System</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Documentation</h3>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#token-architecture">Token Architecture</a></li>
+                <li><a href="#color-system">Color System</a></li>
+                <li><a href="#typography">Typography</a></li>
+                <li><a href="#spacing">Spacing & Sizing</a></li>
+                <li><a href="#shadows">Shadows</a></li>
+                <li><a href="#theming">Theming System</a></li>
+                <li><a href="#implementation">Implementation</a></li>
+                <li><a href="#components">Component Examples</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="introduction">
+                <h1>VideoEngager Design System</h1>
+                <div class="intro">
+                    <p>A comprehensive design system built with CSS custom properties, providing consistency across the VideoEngager platform. This token-based architecture enables theming, accessibility, and maintainability.</p>
+                </div>
+                
+                <h2>Overview</h2>
+                <p>The VideoEngager Design System is built on a foundation of design tokens—named entities that store visual design attributes. These tokens power the entire UI, ensuring consistency and enabling theming capabilities.</p>
+                
+                <h2>Core Principles</h2>
+                <div class="token-grid">
+                    <div class="token-item">
+                        <h3>Consistency</h3>
+                        <p>Uniform design language across all components and pages</p>
+                    </div>
+                    <div class="token-item">
+                        <h3>Maintainability</h3>
+                        <p>Centralized tokens make global changes simple and reliable</p>
+                    </div>
+                    <div class="token-item">
+                        <h3>Accessibility</h3>
+                        <p>Built with contrast, motion preferences, and focus states in mind</p>
+                    </div>
+                    <div class="token-item">
+                        <h3>Flexibility</h3>
+                        <p>Theming system allows for different visual expressions</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="token-architecture">
+                <h2>Token Architecture</h2>
+                <p>The design system uses CSS custom properties (variables) organized into semantic categories. Tokens are defined in <code>tokens.css</code> and applied through <code>tokens-bridge.css</code>.</p>
+                
+                <h3>Token Naming Convention</h3>
+                <p>Tokens follow the pattern: <code>--category-property-modifier</code></p>
+                
+                <div class="example-component">
+                    <pre><code>/* Category */
+--color-brand-500: #009EDB;
+
+/* Property */
+--font-family: Inter, sans-serif;
+
+/* Modifier */
+--shadow-md: 0 0 16px rgba(0,0,0,0.37);</code></pre>
+                </div>
+                
+                <h3>File Structure</h3>
+                <div class="usage-table">
+                    <table>
+                        <tr>
+                            <th>File</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td><code>tokens.css</code></td>
+                            <td>Defines all design tokens (CSS custom properties)</td>
+                        </tr>
+                        <tr>
+                            <td><code>tokens-bridge.css</code></td>
+                            <td>Applies tokens to actual UI components</td>
+                        </tr>
+                        <tr>
+                            <td><code>theme-*.css</code></td>
+                            <td>Theme-specific token overrides</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <section id="color-system">
+                <h2>Color System</h2>
+                <p>The color system is built with a primary brand color and supporting functional colors.</p>
+                
+                <h3>Brand Colors</h3>
+                <div class="token-grid">
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-brand-300);">--color-brand-300</div>
+                        <div class="token-name">Brand 300</div>
+                        <div class="token-value">#21c7ed</div>
+                    </div>
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-brand-500); color: white;">--color-brand-500</div>
+                        <div class="token-name">Brand 500</div>
+                        <div class="token-value">#009EDB</div>
+                    </div>
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-brand-700); color: white;">--color-brand-700</div>
+                        <div class="token-name">Brand 700</div>
+                        <div class="token-value">#0056b3</div>
+                    </div>
+                </div>
+                
+                <h3>Status Colors</h3>
+                <div class="token-grid">
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-success-500); color: white;">--color-success-500</div>
+                        <div class="token-name">Success</div>
+                        <div class="token-value">#28a745</div>
+                    </div>
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-warning-500); color: white;">--color-warning-500</div>
+                        <div class="token-name">Warning</div>
+                        <div class="token-value">#FF8C00</div>
+                    </div>
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-danger-500); color: white;">--color-danger-500</div>
+                        <div class="token-name">Danger</div>
+                        <div class="token-value">#e63946</div>
+                    </div>
+                </div>
+                
+                <h3>Surface Colors</h3>
+                <div class="token-grid">
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-bg-canvas);">--color-bg-canvas</div>
+                        <div class="token-name">Background Canvas</div>
+                        <div class="token-value">#0b1a2b</div>
+                    </div>
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-surface);">--color-surface</div>
+                        <div class="token-name">Surface</div>
+                        <div class="token-value">#1c1c1c</div>
+                    </div>
+                    <div class="token-item">
+                        <div class="color-swatch" style="background-color: var(--color-surface-2);">--color-surface-2</div>
+                        <div class="token-name">Surface 2</div>
+                        <div class="token-value">#162336</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="typography">
+                <h2>Typography</h2>
+                <p>The typography system uses Inter as its primary typeface with a clear hierarchy.</p>
+                
+                <div class="token-grid">
+                    <div class="token-item">
+                        <div class="token-name">Font Family</div>
+                        <div class="token-value">var(--font-family)</div>
+                        <p>Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Base Font Size</div>
+                        <div class="token-value">var(--font-size-base)</div>
+                        <p>14px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Line Height</div>
+                        <div class="token-value">var(--line-height-base)</div>
+                        <p>1.6</p>
+                    </div>
+                </div>
+                
+                <h3>Type Scale Examples</h3>
+                <div class="example-component">
+                    <h1>Heading 1: 2.5rem</h1>
+                    <h2>Heading 2: 2rem</h2>
+                    <h3>Heading 3: 1.75rem</h3>
+                    <p>Body text: 1rem (14px)</p>
+                    <p class="text-muted">Muted text: var(--color-text-muted)</p>
+                </div>
+            </section>
+
+            <section id="spacing">
+                <h2>Spacing & Sizing</h2>
+                <p>The spacing system uses a consistent scale based on 4px increments.</p>
+                
+                <div class="token-grid">
+                    <div class="token-item">
+                        <div class="token-name">Space 2</div>
+                        <div class="token-value">var(--space-2)</div>
+                        <p>8px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Space 3</div>
+                        <div class="token-value">var(--space-3)</div>
+                        <p>12px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Space 4</div>
+                        <div class="token-value">var(--space-4)</div>
+                        <p>16px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Space 5</div>
+                        <div class="token-value">var(--space-5)</div>
+                        <p>20px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Space 6</div>
+                        <div class="token-value">var(--space-6)</div>
+                        <p>24px</p>
+                    </div>
+                </div>
+                
+                <h3>Border Radius Scale</h3>
+                <div class="token-grid">
+                    <div class="token-item">
+                        <div class="token-name">Radius SM</div>
+                        <div class="token-value">var(--radius-sm)</div>
+                        <p>4px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Radius MD</div>
+                        <div class="token-value">var(--radius-md)</div>
+                        <p>6px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Radius LG</div>
+                        <div class="token-value">var(--radius-lg)</div>
+                        <p>10px</p>
+                    </div>
+                    <div class="token-item">
+                        <div class="token-name">Radius XL</div>
+                        <div class="token-value">var(--radius-xl)</div>
+                        <p>12px</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="shadows">
+                <h2>Shadows</h2>
+                <p>The shadow system provides depth and hierarchy to UI elements.</p>
+                
+                <div class="token-grid">
+                    <div class="token-item">
+                        <div class="example-component" style="box-shadow: var(--shadow-sm);">
+                            <div class="token-name">Shadow SM</div>
+                            <div class="token-value">var(--shadow-sm)</div>
+                        </div>
+                    </div>
+                    <div class="token-item">
+                        <div class="example-component" style="box-shadow: var(--shadow-md);">
+                            <div class="token-name">Shadow MD</div>
+                            <div class="token-value">var(--shadow-md)</div>
+                        </div>
+                    </div>
+                    <div class="token-item">
+                        <div class="example-component" style="box-shadow: var(--shadow-lg);">
+                            <div class="token-name">Shadow LG</div>
+                            <div class="token-value">var(--shadow-lg)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="theming">
+                <h2>Theming System</h2>
+                <p>The design system supports multiple themes through CSS custom property overrides.</p>
+                
+                <h3>How to Apply a Theme</h3>
+                <p>Add a data attribute to the HTML element to switch themes:</p>
+                
+                <div class="example-component">
+                    <pre><code>&lt;html data-theme="acme"&gt;
+  &lt;!-- Content --&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+                
+                <h3>Available Themes</h3>
+                <div class="theme-switcher">
+                    <button class="theme-button active" onclick="switchTheme('default')">Default</button>
+                    <button class="theme-button" onclick="switchTheme('acme')">Acme</button>
+                    <button class="theme-button" onclick="switchTheme('zen')">Zen</button>
+                </div>
+                
+                <h3>Theme Definitions</h3>
+                <div class="example-component">
+                    <pre><code>/* Default theme (in tokens.css) */
+:root {
+  --color-brand-500: #009EDB;
+  --ring-video: #0b7cff;
+  --color-text: #e6f3ff;
+}
+
+/* Acme theme (in theme-acme.css) */
+[data-theme="acme"] {
+  --color-brand-500: #4A90E2;
+  --ring-video: #4A90E2;
+  --color-text: #eaf2ff;
+}
+
+/* Zen theme (in tokens.css) */
+[data-theme="zen"] {
+  --color-brand-500: #00B8A9;
+  --ring-video: #00B8A9;
+  --color-text: #e8fffb;
+}</code></pre>
+                </div>
+            </section>
+
+            <section id="implementation">
+                <h2>Implementation</h2>
+                <p>To use the design system in your project, include the following CSS files in your HTML:</p>
+                
+                <div class="example-component">
+                    <pre><code>&lt;link rel="stylesheet" href="tokens.css"&gt;
+&lt;link rel="stylesheet" href="tokens-bridge.css"&gt;
+&lt;!-- Optional theme --&gt;
+&lt;link rel="stylesheet" href="theme-acme.css"&gt;</code></pre>
+                </div>
+                
+                <h3>Using Tokens in CSS</h3>
+                <p>Reference design tokens in your custom CSS:</p>
+                
+                <div class="example-component">
+                    <pre><code>.custom-component {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+
+.custom-component h2 {
+  color: var(--color-text-strong);
+  margin-bottom: var(--space-3);
+}</code></pre>
+                </div>
+                
+                <h3>Using Tokens in JavaScript</h3>
+                <p>Access design tokens in JavaScript when needed:</p>
+                
+                <div class="example-component">
+                    <pre><code>// Get a token value
+const brandColor = getComputedStyle(document.documentElement)
+  .getPropertyValue('--color-brand-500');
+
+// Set a token value (for dynamic theming)
+document.documentElement.style.setProperty(
+  '--color-brand-500', 
+  '#newColor'
+);</code></pre>
+                </div>
+            </section>
+
+            <section id="components">
+                <h2>Component Examples</h2>
+                <p>Here are some common UI components built with the design system tokens:</p>
+                
+                <h3>Buttons</h3>
+                <div class="example-component">
+                    <button class="button">Primary Button</button>
+                    <button class="button button-secondary">Secondary Button</button>
+                </div>
+                
+                <div class="example-component">
+                    <pre><code>.button {
+  display: inline-block;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-500);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--dur-fast);
+}
+
+.button:hover {
+  background: var(--color-brand-700);
+}</code></pre>
+                </div>
+                
+                <h3>Cards</h3>
+                <div class="example-component">
+                    <div class="card">
+                        <h3>Example Card</h3>
+                        <p>This is a card component built with design system tokens. It uses surface colors, spacing, and border radius tokens.</p>
+                    </div>
+                </div>
+                
+                <div class="example-component">
+                    <pre><code>.card {
+  background: var(--color-surface-2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: var(--color-text-strong);
+}</code></pre>
+                </div>
+            </section>
+
+            <section id="best-practices">
+                <h2>Best Practices</h2>
+                <p>Follow these guidelines when working with the design system:</p>
+                
+                <h3>Do's and Don'ts</h3>
+                <div class="do-dont">
+                    <div class="do">
+                        <h4>✅ Do</h4>
+                        <p>Use design tokens for all style values</p>
+                        <p>Follow the established naming conventions</p>
+                        <p>Test themes for accessibility and contrast</p>
+                    </div>
+                    <div class="dont">
+                        <h4>❌ Don't</h4>
+                        <p>Use hard-coded values instead of tokens</p>
+                        <p>Create new tokens without consulting the system</p>
+                        <p>Override tokens with !important</p>
+                    </div>
+                </div>
+                
+                <h3>Extending the System</h3>
+                <p>When you need to add new tokens:</p>
+                <ol>
+                    <li>Add the token to <code>tokens.css</code> following naming conventions</li>
+                    <li>Document the token's purpose and usage</li>
+                    <li>Update the bridge file if the token maps to a component</li>
+                    <li>Test across all supported themes</li>
+                </ol>
+                
+                <h3>Accessibility</h3>
+                <p>The design system includes accessibility considerations:</p>
+                <ul>
+                    <li>Color contrast ratios meet WCAG AA standards</li>
+                    <li>Respects <code>prefers-reduced-motion</code> settings</li>
+                    <li>Focus states are clearly visible</li>
+                    <li>Semantic HTML is encouraged for proper screen reader support</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function switchTheme(theme) {
+            if (theme === 'default') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            
+            // Update active button state
+            document.querySelectorAll('.theme-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

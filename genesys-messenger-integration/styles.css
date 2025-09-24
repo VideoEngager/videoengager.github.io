@@ -495,3 +495,27 @@ footer {
 .ctx-preview{ margin-top:8px; font-size:.85rem; opacity:.85; }
 #ctx-json{ max-height:180px; overflow:auto; background:#0b0b0b; color:#e6f3ff; padding:8px; border-radius:8px; }
 @media (max-width: 860px){ .ctx-grid{ grid-template-columns: repeat(2, minmax(160px,1fr)); } }
+
+/* Context toggle + hide support */
+#context-card[hidden] { display: none !important; }
+
+.ctx-toggle{
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 10002;              /* above welcome box (10001) */
+  padding: 8px 10px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  background: #fff;
+  color: #000;
+  box-shadow: var(--shadow-sm, 0 0 5px rgba(0,0,0,.2));
+  font-size: 13px;
+  cursor: pointer;
+}
+.ctx-toggle:hover { filter: brightness(0.95); }
+.ctx-toggle[aria-pressed="true"]{
+  background: var(--color-brand-500, #009EDB);
+  color: #fff;
+  border-color: transparent;
+}

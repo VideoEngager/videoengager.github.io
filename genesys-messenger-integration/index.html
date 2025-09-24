@@ -24,7 +24,15 @@
     <p>Start a direct video call — connect instantly with a live person.</p>
   </div>
 <!-- CONTEXT CARD (drop-in) -->
-<section id="context-card" aria-label="Demo Context" class="ctx-card">
+<button id="ctx-toggle"
+  class="ctx-toggle"
+  aria-pressed="false"
+  aria-controls="context-card"
+  title="Show/Hide context">
+  Context — Show
+</button>
+
+<section id="context-card" aria-label="Demo Context" class="ctx-card" hidden>
   <header class="ctx-head">
     <strong>Context</strong>
     <div class="ctx-actions">
@@ -529,6 +537,27 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <!-- include after your other scripts -->
 <script src="context-bridge.js"></script>
-
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const card = document.getElementById('context-card');
+    const btn  = document.getElementById('ctx-toggle');
+    const KEY  = 've.ctx.visible';
+  
+    function sync(visible){
+      card.hidden = !visible;
+      btn.setAttribute('aria-pressed', visible ? 'true' : 'false');
+      btn.textContent = visible ? 'Context — Hide' : 'Context — Show';
+      localStorage.setItem(KEY, visible ? '1' : '0');
+    }
+  
+    // Default to hidden to avoid overlap with the typewriter intro.
+    const saved = localStorage.getItem(KEY);
+    sync(saved === '1');
+  
+    btn.addEventListener('click', () => {
+      sync(card.hidden); // toggle
+    });
+  });
+  </script>
 </body>
 </html>

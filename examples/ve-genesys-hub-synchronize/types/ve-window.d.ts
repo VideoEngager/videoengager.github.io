@@ -1,6 +1,4 @@
 // your-file.d.ts
-import { KioskApplication } from '../js/kiosk';
-
 declare global {
   interface Window {
     ENV_CONFIG: any;
@@ -10,36 +8,6 @@ declare global {
     Genesys: (type: string, execute: stirng, options?: {}, succsessFn?: () => void, failedFn?: () => void) => void;
     
   }
-}
-
-interface VideoEngagerConfig {
-  tenantId: string;
-  veEnv: string;
-  deploymentId: string;
-  isPopup?: boolean; // default: false
-  veHttps?: boolean; // default: true
-  debug?: boolean; // default: false
-  enableVeIframeCommands?: boolean; // default: false
-}
-
-interface GenesysConfig {
-  deploymentId: string;
-  domain: string;
-  hideGenesysLauncher?: boolean; // default: false
-  debug?: boolean; // default: false
-}
-
-// interface MonitoringConfig {
-//   enabled?: boolean; // default: true
-//   level?: "debug" | "info" | "warn" | "error"; // default: 'info'
-// }
-
-interface ClientConfig {
-  videoEngager: VideoEngagerConfig;
-  genesys: GenesysConfig;
-  useGenesysMessengerChat?: boolean; // default: false
-  logger?: boolean; // default: false
-  debug?: boolean; // default: false
 }
 
 export {};

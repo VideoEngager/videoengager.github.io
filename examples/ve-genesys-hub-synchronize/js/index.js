@@ -9,24 +9,28 @@ class VEHubHarnessClass {
     this.isInitialized = false;
     this.customAttributes = {};
     this.configManager = null;
-    this.hasVideoCall = false;
+    this.hasCurrentCall = false;
 
     /**
      * @type {{
-     *   initLibraryBtn: HTMLButtonElement | null,
-     *   startChatBtn: HTMLButtonElement | null,
-     *   startVideoBtn: HTMLButtonElement | null,
-     *   endChatBtn: HTMLButtonElement | null,
-     *   endVideoBtn: HTMLButtonElement | null,
-     *   debugBox: HTMLDivElement | null
-     *   videoContainer: HTMLDivElement | null
-     *   presetSelect: HTMLSelectElement | null
-     *   attributesForm: HTMLFormElement | null
-     * toggleCameraBtn: HTMLButtonElement | null
-     * toggleMuteBtn: HTMLButtonElement | null
-     * switchCameraBtn: HTMLButtonElement | null
-     * toggleScreenBtn: HTMLButtonElement | null
-     * endCallBtn: HTMLButtonElement | null
+     *  initLibraryBtn: HTMLButtonElement | null,
+     *  startChatBtn: HTMLButtonElement | null,
+     *  startVideoBtn: HTMLButtonElement | null,
+     *  endChatBtn: HTMLButtonElement | null,
+     *  endVideoBtn: HTMLButtonElement | null,
+     *  debugBox: HTMLDivElement | null
+     *  videoContainer: HTMLDivElement | null
+     *  presetSelect: HTMLSelectElement | null
+     *  attributesForm: HTMLFormElement | null
+     *  toggleCameraBtn: HTMLButtonElement | null
+     *  toggleMuteBtn: HTMLButtonElement | null
+     *  switchCameraBtn: HTMLButtonElement | null
+     *  toggleScreenBtn: HTMLButtonElement | null
+     *  endCallBtn: HTMLButtonElement | null
+     *  confirmConfig: HTMLButtonElement | null
+     *  launchInIframe: HTMLButtonElement | null
+     *  launchInPopup: HTMLButtonElement | null
+     *  videoIframe: HTMLIFrameElement | null
      * }}
      */
     this.elements = {
@@ -44,6 +48,10 @@ class VEHubHarnessClass {
       switchCameraBtn: null,
       toggleScreenBtn: null,
       endCallBtn: null,
+      confirmConfig: null,
+      launchInIframe: null,
+      launchInPopup: null,
+      videoIframe: null,
     };
 
     this.initElements();
@@ -92,20 +100,66 @@ class VEHubHarnessClass {
     this.elements.endCallBtn = /**@type {HTMLButtonElement}*/ (
       document.getElementById("endCall")
     );
+    this.elements.confirmConfig = /**@type {HTMLButtonElement}*/ (
+      document.getElementById("confirmConfig")
+    );
+    this.elements.launchInIframe = /**@type {HTMLButtonElement}*/ (
+      document.getElementById("launchInIframe")
+    );
+    this.elements.launchInPopup = /**@type {HTMLButtonElement}*/ (
+      document.getElementById("launchInPopup")
+    );
   }
 
-  async init(defaultConfig = null) {
+  async init() {
     try {
-      this.configManager = new ConfigManager(defaultConfig);
-      this.config = await this.configManager.load();
-      this.log(`INIT: Configuration loaded: ${JSON.stringify(this.config)}`);
+      if (!this.config) {
+        throw new Error(
+          "Configuration not loaded. Try calling loadConfig() first."
+        );
+      }
       await this.initializeVideoEngager();
       this.initVideoControlListeners();
+      this.isInitialized = true;
       return true;
     } catch (error) {
       this.log(`INIT: Initialization failed: ${error.message}`);
       return false;
     }
+  }
+
+  initWindowMessageListener() {
+    window.addEventListener("message", async (event) => {
+      if (!event.data || !event.data.type) return;
+      this.log(`INIT: Received message: ${JSON.stringify(event.data)}`);
+
+      const { type, action } = event.data;
+      if (
+        type === "iframe" &&
+        action === "videoCallEnded" &&
+        this.elements.launchInIframe &&
+        this.elements.launchInPopup
+      ) {
+        this.elements.launchInIframe.disabled = false;
+        this.elements.launchInPopup.disabled = false;
+        this.elements.videoIframe?.remove();
+      } else if (
+        type === "popup" &&
+        action === "videoCallEnded" &&
+        this.elements.launchInPopup &&
+        this.elements.launchInIframe
+      ) {
+        this.elements.launchInIframe.disabled = false;
+        this.elements.launchInPopup.disabled = false;
+      }
+    });
+  }
+
+  async loadConfig(defaultConfig = null) {
+    this.configManager = new ConfigManager(defaultConfig);
+    this.config = await this.configManager.load();
+    this.log(`INIT: Configuration loaded: ${JSON.stringify(this.config)}`);
+    this.initWindowMessageListener();
   }
 
   /**
@@ -141,6 +195,64 @@ class VEHubHarnessClass {
       return true;
     } catch (error) {
       this.log(`CALL: Error ending chat: ${error.message}`);
+      return false;
+    }
+  }
+
+  async launchInPopup() {
+    this.log("CUSTOM CALL: Start chat in popup requested");
+    try {
+      const popup = window.open(
+        `video-iframe/index.html?config=${btoa(
+          JSON.stringify({
+            ...this.config,
+            customAttributes: this.customAttributes,
+          })
+        )}&v=${new Date().getTime()}`,
+        "_blank",
+        `width=${window.screen.width * 0.6},height=${
+          window.screen.height * 0.6
+        },resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,center=yes,cache=no,title=VideoEngager Video Chat`
+      );
+      if (!popup) {
+        throw new Error("Popup blocked");
+      }
+      if (this.elements.launchInPopup) {
+        this.elements.launchInPopup.disabled = true;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return true;
+    } catch (error) {
+      this.log(`CUSTOM CALL: Failed to start chat in popup: ${error.message}`);
+      return false;
+    }
+  }
+
+  async launchInIframe() {
+    this.log("CUSTOM CALL: Start chat requested");
+    try {
+      const iframe = document.createElement("iframe");
+      iframe.src = `video-iframe/index.html?config=${btoa(
+        JSON.stringify({
+          ...this.config,
+          customAttributes: this.customAttributes,
+        })
+      )}`;
+      iframe.style.width = "100%";
+      iframe.style.height = "100vh";
+      iframe.style.border = "none";
+      iframe.style.position = "absolute";
+      iframe.style.top = "0";
+      iframe.style.left = "0";
+      iframe.style.zIndex = "1000";
+      iframe.allow = "camera; microphone; fullscreen; display-capture";
+
+      document.body.appendChild(iframe);
+      this.elements.videoIframe = iframe;
+      return true;
+    } catch (error) {
+      this.log(`CUSTOM CALL: Failed to start chat: ${error.message}`);
       return false;
     }
   }
@@ -230,13 +342,28 @@ class VEHubHarnessClass {
               /*rejected callback*/
             }
           );
+          if (this.elements.endChatBtn) {
+            this.elements.endChatBtn.disabled = false;
+          }
+          if (this.elements.startChatBtn) {
+            this.elements.startChatBtn.disabled = true;
+          }
+          if (this.elements.launchInIframe) {
+            this.elements.launchInIframe.disabled = true;
+          }
+          if (this.elements.launchInPopup) {
+            this.elements.launchInPopup.disabled = true;
+          }
+          this.hasCurrentCall = true;
         }
       );
 
       this.videoEngagerClient.on(
         "GenesysMessenger.conversationEnded",
         async () => {
-          await this.handleVideoCallEnded();
+          await this.endChat();
+          await this.handleVideoCallEndedUI();
+          this.hasCurrentCall = false;
         }
       );
 
@@ -278,7 +405,7 @@ class VEHubHarnessClass {
     }
   }
 
-  async handleVideoCallEnded() {
+  async handleVideoCallEndedUI() {
     this.log("CALL: Conversation ended");
     if (this.elements.endVideoBtn) {
       this.elements.endVideoBtn.disabled = true;
@@ -292,8 +419,6 @@ class VEHubHarnessClass {
     if (this.elements.startChatBtn) {
       this.elements.startChatBtn.disabled = false;
     }
-
-    await this.endChat();
 
     if (this.elements.videoContainer) {
       this.elements.videoContainer.style.display = "none";
@@ -545,9 +670,13 @@ document.addEventListener("DOMContentLoaded", function () {
     elements.startChatBtn &&
     elements.endChatBtn &&
     elements.startVideoBtn &&
-    elements.endVideoBtn
+    elements.endVideoBtn &&
+    elements.confirmConfig &&
+    elements.launchInIframe &&
+    elements.launchInPopup
   ) {
-    elements.initLibraryBtn.addEventListener("click", async () => {
+    elements.confirmConfig.addEventListener("click", () => {
+      if (elements.confirmConfig) elements.confirmConfig.disabled = true;
       if (elements.presetSelect) elements.presetSelect.disabled = true;
 
       const selectedPresetKey = elements.presetSelect
@@ -584,9 +713,47 @@ document.addEventListener("DOMContentLoaded", function () {
           .getElementById("context-card-container")
           ?.removeAttribute("open");
       }
+      app.loadConfig(defaultConfig);
+      if (elements.initLibraryBtn) {
+        elements.initLibraryBtn.disabled = false;
+      }
+      if (elements.launchInIframe) {
+        elements.launchInIframe.disabled = false;
+      }
+      if (elements.launchInPopup) {
+        elements.launchInPopup.disabled = false;
+      }
+    });
 
-      const initSuccess = await app.init(defaultConfig);
-      
+    elements.launchInIframe.addEventListener("click", async () => {
+      if (elements.launchInPopup) {
+        elements.launchInPopup.disabled = true;
+      }
+      if (elements.launchInIframe) {
+        elements.launchInIframe.disabled = true;
+      }
+      await app.launchInIframe();
+    });
+
+    elements.launchInPopup.addEventListener("click", async () => {
+      if (elements.launchInPopup) {
+        elements.launchInPopup.disabled = true;
+      }
+      if (elements.launchInIframe) {
+        elements.launchInIframe.disabled = true;
+      }
+      await app.launchInPopup();
+    });
+
+    elements.initLibraryBtn.addEventListener("click", async () => {
+      if (elements.launchInIframe) {
+        elements.launchInIframe.disabled = true;
+      }
+      if (elements.launchInPopup) {
+        elements.launchInPopup.disabled = true;
+      }
+      const initSuccess = await app.init();
+
       if (elements.startChatBtn) {
         elements.startChatBtn.disabled = !initSuccess;
       }

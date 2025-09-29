@@ -70,6 +70,7 @@ export class ConfigManager {
       veEnv: 'videoEngager.veEnv',
       interactive: 'useGenesysMessengerChat',
       debug: 'debug',
+      fun: 'fun',
       isPopup: 'videoEngager.isPopup',
     };
 

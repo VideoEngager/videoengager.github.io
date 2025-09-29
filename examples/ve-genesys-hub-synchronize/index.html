@@ -348,7 +348,8 @@
     <div class="command-center">
       <h2>Command Center</h2>
       <div>
-        <button id="initLibraryBtn">Init Library</button>
+        <button id="confirmConfig">Confirm Config</button>
+        <button id="initLibraryBtn" disabled>Init Library</button>
         <button id="startChatBtn" disabled>Start Chat</button>
         <button id="startVideoBtn" disabled>Start Video</button>
         <button id="endChatBtn" disabled>End Chat</button>
@@ -356,6 +357,8 @@
         <button id="reloadDemo" onclick="window.location.reload()">
           Reload Demo
         </button>
+        <button id="launchInIframe" disabled>Launch iFrame</button>
+        <button id="launchInPopup" disabled>Launch Popup</button>
         <select id="presetSelect"></select>
       </div>
 
@@ -483,7 +486,7 @@ Video freezes after 2 minutes</textarea
       </div>
     </div>
 
-    <script type="module" defer src="./js/index.js"></script>
-    <script type="module" defer src="./js/context-presets.js"></script>
+    <script type="module" defer src="js/index.js"></script>
+    <script type="module" defer src="js/context-presets.js"></script>
   </body>
 </html>

@@ -114,7 +114,7 @@ const CommandButtons = ({
 }) => {
   const [presetKey, setPresetKey] =
     useState<keyof typeof PRESETS>("inlineWithChat");
-  const [videoEngagarUrl, setVideoEngagerUrl] = useState("");
+  const [videoEngagerUrl, setVideoEngagerUrl] = useState("");
   const handlePresetChange = (key: keyof typeof PRESETS) => {
     setPresetKey(key);
   };
@@ -141,12 +141,12 @@ const CommandButtons = ({
   };
 
   const launchInIframe = () => {
-    setIframeSource(videoEngagarUrl);
+    setIframeSource(videoEngagerUrl);
   };
 
   const launchInPopup = () => {
     const popup = window.open(
-      videoEngagarUrl,
+      videoEngagerUrl,
       "_blank",
       `width=${window.screen.width * 0.6},height=${
         window.screen.height * 0.6

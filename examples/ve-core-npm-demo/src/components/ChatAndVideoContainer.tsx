@@ -10,7 +10,7 @@ const ChatAndVideoContainer = ({
 }) => {
   return (
     <div className="video-chat-container">
-      <Video  videoEngagerInstance={videoEngagerInstance} />
+      <Video videoEngagerInstance={videoEngagerInstance} />
       <Chat videoEngagerInstance={videoEngagerInstance} />
     </div>
   );

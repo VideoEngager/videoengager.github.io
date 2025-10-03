@@ -327,6 +327,13 @@ button:hover:not(:disabled) {
 .video-control-btn.active {
   background: #007bff;
 }
+.video-control-btn.info {
+  background: #09b200;
+}
+
+.video-control-btn.info:hover {
+  background: rgb(6, 129, 0);
+}
 
 .video-control-btn.end-call {
   background: #dc3545;
@@ -392,6 +399,7 @@ details > section {
   padding: 16px 20px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

@@ -260,11 +260,18 @@
     ]
   },
   {
-  "title": "Schedule a Meeting",
-  "href": "https://videoengager.github.io/examples/schedules/callwiz4.html",
-  "category": "Scheduling Suite",
-  "desc": "Two-page scheduling wizard that lets agents configure branding, collect customer details, and generate a meeting link and calendar invite with timezone support.",
-  "tags": ["scheduling", "wizard", "genesys", "meeting", "calendar", "branding"],
-  "featured": true
-}
+    "title": "Schedule a Meeting",
+    "href": "https://videoengager.github.io/examples/schedules/callwiz4.html",
+    "category": "Scheduling Suite",
+    "desc": "Two-page scheduling wizard that lets agents configure branding, collect customer details, and generate a meeting link and calendar invite with timezone support.",
+    "tags": ["scheduling", "wizard", "genesys", "meeting", "calendar", "branding"],
+    "featured": true
+  },
+  {
+    "title": "VideoEngager React Demo Hub",
+    "href": "/examples/ve-core-npm-demo/dist/index.html",
+    "category": "Integration Demo",
+    "desc": "Comprehensive command center for testing VideoEngager video chat sessions with Genesys Cloud. Features multiple integration modes (inline/popup), industry-specific context presets, real-time chat, and full video controls.",
+    "tags": ["react", "genesys", "video-chat", "integration"]
+  }
 ]

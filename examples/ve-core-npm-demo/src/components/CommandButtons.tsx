@@ -136,8 +136,7 @@ const CommandButtons = ({
       loadedConfig,
       customAttributes,
     };
-
-    setVideoEngagerUrl(`/#single?config=${btoa(JSON.stringify(config))}`);
+    setVideoEngagerUrl(`${import.meta.env.BASE_URL}#single?config=${btoa(JSON.stringify(config))}`);
   };
 
   const launchInIframe = () => {

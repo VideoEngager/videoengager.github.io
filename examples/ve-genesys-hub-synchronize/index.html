@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Attributes & Command Center</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+
+      .command-center {
+        background: white;
+        padding: 30px;
+        max-width: 600px;
+        margin: 20px auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h2,
+      h3 {
+        color: #333;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="tel"] {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #007bff;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 5px 0;
+        transition: background-color 0.3s;
+      }
+
+      select#presetSelect {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 5px 0;
+        transition: background-color 0.3s;
+        width: 100%;
+      }
+
+      select#presetSelect:hover {
+        background-color: #0056b3;
+      }
+
+      button:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+      }
+
+      button:hover:not(:disabled) {
+        background-color: #0056b3;
+      }
+
+      .debug-box {
+        background: #111;
+        color: #f3f3f3;
+        padding: 15px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 13px;
+        margin-top: 20px;
+        height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      /* Context Card Styles */
+      .ctx-card {
+        background: #f9f9f9;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .ctx-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ddd;
+      }
+
+      .ctx-head strong {
+        font-size: 18px;
+        color: #333;
+      }
+
+      .ctx-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .ctx-actions label {
+        margin: 0;
+        font-weight: normal;
+        font-size: 14px;
+      }
+
+      .ctx-actions select {
+        width: auto;
+        padding: 6px 12px;
+        font-size: 14px;
+        margin: 0;
+        background-color: #fff;
+        color: #333;
+        border: 2px solid #ddd;
+        transition: border-color 0.3s, background-color 0.3s;
+      }
+
+      .ctx-actions select:hover {
+        border-color: #007bff;
+        background-color: #f8f9fa;
+      }
+
+      .ctx-actions select:focus {
+        outline: none;
+        border-color: #007bff;
+      }
+
+      .ctx-actions button {
+        padding: 6px 16px;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      .ctx-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-bottom: 15px;
+      }
+
+      .ctx-grid label {
+        display: flex;
+        flex-direction: column;
+        font-size: 13px;
+        font-weight: 600;
+        color: #555;
+      }
+
+      .ctx-grid input,
+      .ctx-grid select,
+      .ctx-grid textarea {
+        margin-top: 4px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+        font-family: inherit;
+      }
+
+      .ctx-grid input:focus,
+      .ctx-grid select:focus,
+      .ctx-grid textarea:focus {
+        outline: none;
+        border-color: #007bff;
+      }
+
+      .ctx-notes {
+        grid-column: 1 / -1;
+      }
+
+      .ctx-preview {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+      }
+
+      .ctx-preview summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #555;
+        padding: 5px;
+      }
+
+      .ctx-preview pre {
+        background: #111;
+        color: #f3f3f3;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        overflow-x: auto;
+        margin-top: 10px;
+      }
+
+      .info-container {
+        display: inline-block;
+        position: relative;
+      }
+
+      .info-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #2196f3;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: help;
+        font-family: Arial, sans-serif;
+      }
+
+      .tooltip {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        white-space: nowrap;
+        font-size: 14px;
+        transition: opacity 0.3s;
+        z-index: 1;
+      }
+
+      .tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #333 transparent transparent transparent;
+      }
+
+      .info-container:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .video-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        background: #2c2c2c;
+        border-radius: 8px;
+        margin-top: 15px;
+      }
+
+      .video-control-btn {
+        background: #444;
+        border: none;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: background-color 0.3s, transform 0.1s;
+      }
+
+      .video-control-btn:hover {
+        background: #555;
+        transform: scale(1.05);
+      }
+
+      .video-control-btn:active {
+        transform: scale(0.95);
+      }
+
+      .video-control-btn.active {
+        background: #007bff;
+      }
+
+      .video-control-btn.end-call {
+        background: #dc3545;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      }
+
+      .video-control-btn.end-call:hover {
+        background: #c82333;
+      }
+
+      
+    </style>
+  </head>
+  <body>
+    <!-- Command Center -->
+    <div class="command-center">
+      <h2>Command Center</h2>
+      <div>
+        <button id="confirmConfig">Confirm Config</button>
+        <button id="initLibraryBtn" disabled>Init Library</button>
+        <button id="startChatBtn" disabled>Start Chat</button>
+        <button id="startVideoBtn" disabled>Start Video</button>
+        <button id="endChatBtn" disabled>End Chat</button>
+        <button id="endVideoBtn" disabled>End Video</button>
+        <button id="reloadDemo" onclick="window.location.reload()">
+          Reload Demo
+        </button>
+        <button id="launchInIframe" disabled>Launch iFrame</button>
+        <button id="launchInPopup" disabled>Launch Popup</button>
+        <select id="presetSelect"></select>
+      </div>
+
+      <!-- New Context Section -->
+      <details id="context-card-container" class="ctx-preview" open>
+        <summary>Context</summary>
+        <section id="context-card" aria-label="Demo Context" class="ctx-card">
+          <header class="ctx-head">
+            <div class="ctx-actions">
+              <label for="ctx-preset">Preset:</label>
+              <select id="ctx-preset">
+                <option value="travel">Travel / Aviation</option>
+                <option value="banking">Banking</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="telco">Telecom</option>
+                <option value="custom">Custom</option>
+              </select>
+              <button
+                id="ctx-apply"
+                type="button"
+                title="Apply context to session"
+              >
+                Apply
+              </button>
+            </div>
+          </header>
+
+          <form id="ctx-form" class="ctx-grid" autocomplete="off">
+            <label>name <input name="firstName" value="Ava Rossi" /></label>
+            <label
+              >email <input name="emailAddress" value="ava.rossi@example.com"
+            /></label>
+            <label
+              >phone <input name="phoneNumber" value="+39 02 1234 5678"
+            /></label>
+            <label
+              >sessionId <input name="sessionId" value="ve_demo_001"
+            /></label>
+            <label
+              >customerId <input name="customerId" value="CUST-9988"
+            /></label>
+            <label>caseId <input name="caseId" value="CASE-2025-0912" /></label>
+            <label
+              >productSKU <input name="productSKU" value="SKU-12345"
+            /></label>
+            <label
+              >deviceModel <input name="deviceModel" value="Model-X"
+            /></label>
+            <label
+              >priority
+              <select name="priority">
+                <option>low</option>
+                <option>normal</option>
+                <option selected>high</option>
+              </select>
+            </label>
+            <label>locale <input name="locale" value="it-IT" /></label>
+            <label
+              >consentFlag
+              <select name="consentFlag">
+                <option value="true" selected>true</option>
+                <option value="false">false</option>
+              </select>
+            </label>
+            <label class="ctx-notes"
+              >notes
+              <textarea name="notes" rows="2">
+Video freezes after 2 minutes</textarea
+              >
+            </label>
+          </form>
+        </section>
+        <!-- End Context Section -->
+      </details>
+
+      <details class="ctx-preview" open>
+        <summary>Preview JSON</summary>
+        <pre id="ctx-json"></pre>
+      </details>
+
+      <h3>Debug Logs</h3>
+      <div id="debugBox" class="debug-box"></div>
+      <div id="chat-and-video">
+        <div id="videoContainer" style="display: none">
+          <div id="video-call-ui" style="width: 100%; height: 50vh"></div>
+          <div class="video-controls">
+            <button
+              class="video-control-btn"
+              id="toggleCamera"
+              title="Toggle Camera"
+            >
+              <i class="fas fa-video"></i>
+            </button>
+            <button
+              class="video-control-btn"
+              id="toggleMute"
+              title="Toggle Microphone"
+            >
+              <i class="fas fa-microphone"></i>
+            </button>
+            <button
+              class="video-control-btn"
+              id="switchCamera"
+              title="Switch Camera"
+            >
+              <i class="fas fa-camera-rotate"></i>
+            </button>
+            <button
+              class="video-control-btn"
+              id="toggleScreen"
+              title="Share Screen"
+            >
+              <i class="fas fa-desktop"></i>
+            </button>
+            <button
+              class="video-control-btn end-call"
+              id="endCall"
+              title="End Call"
+            >
+              <i class="fas fa-phone-slash"></i>
+            </button>
+          </div>
+        </div>
+        <div id="custom-chat-container"></div>
+      </div>
+    </div>
+
+    <script type="module" defer src="js/index.js"></script>
+    <script type="module" defer src="js/context-presets.js"></script>
+  </body>
+</html>

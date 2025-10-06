@@ -24,7 +24,7 @@ const config = {
 
 document.addEventListener('DOMContentLoaded', function () {
   const urlParams = new URLSearchParams(window.location.search);
-  const env = urlParams.get('env') || 'staging';
+  const env = urlParams.get('env') || 'prod';
   let { envUrl, environment, deploymentId, veUrl, tenantId } = config[env];
   // update config parameters from environment variables
   environment = urlParams.get('environment') || environment;

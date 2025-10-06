@@ -4,9 +4,12 @@ import type { VideoEngagerConnectionConfigs } from "@videoengager-widget/js/core
 import type { GenesysConfigs } from "@videoengager-widget/js/integrations";
 
 export interface ConfigurationInterface {
-  videoEngager: VideoEngagerConnectionConfigs & { isPopup: boolean, debug?: boolean };
+  videoEngager: VideoEngagerConnectionConfigs & {
+    isPopup: boolean;
+    debug?: boolean;
+  };
   genesys: GenesysConfigs;
-  useGenesysMessengerChat: boolean;
+  interactive: boolean;
   debug?: boolean;
 }
 
@@ -25,11 +28,11 @@ function deepMerge<T extends Record<string, any>>(
   source: DeepPartial<T>
 ): T {
   const result = { ...target };
-  
+
   for (const key in source) {
     const sourceValue = source[key];
     const targetValue = result[key];
-    
+
     if (
       sourceValue &&
       typeof sourceValue === "object" &&
@@ -43,13 +46,13 @@ function deepMerge<T extends Record<string, any>>(
       result[key] = sourceValue as any;
     }
   }
-  
+
   return result;
 }
 
 export class ConfigManager {
   private config: ConfigurationInterface;
-  
+
   constructor(private defaultConfig: ConfigurationInterface) {
     this.config = { ...defaultConfig };
   }
@@ -90,7 +93,7 @@ export class ConfigManager {
       genesysDomain: "genesys.domain",
       veTenantId: "videoEngager.tenantId",
       veEnv: "videoEngager.veEnv",
-      interactive: "useGenesysMessengerChat",
+      interactive: "interactive",
       debug: "debug",
       isPopup: "videoEngager.isPopup",
     };

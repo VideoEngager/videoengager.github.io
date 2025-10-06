@@ -28,6 +28,8 @@ const VideoControls = ({
 }: {
   videoEngagerInstance?: VideoEngagerWidgetCore<any>;
 }) => {
+  const configs = getConfigsFromParams();
+
   const [videoControls, setVideoControls] =
     useState<VideoControlsStateInterface>({
       isVideoOn: false,
@@ -49,15 +51,21 @@ const VideoControls = ({
       await videoEngagerInstance?.executeVideoCallFn("triggerScreenShare");
     },
     onEndCall: async () => {
-      console.log('End call clicked', videoEngagerInstance);
       if (videoEngagerInstance?.isCallOngoing) {
-        // await videoEngagerInstance.endVideoChatSession();
-        await videoEngagerInstance?.executeVideoCallFn('triggerHangup');
+        await (configs.loadedConfig.interactive
+          ? videoEngagerInstance.executeVideoCallFn("triggerHangup")
+          : videoEngagerInstance.endVideoChatSession());
+      } else if (!configs.loadedConfig.interactive) {
+        await videoEngagerInstance?.contactCenterIntegrationInstance?.endConversation();
       }
     },
   };
- const switchCameraAvailable = useMemo(() => {
-    return (videoControls.availableCameras?.length && videoControls.availableCameras.length > 1) && videoControls.isVideoOn;
+  const switchCameraAvailable = useMemo(() => {
+    return (
+      videoControls.availableCameras?.length &&
+      videoControls.availableCameras.length > 1 &&
+      videoControls.isVideoOn
+    );
   }, [videoControls]);
   useEffect(() => {
     if (!videoEngagerInstance) return;
@@ -72,40 +80,51 @@ const VideoControls = ({
     );
     return () => {
       videoEngagerInstance.off("videoEngager:iframe-connected", stVideoControl);
-      videoEngagerInstance.off("videoEngager:iframe-video-state-changed", stVideoControl);
+      videoEngagerInstance.off(
+        "videoEngager:iframe-video-state-changed",
+        stVideoControl
+      );
     };
   }, [videoEngagerInstance]);
   if (!videoEngagerInstance) {
     return null;
   }
- 
+
   return (
     <div className="video-controls">
-      {!isCallActive && <button
-        onClick={async (e) => {
-          const target = e.currentTarget || e.target;
-          target.disabled = true;
-          try {
-            const configs = getConfigsFromParams();
-            await videoEngagerInstance?.startVideoChatSession({
-              autoAccept: true,
-            }, configs.customAttributes)
-          } catch (err) {
-            alert((err as Error)?.message || 'Failed to start the video chat session.');
-          }
-          target.disabled = false;
-        }}
-        className="video-control-btn info"
-        id="startVideoX"
-      >
-        <FontAwesomeIcon icon={faPhone} />
-
-      </button>}
-      {
-        isCallActive && <>
+      {!isCallActive && (
+        <button
+          onClick={async (e) => {
+            const target = e.currentTarget || e.target;
+            target.disabled = true;
+            try {
+              const configs = getConfigsFromParams();
+              await videoEngagerInstance?.startVideoChatSession(
+                {
+                  autoAccept: true,
+                },
+                configs.customAttributes
+              );
+            } catch (err) {
+              alert(
+                (err as Error)?.message ||
+                  "Failed to start the video chat session."
+              );
+            }
+            target.disabled = false;
+          }}
+          className="video-control-btn info"
+          id="startVideoX"
+        >
+          <FontAwesomeIcon icon={faPhone} />
+        </button>
+      )}
+      {isCallActive && (
+        <>
           <button
-            className={`video-control-btn ${videoControls.isVideoOn ? "active" : ""
-              }`}
+            className={`video-control-btn ${
+              videoControls.isVideoOn ? "active" : ""
+            }`}
             title="Toggle Camera"
             onClick={videoControlHandlers?.onToggleCamera}
           >
@@ -114,7 +133,9 @@ const VideoControls = ({
             />
           </button>
           <button
-            className={`video-control-btn ${videoControls.isMicOn ? "active" : ""}`}
+            className={`video-control-btn ${
+              videoControls.isMicOn ? "active" : ""
+            }`}
             title="Toggle Microphone"
             onClick={videoControlHandlers?.onToggleMute}
           >
@@ -122,17 +143,20 @@ const VideoControls = ({
               icon={videoControls.isMicOn ? faMicrophone : faMicrophoneSlash}
             />
           </button>
-          {switchCameraAvailable && <button
-            className="video-control-btn"
-            id="switchCamera"
-            title="Switch Camera"
-            onClick={videoControlHandlers?.onSwitchCamera}
-          >
-            <FontAwesomeIcon icon={faCameraRotate} />
-          </button>}
+          {switchCameraAvailable && (
+            <button
+              className="video-control-btn"
+              id="switchCamera"
+              title="Switch Camera"
+              onClick={videoControlHandlers?.onSwitchCamera}
+            >
+              <FontAwesomeIcon icon={faCameraRotate} />
+            </button>
+          )}
           <button
-            className={`video-control-btn ${videoControls.isScreenSharing ? "active" : ""
-              }`}
+            className={`video-control-btn ${
+              videoControls.isScreenSharing ? "active" : ""
+            }`}
             title="Share Screen"
             onClick={videoControlHandlers?.onToggleScreen}
           >
@@ -147,7 +171,7 @@ const VideoControls = ({
             <FontAwesomeIcon icon={faPhoneSlash} />
           </button>
         </>
-      }
+      )}
     </div>
   );
 };

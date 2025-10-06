@@ -15,7 +15,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
       domain: "mypurecloud.com",
     },
-    useGenesysMessengerChat: true,
+    interactive: false,
   },
   popupWithChat: {
     videoEngager: {
@@ -27,7 +27,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
       domain: "mypurecloud.com",
     },
-    useGenesysMessengerChat: true,
+    interactive: true,
   },
   inlineNoChat: {
     videoEngager: {
@@ -39,7 +39,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
       domain: "mypurecloud.com",
     },
-    useGenesysMessengerChat: false,
+    interactive: false,
   },
   popupNoChat: {
     videoEngager: {
@@ -51,7 +51,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
       domain: "mypurecloud.com",
     },
-    useGenesysMessengerChat: false,
+    interactive: false,
   },
   inlineWithChat_usaw: {
     videoEngager: {
@@ -63,7 +63,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
       domain: "usw2.pure.cloud",
     },
-    useGenesysMessengerChat: true,
+    interactive: true,
   },
   popupWithChat_usaw: {
     videoEngager: {
@@ -75,7 +75,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
       domain: "usw2.pure.cloud",
     },
-    useGenesysMessengerChat: true,
+    interactive: true,
   },
   inlineNoChat_usaw: {
     videoEngager: {
@@ -87,7 +87,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
       domain: "usw2.pure.cloud",
     },
-    useGenesysMessengerChat: false,
+    interactive: false,
   },
   popupNoChat_usaw: {
     videoEngager: {
@@ -99,7 +99,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
       domain: "usw2.pure.cloud",
     },
-    useGenesysMessengerChat: false,
+    interactive: false,
   },
 };
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type VideoEngagerWidgetCore from "@videoengager-widget/js/core";
 import { useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,8 +13,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { getConfigsFromParams } from "../utils/get-configs-from-params";
 import { useVeActivityState } from "../hooks/useVeActivityState";
+import type { GenesysIntegrationPureSocket } from "@videoengager-widget/js/integrations";
 
-interface VideoControlsStateInterface extends Record<string, any> {
+interface VideoControlsStateInterface {
   isVideoOn: boolean;
   isMicOn: boolean;
   isScreenSharing: boolean;
@@ -26,7 +26,7 @@ interface VideoControlsStateInterface extends Record<string, any> {
 const VideoControls = ({
   videoEngagerInstance,
 }: {
-  videoEngagerInstance?: VideoEngagerWidgetCore<any>;
+  videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>;
 }) => {
   const configs = getConfigsFromParams();
 
@@ -51,12 +51,10 @@ const VideoControls = ({
       await videoEngagerInstance?.executeVideoCallFn("triggerScreenShare");
     },
     onEndCall: async () => {
-      if (videoEngagerInstance?.isCallOngoing) {
+      if (videoEngagerInstance) {
         await (configs.loadedConfig.interactive
           ? videoEngagerInstance.executeVideoCallFn("triggerHangup")
           : videoEngagerInstance.endVideoChatSession());
-      } else if (!configs.loadedConfig.interactive) {
-        await videoEngagerInstance?.contactCenterIntegrationInstance?.endConversation();
       }
     },
   };
@@ -69,7 +67,7 @@ const VideoControls = ({
   }, [videoControls]);
   useEffect(() => {
     if (!videoEngagerInstance) return;
-    const stVideoControl = (state: Record<string, any>) => {
+    const stVideoControl = (state: Record<string, boolean | Record<string, string>[] | number>) => {
       setVideoControls((prev) => ({ ...prev, ...state }));
     };
     videoEngagerInstance.on("videoEngager:iframe-connected", stVideoControl);

@@ -1,7 +1,8 @@
 import type VideoEngagerWidgetCore from "@videoengager-widget/js/core";
+import type { GenesysIntegrationPureSocket } from "@videoengager-widget/js/integrations";
 import { useEffect, useState } from "react";
 
-export function useVeActivityState (videoEngagerInstance?: VideoEngagerWidgetCore<string>) {
+export function useVeActivityState (videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>) {
     const [isChatActive, setIsChatActive] = useState(videoEngagerInstance?.contactCenterIntegrationInstance?.inActiveConversation || false);
     const [isCallActive, setIsCallActive] = useState(false);
     useEffect(() => {

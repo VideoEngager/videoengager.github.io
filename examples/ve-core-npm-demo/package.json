@@ -14,7 +14,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.0.2",
-    "@videoengager-widget/js": "https://cdn.videoengager.com/widget/v3.0.1/packages/videoengager-widget-js.tgz",
+    "@videoengager-widget/js": "file:videoengager-widget-js-3.0.4.tgz",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.3"

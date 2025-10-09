@@ -3,11 +3,12 @@ import type VideoEngagerWidgetCore from "@videoengager-widget/js/core";
 import Chat from "./Chat";
 import Video from "./Video";
 import { useVeActivityState } from "../hooks/useVeActivityState";
+import type { GenesysIntegrationPureSocket } from "@videoengager-widget/js/integrations";
 
 const ChatAndVideoContainer = ({
   videoEngagerInstance,
 }: {
-  videoEngagerInstance?: VideoEngagerWidgetCore<any>;
+  videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>;
 }) => {
   return (
     <ChatVideoWrapper videoEngagerInstance={videoEngagerInstance}>
@@ -17,7 +18,7 @@ const ChatAndVideoContainer = ({
   );
 };
 
-function ChatVideoWrapper({ videoEngagerInstance, children }: { videoEngagerInstance?: VideoEngagerWidgetCore<any>, children: React.ReactNode }) {
+function ChatVideoWrapper({ videoEngagerInstance, children }: { videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>, children: React.ReactNode }) {
   const { isChatActive } = useVeActivityState(videoEngagerInstance);
   return (
     <div className="video-chat-container" style={{

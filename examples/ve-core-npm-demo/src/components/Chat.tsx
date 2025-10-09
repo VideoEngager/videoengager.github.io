@@ -1,19 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import VideoEngagerWidgetCore from "@videoengager-widget/js/core";
-import type { NormalizedMessages } from "@videoengager-widget/js/core";
+import type {
+  MessageTypeVideoEngagerUrl,
+  NormalizedMessages,
+} from "@videoengager-widget/js/core";
 import { useEffect, useRef, useState } from "react";
 import { useVeActivityState } from "../hooks/useVeActivityState";
 import { getConfigsFromParams } from "../utils/get-configs-from-params";
+import type { GenesysIntegrationPureSocket } from "@videoengager-widget/js/integrations";
 
 const Chat = ({
   videoEngagerInstance,
 }: {
-  videoEngagerInstance?: VideoEngagerWidgetCore<any>;
+  videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>;
 }) => {
   const [inputText, setInputText] = useState("");
   const { isChatActive } = useVeActivityState(videoEngagerInstance);
   const configs = getConfigsFromParams();
-  console.log("configs", configs);
+  const [nameIndex, setNameIndex] = useState(0);
+  const names = ["John Smith", "Gracelyn Li", "Johan Holt", "Freyja Flynn"];
 
   const handleSendMessage = () => {
     if (inputText.trim()) {
@@ -37,17 +41,28 @@ const Chat = ({
             </div>
           </div>
           <div>
+            <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const target = e.currentTarget || e.target;
+                  target.disabled = true;
+                  const newName = names[nameIndex];
+                  alert(`Your new name is ${newName}`);
+                  await videoEngagerInstance.updateCustomAttributes({ "context.firstName": newName });
+                  const nextIndex = (nameIndex + 1) % names.length;
+                  setNameIndex(nextIndex);
+                  target.disabled = false;
+                }}
+              >
+                Update Context
+              </button>
             {configs.loadedConfig.interactive && (
               <button
                 onClick={async (e) => {
                   const target = e.currentTarget || e.target;
                   target.disabled = true;
                   try {
-                    if (videoEngagerInstance?.isCallOngoing) {
-                      await videoEngagerInstance?.endVideoChatSession();
-                    } else {
-                      await videoEngagerInstance?.contactCenterIntegrationInstance?.endConversation();
-                    }
+                    await videoEngagerInstance?.endVideoChatSession();
                   } catch {
                     alert("Failed to end the session. Please try again.");
                   }
@@ -96,7 +111,7 @@ const Chat = ({
 function MessagesContainer({
   videoEngagerInstance,
 }: {
-  videoEngagerInstance?: VideoEngagerWidgetCore<any>;
+  videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>;
 }) {
   const [messages, setMessages] = useState<NormalizedMessages[]>(
     videoEngagerInstance?.contactCenterIntegrationInstance?.messages || []
@@ -159,32 +174,44 @@ function MessagesContainer({
 }
 function RenderSingleMessage({
   message,
+  videoEngagerInstance,
 }: {
   message: NormalizedMessages;
-  videoEngagerInstance?: VideoEngagerWidgetCore<any>;
+  videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>;
 }) {
   switch (message.content.type) {
     case "Text":
       return <div className="message-text">{message.content.text}</div>;
-    // case "videoEngagerUrl":
-    //   return (<div
-
-    //   className="message-text">
-    //     Agent requests you to join a video chat session.{" "}
-    //     <button style={{ marginTop: '10px', marginLeft: 0 }} onClick={async (e) => {
-    //       const target = e.currentTarget || e.target;
-    //       target.disabled = true;
-    //       await videoEngagerInstance?.startVideoChatSession({
-    //         autoAccept: true,
-    //         shortUrl: (message.content as MessageTypeVideoEngagerUrl).url,
-    //       })
-    //         .catch(() => {
-    //           alert('Failed to join the video chat session.');
-    //         })
-    //       target.disabled = false;
-    //     }}>Join Video Chat</button>
-    //   </div>
-    //   );
+    case "videoEngagerUrl":
+      return (
+        <div className="message-text">
+          Agent requests you to join a video chat session.{" "}
+          <button
+            style={{ marginTop: "10px", marginLeft: 0 }}
+            onClick={async (e) => {
+              const target = e.currentTarget || e.target;
+              target.disabled = true;
+              await videoEngagerInstance
+                ?.startVideoChatSession(
+                  {
+                    autoAccept: true,
+                    shortUrl: (message.content as MessageTypeVideoEngagerUrl)
+                      .url,
+                  },
+                  undefined,
+                  undefined,
+                  false
+                )
+                .catch(() => {
+                  alert("Failed to join the video chat session.");
+                });
+              target.disabled = false;
+            }}
+          >
+            Join Video Chat
+          </button>
+        </div>
+      );
     default:
       return <div className="message-text">Unsupported message type</div>;
   }

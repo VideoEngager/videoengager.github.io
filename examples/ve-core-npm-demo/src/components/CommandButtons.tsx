@@ -5,6 +5,18 @@ import {
 } from "../utils/ConfigManager";
 
 const PRESETS: Record<string, ConfigurationInterface> = {
+  inlineWithoutChat: {
+    videoEngager: {
+      tenantId: "0FphTk091nt7G1W7",
+      veEnv: "videome.leadsecure.com",
+      isPopup: false,
+    },
+    genesys: {
+      deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
+      domain: "mypurecloud.com",
+    },
+    interactive: false,
+  },
   inlineWithChat: {
     videoEngager: {
       tenantId: "0FphTk091nt7G1W7",
@@ -15,91 +27,7 @@ const PRESETS: Record<string, ConfigurationInterface> = {
       deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
       domain: "mypurecloud.com",
     },
-    interactive: false,
-  },
-  popupWithChat: {
-    videoEngager: {
-      tenantId: "0FphTk091nt7G1W7",
-      veEnv: "videome.leadsecure.com",
-      isPopup: true,
-    },
-    genesys: {
-      deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
-      domain: "mypurecloud.com",
-    },
     interactive: true,
-  },
-  inlineNoChat: {
-    videoEngager: {
-      tenantId: "0FphTk091nt7G1W7",
-      veEnv: "videome.leadsecure.com",
-      isPopup: false,
-    },
-    genesys: {
-      deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
-      domain: "mypurecloud.com",
-    },
-    interactive: false,
-  },
-  popupNoChat: {
-    videoEngager: {
-      tenantId: "0FphTk091nt7G1W7",
-      veEnv: "videome.leadsecure.com",
-      isPopup: true,
-    },
-    genesys: {
-      deploymentId: "c5d801ae-639d-4e5e-a52f-4963342fa0dc",
-      domain: "mypurecloud.com",
-    },
-    interactive: false,
-  },
-  inlineWithChat_usaw: {
-    videoEngager: {
-      tenantId: "yRunQK8mL7HsJidu",
-      veEnv: "videome.leadsecure.com",
-      isPopup: false,
-    },
-    genesys: {
-      deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
-      domain: "usw2.pure.cloud",
-    },
-    interactive: true,
-  },
-  popupWithChat_usaw: {
-    videoEngager: {
-      tenantId: "yRunQK8mL7HsJidu",
-      veEnv: "videome.leadsecure.com",
-      isPopup: true,
-    },
-    genesys: {
-      deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
-      domain: "usw2.pure.cloud",
-    },
-    interactive: true,
-  },
-  inlineNoChat_usaw: {
-    videoEngager: {
-      tenantId: "yRunQK8mL7HsJidu",
-      veEnv: "videome.leadsecure.com",
-      isPopup: false,
-    },
-    genesys: {
-      deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
-      domain: "usw2.pure.cloud",
-    },
-    interactive: false,
-  },
-  popupNoChat_usaw: {
-    videoEngager: {
-      tenantId: "yRunQK8mL7HsJidu",
-      veEnv: "videome.leadsecure.com",
-      isPopup: true,
-    },
-    genesys: {
-      deploymentId: "efc4abdb-4c95-4f5d-86b8-b6fb6b3e5b9b",
-      domain: "usw2.pure.cloud",
-    },
-    interactive: false,
   },
 };
 
@@ -113,7 +41,7 @@ const CommandButtons = ({
   setConfiguration: (config: ConfigurationInterface) => void;
 }) => {
   const [presetKey, setPresetKey] =
-    useState<keyof typeof PRESETS>("inlineWithChat");
+    useState<keyof typeof PRESETS>("inlineWithoutChat");
   const [videoEngagerUrl, setVideoEngagerUrl] = useState("");
   const handlePresetChange = (key: keyof typeof PRESETS) => {
     setPresetKey(key);

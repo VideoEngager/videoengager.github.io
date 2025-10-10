@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useSearchParams } from "react-router-dom";
 import ChatAndVideoContainer from "./components/ChatAndVideoContainer";
 import { useState } from "react";
@@ -9,22 +8,32 @@ import { useVeCleanup } from "./hooks/useVeCleanup";
 import { getConfigsFromParams } from "./utils/get-configs-from-params";
 
 const Single = () => {
-
   const [videoEngagerInstance, setVideoEngagerInstance] = useState<
-    undefined | VideoEngagerWidgetCore<any>
+    undefined | VideoEngagerWidgetCore<GenesysIntegrationPureSocket>
   >(undefined);
   useVeCleanup(videoEngagerInstance);
 
+  return (
+    <>
+      <StartButton
+        videoEngagerInstance={videoEngagerInstance}
+        setVideoEngagerInstance={setVideoEngagerInstance}
+      />
 
-  return (<>
-    <StartButton videoEngagerInstance={videoEngagerInstance} setVideoEngagerInstance={setVideoEngagerInstance} />
-
-    <ChatAndVideoContainer videoEngagerInstance={videoEngagerInstance} />
-  </>
+      <ChatAndVideoContainer videoEngagerInstance={videoEngagerInstance} />
+    </>
   );
 };
 
-function StartButton({ videoEngagerInstance, setVideoEngagerInstance }: { videoEngagerInstance?: VideoEngagerWidgetCore<any>, setVideoEngagerInstance: (instance: VideoEngagerWidgetCore<any>) => void }) {
+function StartButton({
+  videoEngagerInstance,
+  setVideoEngagerInstance,
+}: {
+  videoEngagerInstance?: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>;
+  setVideoEngagerInstance: (
+    instance: VideoEngagerWidgetCore<GenesysIntegrationPureSocket>
+  ) => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const { isChatActive } = useVeActivityState(videoEngagerInstance);
   const [params] = useSearchParams();
@@ -46,13 +55,13 @@ function StartButton({ videoEngagerInstance, setVideoEngagerInstance }: { videoE
         );
 
         await veWidget.setContactCenterIntegration(genesysWidget);
-        // Internal workaround - To be fixed by VideoEngager Team
-        veWidget.on('integration:sessionEnded', () => {
-          if (!veWidget?.contactCenterIntegrationInstance) return;
-          veWidget.contactCenterIntegrationInstance.messages = [];
-        })
-
         setVideoEngagerInstance(veWidget);
+
+        if (!parsedConfig.loadedConfig.interactive) {
+          veWidget?.on("videoEngager:videoSessionEnd", async () => {
+            await veWidget?.endVideoChatSession();
+          });
+        }
       }
 
       const contextCustomAttributes: Record<string, string> = {};
@@ -72,7 +81,6 @@ function StartButton({ videoEngagerInstance, setVideoEngagerInstance }: { videoE
       alert((error as Error)?.message);
     }
     setIsLoading(false);
-
   }
   if (isChatActive) return null;
   return (
@@ -85,15 +93,11 @@ function StartButton({ videoEngagerInstance, setVideoEngagerInstance }: { videoE
         alignItems: "center",
       }}
     >
-      <button
-        disabled={isLoading}
-        onClick={async () => await initialize()}
-      >{
-          isLoading ? "Starting..." : "Start Video Chat"
-        }</button>
+      <button disabled={isLoading} onClick={async () => await initialize()}>
+        {isLoading ? "Starting..." : "Start Video Chat"}
+      </button>
     </div>
-  )
+  );
 }
-
 
 export default Single;

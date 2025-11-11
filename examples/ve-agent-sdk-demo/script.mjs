@@ -145,7 +145,7 @@ async function loadVideoEngagerSDK() {
         logEvent('Loading VideoEngager SDK from CDN...', 'info');
         
         // Import the VideoEngager Agent SDK module
-        window.VideoEngagerAgent = await import('https://cdn.jsdelivr.net/npm/videoengager-agent-sdk@0.0.23/dist/index.min.mjs');
+        window.VideoEngagerAgent = await import('https://cdn.jsdelivr.net/npm/videoengager-agent-sdk/dist/index.min.mjs');
 
         // Verify the SDK is available globally
         if (!window.VideoEngagerAgent) {

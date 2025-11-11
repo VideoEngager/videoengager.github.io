@@ -273,5 +273,12 @@
     "category": "Integration Demo",
     "desc": "Comprehensive command center for testing VideoEngager video chat sessions with Genesys Cloud. Features multiple integration modes (inline/popup), industry-specific context presets, real-time chat, and full video controls.",
     "tags": ["react", "genesys", "video-chat", "integration"]
+  },
+  {
+    "title": "Agent SDK React Example",
+    "href": "/examples/agent-sdk-react/dist/index.html",
+    "category": "Agent SDK",
+    "desc": "React-based demonstration of the VideoEngager Agent SDK, showcasing how to build agent-facing applications with modern UI components and seamless video interaction capabilities.",
+    "tags": ["react", "agent-sdk", "video-chat", "ui"]
   }
 ]

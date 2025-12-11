@@ -280,5 +280,12 @@
     "category": "Agent SDK",
     "desc": "React-based demonstration of the VideoEngager Agent SDK, showcasing how to build agent-facing applications with modern UI components and seamless video interaction capabilities.",
     "tags": ["react", "agent-sdk", "video-chat", "ui"]
+  },
+  {
+    "title": "VideoEngager Core SDK Demo",
+    "href": "/examples/ve-core-vanilla-js/index.html",
+    "category": "Integration Demo",
+    "desc": "Vanilla-based demonstration of VideoEngager Core SDK, show casing how to build customer-facing application, collecting customer information",
+    "tags": ["core-sdk", "vanilla", "video-chat", "integration", "genesys", "branding"]
   }
 ]

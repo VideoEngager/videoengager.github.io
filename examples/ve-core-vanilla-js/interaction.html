@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session in Progress</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="interaction-container">
+        <header class="interaction-header">
+            <h1>Virtual Branch</h1>
+            <div class="service-badge" id="serviceBadge"></div>
+        </header>
+
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h2>Connecting...</h2>
+                <p>Please wait while we establish connection with an agent</p>
+            </div>
+        </div>
+
+        <div id="errorScreen" class="error-screen" style="display: none;">
+            <div class="error-content">
+                <div class="error-icon">⚠️</div>
+                <h2>Connection Error</h2>
+                <p id="errorMessage"></p>
+                <button class="btn-primary" onclick="window.location.href=buildUrlWithParams('index.html')">Back to Home</button>
+            </div>
+        </div>
+
+        <main class="interaction-layout">
+            <div class="video-section" id="videoSection">
+                <div class="back-button">
+                    <button><- Go back to Services</button>
+                </div>
+                <div class="waiting-message" id="waitingMessage">
+                    <div class="waiting-icon">⏳</div>
+                    <h3>Waiting for connection...</h3>
+                </div>
+                <!-- VideoEngager iframe will be injected here -->
+            </div>
+
+            <div class="chat-section" id="chatSection">
+                <!-- Genesys chat widget will appear here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.videoengager.com/widget/latest/browser/main.umd.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/interaction.js"></script>
+</body>
+</html>

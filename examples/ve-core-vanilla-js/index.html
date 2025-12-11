@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Branch</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <a href="https://videoengager.github.io" title="Back to Demos Index"
+        >Index</a
+      >
+      <a
+        href="https://github.com/VideoEngager/videoengager.github.io/blob/master/examples/ve-core-vanilla-js"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="View Source on GitHub"
+        >View Source</a
+      >
+    </header>
+    <div class="container">
+      <h1>Choose your service</h1>
+      <main class="services-grid">
+        <div
+          class="service-card"
+          data-service-id="TRAM_PREV_001"
+          data-service-name="Pension Services"
+        >
+          <div class="service-icon">📋</div>
+          <h3>Pension Services</h3>
+          <p>
+            Inquiries and management of pensions, AFP, and other retirement
+            benefits
+          </p>
+          <button class="btn-select">Request Assistance</button>
+        </div>
+
+        <div
+          class="service-card"
+          data-service-id="REG_CIVIL_002"
+          data-service-name="Civil Registry"
+        >
+          <div class="service-icon">📄</div>
+          <h3>Civil Registry</h3>
+          <p>Birth, marriage, death certificates and identity cards</p>
+          <button class="btn-select">Request Assistance</button>
+        </div>
+
+        <div
+          class="service-card"
+          data-service-id="SUBSIDIOS_003"
+          data-service-name="Subsidies and Benefits"
+        >
+          <div class="service-icon">💰</div>
+          <h3>Subsidies and Benefits</h3>
+          <p>Information about housing, family subsidies and state aid</p>
+          <button class="btn-select">Request Assistance</button>
+        </div>
+
+        <div
+          class="service-card"
+          data-service-id="SALUD_004"
+          data-service-name="Healthcare"
+        >
+          <div class="service-icon">🏥</div>
+          <h3>Healthcare</h3>
+          <p>Inquiries about Fonasa, Isapres, and health benefits</p>
+          <button class="btn-select">Request Assistance</button>
+        </div>
+
+        <div
+          class="service-card"
+          data-service-id="CONSULTAS_GEN_005"
+          data-service-name="General Inquiries"
+        >
+          <div class="service-icon">ℹ️</div>
+          <h3>General Inquiries</h3>
+          <p>General guidance about government services</p>
+          <button class="btn-select">Request Assistance</button>
+        </div>
+      </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/service-selection.js"></script>
+  </body>
+</html>

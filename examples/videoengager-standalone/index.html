@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Standalone Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+        <!-- Configuration Form -->
+        <div id="configSection" class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 text-center">
+
+                <h1 class="text-3xl font-bold mb-2">VideoEngager Standalone Demo</h1>
+                <p class="text-blue-100">Configure your demo environment</p>
+            </div>
+            <form id="configForm" class="p-8 space-y-4">
+                <div>
+                    <label for="domain" class="block text-sm font-semibold text-gray-700 mb-2">Domain *</label>
+                    <input type="text" id="domain" placeholder="videome.leadsecure.com" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                </div>
+                <div>
+                    <label for="tenantId" class="block text-sm font-semibold text-gray-700 mb-2">Tenant ID *</label>
+                    <input type="text" id="tenantId" placeholder="Tenant ID" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                </div>
+                <div>
+                    <label for="apiKey" class="block text-sm font-semibold text-gray-700 mb-2">API Key (PAK) *</label>
+                    <input type="text" id="apiKey" placeholder="Your API key" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                </div>
+                <div>
+                    <label for="organizationId" class="block text-sm font-semibold text-gray-700 mb-2">Organization ID
+                        *</label>
+                    <input type="text" id="organizationId" placeholder="Organization ID" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                </div>
+                <div>
+                    <label for="externalId" class="block text-sm font-semibold text-gray-700 mb-2">External ID *</label>
+                    <input type="text" id="externalId" placeholder="VideoEngager External ID" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                </div>
+
+                <button type="submit" id="configSubmitBtn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg">
+                    <span class="flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        Continue
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Demo Selection -->
+        <div id="demoSelectionSection" class="hidden bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
+                    <i data-lucide="video" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">Select Demo Mode</h1>
+                <p class="text-blue-100">Choose which demo you want to launch</p>
+            </div>
+            <div class="p-8 space-y-4">
+                <button id="launchAgentBtn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg">
+                    <span class="flex flex-col items-center justify-center gap-3">
+                        <i data-lucide="headphones" class="w-12 h-12"></i>
+                        <span class="text-xl">Agent Demo</span>
+                        <span class="text-sm text-blue-100">Handle incoming calls from visitors</span>
+                    </span>
+                </button>
+                <button id="launchVisitorBtn"
+                    class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg">
+                    <span class="flex flex-col items-center justify-center gap-3">
+                        <i data-lucide="user" class="w-12 h-12"></i>
+                        <span class="text-xl">Visitor Demo</span>
+                        <span class="text-sm text-purple-100">Start a video call as a visitor</span>
+                    </span>
+                </button>
+                <button id="backBtn"
+                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg transition-all">
+                    <span class="flex items-center justify-center gap-2">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Back to Configuration
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+        // Store configuration
+        let configData = {};
+
+        // Handle form submission
+        document.getElementById('configForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Get form values
+            configData = {
+                domain: document.getElementById('domain').value,
+                tenantId: document.getElementById('tenantId').value,
+                apiKey: document.getElementById('apiKey').value,
+                organizationId: document.getElementById('organizationId').value,
+                externalId: document.getElementById('externalId').value
+            };
+
+            // Show demo selection, hide config form
+            document.getElementById('configSection').classList.add('hidden');
+            document.getElementById('demoSelectionSection').classList.remove('hidden');
+
+            // Reinitialize icons
+            lucide.createIcons();
+
+            // Start demo selection tour (if available and not shown before)
+            if (window.startDemoSelectionTour) {
+                setTimeout(() => {
+                    window.startDemoSelectionTour();
+                }, 400);
+            }
+        });
+
+        // Launch Agent Demo
+        document.getElementById('launchAgentBtn').addEventListener('click', () => {
+            const agentParams = new URLSearchParams({
+                domain: configData.domain,
+                apiKey: configData.apiKey,
+                organizationId: configData.organizationId,
+                externalId: configData.externalId
+            });
+            window.open(`./agent/index.html?${agentParams.toString()}`, '_blank');
+        });
+
+        // Launch Visitor Demo
+        document.getElementById('launchVisitorBtn').addEventListener('click', () => {
+            const visitorParams = new URLSearchParams({
+                domain: configData.domain,
+                tenantId: configData.tenantId
+            });
+            window.open(`./visitor/index.html?${visitorParams.toString()}`, '_blank');
+        });
+
+        // Back button
+        document.getElementById('backBtn').addEventListener('click', () => {
+            document.getElementById('demoSelectionSection').classList.add('hidden');
+            document.getElementById('configSection').classList.remove('hidden');
+            lucide.createIcons();
+        });
+    </script>
+
+    <!-- Tour Script (runs once per user) -->
+    <script src="./tour.js"></script>
+</body>
+
+</html>

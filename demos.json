@@ -231,6 +231,23 @@
     ]
   },
   {
+    "title": "VideoEngager (Standalone) demo",
+    "href": "/examples/videoengager-standalone/index.html",
+    "desc": "Demonstration of VideoEngager inbound calls without relaying on external Contact Center Solutions",
+    "category": "Standalone Mode",
+    "tags": [
+      "agent-sdk",
+      "advanced",
+      "standalone",
+      "rest-api",
+      "visitor",
+      "core-sdk",
+      "vanilla",
+      "interactions",
+      "agent"
+    ]
+  },
+  {
     "title": "Clean Example",
     "href": "/examples/clean/index.html",
     "desc": "Minimal implementation template.",

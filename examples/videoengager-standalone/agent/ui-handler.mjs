@@ -1,3 +1,4 @@
+
 /**
  * UI Handler Module
  * Handles all DOM manipulation and visual updates
@@ -11,12 +12,16 @@ export const elements = {
     // Sections
     configSection: document.getElementById('configSection'),
     dashboardSection: document.getElementById('dashboardSection'),
+    startAgentSection: document.getElementById('startAgentSection'),
+    agentDashboardContent: document.getElementById('agentDashboardContent'),
     callControlsSection: document.getElementById('callControlsSection'),
     queueSection: document.getElementById('queueSection'),
 
     // Form
     configForm: document.getElementById('configForm'),
     connectBtn: document.getElementById('connectBtn'),
+    agentEmailInput: document.getElementById('agentEmailInput'),
+    startAgentBtn: document.getElementById('startAgentBtn'),
 
     // Status indicators
     statusDot: document.getElementById('statusDot'),
@@ -142,7 +147,7 @@ export function renderCalls(calls) {
     // Render call items
     elements.emptyState.classList.add('hidden');
     elements.callsList.innerHTML = calls.map(call => `
-        <div class="bg-gradient-to-r from-blue-50 to-white border-2 border-blue-200 rounded-lg p-4 mb-3 flex items-center justify-between gap-4 hover:shadow-md transition-shadow" data-call-id="${call.caller.id}">
+        <div class="bg-gradient-to-r from-blue-50 to-white border-2 border-blue-200 rounded-lg p-4 mb-3 flex items-center justify-between gap-4 hover:shadow-md transition-shadow" data-caller-id="${call.caller.id}">
             <div class="flex items-center gap-3 flex-1 min-w-0">
                 <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                     <i data-lucide="user" class="w-5 h-5 text-white"></i>
@@ -154,11 +159,11 @@ export function renderCalls(calls) {
             </div>
             <div class="flex gap-2 flex-shrink-0">
                 <button onclick="acceptCall('${call.caller.id}')" 
-                    class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-all transform hover:scale-110 active:scale-95 disabled:opacity-50">
+                    class="accept-call-btn bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-all transform hover:scale-110 active:scale-95 disabled:opacity-50">
                     <i data-lucide="check" class="w-5 h-5"></i>
                 </button>
                 <button onclick="rejectCall('${call.caller.id}')" 
-                    class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-all transform hover:scale-110 active:scale-95 disabled:opacity-50">
+                    class="reject-call-btn bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-all transform hover:scale-110 active:scale-95 disabled:opacity-50">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -184,25 +189,29 @@ export function toggleCallControls(show) {
  * @param {boolean} disabled - Whether to disable the buttons
  */
 export function setCallButtonsState(callerId, disabled) {
-    const buttons = document.querySelectorAll(`[data-call-id="${callerId}"] button`);
+    const buttons = document.querySelectorAll(`[data-caller-id="${callerId}"] button`);
     buttons.forEach(btn => btn.disabled = disabled);
 }
 
 /**
- * Show dashboard and hide config form
+ * Show dashboard and hide config form (if it exists)
  */
 export function showDashboard() {
-    elements.configSection.classList.add('hidden');
+    if (elements.configSection) {
+        elements.configSection.classList.add('hidden');
+    }
     elements.dashboardSection.classList.remove('hidden');
 }
 
 /**
- * Update connect button state
+ * Update connect button state (if it exists)
  * @param {boolean} connecting - Whether connection is in progress
  */
 export function setConnectButtonState(connecting) {
-    elements.connectBtn.disabled = connecting;
-    elements.connectBtn.textContent = connecting ? 'Connecting...' : 'Connect';
+    if (elements.connectBtn) {
+        elements.connectBtn.disabled = connecting;
+        elements.connectBtn.textContent = connecting ? 'Connecting...' : 'Connect';
+    }
 }
 
 /**
@@ -234,3 +243,51 @@ export function getConfigFormValues() {
         externalId: document.getElementById('externalId').value
     };
 }
+
+/**
+ * Show agent dashboard content and hide start section
+ */
+export function showAgentDashboardContent() {
+    elements.startAgentSection.classList.add('hidden');
+    elements.agentDashboardContent.classList.remove('hidden');
+}
+
+/**
+ * Get agent email from input
+ * @returns {string} Agent email
+ */
+export function getAgentEmail() {
+    return elements.agentEmailInput?.value.trim() || '';
+}
+
+/**
+ * Set agent email in input field
+ * @param {string} email - Email to set
+ */
+export function setAgentEmail(email) {
+    if (elements.agentEmailInput) {
+        elements.agentEmailInput.value = email;
+    }
+}
+
+/**
+ * Update start agent button state
+ * @param {boolean} disabled - Whether to disable the button
+ * @param {string} text - Button text
+ */
+export function setStartAgentButtonState(disabled, text = 'Start Agent') {
+    if (elements.startAgentBtn) {
+        elements.startAgentBtn.disabled = disabled;
+        const span = elements.startAgentBtn.querySelector('span span:last-child');
+        if (span) {
+            span.textContent = text;
+        }
+    }
+}
+
+function enableDebugFormat() {
+    const url = new URL(window.location);
+    url.searchParams.set('debug-format', '');
+    window.history.pushState({}, '', url);
+}
+enableDebugFormat();

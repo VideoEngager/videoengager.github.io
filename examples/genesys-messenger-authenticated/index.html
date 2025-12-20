@@ -1,0 +1,81 @@
+<html>
+
+
+<head>
+    <script src="auth.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        (function (g, e, n, es, ys) {
+            g['_genesysJs'] = e;
+            g[e] = g[e] || function () {
+                (g[e].q = g[e].q || []).push(arguments)
+            };
+            g[e].t = 1 * new Date();
+            g[e].c = es;
+            ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+        })(window, 'Genesys', 'https://apps.mypurecloud.com/genesys-bootstrap/genesys.min.js', {
+            environment: 'prod',
+            deploymentId: '1afd2d60-7a5f-43be-943a-2f9d1a898ce6',
+            debug: true
+        });
+    </script>
+    <script src="genesys-auth-test.js"></script>
+
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <!-- Initialize Clerk with your
+Clerk Publishable Key and Frontend API URL -->
+    <button id="login" style="display: none;">Login</button>
+    <button id="login-genesys" style="display: none;">Login with Genesys</button>
+    <button id="logout" style="display: none;">Logout</button>
+    <div id="status"></div>
+    <div id="user"></div>
+    <script>
+        window.addEventListener('load', async function () {
+            const loginButton = document.querySelector('#login');
+            const logoutButton = document.querySelector('#logout');
+            const loginGenesysButton = document.querySelector('#login-genesys');
+            loginButton.addEventListener('click', async () => {
+                signIn()
+            })
+            loginGenesysButton.addEventListener('click', async () => {
+                Genesys('command', 'Auth.refreshToken');
+            });
+            logoutButton.addEventListener('click', async () => {
+                logoutButton.style.display = 'none';
+                await signOut()
+                    .then(() => {
+                        document.querySelector('#status').innerText = 'Not authenticated';
+                        document.querySelector('#user').innerText = '';
+                    })
+                    .catch((e) => {
+                        console.error(e);
+                        loginButton.style.display = '';
+                    });
+
+            });
+            const isLoggedIn = await window.registerGenesysAuthPlugin();
+
+            if (isLoggedIn) {
+                // handle authentication;
+                // const codeAndState = authClient.getCodeAndStateFromCallbackUri(window.location.href);
+                loginButton.style.display = 'none';
+                logoutButton.style.display = '';
+                loginGenesysButton.style.display = '';
+                document.querySelector('#status').innerText = 'Authenticated';
+                Genesys('subscribe', 'Auth.authenticated', function (data) {
+                    loginGenesysButton.style.display = 'none';
+                    document.querySelector('#status').innerText = 'Authenticated with Genesys';
+                });
+            } else {
+                loginButton.style.display = '';
+                logoutButton.style.display = 'none';
+                loginGenesysButton.style.display = 'none';
+            }
+        })
+    </script>
+</body>
+
+</html>

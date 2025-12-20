@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Visitor Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .video-engager-iframe {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            border: none !important;
+            margin: 0 !important;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+        <!-- Visitor Demo -->
+        <div id="dashboardSection" class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                            <i data-lucide="video" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">VideoEngager Visitor Demo</h1>
+                            <div class="flex items-center gap-2 mt-1">
+                                <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse" id="statusDot"></div>
+                                <span class="text-xs text-blue-100">
+                                    <span class="font-semibold">Status:</span> <span id="statusText">Ready</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <!-- Error Display -->
+                <div id="errorDisplay"
+                    class="hidden bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3">
+                    <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="flex-1"></span>
+                </div>
+
+                <!-- Call Controls (shown when not in call) -->
+                <div id="startCallSection" class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Start Video Call</h3>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="visitorName" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Visitor Name (Optional)
+                                    </label>
+                                    <input type="text" id="visitorName" placeholder="Enter your name"
+                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                                </div>
+
+                                <button id="startCallBtn" disabled
+                                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="flex items-center justify-center gap-2">
+                                        <i data-lucide="video" class="w-5 h-5"></i>
+                                        <span>Start Video Call</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-semibold mb-1">How it works:</p>
+                                <ul class="list-disc list-inside space-y-1 text-blue-700">
+                                    <li>Click "Start Video Call" to initiate a call</li>
+                                    <li>Wait for an agent to accept your call</li>
+                                    <li>Use the "End Call" button to hang up at any time</li>
+                                    <li>You can start multiple calls as needed</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Call Controls (shown during call) -->
+                <div id="activeCallSection" class="hidden space-y-4">
+                    <div
+                        class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                            <i data-lucide="phone-call" class="w-6 h-6 animate-pulse"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Call Active</div>
+                            <div class="text-sm text-blue-100">Video call in progress</div>
+                        </div>
+                    </div>
+
+                    <button id="endCallBtn"
+                        class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg">
+                        <span class="flex items-center justify-center gap-2">
+                            <i data-lucide="phone-off" class="w-5 h-5"></i>
+                            <span>End Call</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container for VideoEngager iframe -->
+    <div id="ve-visitor-container"></div>
+
+    <script type="module" src="./main.mjs"></script>
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+
+    <!-- Tour Script (runs once per user) -->
+    <script src="./tour.js"></script>
+</body>
+
+</html>

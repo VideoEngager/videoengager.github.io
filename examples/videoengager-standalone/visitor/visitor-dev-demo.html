@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VideoEngager Customer Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .config-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .field {
+            margin-bottom: 10px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button.secondary {
+            background: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background: #545b62;
+        }
+        
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+        
+        .log {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+        
+        .iframe-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .step-number {
+            background: #007bff;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📞 VideoEngager Customer Demo</h1>
+    <p>Start a video call with an agent using VideoEngager API</p>
+    
+    <!-- Configuration Card -->
+    <div class="card">
+        <h2>⚙️ Configuration</h2>
+        <div class="config-group">
+            <div class="field">
+                <label>API Base URL:</label>
+                <input id="apiBase" type="text" value="https://videome.leadsecure.com">
+            </div>
+            <div class="field">
+                <label>Tenant ID:</label>
+                <input id="tenantId" type="text" value="" placeholder="CHANGE">
+            </div>
+        </div>
+        
+        <div class="field">
+            <label>Optional: Visitor Name:</label>
+            <input id="visitorName" type="text" placeholder="John Doe (optional)">
+        </div>
+        
+        <div class="field">
+            <label>Optional: Visitor Email:</label>
+            <input id="visitorEmail" type="email" placeholder="john@example.com (optional)">
+        </div>
+    </div>
+    
+    <!-- Controls Card -->
+    <div class="card">
+        <h2>🎯 Quick Start Guide</h2>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>Configure your API settings above</div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>Click "Start Video Call" to initiate</div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>Allow camera & microphone permissions</div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">4</div>
+            <div>Wait for agent to answer the call</div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button id="startBtn">🎬 Start Video Call</button>
+            <button id="resetBtn" class="secondary">🔄 Reset</button>
+        </div>
+    </div>
+    
+    <!-- Status Card -->
+    <div class="card">
+        <h2>📊 Status</h2>
+        <div class="status-bar" id="status">Ready to start call</div>
+        <div id="callInfo" style="font-size: 14px; color: #666;"></div>
+    </div>
+    
+    <!-- Video Call Interface -->
+    <div class="card">
+        <h2>🎥 Call Interface</h2>
+        <div id="iframeContainer" style="text-align: center; padding: 30px; color: #888;">
+            <div style="font-size: 16px; margin-bottom: 10px;">📱</div>
+            <div>Video call interface will appear here when started</div>
+        </div>
+    </div>
+    
+    <!-- Event Log -->
+    <div class="card">
+        <h2>📝 Event Log</h2>
+        <div class="log" id="eventLog">[System] Ready</div>
+    </div>
+    
+    <script>
+        // ============================================
+        // 📦 MODULE: CONFIGURATION
+        // ============================================
+        const Config = {
+            apiBase: 'https://videome.leadsecure.com',
+            tenantId: '0FphTk091nt7G1W7',
+            visitor: {
+                name: '',
+                email: ''
+            }
+        };
+        
+        // ============================================
+        // 📦 MODULE: STATE MANAGEMENT
+        // ============================================
+        const State = {
+            currentCall: null,
+            isActive: false,
+            iframe: null
+        };
+        
+        // ============================================
+        // 📦 MODULE: LOGGER
+        // ============================================
+        const Logger = {
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+                const logLine = `${prefix} [${timestamp}] ${message}`;
+                
+                // Update log display
+                const logElement = document.getElementById('eventLog');
+                logElement.innerHTML += '\n' + logLine;
+                logElement.scrollTop = logElement.scrollHeight;
+                
+                // Console output
+                console.log(`[VE Customer] ${message}`);
+            },
+            
+            updateStatus(message) {
+                document.getElementById('status').textContent = message;
+            },
+            
+            updateCallInfo(message) {
+                const element = document.getElementById('callInfo');
+                if (element) {
+                    element.innerHTML = message;
+                }
+            }
+        };
+        
+        // ============================================
+        // 📦 MODULE: API CLIENT
+        // ============================================
+        const ApiClient = {
+            async createVideoCall(apiBase, tenantId, visitorData) {
+                const url = `${apiBase}/api/interactions/tenants/${tenantId}/interactions`;
+                
+                const payload = {
+                    type: 'OUTBOUND',
+                    customData: {
+                        source: 'customer-demo-page',
+                        ...visitorData
+                    }
+                };
+                
+                Logger.log(`Creating video call at ${url}`, 'info');
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API Error ${response.status}: ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    Logger.log(`Call created successfully. ID: ${data.interactionId}`, 'success');
+                    
+                    return data;
+                } catch (error) {
+                    Logger.log(`Failed to create call: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+        };
+        
+        // ============================================
+        // 📦 MODULE: CALL MANAGER
+        // ============================================
+        const CallManager = {
+            initCallIframe(visitorUrl) {
+                // Clear previous iframe
+                const container = document.getElementById('iframeContainer');
+                container.innerHTML = '';
+                const src = new URL(visitorUrl, Config.apiBase).href;
+
+                // Create new iframe
+                const iframe = document.createElement('iframe');
+                iframe.src = src;
+                iframe.allow = 'camera; microphone; fullscreen; display-capture';
+                iframe.style.width = '100%';
+                iframe.style.height = '600px';
+                
+                container.appendChild(iframe);
+                State.iframe = iframe;
+                
+                Logger.log('Call interface loaded', 'success');
+            },
+            
+            startCall() {
+                Logger.updateStatus('Creating video call...');
+                Logger.log('Step 1: Requesting call creation from API');
+                
+                // Get configuration from UI
+                Config.apiBase = document.getElementById('apiBase').value.trim();
+                Config.tenantId = document.getElementById('tenantId').value.trim();
+                Config.visitor.name = document.getElementById('visitorName').value.trim();
+                Config.visitor.email = document.getElementById('visitorEmail').value.trim();
+                
+                // Validate required fields
+                if (!Config.apiBase || !Config.tenantId) {
+                    Logger.log('Please fill in API Base URL and Tenant ID', 'error');
+                    return;
+                }
+                
+                // Create the video call
+                ApiClient.createVideoCall(
+                    Config.apiBase,
+                    Config.tenantId,
+                    Config.visitor
+                )
+                .then(response => {
+                    // Store call info
+                    State.currentCall = response;
+                    
+                    // Log URLs for debugging
+                    if (response.agent && response.agent.fullUrl) {
+                        Logger.log(`Agent URL: ${response.agent.fullUrl}`, 'info');
+                    }
+                    
+                    // Get visitor URL
+                    const visitorUrl = response.visitor?.fullUrl;
+                    if (!visitorUrl) {
+                        throw new Error('No visitor URL in API response');
+                    } else {
+                        Logger.log(`Visitor URL: ${visitorUrl}`, 'info');
+                    }
+                    
+                    // Initialize iframe
+                    this.initCallIframe(visitorUrl);
+                    
+                    Logger.updateStatus('Call initiated - waiting for agent...');
+                    Logger.updateCallInfo(`
+                        <strong>Call ID:</strong> ${response.interactionId}<br>
+                        <strong>Status:</strong> Ringing
+                    `);
+                    
+                    Logger.log('Step 2: Call interface loaded. Please allow camera/microphone access.');
+                })
+                .catch(error => {
+                    Logger.log(`Error: ${error}`, 'error');
+                    Logger.updateStatus('Failed to create call');
+                    Logger.updateCallInfo('');
+                });
+            },
+            
+            endCall() {
+                if (State.iframe && State.iframe.parentNode) {
+                    State.iframe.parentNode.removeChild(State.iframe);
+                }
+                
+                State.iframe = null;
+                State.currentCall = null;
+                State.isActive = false;
+                
+                // Reset UI
+                const container = document.getElementById('iframeContainer');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #888;">
+                        <div style="font-size: 16px; margin-bottom: 10px;">📱</div>
+                        <div>Video call interface will appear here when started</div>
+                    </div>
+                `;
+                
+                Logger.updateStatus('Call ended');
+                Logger.updateCallInfo('');
+                Logger.log('Call reset - ready for new call', 'info');
+            }
+        };
+        
+        // ============================================
+        // 📦 MODULE: EVENT HANDLER (Popup Messages)
+        // ============================================
+        const EventHandler = {
+            init() {
+                // Listen for messages from the VideoEngager popup
+                window.addEventListener('message', this.handlePopupMessage.bind(this));
+            },
+            
+            handlePopupMessage(event) {
+                // Security: Verify message origin
+                // Optional security check
+                // const allowedOrigin = new URL(Config.apiBase).origin;
+                // if (event.origin !== allowedOrigin) return;
+                
+                const data = event.data;
+                if (!data || typeof data !== 'object') return;
+                
+                Logger.log(`Popup event: ${data.type}`, 'info');
+                
+                // Handle different event types
+                switch (data.type) {
+                    case 'CallStarted':
+                        Logger.updateStatus('✅ Call connected with agent');
+                        Logger.updateCallInfo(`
+                            <strong>Status:</strong> In call<br>
+                            <strong>Connected:</strong> ${new Date().toLocaleTimeString()}
+                        `);
+                        break;
+                        
+                    case 'callEnded':
+                        // Optionally auto-reset UI here as well
+                        // CallManager.endCall();
+                        Logger.updateStatus('📵 Call ended');
+                        Logger.log('Call ended by agent or visitor', 'info');
+                        break;
+                        
+                    case 'RemoteVideoStarted':
+                        Logger.log('Agent video stream started', 'info');
+                        break;
+                        
+                    case 'RemoteVideoStopped':
+                        Logger.log('Agent video stopped', 'info');
+                        break;
+                        
+                    case 'popupClosed':
+                        Logger.updateStatus('Popup closed');
+                        CallManager.endCall();
+                        break;
+                        
+                    case 'ResizePopup':
+                        // Optional: Adjust iframe size if needed
+                        if (State.iframe && data.data?.height) {
+                            State.iframe.style.height = data.data.height + 'px';
+                        }
+                        break;
+                }
+            }
+        };
+        
+        // ============================================
+        // 📦 MODULE: UI CONTROLLER
+        // ============================================
+        const UIController = {
+            init() {
+                // Bind button events
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    CallManager.startCall();
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    CallManager.endCall();
+                });
+                
+                // Live configuration updates
+                ['apiBase', 'tenantId', 'visitorName', 'visitorEmail'].forEach(id => {
+                    document.getElementById(id).addEventListener('change', () => {
+                        this.updateConfig();
+                    });
+                });
+                
+                Logger.log('UI initialized - ready to start calls', 'success');
+            },
+            
+            updateConfig() {
+                Config.apiBase = document.getElementById('apiBase').value.trim();
+                Config.tenantId = document.getElementById('tenantId').value.trim();
+                Config.visitor.name = document.getElementById('visitorName').value.trim();
+                Config.visitor.email = document.getElementById('visitorEmail').value.trim();
+                
+                Logger.log('Configuration updated', 'info');
+            }
+        };
+        
+        // ============================================
+        // 🚀 APPLICATION BOOTSTRAP
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            Logger.log('VideoEngager Customer Demo starting...', 'info');
+            
+            // Initialize all modules
+            UIController.init();
+            EventHandler.init();
+            
+            Logger.log('Application ready. Click "Start Video Call" to begin.', 'success');
+        });
+        
+        // ============================================
+        // 🎯 SIMPLE EXAMPLE FOR DEVELOPERS
+        // ============================================
+        /*
+        // How to use the VideoEngager API in your own code:
+        
+        async function startVideoCall() {
+            const apiBase = 'https://videome.leadsecure.com';
+            const tenantId = 'YOUR_TENANT_ID';
+            
+            // 1. Create the interaction
+            const response = await fetch(`${apiBase}/api/interactions/tenants/${tenantId}/interactions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'OUTBOUND',
+                    customData: { source: 'your-app' }
+                })
+            });
+            
+            const data = await response.json();
+            
+            // 2. Get the visitor URL
+            const visitorUrl = data.visitor.fullUrl;
+            
+            // 3. Embed in iframe or redirect
+            console.log('Visitor URL:', visitorUrl);
+            // window.location.href = visitorUrl; // Or embed in iframe
+        }
+        */
+    </script>
+    
+    <!-- Quick Developer Notes -->
+    <div class="card" style="background: #f0f8ff; border-left: 4px solid #007bff;">
+        <h3>💡 For Developers</h3>
+        <p>This demo shows how to:</p>
+        <ul>
+            <li>Create a video call interaction via REST API</li>
+            <li>Embed VideoEngager's visitor interface in an iframe</li>
+            <li>Handle call events (connected, ended, etc.)</li>
+            <li>Pass visitor metadata (name, email) optionally</li>
+        </ul>
+        <p><strong>API Endpoint:</strong> POST /api/interactions/tenants/{tenantId}/interactions</p>
+        <p><strong>Response includes:</strong> visitor.fullUrl (customer UI) and agent.fullUrl (agent UI)</p>
+    </div>
+</body>
+</html>

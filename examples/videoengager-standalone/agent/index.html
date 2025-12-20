@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEngager Agent - Standalone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .video-engager-widget-iframe {
+            width: calc(100% + 10px);
+            margin-left: -5px;
+            height: calc(100% + 5px);
+            margin-top: -5px;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+        <!-- Agent Dashboard -->
+        <div id="dashboardSection" class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                            <i data-lucide="headphones" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">VideoEngager Agent Dashboard</h1>
+                            <div class="flex items-center gap-4 mt-1">
+                                <!-- Connection Status -->
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-gray-400" id="statusDot"></div>
+                                    <span class="text-xs text-blue-100">
+                                        <span class="font-semibold">Service:</span> <span id="statusText">Offline</span>
+                                    </span>
+                                </div>
+                                <!-- Queue Status -->
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-gray-400" id="queueStatusDot"></div>
+                                    <span class="text-xs text-blue-100">
+                                        <span class="font-semibold">Queue:</span> <span
+                                            id="queueStatusText">Inactive</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <!-- Error Display -->
+                <div id="errorDisplay"
+                    class="hidden bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3">
+                    <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="flex-1"></span>
+                </div>
+
+                <!-- Start Agent Section (shown before initialization) -->
+                <div id="startAgentSection" class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Agent Configuration
+                        </h3>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="agentEmailInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Agent Email *
+                                    </label>
+                                    <input type="email" id="agentEmailInput" placeholder="agent@company.com" required
+                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                                </div>
+
+                                <button id="startAgentBtn" disabled
+                                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="flex items-center justify-center gap-2">
+                                        <i data-lucide="play-circle" class="w-5 h-5"></i>
+                                        <span>Start Agent</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-semibold mb-1">Agent Instructions:</p>
+                                <ul class="list-disc list-inside space-y-1 text-blue-700">
+                                    <li>Enter your agent email to connect</li>
+                                    <li>Toggle the queue to start receiving calls</li>
+                                    <li>Accept or reject incoming visitor calls</li>
+                                    <li>Use "End Call" button during active calls</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Dashboard Content (shown after initialization) -->
+                <div id="agentDashboardContent" class="hidden space-y-6">
+
+                    <!-- Call Controls (shown during active call) -->
+                    <div id="callControlsSection" class="hidden space-y-4">
+                        <div
+                            class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4 rounded-xl flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                <i data-lucide="phone-call" class="w-6 h-6 animate-pulse"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-semibold">Call In Progress</div>
+                                <div class="text-sm text-blue-100">Video call is active</div>
+                            </div>
+                        </div>
+
+                        <div id="ve-agent-container"
+                            class="w-full aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-lg"></div>
+
+                        <button id="endCallBtn"
+                            class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="flex items-center justify-center gap-2">
+                                <i data-lucide="phone-off" class="w-5 h-5"></i>
+                                End Call
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Queue Toggle -->
+                    <div id="queueSection" class="space-y-6">
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Call Queue Status
+                            </h3>
+                            <div
+                                class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                            <i data-lucide="list" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <span class="font-semibold text-gray-800">Receive Calls</span>
+                                    </div>
+                                    <button id="queueToggle"
+                                        class="relative w-14 h-8 bg-gray-300 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2">
+                                        <div
+                                            class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300">
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Incoming Calls Queue -->
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Incoming Calls
+                            </h3>
+                            <div class="bg-white border-2 border-gray-200 rounded-xl overflow-hidden">
+                                <div
+                                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="phone-incoming" class="w-5 h-5"></i>
+                                        <span class="font-semibold">Queue</span>
+                                    </div>
+                                    <span class="bg-white text-blue-600 text-sm font-bold px-3 py-1 rounded-full"
+                                        id="callCount">0</span>
+                                </div>
+                                <div class="p-4">
+                                    <div id="callsList">
+                                        <div id="emptyState" class="text-center py-12">
+                                            <div class="w-16 h-16 mx-auto mb-4 text-gray-300">
+                                                <i data-lucide="phone" class="w-full h-full"></i>
+                                            </div>
+                                            <div class="text-gray-500 font-medium">No incoming calls</div>
+                                            <div class="text-sm text-gray-400 mt-2" id="emptyStateText">
+                                                Enable queue to receive calls
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End Agent Dashboard Content -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.mjs"></script>
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+
+    <!-- Tour Script (runs once per user) -->
+    <script src="./tour.js"></script>
+</body>
+
+</html>

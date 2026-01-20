@@ -252,11 +252,89 @@ For complete API documentation including all methods and events, please refer to
 
 ```
 ve-core-sdk/
-├── index.html        # UI structure with Tailwind CSS
-├── main.mjs         # Business logic and SDK integration
-├── ui-handler.mjs   # UI manipulation functions
-└── README.md        # This file
+├── index.html           # UI structure with Tailwind CSS + custom controls overlay
+├── main.mjs             # Business logic and SDK integration
+├── ui-handler.mjs       # UI manipulation functions
+└── README.md            # This file
 ```
+
+## URL Parameters
+
+This demo accepts the following URL parameters:
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `domain` | Yes | VideoEngager domain (e.g., `videome.leadsecure.com`) |
+| `tenantId` | Yes | Your tenant ID |
+| `customizedUI` | No | Set to `true` to show custom control buttons overlay |
+| `customCssGuid` | No | Custom CSS GUID to apply custom styles to the visitor page |
+
+### Example URL
+
+```
+index.html?domain=videome.leadsecure.com&tenantId=abc123&customizedUI=true&customCssGuid=my-css-guid
+```
+
+## UI Customization
+
+This demo supports **custom video controls** that overlay on top of the iframe. When enabled, you get a floating control bar at the bottom of the screen with:
+
+- 🎤 **Microphone toggle** - Mute/unmute audio
+- 📹 **Camera toggle** - Turn camera on/off
+- 🖥️ **Screen share** - Start/stop screen sharing
+- 🔄 **Camera switch** - Cycle through available cameras
+- 📞 **Hangup** - End the call
+
+### Enabling Custom Controls
+
+1. **From the main configuration page**: Check "Use Customized UI" option
+2. **Via URL parameter**: Add `customizedUI=true` to the URL
+
+### How It Works
+
+When `customizedUI=true`:
+1. The SDK is initialized with `enableVeIframeCommands: true`
+2. Custom control buttons appear when the call connects
+3. Button states sync with actual call state via `videoEngager:iframe-video-state-changed` events
+4. Buttons use `executeVideoCallFn()` to trigger actions
+
+```javascript
+// SDK initialized with iframe commands enabled
+const videoEngagerInstance = new window.VideoEngager.VideoEngagerCore({
+    veHttps: true,
+    veEnv: config.domain,
+    tenantId: config.tenantId,
+    enableVeIframeCommands: config.customizedUI  // Enable only when needed
+});
+
+// Listen for state changes to update button UI
+videoEngagerInstance.on('videoEngager:iframe-video-state-changed', (state) => {
+    // state.isMicOn, state.isVideoOn, state.isScreenSharing, etc.
+    updateButtonStates(state);
+});
+
+// Execute commands via SDK
+await videoEngagerInstance.executeVideoCallFn('triggerMuteUnmute');
+await videoEngagerInstance.executeVideoCallFn('triggerShowHideVideo');
+await videoEngagerInstance.executeVideoCallFn('triggerScreenShare');
+await videoEngagerInstance.executeVideoCallFn('triggerHangup');
+```
+
+### Custom CSS GUID
+
+You can apply custom CSS to the visitor video page by providing a `customCssGuid` parameter. This GUID references a CSS configuration stored in VideoEngager settings.
+
+When provided, the GUID is passed to the visitor URL as the `csg` parameter:
+
+```javascript
+if (config.customCssGuid) {
+    visitorUrlObj.searchParams.set('csg', config.customCssGuid);
+}
+```
+
+For more details on UI customization, refer to the official documentation:
+- **[UI Customization Guide](https://videoengager.github.io/videoengager.widget/#/core/api-reference/customization)** - Complete customization reference
+- **[VideoEngager Visitor Core SDK](https://videoengager.github.io/videoengager.widget/#/core/README)** - Full SDK documentation
 
 ### Key Implementation Steps
 

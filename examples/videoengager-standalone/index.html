@@ -64,6 +64,34 @@
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
                 </div>
 
+                <!-- Visitor SDK Options -->
+                <div class="border-t-2 border-gray-100 pt-4 mt-4">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Visitor SDK Options</h3>
+
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="useVisitorCoreSDK"
+                                class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500">
+                            <span class="text-sm font-medium text-gray-700">Use VideoEngager Visitor Core SDK</span>
+                        </label>
+
+                        <div id="coreSdkOptions" class="hidden ml-8 space-y-3 pl-4 border-l-2 border-blue-200">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="useCustomizedUI"
+                                    class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-purple-500">
+                                <span class="text-sm font-medium text-gray-700">Use Customized UI</span>
+                            </label>
+
+                            <div>
+                                <label for="customCssGuid" class="block text-sm font-medium text-gray-700 mb-2">Custom
+                                    CSS GUID (Optional)</label>
+                                <input type="text" id="customCssGuid" placeholder="Enter Custom CSS GUID"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" id="configSubmitBtn"
                     class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg">
                     <span class="flex items-center justify-center gap-2">
@@ -130,7 +158,10 @@
                 tenantId: document.getElementById('tenantId').value,
                 apiKey: document.getElementById('apiKey').value,
                 organizationId: document.getElementById('organizationId').value,
-                externalId: document.getElementById('externalId').value
+                externalId: document.getElementById('externalId').value,
+                useVisitorCoreSDK: document.getElementById('useVisitorCoreSDK').checked,
+                useCustomizedUI: document.getElementById('useCustomizedUI').checked,
+                customCssGuid: document.getElementById('customCssGuid').value
             };
 
             // Show demo selection, hide config form
@@ -165,7 +196,23 @@
                 domain: configData.domain,
                 tenantId: configData.tenantId
             });
-            window.open(`./visitor/index.html?${visitorParams.toString()}`, '_blank');
+
+            // Determine which visitor page to open
+            let visitorPath = './visitor/index.html';
+
+            if (configData.useVisitorCoreSDK) {
+                visitorPath = './visitor/ve-core-sdk/index.html';
+
+                if (configData.useCustomizedUI) {
+                    visitorParams.set('customizedUI', 'true');
+                }
+
+                if (configData.customCssGuid) {
+                    visitorParams.set('customCssGuid', configData.customCssGuid);
+                }
+            }
+
+            window.open(`${visitorPath}?${visitorParams.toString()}`, '_blank');
         });
 
         // Back button
@@ -173,6 +220,19 @@
             document.getElementById('demoSelectionSection').classList.add('hidden');
             document.getElementById('configSection').classList.remove('hidden');
             lucide.createIcons();
+        });
+
+        // Toggle Core SDK options visibility
+        document.getElementById('useVisitorCoreSDK').addEventListener('change', (e) => {
+            const coreSdkOptions = document.getElementById('coreSdkOptions');
+            if (e.target.checked) {
+                coreSdkOptions.classList.remove('hidden');
+            } else {
+                coreSdkOptions.classList.add('hidden');
+                // Reset nested options when unchecked
+                document.getElementById('useCustomizedUI').checked = false;
+                document.getElementById('customCssGuid').value = '';
+            }
         });
     </script>
 

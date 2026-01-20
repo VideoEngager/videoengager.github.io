@@ -6,79 +6,79 @@
 // Check if tour has been shown before
 const TOUR_KEY = 've-visitor-sdk-tour-shown';
 
-function hasShownTour() {
-    return localStorage.getItem(TOUR_KEY) === 'true';
+function hasShownTour () {
+  return window.localStorage.getItem(TOUR_KEY) === 'true';
 }
 
-function markTourAsShown() {
-    localStorage.setItem(TOUR_KEY, 'true');
+function markTourAsShown () {
+  window.localStorage.setItem(TOUR_KEY, 'true');
 }
 
 // Initialize tour when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Skip if tour already shown
-    if (hasShownTour()) {
-        return;
-    }
+  // Skip if tour already shown
+  if (hasShownTour()) {
+    return;
+  }
 
-    // Load driver.js dynamically
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css';
-    document.head.appendChild(link);
+  // Load driver.js dynamically
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css';
+  document.head.appendChild(link);
 
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js';
-    script.onload = initTour;
-    document.head.appendChild(script);
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js';
+  script.onload = initTour;
+  document.head.appendChild(script);
 });
 
-function initTour() {
-    const driver = window.driver.js.driver({
-        showProgress: true,
-        showButtons: ['next', 'previous', 'close'],
-        progressText: '{{current}} of {{total}}',
-        nextBtnText: 'Next →',
-        prevBtnText: '← Previous',
-        doneBtnText: 'Got it!',
-        closeBtnText: 'Skip Tour',
-        onDestroyed: () => {
-            markTourAsShown();
-        },
-        popoverClass: 've-tour-popover',
-        steps: [
-            {
-                popover: {
-                    title: '🚀 Visitor Demo (SDK)',
-                    description: 'This demo uses VideoEngagerCore SDK which handles iframe communication automatically.<br><br><a href="#" id="skipTourForever" style="color: #ef4444; text-decoration: underline; font-size: 13px;">Don\'t show this tour again</a>',
-                    side: 'top',
-                    align: 'center'
-                }
-            },
-            {
-                element: '#visitorName',
-                popover: {
-                    title: '👤 Your Name',
-                    description: 'Enter your name (optional) to be displayed to the agent.',
-                    side: 'right',
-                    align: 'start'
-                }
-            },
-            {
-                element: '#startCallBtn',
-                popover: {
-                    title: '📞 Start Video Call',
-                    description: 'Click to start. The SDK handles interaction creation, iframe management, and events automatically.',
-                    side: 'right',
-                    align: 'start'
-                }
-            }
-        ]
-    });
+function initTour () {
+  const driver = window.driver.js.driver({
+    showProgress: true,
+    showButtons: ['next', 'previous', 'close'],
+    progressText: '{{current}} of {{total}}',
+    nextBtnText: 'Next →',
+    prevBtnText: '← Previous',
+    doneBtnText: 'Got it!',
+    closeBtnText: 'Skip Tour',
+    onDestroyed: () => {
+      markTourAsShown();
+    },
+    popoverClass: 've-tour-popover',
+    steps: [
+      {
+        popover: {
+          title: '🚀 Visitor Demo (SDK)',
+          description: 'This demo uses VideoEngagerCore SDK which handles iframe communication automatically.<br><br><a href="#" id="skipTourForever" style="color: #ef4444; text-decoration: underline; font-size: 13px;">Don\'t show this tour again</a>',
+          side: 'top',
+          align: 'center'
+        }
+      },
+      {
+        element: '#visitorName',
+        popover: {
+          title: '👤 Your Name',
+          description: 'Enter your name (optional) to be displayed to the agent.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: '#startCallBtn',
+        popover: {
+          title: '📞 Start Video Call',
+          description: 'Click to start. The SDK handles interaction creation, iframe management, and events automatically.',
+          side: 'right',
+          align: 'start'
+        }
+      }
+    ]
+  });
 
-    // Add custom styling
-    const style = document.createElement('style');
-    style.textContent = `
+  // Add custom styling
+  const style = document.createElement('style');
+  style.textContent = `
         .driver-popover.ve-tour-popover {
             border-radius: 12px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
@@ -137,22 +137,22 @@ function initTour() {
             color: #64748b;
         }
     `;
-    document.head.appendChild(style);
+  document.head.appendChild(style);
 
-    // Start the tour after a short delay
+  // Start the tour after a short delay
+  setTimeout(() => {
+    driver.drive();
+
+    // Add skip forever handler
     setTimeout(() => {
-        driver.drive();
-
-        // Add skip forever handler
-        setTimeout(() => {
-            const skipLink = document.getElementById('skipTourForever');
-            if (skipLink) {
-                skipLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    markTourAsShown();
-                    driver.destroy();
-                });
-            }
-        }, 100);
-    }, 800);
+      const skipLink = document.getElementById('skipTourForever');
+      if (skipLink) {
+        skipLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          markTourAsShown();
+          driver.destroy();
+        });
+      }
+    }, 100);
+  }, 800);
 }

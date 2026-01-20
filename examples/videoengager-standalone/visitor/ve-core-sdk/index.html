@@ -34,6 +34,89 @@
             border: none !important;
             margin: 0 !important;
         }
+
+        /* Custom Controls Overlay */
+        #custom-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: none;
+            gap: 12px;
+            padding: 16px 24px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #custom-controls.visible {
+            display: flex;
+        }
+
+        .control-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .control-btn.mute-btn {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+        }
+
+        .control-btn.mute-btn.off {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .control-btn.video-btn {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+        }
+
+        .control-btn.video-btn.off {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .control-btn.screen-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+
+        .control-btn.screen-btn.active {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .control-btn.camera-btn {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+        }
+
+        .control-btn.hangup-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .control-btn.hangup-btn:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
     </style>
     <script src="https://cdn.videoengager.com/widget/latest/browser/main.umd.js"></script>
 
@@ -135,6 +218,25 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Custom Video Controls Overlay -->
+    <div id="custom-controls">
+        <button id="mute-btn" class="control-btn mute-btn" title="Toggle Microphone">
+            <i data-lucide="mic" class="w-6 h-6"></i>
+        </button>
+        <button id="video-btn" class="control-btn video-btn" title="Toggle Camera">
+            <i data-lucide="video" class="w-6 h-6"></i>
+        </button>
+        <button id="screen-btn" class="control-btn screen-btn" title="Share Screen">
+            <i data-lucide="monitor" class="w-6 h-6"></i>
+        </button>
+        <button id="camera-switch-btn" class="control-btn camera-btn" title="Switch Camera">
+            <i data-lucide="refresh-cw" class="w-6 h-6"></i>
+        </button>
+        <button id="hangup-btn" class="control-btn hangup-btn" title="End Call">
+            <i data-lucide="phone-off" class="w-6 h-6"></i>
+        </button>
     </div>
 
     <!-- Container for VideoEngager iframe -->

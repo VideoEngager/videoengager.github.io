@@ -28,7 +28,7 @@ class ScheduleManager {
         const requestBody = {
             firstname: bookingData.firstname,
             lastname: bookingData.lastname,
-            customer_number: bookingData.phonenumber, // Note: API expects customer_number
+            _customer_number: bookingData.phonenumber, // Note: API expects customer_number
             customer_email: bookingData.email,
             tennantId: this.tenantId, // Note: API uses 'tennantId' (with double 'n')
             _desired_time: bookingData.desiredTime

@@ -21,6 +21,9 @@ export const elements = {
   // Form inputs
   visitorName: document.getElementById('visitorName'),
 
+  // Recording notice
+  recordingNotice: document.getElementById('recordingNotice'),
+
   // Buttons
   startCallBtn: document.getElementById('startCallBtn'),
   endCallBtn: document.getElementById('endCallBtn'),
@@ -94,6 +97,73 @@ export function showStartCall () {
  */
 export function getVisitorName () {
   return elements.visitorName.value.trim();
+}
+
+// ============================================
+// RECORDING STRATEGY UI
+// ============================================
+
+const RECORDING_TEXTS = {
+  mandatory: 'This call will be recorded. By proceeding, you acknowledge and accept that the session will be recorded.',
+  consent: 'I consent to this call being recorded',
+  optional: 'This call may be recorded during the interaction. A visible indicator will appear when recording starts. You may ask the agent not to record.'
+};
+
+/**
+ * Apply the recording strategy to the UI
+ * @param {'disabled'|'mandatory'|'consent'|'optional'} strategy
+ */
+export function applyRecordingStrategy (strategy) {
+  const container = elements.recordingNotice;
+  container.innerHTML = '';
+  container.classList.add('hidden');
+
+  if (strategy === 'disabled') return;
+
+  container.classList.remove('hidden');
+
+  if (strategy === 'mandatory') {
+    container.innerHTML = `
+      <div class="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg p-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <span class="text-sm text-amber-800">${RECORDING_TEXTS.mandatory}</span>
+      </div>`;
+  } else if (strategy === 'consent') {
+    container.innerHTML = `
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="recordingConsent"
+          class="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
+        <label for="recordingConsent" class="text-sm text-gray-700 cursor-pointer">
+          ${RECORDING_TEXTS.consent}
+        </label>
+      </div>`;
+  } else if (strategy === 'optional') {
+    container.innerHTML = `
+      <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <i data-lucide="info" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+        <span class="text-sm text-blue-700">${RECORDING_TEXTS.optional}</span>
+      </div>`;
+  }
+
+  lucide.createIcons();
+}
+
+/**
+ * Get recording consent value (only meaningful for 'consent' strategy)
+ * @returns {boolean} Whether recording consent checkbox is checked
+ */
+export function getRecordingConsent () {
+  const checkbox = document.getElementById('recordingConsent');
+  return checkbox ? checkbox.checked : false;
+}
+
+/**
+ * Get the recording notice text currently displayed to the user
+ * @param {'disabled'|'mandatory'|'consent'|'optional'} strategy
+ * @returns {string} The text shown to the user
+ */
+export function getRecordingNoticeText (strategy) {
+  return RECORDING_TEXTS[strategy] || '';
 }
 
 /**

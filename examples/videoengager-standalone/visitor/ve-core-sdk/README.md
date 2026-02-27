@@ -336,6 +336,85 @@ For more details on UI customization, refer to the official documentation:
 - **[UI Customization Guide](https://videoengager.github.io/videoengager.widget/#/core/api-reference/customization)** - Complete customization reference
 - **[VideoEngager Visitor Core SDK](https://videoengager.github.io/videoengager.widget/#/core/README)** - Full SDK documentation
 
+## Recording Consent (Beta)
+
+When **Require Visitor Consent** is enabled in organization recording settings, the agent's recording button visibility is controlled by the value you pass in `customData.recordingConsent.given` during interaction creation.
+
+- **`given: true`** → agent sees the recording button
+- **`given: false`** → recording button is hidden from the agent
+
+### Prerequisites
+
+1. Go to **Settings → Recording**
+2. Enable **Recording**
+3. Enable **Require Visitor Consent**
+4. Make sure **Mandatory** is **disabled**
+
+### How It Works
+
+When creating an interaction, include `customData.recordingConsent` in the request body. The only required field is `given` (boolean):
+
+```javascript
+const response = await fetch(
+    `https://${domain}/api/interactions/tenants/${tenantId}/interactions`,
+    {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            type: 'OUTBOUND',
+            customData: {
+                recordingConsent: {
+                    given: true // or false — based on visitor's choice
+                }
+            }
+        })
+    }
+);
+```
+
+That's it. The agent UI reads `customData.recordingConsent.given` and shows or hides the recording button accordingly.
+
+### Optional Audit Fields
+
+The `given` field is all that's required. If your organization needs an audit trail, you can add additional fields to `recordingConsent` at your discretion:
+
+```javascript
+customData: {
+    recordingConsent: {
+        given: true,                              // required — controls recording button
+        collectedAt: new Date().toISOString(),     // optional — when consent was collected
+        method: 'prejoin-web',                     // optional — how consent was collected
+        consentTextId: 'my-org-consent-v1',        // optional — identifier for the consent text version
+        consentTextHash: 'sha256:abc123...'        // optional — hash of the text shown to the visitor
+    }
+}
+```
+
+These fields are not used by the platform — they exist purely for your compliance and auditing needs.
+
+### Detecting the Recording Strategy
+
+To determine which UI to show the visitor (if any), fetch the tenant's visitor settings:
+
+```javascript
+const resp = await fetch(`https://${domain}/api/brokerages/settingsFindByTennantId/${tenantId}`);
+const settings = await resp.json();
+
+if (!settings.recording?.enable) {
+    // Recording is disabled — no consent needed
+} else if (settings.recording.mandatory) {
+    // Recording is mandatory — inform the visitor, always pass given: true
+} else if (settings.recording.requireVisitorConsent) {
+    // Consent mode — ask the visitor and pass their choice
+} else {
+    // Recording enabled but no consent required — optionally inform the visitor
+}
+```
+
+> **Note:** This feature is experimental. Collecting and passing consent data is the implementor's responsibility. The implementation may evolve.
+
+See the full working example in [main.mjs](main.mjs) and [ui-handler.mjs](ui-handler.mjs).
+
 ### Key Implementation Steps
 
 1. **Load SDK via CDN**

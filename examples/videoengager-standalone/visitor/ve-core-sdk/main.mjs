@@ -18,13 +18,28 @@ function initializeVisitor (config) {
     destroyIframe
   });
 
+  let recordingStrategy = 'disabled';
+
+  // Fetch visitor settings and apply recording strategy
+  getVisitorSettings(config.domain, config.tenantId)
+    .then(settings => defineRecordingStrategy(settings))
+    .then(strategy => {
+      recordingStrategy = strategy;
+      console.log('Defined recording strategy:', strategy);
+      UI.applyRecordingStrategy(strategy);
+    })
+    .catch(err => {
+      console.warn('Failed to fetch visitor settings, recording notice hidden:', err);
+    });
+
   async function startCall () {
     try {
       UI.setStartCallButtonState(true, 'Starting...');
       UI.updateStatus('Preparing call...', 'yellow');
 
       const visitorName = UI.getVisitorName();
-      const { interactionId, visitorUrl } = await prepareVisitorOutboundInteraction(config);
+      const recordingConsent = UI.getRecordingConsent();
+      const { interactionId, visitorUrl } = await prepareVisitorOutboundInteraction(config, recordingStrategy, recordingConsent);
 
       const visitorUrlObj = new URL(visitorUrl, `https://${config.domain}`);
       if (visitorName) {
@@ -166,13 +181,41 @@ function initializeVisitor (config) {
  * @see {@link https://api.videoengager.com/interactions_api?route=%2Finteractions_api#tag/interactions/POST/api/interactions/tenants/%7BtenantId%7D/interactions}
  * @returns {Promise<Object>} API response with interaction details
  */
-async function prepareVisitorOutboundInteraction (config) {
+async function prepareVisitorOutboundInteraction (config, recordingStrategy, recordingConsent) {
+  const customData = {};
+
+  if (recordingStrategy !== 'disabled') {
+    const noticeText = UI.getRecordingNoticeText(recordingStrategy);
+    const consentTextHash = 'sha256:' + await sha256(noticeText);
+
+    let given;
+    if (recordingStrategy === 'mandatory') {
+      given = true;
+    } else if (recordingStrategy === 'consent') {
+      given = recordingConsent;
+    } else {
+      // optional — user acknowledged the notice
+      given = true;
+    }
+
+    customData.recordingConsent = {
+      given,
+      collectedAt: new Date().toISOString(),
+      method: 'prejoin-web',
+      consentTextId: 've-standalone-v1-en',
+      consentTextHash
+    };
+  }
+
   const resp = await fetch(`https://${config.domain}/api/interactions/tenants/${config.tenantId}/interactions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ type: 'OUTBOUND' })
+    body: JSON.stringify({
+      type: 'OUTBOUND',
+      customData
+    })
   });
   const data = await resp.json();
   console.log('Outbound interaction created', data);
@@ -180,6 +223,31 @@ async function prepareVisitorOutboundInteraction (config) {
     visitorUrl: data.visitor.fullUrl,
     interactionId: data.interactionId
   };
+}
+async function defineRecordingStrategy (visitorSettings) {
+  console.log('Defining recording strategy based on visitor settings:', visitorSettings);
+  if (!visitorSettings.recording) return 'disabled';
+  if (!visitorSettings.recording.enable) return 'disabled';
+  if (visitorSettings.recording.mandatory) return 'mandatory';
+  if (visitorSettings.recording.requireVisitorConsent) return 'consent';
+  return 'optional';
+}
+async function getVisitorSettings (domain, tenantId) {
+  const resp = await fetch(`https://${domain}/api/brokerages/settingsFindByTennantId/${tenantId}`);
+  const data = await resp.json();
+  console.log('Visitor settings:', data);
+  return data;
+}
+/**
+ * Compute SHA-256 hex digest of a string using the Web Crypto API
+ * @param {string} message
+ * @returns {Promise<string>} hex-encoded hash
+ */
+async function sha256 (message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  // eslint-disable-next-line no-undef
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 // ============================================

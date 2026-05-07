@@ -304,5 +304,20 @@
     "category": "Integration Demo",
     "desc": "Vanilla-based demonstration of VideoEngager Core SDK, show casing how to build customer-facing application, collecting customer information",
     "tags": ["core-sdk", "vanilla", "video-chat", "integration", "genesys", "branding"]
+  },
+  {
+  "title": "Join by PIN",
+  "href": "/examples/pin-join/pin-page-light.html",
+  "desc": "Customer-facing PIN entry page with reCAPTCHA protection. Includes companion Tampermonkey script for floating join button on any website.",
+  "category": "Customer Entry Points",
+  "tags": [
+    "pin",
+    "join",
+    "customer",
+    "tampermonkey",
+    "standalone",
+    "recaptcha"
+  ],
+  "featured": false
   }
 ]

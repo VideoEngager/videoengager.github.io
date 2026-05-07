@@ -307,7 +307,7 @@
   },
   {
   "title": "Join by PIN",
-  "href": "/examples/pin-join/index.html",
+  "href": "/examples/joinbypin/index.html",
   "desc": "Customer-facing PIN entry page with reCAPTCHA protection. Includes companion Tampermonkey script for floating join button on any website.",
   "category": "Customer Entry Points",
   "tags": [

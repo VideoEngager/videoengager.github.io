@@ -368,7 +368,7 @@ class VideoEngagerWidget {
     this.iframeInstance.width = '100%';
     this.iframeInstance.height = '100%';
     this.iframeInstance.id = 'videoengageriframe';
-    this.iframeInstance.allow = 'microphone; camera';
+    this.iframeInstance.allow = 'microphone; camera; display-capture';
     this.iframeInstance.src = url;
     this.iframeHolder.querySelectorAll('iframe').forEach(e => e.remove());
     this.iframeHolder.appendChild(this.iframeInstance);

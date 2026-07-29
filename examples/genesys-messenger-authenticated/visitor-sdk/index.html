@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>Authenticated VideoEngager Visitor</title>
+    <style>
+        body {
+            max-width: 42rem;
+            margin: 4rem auto;
+            padding: 0 1rem;
+            font: 1rem/1.5 system-ui, sans-serif;
+        }
+
+        button {
+            padding: 0.7rem 1rem;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: wait;
+        }
+
+        #status[data-error="true"] {
+            color: #b42318;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>VideoEngager + Genesys + Okta</h1>
+        <p id="status" role="status" aria-live="polite">Initializing…</p>
+        <button id="startInteraction" type="button" disabled>Start video interaction</button>
+    </main>
+
+    <!-- Load the dependencies before the demo application. -->
+    <script src="https://cdn.videoengager.com/widget/latest/browser/main.umd.js"></script>
+    <script src="./okta-auth-provider.js"></script>
+    <script src="./app.js"></script>
+</body>
+
+</html>

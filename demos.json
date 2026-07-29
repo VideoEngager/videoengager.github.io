@@ -11,6 +11,34 @@
     "featured": true
   },
   {
+    "title": "Authenticated Genesys Messenger — Redirect",
+    "href": "/examples/genesys-messenger-authenticated/visitor-sdk/index.html",
+    "desc": "Visitor SDK integration with Genesys authenticated Messenger and Okta redirect login.",
+    "category": "Integrations: Genesys",
+    "tags": [
+      "genesys",
+      "messenger",
+      "authentication",
+      "okta",
+      "visitor-sdk",
+      "redirect"
+    ]
+  },
+  {
+    "title": "Authenticated Genesys Messenger — Popup",
+    "href": "/examples/genesys-messenger-authenticated/visitor-sdk-popup/index.html",
+    "desc": "Visitor SDK integration with Genesys authenticated Messenger and Okta popup login.",
+    "category": "Integrations: Genesys",
+    "tags": [
+      "genesys",
+      "messenger",
+      "authentication",
+      "okta",
+      "visitor-sdk",
+      "popup"
+    ]
+  },
+  {
     "title": "Genesys Messenger UMD",
     "href": "/examples/messaging/",
     "desc": "Custom deployment selector implementation.",

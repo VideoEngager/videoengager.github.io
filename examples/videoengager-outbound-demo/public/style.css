@@ -75,6 +75,29 @@ body {
     display: block;
     -webkit-text-fill-color: var(--text-muted);
 }
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border: 1px solid #28323f;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.source-link:hover {
+    color: var(--text);
+    border-color: var(--border-hover);
+    background: #1a2330;
+}
 .status-badge {
     background: #1a2330;
     padding: 6px 16px;

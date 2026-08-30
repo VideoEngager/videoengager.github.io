@@ -1,0 +1,483 @@
+# Source of truth for public/js/videoengager-client.js — every method in that
+# file mirrors one operationId below. If you change or add a path here, mirror
+# it there too (see AGENTS.md, "Adding a new endpoint").
+#
+# NOTE: the Partner impersonate endpoint used by this demo's auth step
+# (GET /api/partners/impersonate/{pak}/{externalId}/{email}) belongs to a
+# separate Partner API and is intentionally not part of this spec. It is
+# documented in ./partners-impersonate.yaml instead.
+openapi: 3.0.3
+info:
+  title: VideoEngager Interactions REST API
+  version: 1.0.0
+  description: |
+    REST endpoints for creating and managing VideoEngager interactions (tenant-scoped visitor flows and agent flows).
+    Notes:
+      - Agent endpoints require authentication (bearer token by default; adjust to your auth).
+      - `unwrap` uses a one-time password (OTIP) in the `otip` header (or Basic auth in legacy paths; header is recommended).
+servers:
+  - url: https://videome.leadsecure.com
+    description: Production
+  - url: https://{host}
+    variables:
+      host:
+        default: dev.videoengager.com
+        description: Local/dev
+
+tags:
+  - name: Interactions
+  - name: Feedback
+  - name: Analytics
+
+paths:
+  /api/interactions/tenants/{tenantId}/interactions:
+    post:
+      tags: [Interactions]
+      summary: Create interaction (visitor) — tenant scoped
+      operationId: createInteractionByVisitor
+      parameters:
+        - in: path
+          name: tenantId
+          required: true
+          schema: { type: string }
+          description: Brokerage tenant identifier (aka `tennantId`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVisitorInteractionRequest'
+      responses:
+        '200':
+          description: Created (routed via Genesys)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateVisitorInteractionResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/interactions:
+    post:
+      tags: [Interactions]
+      summary: Create interaction (agent-initiated)
+      operationId: createInteractionByAgent
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentInteractionRequest'
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProjection'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/interactions/{interactionId}/visitor:
+    get:
+      tags: [Interactions]
+      summary: Get visitor projection
+      operationId: getInteractionByVisitor
+      parameters:
+        - $ref: '#/components/parameters/InteractionId'
+      responses:
+        '200':
+          description: Visitor-safe projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitorProjection'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '410': { $ref: '#/components/responses/Gone' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/interactions/{interactionId}/agent:
+    get:
+      tags: [Interactions]
+      summary: Get agent projection
+      operationId: getInteractionByAgent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/InteractionId'
+      responses:
+        '200':
+          description: Agent projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProjection'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    patch:
+      tags: [Interactions]
+      summary: Update interaction (agent)
+      operationId: updateInteractionByAgent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/InteractionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateAttributesRequest'
+                - $ref: '#/components/schemas/GenericAgentUpdateRequest'
+      responses:
+        '200':
+          description: Updated; returns agent projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProjection'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/interactions/{interactionId}/visitor-data:
+    get:
+      tags: [Interactions]
+      summary: Unwrap visitor PII (decrypt with OTIP)
+      operationId: unwrapVisitorData
+      parameters:
+        - $ref: '#/components/parameters/InteractionId'
+        - in: header
+          name: otip
+          required: true
+          schema: { type: string }
+          description: One-time password provided at interaction creation when `visitorData` is present.
+      responses:
+        '200':
+          description: Visitor projection + decrypted data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitorUnwrapResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '410': { $ref: '#/components/responses/Gone' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+
+  /api/interactions/{interactionId}:
+    delete:
+      tags: [Interactions]
+      summary: Invalidate interaction (agent/global)
+      operationId: invalidateByAgent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/InteractionId'
+      responses:
+        '200':
+          description: Invalidated (global)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidateResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+
+  /api/interactions/{interactionId}/feedback:
+    get:
+      tags: [Feedback]
+      summary: Get feedback for interaction
+      operationId: getFeedbackForInteraction
+      parameters:
+        - $ref: '#/components/parameters/InteractionId'
+      responses:
+        '200':
+          description: Feedback retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedback'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    post:
+      tags: [Feedback]
+      summary: Create feedback for interaction
+      operationId: createFeedbackForInteraction
+      parameters:
+        - $ref: '#/components/parameters/InteractionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Feedback' }
+      responses:
+        '201':
+          description: Feedback stored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Feedback' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/interactions/external/{externalId}:
+    patch:
+      tags: [Analytics]
+      summary: Update interaction by external ID (analytics backfill)
+      operationId: updateByExternalId
+      parameters:
+        - in: path
+          name: externalId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpeechAndTextAnalyticsPatch'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProjection'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    InteractionId:
+      in: path
+      name: interactionId
+      required: true
+      schema: { type: string, description: 'UUIDv4 (vevisitor/session id)' }
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Gone:
+      description: Interaction expired/invalidated
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    CreateVisitorInteractionRequest:
+      type: object
+      properties:
+        customData:
+          type: object
+          additionalProperties: true
+          description: Free-form context shown to the agent (subject, caseId, etc.).
+        options:
+          type: object
+          additionalProperties: true
+          description: Advanced options (type, view config, flags).
+        visitorData:
+          type: object
+          additionalProperties: true
+          description: |
+            Sensitive customer PII to be encrypted-at-rest. When present,
+            response will include OTIP/EOTIP used for subsequent unwrap.
+      required: [customData]
+
+    CreateVisitorInteractionResponse:
+      type: object
+      properties:
+        interactionId: { type: string }
+        type: { type: string, example: INBOUND }
+        agent:
+          $ref: '#/components/schemas/AgentJoin'
+        visitor:
+          $ref: '#/components/schemas/VisitorJoin'
+        otip:
+          type: string
+          description: One-time password for decrypting visitorData (only if visitorData was sent).
+        eotip:
+          type: string
+          description: Base64 of `interactionId:otip` for Basic auth (legacy compatibility).
+      required: [interactionId, type, agent, visitor]
+
+    CreateAgentInteractionRequest:
+      type: object
+      properties:
+        customData:
+          type: object
+          additionalProperties: true
+        options:
+          type: object
+          additionalProperties: true
+
+    VisitorProjection:
+      type: object
+      properties:
+        interactionId: { type: string }
+        type: { type: string }
+        start: { type: number }
+        expiresOn: { type: number }
+        invalidated:
+          oneOf:
+            - { type: boolean }
+            - { type: string }
+        customData:
+          type: object
+          additionalProperties: true
+        visitor:
+          $ref: '#/components/schemas/VisitorJoin'
+        agent:
+          $ref: '#/components/schemas/AgentJoin'
+        conferenceData:
+          type: object
+          additionalProperties: true
+          description: Present for CONFERENCE interactions.
+      required: [interactionId, type, start, expiresOn, visitor]
+
+    VisitorUnwrapResponse:
+      allOf:
+        - $ref: '#/components/schemas/VisitorProjection'
+        - type: object
+          properties:
+            visitorData:
+              type: object
+              additionalProperties: true
+            brokerage:
+              type: object
+              additionalProperties: true
+              description: Brokerage metadata (with encryption internals removed).
+
+    AgentProjection:
+      type: object
+      properties:
+        interactionId: { type: string }
+        type: { type: string }
+        invalidated:
+          oneOf:
+            - { type: boolean }
+            - { type: string }
+        expiresOn:
+          type: number
+          description: Present for CONFERENCE interactions and some flows; treat as optional.
+        customData:
+          type: object
+          additionalProperties: true
+        agent:
+          $ref: '#/components/schemas/AgentJoin'
+        visitor:
+          $ref: '#/components/schemas/VisitorJoin'
+      required: [interactionId, type, agent, visitor]
+
+    UpdateAttributesRequest:
+      type: object
+      description: Update selected attributes (subject, start, expiresOn).
+      properties:
+        key:
+          type: string
+          enum: [updateAttributes]
+        updates:
+          type: object
+          properties:
+            subject: { type: string }
+            start: { type: number }
+            expiresOn: { type: number }
+          additionalProperties: false
+      required: [key, updates]
+
+    GenericAgentUpdateRequest:
+      type: object
+      description: Other agent-side updates (eventing, flags, externalId, etc.).
+      additionalProperties: true
+
+    GenericVisitorUpdateRequest:
+      type: object
+      description: Visitor-side updates.
+      additionalProperties: true
+
+    Feedback:
+      type: object
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    SpeechAndTextAnalyticsPatch:
+      type: object
+      properties:
+        speechandtextanalytics:
+          type: object
+          additionalProperties: true
+      required: [speechandtextanalytics]
+
+    AgentJoin:
+      type: object
+      properties:
+        fullUrl:
+          type: string
+          description: Agent join URL (Genesys Cloud agent workplace frame).
+      required: [fullUrl]
+
+    VisitorJoin:
+      type: object
+      properties:
+        fullUrl:
+          type: string
+          description: Visitor join URL (widget/popup bootstrap URL).
+      required: [fullUrl]
+
+    InvalidateResult:
+      type: object
+      properties:
+        interactionId: { type: string }
+        invalidated: { type: boolean }
+
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+        code:
+          type: string
+          description: Optional error code

@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant Browser
+    participant Backend as Your backend (optional: server/secure-proxy.js)
+    participant VE as VideoEngager API
+
+    rect rgb(30,42,58)
+    note over Browser,VE: Auth (Option B — recommended)
+    Browser->>Backend: POST /api/token/impersonate {externalId, email}
+    Backend->>VE: GET /api/partners/impersonate/{PAK}/{externalId}/{email}
+    VE-->>Backend: {token, token_expiration}
+    Backend-->>Browser: {token, token_expiration}  (PAK stays server-side)
+    end
+
+    Browser->>VE: POST /api/interactions  (Authorization: Bearer token)
+    VE-->>Browser: {interactionId, agent.fullUrl, visitor.fullUrl}
+    Browser->>VE: iframe src = agent.fullUrl (+ token)
+    Browser->>VE: iframe src = visitor.fullUrl

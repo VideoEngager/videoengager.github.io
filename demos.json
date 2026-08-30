@@ -347,5 +347,19 @@
     "recaptcha"
   ],
   "featured": false
+  },
+  {
+    "title": "Outbound Interaction — Impersonate Auth",
+    "href": "/examples/videoengager-outbound-demo/outbound-demo.html",
+    "desc": "Partner API Key impersonate auth to a bearer token, then create an OUTBOUND interaction via the REST API and load the agent + visitor join views.",
+    "category": "API Usage: Interactions",
+    "tags": [
+      "interactions",
+      "outbound",
+      "agent",
+      "rest-api",
+      "authentication",
+      "impersonate"
+    ]
   }
 ]

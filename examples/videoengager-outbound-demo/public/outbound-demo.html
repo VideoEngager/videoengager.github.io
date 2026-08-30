@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VideoEngager · OUTBOUND Interaction + Impersonate</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <div class="app" id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>◈ VideoEngager</h1>
+                <span>OUTBOUND Interaction + Impersonate Auth — reference demo</span>
+            </div>
+            <div class="status-badge">
+                <span class="dot"></span>
+                <span id="statusLabel">Ready</span>
+                <span style="color:#3d4a60;margin-left:4px;">·</span>
+                <span style="color:#5f6f89;" id="apiBaseDisplay">videome.leadsecure.com</span>
+            </div>
+        </header>
+
+        <div class="banner-note">
+            <strong>⚠ For local/dev testing only.</strong> This page calls the impersonate endpoint
+            directly from the browser, which means the Partner API Key (PAK) is visible in the
+            browser's network tab. A PAK authenticates your entire partner tenant — treat it like a
+            password. Before running anything like this where a real user's browser is involved,
+            route the impersonate call through your own backend instead. See
+            <code>server/secure-proxy.js</code> and the README ("Security: where should the PAK live?")
+            for the drop-in pattern.
+        </div>
+
+        <!-- Authentication Card (Impersonate) -->
+        <section class="card" id="authCard">
+            <div class="card-title">
+                🔑 Impersonate Authentication
+                <span class="badge" id="authBadge">get token</span>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label>PAK (Partner API Key) <span class="required">*</span></label>
+                    <input type="text" id="pakInput" placeholder="e.g. pak_live_abc123" />
+                    <span class="hint">Partner API Key from VideoEngager</span>
+                </div>
+                <div class="field">
+                    <label>External ID <span class="required">*</span></label>
+                    <input type="text" id="externalIdInput" placeholder="e.g. tenant_ext_456" />
+                    <span class="hint">External ID of the partner tenant</span>
+                </div>
+                <div class="field">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" id="emailInput" placeholder="agent@example.com" />
+                    <span class="hint">Partner email address</span>
+                </div>
+                <div class="field full-width">
+                    <label>Obtained Token</label>
+                    <div class="token-display" id="tokenDisplay">
+                        <span class="empty">No token yet</span>
+                    </div>
+                    <div class="expiry-info" id="tokenExpiryInfo"></div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-warning" id="impersonateBtn">
+                    <span>🔑</span> Get Token via Impersonate
+                </button>
+                <button class="btn btn-outline" id="clearAuthBtn" type="button">Clear Token</button>
+                <span class="text-muted" style="margin-left:auto;" id="authStatus">Ready</span>
+            </div>
+
+            <div id="authResponseArea" style="display:none;">
+                <div class="response-box" id="authResponseBox"></div>
+            </div>
+        </section>
+
+        <!-- Configuration Card -->
+        <section class="card" id="configCard">
+            <div class="card-title">
+                ⚙️ Interaction Configuration
+                <span class="badge">OUTBOUND</span>
+            </div>
+
+            <div class="form-grid">
+                <!-- Bearer Token (auto-filled by impersonate) -->
+                <div class="field">
+                    <label>Bearer Token <span class="required">*</span></label>
+                    <div class="token-input-wrap">
+                        <input type="password" id="bearerToken" placeholder="eyJhbGciOiJIUzI1NiIs..." />
+                        <button class="toggle-vis" id="toggleToken" type="button" aria-label="Toggle token visibility">👁</button>
+                    </div>
+                    <span class="hint">JWT for agent auth (auto‑filled via impersonate)</span>
+                </div>
+
+                <!-- API Base URL -->
+                <div class="field">
+                    <label>API Base URL</label>
+                    <input type="text" id="apiBase" placeholder="https://videome.leadsecure.com" value="https://videome.leadsecure.com" />
+                    <span class="hint">Override for dev/local (see servers: in openapi/interactions.yaml)</span>
+                </div>
+
+                <!-- Custom Data -->
+                <div class="field full-width">
+                    <label>Custom Data <span class="hint">(JSON, optional)</span></label>
+                    <textarea id="customData" placeholder='{"subject": "Outbound Campaign #123", "caseId": "CASE-456"}'></textarea>
+                    <span class="hint">Free-form context shown to the agent</span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" id="generateBtn">
+                    <span>🚀</span> Generate OUTBOUND Interaction
+                </button>
+                <button class="btn btn-outline" id="clearBtn" type="button">Clear All</button>
+                <span class="text-muted" style="margin-left:auto;" id="statusText">Ready</span>
+            </div>
+
+            <div id="responseArea" style="display:none;">
+                <div class="response-box" id="responseBox"></div>
+                <div class="response-summary" id="responseSummary"></div>
+            </div>
+        </section>
+
+        <!-- Iframes Card -->
+        <section class="card" id="iframeCard">
+            <div class="card-title">
+                🖥️ Agent &amp; Visitor Views (OUTBOUND)
+                <span class="badge" id="interactionIdBadge">waiting for interaction</span>
+            </div>
+
+            <div class="iframe-grid">
+                <!-- Agent -->
+                <div class="iframe-wrapper">
+                    <div class="iframe-header">
+                        <div class="label">
+                            <span class="icon">🧑‍💼</span> Agent View
+                            <span class="role-tag agent">bearer auth</span>
+                        </div>
+                        <span class="url-preview" id="agentUrlPreview">—</span>
+                    </div>
+                    <div class="iframe-body" id="agentBody">
+                        <div class="placeholder" id="agentPlaceholder">
+                            <div class="big-icon">🪟</div>
+                            <div>Agent join frame will appear here</div>
+                            <div class="sub">Generate an OUTBOUND interaction first</div>
+                        </div>
+                        <div class="loading-overlay hidden" id="agentLoading">
+                            <div class="spinner"></div>
+                            <span style="color:#7b8aa3;font-size:13px;">Loading agent view…</span>
+                        </div>
+                        <iframe id="agentIframe" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox" allow="camera; microphone; clipboard-read; clipboard-write; display-capture"></iframe>
+                    </div>
+                </div>
+
+                <!-- Visitor -->
+                <div class="iframe-wrapper">
+                    <div class="iframe-header">
+                        <div class="label">
+                            <span class="icon">👤</span> Visitor View
+                            <span class="role-tag visitor">public</span>
+                        </div>
+                        <span class="url-preview" id="visitorUrlPreview">—</span>
+                    </div>
+                    <div class="iframe-body" id="visitorBody">
+                        <div class="placeholder" id="visitorPlaceholder">
+                            <div class="big-icon">🌐</div>
+                            <div>Visitor widget will appear here</div>
+                            <div class="sub">Generate an OUTBOUND interaction first</div>
+                        </div>
+                        <div class="loading-overlay hidden" id="visitorLoading">
+                            <div class="spinner"></div>
+                            <span style="color:#7b8aa3;font-size:13px;">Loading visitor view…</span>
+                        </div>
+                        <iframe id="visitorIframe" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox" allow="camera; microphone; clipboard-read; clipboard-write; display-capture"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script type="module" src="js/outbound-demo.js"></script>
+</body>
+</html>

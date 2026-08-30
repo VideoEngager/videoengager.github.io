@@ -1,0 +1,100 @@
+# Reverse-documented from the working demo (auth_demo.html) — this endpoint
+# is not present in interactions.yaml because it belongs to VideoEngager's
+# separate Partner API. Filed here so the impersonate call is spec'd
+# somewhere instead of living only as a hardcoded fetch() in a demo page.
+# If VideoEngager publishes an official Partner API spec, replace this file
+# with that one and update videoengager-client.js's `impersonate()` JSDoc
+# to point at it.
+openapi: 3.0.3
+info:
+  title: VideoEngager Partner API (impersonate subset)
+  version: 1.0.0
+  description: |
+    Partner-tenant authentication. A Partner API Key (PAK) identifies and
+    authenticates an entire partner tenant — it is a long-lived secret and
+    should be handled like one (never shipped in client-side bundles, never
+    logged, rotated on suspected exposure).
+servers:
+  - url: https://videome.leadsecure.com
+    description: Production
+
+paths:
+  /api/partners/impersonate/{pak}/{externalId}/{email}:
+    get:
+      summary: Exchange a PAK for a short-lived agent bearer token
+      operationId: impersonatePartner
+      description: |
+        Returns a bearer token scoped to the given externalId/email, for use
+        as the `Authorization: Bearer <token>` header on the agent-side
+        Interactions endpoints (see interactions.yaml).
+
+        SECURITY: because the PAK is passed as a URL path segment, calling
+        this directly from a browser puts the PAK in that browser's network
+        log/devtools/history. Prefer calling this from your backend and
+        returning only the resulting token to the browser — see
+        server/secure-proxy.js in this repo for a minimal reference
+        implementation.
+      parameters:
+        - in: path
+          name: pak
+          required: true
+          schema: { type: string }
+          description: Partner API Key.
+        - in: path
+          name: externalId
+          required: true
+          schema: { type: string }
+          description: External ID of the partner tenant/agent being impersonated.
+        - in: path
+          name: email
+          required: true
+          schema: { type: string, format: email }
+          description: Partner email address to impersonate.
+      responses:
+        '200':
+          description: Token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpersonateResponse'
+        '400':
+          description: Bad request (missing/malformed parameters)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Invalid or revoked PAK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: External ID / email not found for this partner
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+components:
+  schemas:
+    ImpersonateResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: "JWT bearer token — pass as `Authorization: Bearer <token>` to agent endpoints."
+        token_expiration:
+          type: number
+          description: Unix timestamp (seconds) the token expires at. 0 means session-scoped / no expiry.
+      required: [token]
+
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+        code:
+          type: string
+          description: Optional error code

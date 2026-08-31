@@ -242,7 +242,7 @@ import { formatJson, highlightJson, createToast, copyToClipboard, bindPersistent
       // (openapi/interactions.yaml). Older gateway responses have been seen
       // using top-level agentUrl/visitorUrl instead — both are handled here.
       let agentUrl = data.agent?.fullUrl || data.agentUrl || null;
-      const visitorUrl = data.visitor?.fullUrl || data.visitor?.shortUrl || data.visitorUrl || null;
+      const visitorUrl = data.visitor?.shortUrl || data.visitorUrl || null;
       const type = data.type || 'OUTBOUND';
 
       if (agentUrl) {

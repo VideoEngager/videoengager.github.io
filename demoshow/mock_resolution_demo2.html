@@ -1,0 +1,562 @@
+<!--
+  ═══════════════════════════════════════════════════════════════
+  VIDEO OVERLAY · IN-SITU ACK WIDGET
+  Drops on top of live video — captures ack BEFORE call ends
+  ═══════════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Overlay · In-Situ Ack</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* ─── Full-screen video simulation ─── */
+    body {
+      background: #0a0a0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ─── Video "feed" placeholder ─── */
+    .video-feed {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      position: relative;
+    }
+
+    .video-feed .participants {
+      position: absolute;
+      bottom: 20px;
+      right: 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .video-feed .participants .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.10);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .video-feed .participants .avatar.active {
+      border-color: #22c55e;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    }
+
+    .video-feed .call-timer {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+      font-weight: 500;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 6px 16px;
+      border-radius: 100px;
+      backdrop-filter: blur(10px);
+    }
+
+    .video-feed .call-timer .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-right: 8px;
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.8); }
+    }
+
+    /* ─── OVERLAY (slides up from bottom) ─── */
+    .ack-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 28px 32px 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      transform: translateY(100%);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .ack-overlay.visible {
+      transform: translateY(0);
+    }
+
+    .ack-overlay .overlay-handle {
+      width: 40px;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      margin: 0 auto 20px;
+    }
+
+    .ack-overlay .overlay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .ack-overlay .overlay-left {
+      color: #fff;
+    }
+
+    .ack-overlay .overlay-left h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+
+    .ack-overlay .overlay-left p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .ack-overlay .overlay-left .resolution-summary {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ack-overlay .overlay-left .resolution-summary .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+
+    .ack-overlay .overlay-left .resolution-summary .row .label {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .ack-overlay .overlay-left .resolution-summary .row .value {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .ack-overlay .overlay-left .resolution-summary .row .value.green {
+      color: #4ade80;
+    }
+
+    /* ─── Right side — Ack buttons ─── */
+    .ack-overlay .overlay-right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .ack-overlay .overlay-right .ack-prompt {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .ack-overlay .overlay-right .ack-btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .ack-overlay .overlay-right .ack-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .ack-overlay .overlay-right .ack-btn-yes {
+      background: #22c55e;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(34, 197, 94, 0.25);
+    }
+
+    .ack-overlay .overlay-right .ack-btn-yes:hover {
+      background: #16a34a;
+      transform: scale(1.02);
+      box-shadow: 0 8px 30px rgba(34, 197, 94, 0.35);
+    }
+
+    .ack-overlay .overlay-right .ack-btn-yes:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .ack-overlay .overlay-right .ack-btn-no {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .ack-overlay .overlay-right .ack-btn-no:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .ack-overlay .overlay-right .ack-btn-no:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .ack-overlay .overlay-right .ack-status {
+      text-align: center;
+      font-size: 13px;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 4px;
+    }
+
+    .ack-overlay .overlay-right .ack-status.pending {
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.10);
+    }
+
+    .ack-overlay .overlay-right .ack-status.resolved {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.10);
+    }
+
+    /* ─── Trigger button (agent only) ─── */
+    .trigger-btn {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 32px;
+      border: none;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.10);
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
+      z-index: 5;
+      letter-spacing: 0.02em;
+    }
+
+    .trigger-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateX(-50%) scale(1.02);
+    }
+
+    .trigger-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: translateX(-50%);
+    }
+
+    .trigger-btn .key-hint {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.10);
+      padding: 0 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 8px;
+      font-weight: 400;
+    }
+
+    /* ─── Mobile responsive ─── */
+    @media (max-width: 600px) {
+      .ack-overlay .overlay-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .ack-overlay {
+        padding: 20px 16px 24px;
+      }
+
+      .ack-overlay .overlay-left h3 {
+        font-size: 17px;
+      }
+
+      .trigger-btn {
+        bottom: 16px;
+        padding: 10px 20px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-container">
+
+    <!-- ─── VIDEO FEED ─── -->
+    <div class="video-feed">
+      <span style="font-size: 48px; opacity: 0.3;">📹</span>
+      <span style="color: rgba(255,255,255,0.2); margin-top: 8px;">Live video call in progress</span>
+
+      <div class="call-timer">
+        <span class="dot"></span> 12:47 · Recording
+      </div>
+
+      <div class="participants">
+        <div class="avatar active">👤</div>
+        <div class="avatar">👤</div>
+        <div style="color: rgba(255,255,255,0.3); font-size: 12px;">+2</div>
+      </div>
+    </div>
+
+    <!-- ─── TRIGGER BUTTON (Agent clicks this) ─── -->
+    <button class="trigger-btn" id="showOverlayBtn">
+      📋 Present Resolution <span class="key-hint">⌘+R</span>
+    </button>
+
+    <!-- ─── ACKNOWLEDGMENT OVERLAY ─── -->
+    <div class="ack-overlay" id="ackOverlay">
+
+      <div class="overlay-handle"></div>
+
+      <div class="overlay-grid">
+
+        <!-- LEFT: Resolution summary -->
+        <div class="overlay-left">
+          <h3>✅ Resolution ready to lock</h3>
+          <p>Member must acknowledge before call ends.</p>
+
+          <div class="resolution-summary">
+            <div class="row">
+              <span class="label">Member</span>
+              <span class="value">Michael R.</span>
+            </div>
+            <div class="row">
+              <span class="label">Ticket</span>
+              <span class="value">#FIN-2847</span>
+            </div>
+            <div class="row">
+              <span class="label">Adjustment</span>
+              <span class="value green">-$450.00 reversed</span>
+            </div>
+            <div class="row">
+              <span class="label">New balance</span>
+              <span class="value green">$0.00</span>
+            </div>
+            <div class="row" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; margin-top: 4px;">
+              <span class="label">Status</span>
+              <span class="value green">● Resolved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Ack buttons -->
+        <div class="overlay-right">
+          <div class="ack-prompt">🔒 Confirm this resolution <strong>in-situ</strong></div>
+
+          <div class="ack-btn-group">
+            <button class="ack-btn ack-btn-yes" id="ackYesBtn">✓ Yes, resolved</button>
+            <button class="ack-btn ack-btn-no" id="ackNoBtn">✗ Not yet</button>
+          </div>
+
+          <div class="ack-status pending" id="ackStatus">
+            ⏳ Awaiting member confirmation...
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 4px;">
+            <button class="ack-btn" id="simulateMemberYes" style="flex:1; padding:8px; background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.2); border-radius:8px; font-size:12px; cursor:pointer;">
+              🎭 Simulate Member "Yes"
+            </button>
+            <button class="ack-btn" id="resetOverlayBtn" style="flex:1; padding:8px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.06); border-radius:8px; font-size:12px; cursor:pointer;">
+              🔄 Reset
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      const overlay = document.getElementById('ackOverlay');
+      const triggerBtn = document.getElementById('showOverlayBtn');
+      const ackYes = document.getElementById('ackYesBtn');
+      const ackNo = document.getElementById('ackNoBtn');
+      const ackStatus = document.getElementById('ackStatus');
+      const simYes = document.getElementById('simulateMemberYes');
+      const resetBtn = document.getElementById('resetOverlayBtn');
+
+      let acknowledged = false;
+      let overlayVisible = false;
+
+      // ─── Show overlay (slides up) ───
+      function showOverlay() {
+        overlay.classList.add('visible');
+        overlayVisible = true;
+        triggerBtn.disabled = true;
+        triggerBtn.textContent = '📋 Resolution presented';
+        console.log('[ISA] 📋 Overlay presented to member — awaiting ack.');
+        ackStatus.className = 'ack-status pending';
+        ackStatus.textContent = '⏳ Awaiting member confirmation...';
+      }
+
+      // ─── Hide overlay ───
+      function hideOverlay() {
+        overlay.classList.remove('visible');
+        overlayVisible = false;
+        triggerBtn.disabled = false;
+        triggerBtn.textContent = '📋 Present Resolution ⌘+R';
+      }
+
+      // ─── Set resolved state ───
+      function setResolved() {
+        acknowledged = true;
+        ackYes.disabled = true;
+        ackNo.disabled = true;
+        ackStatus.className = 'ack-status resolved';
+        ackStatus.innerHTML = '✅ <strong>Resolved in-situ!</strong> 3-layer ack captured · ' + new Date().toLocaleTimeString();
+        ackYes.textContent = '✓ Confirmed';
+        ackYes.style.background = '#16a34a';
+
+        console.log('[ISA] 🔒 3-LAYER ACK LOCKED:');
+        console.log('   Layer 1: Verbal — Member said "Yes" on camera');
+        console.log('   Layer 2: System — Resolution shown on overlay');
+        console.log('   Layer 3: Documentary — Timestamped at ' + new Date().toISOString());
+
+        // Auto-hide overlay after 3 seconds (simulate ending call)
+        setTimeout(() => {
+          if (overlayVisible) {
+            hideOverlay();
+            console.log('[ISA] 📞 Call ended — resolution locked in-situ.');
+          }
+        }, 3000);
+      }
+
+      // ─── Reset state ───
+      function resetState() {
+        acknowledged = false;
+        ackYes.disabled = false;
+        ackNo.disabled = false;
+        ackYes.textContent = '✓ Yes, resolved';
+        ackYes.style.background = '#22c55e';
+        ackStatus.className = 'ack-status pending';
+        ackStatus.textContent = '⏳ Awaiting member confirmation...';
+        hideOverlay();
+        console.log('[ISA] 🔄 Reset — ready for next call.');
+      }
+
+      // ─── Events ───
+
+      // Agent shows overlay
+      triggerBtn.addEventListener('click', showOverlay);
+
+      // Member clicks "Yes" (or agent clicks on their behalf)
+      ackYes.addEventListener('click', function() {
+        if (!acknowledged) {
+          setResolved();
+        }
+      });
+
+      // Member clicks "No" — keep them in the conversation
+      ackNo.addEventListener('click', function() {
+        if (!acknowledged) {
+          ackStatus.className = 'ack-status pending';
+          ackStatus.innerHTML = '🔄 Member says <strong>not yet</strong> — agent resolving additional concerns...';
+          console.log('[ISA] 🔄 Member said "No" — agent continuing resolution.');
+          // In real flow, agent would address remaining issues, then re-present
+          setTimeout(() => {
+            ackStatus.textContent = '⏳ Awaiting member confirmation...';
+          }, 3000);
+        }
+      });
+
+      // Simulate member saying "Yes" (for demo)
+      simYes.addEventListener('click', function() {
+        if (overlayVisible && !acknowledged) {
+          setResolved();
+        } else if (!overlayVisible) {
+          alert('📋 Click "Present Resolution" first to show the overlay.');
+        } else {
+          alert('✅ Already acknowledged.');
+        }
+      });
+
+      // Reset button
+      resetBtn.addEventListener('click', resetState);
+
+      // ─── Keyboard shortcut: ⌘+R or Ctrl+R ───
+      document.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
+          e.preventDefault();
+          if (!overlayVisible && !acknowledged) {
+            showOverlay();
+          }
+        }
+        // Escape to dismiss overlay (agent only)
+        if (e.key === 'Escape' && overlayVisible && !acknowledged) {
+          hideOverlay();
+        }
+      });
+
+      // ─── Init ───
+      console.log('🔷 VIDEO OVERLAY · In-Situ Ack Widget loaded.');
+      console.log('   ⌘+R  → Present resolution overlay');
+      console.log('   ESC   → Dismiss overlay (if pending)');
+      console.log('   Click "Simulate Member Yes" to demo ack flow');
+
+    })();
+  </script>
+
+</body>
+</html>

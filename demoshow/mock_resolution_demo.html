@@ -1,0 +1,347 @@
+<!-- VideoEngager · In-Situ Resolution Confirmation (Exit Widget) -->
+<!-- Plug this overlay into any page to demonstrate the post-resolution exit flow -->
+
+<style>
+    /* ── Reset & base (minimal, scoped to .ve-exit-widget) ── */
+    .ve-exit-widget * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .ve-exit-widget {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        animation: veFadeIn 0.3s ease;
+        padding: 20px;
+    }
+
+    @keyframes veFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .ve-exit-widget .ve-card {
+        max-width: 420px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 28px;
+        padding: 40px 36px 32px;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.04);
+        text-align: center;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ve-exit-widget .ve-badge {
+        display: inline-block;
+        background: #f3f4f6;
+        padding: 4px 14px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #4b5563;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+
+    .ve-exit-widget .ve-icon {
+        font-size: 48px;
+        line-height: 1;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .ve-exit-widget h3 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
+        letter-spacing: -0.01em;
+    }
+
+    .ve-exit-widget p {
+        font-size: 15px;
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 28px;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .ve-exit-widget .ve-btn-group {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .ve-exit-widget .ve-btn {
+        padding: 12px 32px;
+        border: none;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f3f4f6;
+        color: #1f2937;
+        min-width: 120px;
+        flex: 1;
+    }
+
+    .ve-exit-widget .ve-btn-primary {
+        background: #1a56db;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
+    }
+
+    .ve-exit-widget .ve-btn-primary:hover {
+        background: #1e40af;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(26, 86, 219, 0.3);
+    }
+
+    .ve-exit-widget .ve-btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .ve-exit-widget .ve-footer-note {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #f3f4f6;
+        font-size: 12px;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .ve-exit-widget .ve-footer-note .ve-lock {
+        font-size: 13px;
+    }
+
+    /* ── SUCCESS STATE (post "Yes" click) ── */
+    .ve-exit-widget .ve-success-state {
+        display: none;
+        animation: veFadeIn 0.4s ease;
+    }
+
+    .ve-exit-widget .ve-success-state .ve-check-mark {
+        display: inline-block;
+        background: #ecfdf5;
+        padding: 16px;
+        border-radius: 50%;
+        margin-bottom: 16px;
+    }
+
+    .ve-exit-widget .ve-success-state .ve-check-mark svg {
+        display: block;
+        width: 48px;
+        height: 48px;
+        fill: none;
+        stroke: #059669;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .ve-exit-widget .ve-success-state h3 {
+        color: #059669;
+    }
+
+    .ve-exit-widget .ve-success-state .ve-meta {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin: 16px 0 24px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #4b5563;
+        text-align: left;
+        border: 1px solid #e5e7eb;
+    }
+
+    .ve-exit-widget .ve-success-state .ve-meta span {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .ve-exit-widget .ve-btn-close {
+        background: #f3f4f6;
+        color: #1f2937;
+        padding: 10px 40px;
+        border-radius: 100px;
+        border: none;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+    }
+
+    .ve-exit-widget .ve-btn-close:hover {
+        background: #e5e7eb;
+    }
+
+    /* ── State toggle ── */
+    .ve-exit-widget.is-resolved .ve-prompt-state {
+        display: none;
+    }
+    .ve-exit-widget.is-resolved .ve-success-state {
+        display: block;
+    }
+
+    /* ── Micro-interactions ── */
+    .ve-exit-widget .ve-btn:active {
+        transform: scale(0.96);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+        .ve-exit-widget .ve-card {
+            padding: 32px 20px 24px;
+            border-radius: 20px;
+        }
+        .ve-exit-widget .ve-btn {
+            min-width: 100px;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .ve-exit-widget .ve-success-state .ve-meta {
+            flex-direction: column;
+            gap: 6px;
+        }
+    }
+</style>
+
+<!-- ═══ WIDGET MARKUP ═══ -->
+<div class="ve-exit-widget" id="veExitWidget" role="dialog" aria-modal="true">
+    <div class="ve-card">
+
+        <!-- ─── PROMPT STATE ─── -->
+        <div class="ve-prompt-state">
+            <span class="ve-badge">⏳ In-Session · Feature 8</span>
+            <span class="ve-icon">✅</span>
+            <h3>Is your issue resolved?</h3>
+            <p>Confirm now while we're still connected. Your feedback helps us improve.</p>
+            <div class="ve-btn-group">
+                <button class="ve-btn ve-btn-primary" id="veResolveYes">Yes, resolved</button>
+                <button class="ve-btn ve-btn-secondary" id="veResolveNo">Not yet</button>
+            </div>
+            <div class="ve-footer-note">
+                <span class="ve-lock">🔒</span> This confirmation is recorded with the session
+            </div>
+        </div>
+
+        <!-- ─── SUCCESS STATE (hidden by default) ─── -->
+        <div class="ve-success-state">
+            <div class="ve-check-mark">
+                <svg viewBox="0 0 48 48">
+                    <path d="M36 16L20 32L12 24" stroke="currentColor" />
+                </svg>
+            </div>
+            <h3>Resolution confirmed ✓</h3>
+            <p style="margin-bottom:12px;">Member confirmed in-stream, on the live recorded session.</p>
+            <div class="ve-meta">
+                <span>Confirmed by <span>Emil V.</span></span>
+                <span>Timestamp <span>6:42:13</span></span>
+                <span>Session <span>#ABC-2847</span></span>
+            </div>
+            <button class="ve-btn-close" id="veCloseWidget">Close &amp; exit workflow</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        const widget = document.getElementById('veExitWidget');
+        const yesBtn = document.getElementById('veResolveYes');
+        const noBtn = document.getElementById('veResolveNo');
+        const closeBtn = document.getElementById('veCloseWidget');
+
+        // ── "Yes" – transition to success / resolved state ──
+        yesBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            widget.classList.add('is-resolved');
+            // Log for approval demo
+            console.log('[VideoEngager] Resolution confirmed: YES (in-situ)');
+        });
+
+        // ── "No" – interactive feedback (keeps it realistic) ──
+        noBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const originalText = noBtn.textContent;
+            noBtn.textContent = '⏳ Noted, follow-up scheduled';
+            noBtn.style.background = '#fef2f2';
+            noBtn.style.color = '#b91c1c';
+            noBtn.disabled = true;
+            setTimeout(() => {
+                noBtn.textContent = originalText;
+                noBtn.style.background = '';
+                noBtn.style.color = '';
+                noBtn.disabled = false;
+                // Optionally close or reset? For approval demo, just reset.
+                // Better to keep it open so they can test "Yes" path.
+            }, 2000);
+            console.log('[VideoEngager] Resolution: NO (follow-up triggered)');
+        });
+
+        // ── "Close" – simulates exiting the workflow ──
+        closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Fade out and remove from DOM (or just hide)
+            widget.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+            widget.style.opacity = '0';
+            widget.style.transform = 'scale(0.96)';
+            setTimeout(() => {
+                widget.style.display = 'none';
+                console.log('[VideoEngager] Exit workflow closed.');
+                // Optional: show a console reminder for approval teams
+                console.info('✅ In-situ resolution exit flow approved for integration.');
+            }, 300);
+        });
+
+        // ── Click on backdrop to close (only if resolved) ──
+        widget.addEventListener('click', function(e) {
+            if (e.target === widget && widget.classList.contains('is-resolved')) {
+                closeBtn.click();
+            }
+        });
+
+        // ── Keyboard: Escape to close (only if resolved) ──
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && widget.classList.contains('is-resolved')) {
+                closeBtn.click();
+            }
+        });
+
+        // ── Auto-log for approval teams ──
+        console.log('🔷 VideoEngager · In-Situ Resolution Widget (Feature 8)');
+        console.log('   Click "Yes, resolved" to see the exit success state.');
+        console.log('   Click "Close & exit workflow" to dismiss.');
+
+    })();
+</script>

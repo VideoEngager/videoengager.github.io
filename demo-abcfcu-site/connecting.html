@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ABC Federal Credit Union — Connecting</title>
+<!-- Holding screen shown in the customer video panel before the live call starts.
+     Same brand tokens as index.html. Convert to SVG/PNG at 1280×720 (16:9) or 1920×1080. -->
+<style>
+  :root{--navy:#0B3D5C;--teal:#1B9AAA;--teal-2:#137F8D;--gold:#E0A526;--ink-3:#7E8B96;--bg:#F3F6F8}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;color:var(--navy)}
+  .stage{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:56px;padding:40px;
+         background:radial-gradient(ellipse at 50% 40%,#FFFFFF 0%,var(--bg) 70%)}
+  .logo{display:flex;align-items:center;gap:26px}
+  .logo svg{width:112px;height:112px;flex:none}
+  .name{font-weight:800;font-size:46px;letter-spacing:-.3px;line-height:1.05}
+  .name small{display:block;font-weight:600;font-size:18px;color:var(--teal-2);letter-spacing:2px;text-transform:uppercase;margin-top:10px}
+  .msg{display:flex;align-items:center;gap:18px;font-size:30px;font-weight:600;color:var(--navy)}
+  .dots span{display:inline-block;width:10px;height:10px;margin-left:6px;border-radius:50%;background:var(--teal);animation:b 1.2s infinite ease-in-out}
+  .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  @keyframes b{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-6px)}}
+  .foot{position:fixed;bottom:28px;font-size:14px;color:var(--ink-3);letter-spacing:.3px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="logo" aria-label="ABC Federal Credit Union">
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <rect width="40" height="40" rx="9" fill="#0B3D5C"/>
+      <path d="M8 27 C14 12, 26 12, 32 27" stroke="#1B9AAA" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M12 29 C16.5 19, 23.5 19, 28 29" stroke="#E0A526" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="30" r="2.6" fill="#fff"/>
+    </svg>
+    <div class="name">ABC Federal Credit Union<small>Member banking since 1954</small></div>
+  </div>
+  <div class="msg">Connecting to a Live Agent<span class="dots"><span></span><span></span><span></span></span></div>
+  <div class="foot">Secure member session · this session may be recorded</div>
+</div>
+</body>
+</html>

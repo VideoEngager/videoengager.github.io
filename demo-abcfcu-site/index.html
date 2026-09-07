@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ABC Federal Credit Union — Send a Wire Transfer</title>
+<!--
+  ABC Federal Credit Union — fictional demo site for the VideoEngager × Salesforce Agentforce demo.
+  Single file, no build step. Serve from an origin allowlisted in the SDO org (see README.md):
+
+      python3 -m http.server 8000     →  http://localhost:8000/
+
+  URL switches (for rehearsal only, never on camera):
+      ?correct    pre-fill the recipient with routing/account in the RIGHT fields (success path)
+      ?reset      start with an empty recipient form
+      ?nochat     do not load the Salesforce messaging widget
+      ?video=panel   1: floating panel inside this page (draggable, resizable; visible in a screen share)
+      ?video=popup   2: separate floating browser window (default)
+      ?video=tab     3: new tab in the same browser
+      (?video=1|2|3 and the bare ?panel / ?popup / ?tab flags are accepted too)
+  Shift+D toggles a small operator strip showing widget status and the captured video link.
+-->
+<style>
+  :root{
+    --navy:#0B3D5C; --navy-2:#0F4E75; --teal:#1B9AAA; --teal-2:#137F8D; --gold:#E0A526;
+    --ink:#1E2A33; --ink-2:#4F5E6B; --ink-3:#7E8B96; --line:#D9E1E7; --line-2:#EAF0F4;
+    --bg:#F3F6F8; --card:#FFFFFF; --ok:#1E7F4F; --ok-bg:#E8F5EE; --bad:#B42318; --bad-bg:#FDECEA;
+    --radius:10px; --shadow:0 1px 2px rgba(16,32,48,.06),0 6px 20px rgba(16,32,48,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;font-size:15px;line-height:1.5}
+  a{color:var(--teal-2);text-decoration:none}
+  button{font:inherit}
+
+  /* ---------- top chrome ---------- */
+  .util{background:var(--navy);color:#CFE0EC;font-size:13px}
+  .util .wrap{display:flex;align-items:center;justify-content:space-between;height:38px}
+  .util a{color:#CFE0EC}
+  .util .who{display:flex;gap:18px;align-items:center}
+  .util .who b{color:#fff;font-weight:600}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  header.main{background:#fff;border-bottom:1px solid var(--line)}
+  header.main .wrap{display:flex;align-items:center;height:96px;gap:40px}
+  .logo{display:flex;align-items:center;gap:16px;color:var(--navy)}
+  .logo svg{width:60px;height:60px;flex:none}
+  .logo .name{font-weight:800;font-size:26px;letter-spacing:-.2px;line-height:1.05}
+  .logo .name small{display:block;font-weight:600;font-size:12.5px;color:var(--teal-2);letter-spacing:1px;text-transform:uppercase;margin-top:5px}
+  nav.primary{display:flex;gap:6px;margin-left:auto}
+  nav.primary a{padding:11px 16px;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:16px}
+  nav.primary a.active{color:var(--navy);background:var(--line-2)}
+  .avatar{width:42px;height:42px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+
+  /* ---------- layout ---------- */
+  .page{padding:26px 0 60px}
+  .crumbs{font-size:13px;color:var(--ink-3);margin-bottom:14px}
+  .crumbs a{color:var(--ink-3)}
+  .crumbs span{margin:0 6px}
+  h1{font-size:30px;font-weight:700;margin:0 0 4px;color:var(--navy)}
+  .lede{color:var(--ink-2);margin:0 0 22px}
+  .grid{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .card .hd{padding:14px 18px;border-bottom:1px solid var(--line-2);font-weight:600;font-size:14px;color:var(--ink-2);display:flex;align-items:center;justify-content:space-between}
+  .card .bd{padding:18px}
+
+  /* account sidebar */
+  .acct{padding:16px 18px}
+  .acct .lbl{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.5px}
+  .acct .num{font-size:13px;color:var(--ink-2)}
+  .acct .bal{font-size:26px;font-weight:700;color:var(--navy);margin:4px 0 0;letter-spacing:-.3px}
+  .acct .sub{font-size:12.5px;color:var(--ink-3)}
+  .kv{display:flex;justify-content:space-between;font-size:13.5px;padding:8px 0;border-top:1px solid var(--line-2)}
+  .kv:first-child{border-top:0}
+  .kv b{font-weight:600;color:var(--ink)}
+  .pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--ok-bg);color:var(--ok)}
+  .side-help{font-size:13px;color:var(--ink-2)}
+  .side-help p{margin:0 0 8px}
+
+  /* stepper */
+  .steps{display:flex;gap:0;margin:0 0 18px;padding:0;list-style:none}
+  .steps li{flex:1;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--ink-3);font-weight:500}
+  .steps li:first-child{border-radius:8px 0 0 8px}
+  .steps li:last-child{border-radius:0 8px 8px 0}
+  .steps li+li{border-left:0}
+  .steps li i{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;font-weight:600;flex:none}
+  .steps li.done{color:var(--ink-2)}
+  .steps li.done i{background:var(--ok);border-color:var(--ok);color:#fff}
+  .steps li.cur{color:var(--navy);background:#F5FAFC;border-color:var(--teal)}
+  .steps li.cur i{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* form */
+  fieldset{border:0;padding:0;margin:0 0 22px}
+  legend{font-weight:600;font-size:15px;color:var(--navy);margin-bottom:10px;padding:0}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+  .row.one{grid-template-columns:1fr}
+  @media (max-width:640px){.row{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+  label small{font-weight:400;color:var(--ink-3)}
+  input[type=text],input[type=tel],select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid #BFCBD5;border-radius:8px;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:0;border-color:var(--teal)}
+  input.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px}
+  input[readonly]{background:#F7F9FB;color:var(--ink-2)}
+  .amt{position:relative}
+  .amt input{padding-left:26px;font-weight:600}
+  .amt:before{content:"$";position:absolute;left:12px;top:10px;color:var(--ink-3)}
+  .hint{font-size:12.5px;color:var(--ink-3);margin-top:5px}
+  .saved{display:flex;align-items:center;gap:10px;background:#F5FAFC;border:1px solid #CFE6EA;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+  .saved .chip{font-weight:600;color:var(--navy)}
+  .saved a{margin-left:auto;font-size:12.5px}
+  .chk{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);font-weight:400}
+  .chk input{margin-top:3px}
+  .actions{display:flex;gap:10px;align-items:center;padding-top:16px;border-top:1px solid var(--line-2)}
+  .btn{padding:11px 20px;border-radius:8px;border:1px solid transparent;cursor:pointer;font-weight:600;font-size:14px}
+  .btn.primary{background:var(--navy);color:#fff}
+  .btn.primary:hover{background:var(--navy-2)}
+  .btn.primary[disabled]{opacity:.6;cursor:default}
+  .btn.ghost{background:#fff;border-color:#BFCBD5;color:var(--ink-2)}
+  .btn.ghost:hover{background:var(--line-2)}
+  .btn.link{background:none;border:0;color:var(--teal-2);padding:11px 6px}
+  .actions .right{margin-left:auto;font-size:12.5px;color:var(--ink-3)}
+
+  /* review */
+  .review{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+  @media (max-width:640px){.review{grid-template-columns:1fr}}
+  .review .kv{padding:9px 0}
+  .review .kv span{color:var(--ink-3)}
+  .review .kv b.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:500;letter-spacing:.5px}
+  .total{margin-top:16px;padding:14px 16px;background:#F5FAFC;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+  .total b{font-size:20px;color:var(--navy)}
+
+  /* alerts */
+  .alert{display:none;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:8px;margin:0 0 18px;font-size:14px}
+  .alert.show{display:flex}
+  .alert.bad{background:var(--bad-bg);border:1px solid #F3B9B3;color:#7A1C14}
+  .alert.bad b{color:var(--bad)}
+  .alert svg{flex:none;width:20px;height:20px;margin-top:1px}
+  .alert .ref{display:block;font-size:12px;color:#9B5A54;margin-top:4px;font-family:ui-monospace,Menlo,Consolas,monospace}
+
+  /* processing overlay inside card */
+  .processing{display:none;align-items:center;gap:12px;color:var(--ink-2);font-size:14px;padding:6px 0 0}
+  .processing.show{display:flex}
+  .spin{width:18px;height:18px;border:2.5px solid var(--line);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* success */
+  .success{text-align:center;padding:20px 10px 8px}
+  .success .tick{width:64px;height:64px;border-radius:50%;background:var(--ok-bg);color:var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+  .success h2{margin:0 0 4px;color:var(--navy);font-size:22px}
+  .success p{margin:0;color:var(--ink-2)}
+  .conf{margin:18px auto 6px;display:inline-block;padding:12px 22px;border:1.5px dashed var(--teal);border-radius:8px;background:#F5FAFC}
+  .conf small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-3)}
+  .conf b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;color:var(--navy);letter-spacing:1px}
+  .success .review{text-align:left;margin-top:20px;border-top:1px solid var(--line-2);padding-top:6px}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line);background:#fff;color:var(--ink-3);font-size:12.5px}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;height:60px;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--ink-3);margin-right:16px}
+
+  /* ---------- live video panel (docked beside the messaging widget) ---------- */
+  #video{display:none;position:fixed;z-index:9990;right:0;bottom:0;background:#141B22;border-radius:12px;overflow:hidden;
+         box-shadow:0 14px 44px rgba(0,0,0,.4);flex-direction:column;border:1px solid #2A3644}
+  #video.open{display:flex}
+  #videobar{display:flex;align-items:center;gap:10px;padding:9px 14px;background:#0E141A;color:#D7E0E8;font-size:13px;flex:none;user-select:none;cursor:move;touch-action:none}
+  #videobar .dot{width:8px;height:8px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 3px rgba(229,72,77,.25);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+  #videobar b{font-weight:600}
+  #videobar .brand{margin-left:auto;font-size:11.5px;color:#8FA0AE;letter-spacing:.3px}
+  #videobar button{font-size:15px;line-height:1;padding:3px 9px;border:0;border-radius:6px;background:transparent;color:#8FA0AE;cursor:pointer;margin-left:6px}
+  #videobar button:hover{background:#2A3644;color:#fff}
+  #videoframe{flex:1;width:100%;border:0;background:#000}
+
+  /* rejoin button, only after a call was opened then closed */
+  #rejoin{display:none;position:fixed;z-index:9990;right:24px;bottom:110px;padding:10px 16px;border-radius:999px;border:0;
+          background:var(--teal);color:#fff;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(27,154,170,.4)}
+  #rejoin.show{display:block}
+
+  #videoresize{position:absolute;right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;z-index:2;
+               background:linear-gradient(135deg,transparent 50%,#5A6B7A 50%,#5A6B7A 60%,transparent 60%,transparent 75%,#5A6B7A 75%,#5A6B7A 85%,transparent 85%)}
+  #video.dragging #videoframe{pointer-events:none}
+
+  /* join banner — shown when the popup could not be opened automatically */
+  #join{display:none;position:fixed;z-index:9991;left:50%;transform:translateX(-50%);top:18px;align-items:center;gap:14px;
+        padding:12px 18px 12px 16px;border-radius:12px;background:#0E141A;color:#D7E0E8;font-size:14px;box-shadow:0 12px 36px rgba(0,0,0,.35)}
+  #join.show{display:flex}
+  #join .dot{width:9px;height:9px;border-radius:50%;background:#2EBD85;box-shadow:0 0 0 3px rgba(46,189,133,.25);animation:pulse 1.6s ease-in-out infinite}
+  #join button{padding:9px 16px;border-radius:8px;border:0;background:var(--teal);color:#fff;font-weight:600;cursor:pointer}
+  #join button:hover{background:#22A9BA}
+
+  /* operator strip — Shift+D */
+  #ops{display:none;position:fixed;z-index:9999;left:0;right:0;bottom:0;background:#111;color:#9FE1CB;font:12px ui-monospace,Menlo,Consolas,monospace;padding:6px 14px;opacity:.92}
+  #ops.show{display:block}
+  #ops span{margin-right:22px}
+  #ops .k{color:#6B7B88}
+</style>
+</head>
+<body>
+
+<div class="util"><div class="wrap">
+  <div>Member Services · Mon–Fri 7am–7pm PT · 1-800-555-0142</div>
+  <div class="who"><a href="#">Messages (0)</a><a href="#">Settings</a><span>Signed in as <b id="who-name">Ben</b> · <a href="#">Sign out</a></span></div>
+</div></div>
+
+<header class="main"><div class="wrap">
+  <div class="logo" aria-label="ABC Federal Credit Union">
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <rect width="40" height="40" rx="9" fill="#0B3D5C"/>
+      <path d="M8 27 C14 12, 26 12, 32 27" stroke="#1B9AAA" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M12 29 C16.5 19, 23.5 19, 28 29" stroke="#E0A526" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="30" r="2.6" fill="#fff"/>
+    </svg>
+    <div class="name">ABC Federal Credit Union<small>Member banking since 1954</small></div>
+  </div>
+  <nav class="primary">
+    <a href="#">Accounts</a><a href="#" class="active">Transfers &amp; Payments</a><a href="#">Cards</a><a href="#">Loans</a><a href="#">Support</a>
+  </nav>
+  <div class="avatar" id="who-initials">BR</div>
+</div></header>
+
+<main class="page"><div class="wrap">
+  <div class="crumbs"><a href="#">Transfers &amp; Payments</a><span>›</span><a href="#">External transfers</a><span>›</span>Send a wire</div>
+  <h1>Send a wire transfer</h1>
+  <p class="lede">Domestic wires submitted before 2:00 pm PT on a business day are typically received the same day.</p>
+
+  <div class="grid">
+    <!-- ---------- sidebar ---------- -->
+    <aside>
+      <div class="card">
+        <div class="hd">From account</div>
+        <div class="acct">
+          <div class="lbl" id="acct-name">Everyday Checking</div>
+          <div class="num" id="acct-num">•••• 2290</div>
+          <div class="bal" id="acct-bal">$18,642.17</div>
+          <div class="sub">Available balance</div>
+        </div>
+        <div class="bd" style="padding-top:4px">
+          <div class="kv"><span>Daily external wire limit</span><b id="acct-limit">$25,000.00</b></div>
+          <div class="kv"><span>Used today</span><b id="acct-used">$0.00</b></div>
+          <div class="kv"><span>Holds on account</span><b id="acct-holds">None</b></div>
+          <div class="kv"><span>External wires</span><b><span class="pill" id="acct-wires">Enabled</span></b></div>
+        </div>
+      </div>
+      <div class="card side-help" style="margin-top:16px">
+        <div class="hd">Need help?</div>
+        <div class="bd">
+          <p>Chat with our virtual assistant any time using the chat button at the bottom right. A member services specialist can join when you need one.</p>
+          <p style="margin:0"><a href="#">Wire transfer FAQ</a> · <a href="#">Fees &amp; cut-off times</a></p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ---------- main ---------- -->
+    <section>
+      <ol class="steps" id="steps">
+        <li class="cur" data-step="1"><i>1</i>Recipient &amp; amount</li>
+        <li data-step="2"><i>2</i>Review</li>
+        <li data-step="3"><i>3</i>Confirmation</li>
+      </ol>
+
+      <div class="card">
+        <!-- STEP 1 -->
+        <div class="bd" id="step1">
+          <div class="alert bad" id="err1"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-.9 4h1.8v5.5H9.1V6zm0 7h1.8v1.8H9.1V13z"/></svg><div>Please complete the highlighted fields.</div></div>
+          <form id="wire" novalidate>
+            <fieldset>
+              <legend>Recipient</legend>
+              <div class="saved" id="savedbar">
+                <span>Saved recipient:</span><span class="chip" id="saved-name">Northgate Construction LLC</span>
+                <span style="color:var(--ink-3)">· loaded from your recipient list</span>
+                <a href="#" id="clear-saved">Enter a new recipient</a>
+              </div>
+              <div class="row">
+                <div><label for="rname">Recipient name</label><input type="text" id="rname" autocomplete="off"></div>
+                <div><label for="rbank">Recipient bank</label><input type="text" id="rbank" autocomplete="off"></div>
+                <div><label for="routing">Bank routing number <small>(ABA)</small></label><input type="tel" id="routing" class="mono" inputmode="numeric" autocomplete="off"></div>
+                <div><label for="account">Recipient account number</label><input type="tel" id="account" class="mono" inputmode="numeric" autocomplete="off"></div>
+                <div><label for="atype">Account type</label><select id="atype"><option>Business checking</option><option>Checking</option><option>Savings</option></select></div>
+                <div><label for="raddr">Recipient address <small>(optional)</small></label><input type="text" id="raddr" autocomplete="off"></div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Transfer details</legend>
+              <div class="row">
+                <div><label for="amount">Amount <small>(USD)</small></label><div class="amt"><input type="text" id="amount" inputmode="decimal" autocomplete="off"></div></div>
+                <div><label for="when">Send date</label><input type="text" id="when" readonly></div>
+                <div class="row one" style="grid-column:1/-1"><div><label for="memo">Message to recipient <small>(optional, 140 characters)</small></label><input type="text" id="memo" maxlength="140" autocomplete="off"></div></div>
+              </div>
+              <div class="hint">Wire fee: <b>$25.00</b>, debited separately from the same account.</div>
+            </fieldset>
+            <div class="actions">
+              <button type="button" class="btn ghost" id="cancel1">Cancel</button>
+              <button type="submit" class="btn primary" id="review">Review transfer</button>
+              <span class="right">Wires cannot be cancelled once submitted.</span>
+            </div>
+          </form>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="bd" id="step2" hidden>
+          <div class="alert bad" id="err2">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-.9 4h1.8v5.5H9.1V6zm0 7h1.8v1.8H9.1V13z"/></svg>
+            <div><b>We were unable to process this transfer.</b><br>Please review the details and try again. If the problem continues, contact Member Services.
+              <span class="ref" id="errref">Reference WT-4021</span></div>
+          </div>
+          <div class="review" id="reviewgrid"></div>
+          <div class="total"><span>Total debited from <b id="rv-from" style="font-size:inherit"></b></span><b id="rv-total"></b></div>
+          <label class="chk" style="margin-top:16px"><input type="checkbox" id="agree"><span>I confirm the recipient details are correct and I understand that wire transfers are final and cannot be recalled once sent.</span></label>
+          <div class="processing" id="proc"><div class="spin"></div><span>Submitting your wire…</span></div>
+          <div class="actions">
+            <button type="button" class="btn ghost" id="back">Back</button>
+            <button type="button" class="btn primary" id="submit" disabled>Submit wire</button>
+            <span class="right">You'll receive a confirmation number on the next screen.</span>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="bd" id="step3" hidden>
+          <div class="success">
+            <div class="tick"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <h2>Your wire has been submitted</h2>
+            <p>We've sent a receipt to your secure messages. Keep the confirmation number for your records.</p>
+            <div class="conf"><small>Confirmation number</small><b id="confnum"></b></div>
+            <div class="review" id="successgrid"></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn ghost" id="another">Send another wire</button>
+            <button type="button" class="btn link" id="print">Print receipt</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div></main>
+
+<footer><div class="wrap">
+  <div><a href="#">Privacy</a><a href="#">Security</a><a href="#">Accessibility</a><a href="#">Rates &amp; fees</a></div>
+  <div>© 2026 ABC Federal Credit Union · Member accounts are federally insured · Equal opportunity lender</div>
+</div></footer>
+
+<!-- ---------- live video panel ---------- -->
+<div id="video" role="dialog" aria-label="Live video session">
+  <div id="videobar"><span class="dot"></span><b>Live video with Member Services</b>
+    <span class="brand">Secure session · this session may be recorded</span>
+    <button id="videoclose" title="Leave session">&#10005;</button></div>
+  <iframe id="videoframe" allow="camera; microphone; fullscreen; autoplay; display-capture" allowfullscreen title="Live video session"></iframe>
+  <div id="videoresize" title="Resize"></div>
+</div>
+<div id="join"><span class="dot"></span><span>A member services specialist is ready to see you.</span><button id="joinbtn">Join video session</button></div>
+<button id="rejoin">Return to video session</button>
+<div id="ops"><span class="k">widget</span><span id="ops-widget">not loaded</span><span class="k">video link</span><span id="ops-link">—</span><span class="k">form</span><span id="ops-form">—</span></div>
+
+<script>
+/* =====================================================================
+   DEMO DATA — the single place to keep the page consistent with what
+   the Agentforce agent asserts in Phase 1 (WEB-06). Change here only.
+   ===================================================================== */
+var DEMO_DATA = {
+  member: { firstName: "Ben", lastName: "Rogers", displayName: "Ben R.", initials: "BR",   // last name is never shown on the page
+            memberNumber: "1004471", memberSince: 2014 },
+  account: { name: "Everyday Checking", last4: "2290", available: 18642.17,
+             dailyWireLimit: 25000.00, usedToday: 0, holds: "None", wiresEnabled: true },
+  recipient: { name: "Northgate Construction LLC", bank: "Cascade Community Bank",
+               routing: "121047324",        // valid ABA checksum, fictional
+               account: "4471882033",       // fictional
+               type: "Business checking", address: "2210 Industrial Way, Tacoma, WA 98421" },
+  transfer: { amount: 12450.00, fee: 25.00, memo: "Invoice NC-2291 — kitchen remodel deposit" },
+  errorRef: "WT-4021"
+};
+
+/* ---- Salesforce Embedded Service (MIAW) — same deployment as demo-customer/demo.html ---- */
+var SF = {
+  ORG_ID:   "00Daj000013BTSf",
+  DEV_NAME: "Messaging_for_In_App_Web_Bot",
+  SITE_URL: "https://vi1786923044976.my.site.com/ESWMessagingforInAppW1787590828626",
+  SCRT2:    "https://vi1786923044976.my.salesforce-scrt.com"
+};
+
+/* ---- helpers ---- */
+var $ = function (id) { return document.getElementById(id); };
+var q = new URLSearchParams(location.search);
+var money = function (n) { return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+var digits = function (s) { return String(s || "").replace(/\D/g, ""); };
+function abaValid(r) {
+  if (!/^\d{9}$/.test(r)) return false;
+  var d = r.split("").map(Number);
+  var sum = 3 * (d[0] + d[3] + d[6]) + 7 * (d[1] + d[4] + d[7]) + (d[2] + d[5] + d[8]);
+  var prefix = +r.slice(0, 2);
+  var prefixOk = (prefix >= 1 && prefix <= 12) || (prefix >= 21 && prefix <= 32) || (prefix >= 61 && prefix <= 72) || prefix === 80;
+  return sum % 10 === 0 && prefixOk;
+}
+function today() {
+  return new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+}
+function ops(k, v) { var el = $("ops-" + k); if (el) el.textContent = v; }
+
+/* ---- populate shell from DEMO_DATA ---- */
+(function fill() {
+  var m = DEMO_DATA.member, a = DEMO_DATA.account, r = DEMO_DATA.recipient, t = DEMO_DATA.transfer;
+  $("who-name").textContent = m.firstName; $("who-initials").textContent = m.initials;
+  $("acct-name").textContent = a.name; $("acct-num").textContent = "•••• " + a.last4;
+  $("acct-bal").textContent = money(a.available); $("acct-limit").textContent = money(a.dailyWireLimit);
+  $("acct-used").textContent = money(a.usedToday); $("acct-holds").textContent = a.holds;
+  $("acct-wires").textContent = a.wiresEnabled ? "Enabled" : "Disabled";
+  $("when").value = today();
+
+  if (q.has("reset")) { $("savedbar").style.display = "none"; ops("form", "empty"); return; }
+
+  // Pre-filled from the "saved recipient". By default the routing and account
+  // numbers are in each other's fields — this is the failure the demo is built
+  // around (WEB-03). ?correct puts them in the right fields for rehearsal.
+  var correct = q.has("correct");
+  $("saved-name").textContent = r.name;
+  $("rname").value = r.name; $("rbank").value = r.bank; $("atype").value = r.type; $("raddr").value = r.address;
+  $("routing").value = correct ? r.routing : r.account;
+  $("account").value = correct ? r.account : r.routing;
+  $("amount").value = t.amount.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  $("memo").value = t.memo;
+  ops("form", correct ? "pre-filled CORRECT" : "pre-filled SWAPPED");
+})();
+
+/* ---- stepper ---- */
+function goStep(n) {
+  [1, 2, 3].forEach(function (i) {
+    $("step" + i).hidden = (i !== n);
+    var li = document.querySelector('.steps li[data-step="' + i + '"]');
+    li.className = i < n ? "done" : i === n ? "cur" : "";
+    if (i < n) li.querySelector("i").innerHTML = "&#10003;"; else li.querySelector("i").textContent = i;
+  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ---- step 1: required fields only. No format hints — the failure must not be
+        visible until Jenna sees the form (script, production notes). ---- */
+$("wire").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var missing = false;
+  ["rname", "rbank", "routing", "account", "amount"].forEach(function (id) {
+    var el = $(id), bad = !el.value.trim();
+    el.style.borderColor = bad ? "var(--bad)" : "";
+    missing = missing || bad;
+  });
+  $("err1").classList.toggle("show", missing);
+  if (missing) return;
+  renderReview($("reviewgrid"));
+  $("err2").classList.remove("show");
+  $("agree").checked = false; $("submit").disabled = true;
+  goStep(2);
+});
+$("clear-saved").onclick = function (e) {
+  e.preventDefault();
+  ["rname", "rbank", "routing", "account", "raddr", "memo"].forEach(function (id) { $(id).value = ""; });
+  $("savedbar").style.display = "none"; $("rname").focus(); ops("form", "cleared");
+};
+$("cancel1").onclick = function () { location.href = location.pathname + "?reset"; };
+
+function renderReview(into) {
+  var amt = parseFloat($("amount").value.replace(/[^0-9.]/g, "")) || 0;
+  var rows = [
+    ["Recipient", $("rname").value], ["Recipient bank", $("rbank").value],
+    ["Routing number", $("routing").value, "mono"], ["Account number", $("account").value, "mono"],
+    ["Account type", $("atype").value], ["Send date", $("when").value],
+    ["Amount", money(amt)], ["Wire fee", money(DEMO_DATA.transfer.fee)],
+    ["Message", $("memo").value || "—"]
+  ];
+  into.innerHTML = rows.map(function (r) {
+    return '<div class="kv"><span>' + r[0] + '</span><b class="' + (r[2] || "") + '">' + esc(r[1]) + "</b></div>";
+  }).join("");
+  $("rv-from").textContent = DEMO_DATA.account.name + " •••• " + DEMO_DATA.account.last4;
+  $("rv-total").textContent = money(amt + DEMO_DATA.transfer.fee);
+  return amt;
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+/* ---- step 2: the final validation step. The only check that matters for the
+        demo is whether the routing number is a real ABA number. With the two
+        values swapped it is not, so the wire fails with a generic error. Nothing
+        on screen says which field is wrong (WEB-03). ---- */
+$("agree").onchange = function () { $("submit").disabled = !this.checked; };
+$("back").onclick = function () { goStep(1); };
+$("submit").onclick = function () {
+  var btn = this; btn.disabled = true; $("back").disabled = true;
+  $("err2").classList.remove("show"); $("proc").classList.add("show");
+  setTimeout(function () {
+    $("proc").classList.remove("show"); $("back").disabled = false;
+    var routing = digits($("routing").value), account = digits($("account").value);
+    var ok = abaValid(routing) && account.length >= 6 && account.length <= 17;
+    if (!ok) {
+      $("err2").classList.add("show"); btn.disabled = false;
+      ops("form", "SUBMIT FAILED (" + DEMO_DATA.errorRef + ")");
+      console.log("[ABCFCU] wire rejected at final validation — routing=" + routing + " account=" + account);
+      return;
+    }
+    var conf = confirmationNumber();
+    $("confnum").textContent = conf;
+    renderReview($("successgrid"));
+    ops("form", "SUBMITTED " + conf);
+    console.log("[ABCFCU] wire submitted, confirmation " + conf);
+    goStep(3);
+  }, 1800);
+};
+function confirmationNumber() {
+  var d = new Date(), p = function (n) { return String(n).padStart(2, "0"); };
+  return "WT-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + String(10000 + Math.floor(Math.random() * 89999));
+}
+$("another").onclick = function () { location.href = location.pathname + "?reset"; };
+$("print").onclick = function () { window.print(); };
+
+/* =====================================================================
+   VIDEO ESCALATION — ported from demo-customer/demo.html.
+   The Agentforce bot posts a VideoEngager link into the chat; we catch it
+   in onEmbeddedMessageSent (INT-03).
+
+   Three ways to show the call, chosen by ?video=<mode>:
+     1 "panel" — an in-page panel docked beside the chat widget (INT-05),
+                 draggable and resizable; it WILL appear in a screen share.
+     2 "popup" — (default) a separate floating browser window. Not part of
+                 this page, so when Ben shares the ABC FCU tab/window in
+                 Phase 7 the video is NOT in the share.
+     3 "tab"   — a new tab in the same browser window.
+   Browsers block window.open() that is not caused by a click; the bot
+   message is not a click. Allow pop-ups for this site in Chrome
+   (Site settings → Pop-ups and redirects → Allow) and the tab/window opens
+   by itself. If it is blocked, a "Join video session" banner appears and
+   one click opens it.
+   ===================================================================== */
+// ?video=panel|popup|tab (or 1|2|3). Default: popup. ?panel / ?popup / ?tab also accepted.
+var VIDEO_MODE = (function () {
+  var m = (q.get("video") || "").toLowerCase();
+  if (m === "1" || m === "panel") return "panel";
+  if (m === "2" || m === "popup") return "popup";
+  if (m === "3" || m === "tab")   return "tab";
+  return q.has("panel") ? "panel" : q.has("tab") ? "tab" : "popup";
+})();
+ops("widget", "video mode: " + VIDEO_MODE);
+var POPUP = { w: 1100, h: 760, name: "abcfcu-video" };
+var PANEL = { w: 960, h: 660 };            // starting size of the in-page panel (resizable)
+
+var video = $("video"), frame = $("videoframe"), rejoin = $("rejoin"), join = $("join");
+var lastUrl = "", popupRef = null;
+
+window.addEventListener("onEmbeddedMessagingReady", function () { ops("widget", "ready"); console.log("[ABCFCU] messaging ready"); });
+
+window.addEventListener("onEmbeddedMessageSent", function (e) {
+  console.log("onEmbeddedMessageSent", e.detail);
+  var urls = JSON.stringify(e.detail).match(/https?:\/\/[^\s"\\]+/g) || [];
+  var link = urls.filter(function (u) { return !/salesforce|my\.site\.com/.test(u); })[0];
+  if (link && link !== lastUrl) onVideoLink(link);
+});
+
+function onVideoLink(url) {
+  console.log("VIDEO LINK:", url);
+  lastUrl = url; ops("link", url);
+  if (VIDEO_MODE === "panel") openPanel(url); else openPopup(url);
+}
+
+/* ---------- new tab / popup window modes ---------- */
+function popupFeatures() {
+  var w = Math.min(POPUP.w, screen.availWidth - 40), h = Math.min(POPUP.h, screen.availHeight - 80);
+  var left = Math.max(0, screen.availWidth - w - 24), top = Math.max(0, 60);
+  return "popup=yes,width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=no";
+}
+function openPopup(url) {
+  var win = null;
+  // No feature string → the browser opens a normal tab; with one → a floating window.
+  try { win = window.open(url, POPUP.name, VIDEO_MODE === "popup" ? popupFeatures() : ""); } catch (err) { win = null; }
+  if (!win) {                                   // blocked — needs a click
+    join.classList.add("show"); ops("link", url + " (popup blocked — click Join)");
+    console.warn("[ABCFCU] popup blocked; showing Join banner");
+    return;
+  }
+  popupRef = win; join.classList.remove("show"); rejoin.classList.remove("show");
+  try { win.focus(); } catch (err) {}
+  // When the popup is closed, offer a way back if the link is still valid.
+  var t = setInterval(function () {
+    if (!popupRef || popupRef.closed) { clearInterval(t); popupRef = null; if (lastUrl) rejoin.classList.add("show"); }
+  }, 1000);
+}
+$("joinbtn").onclick = function () { if (lastUrl) openPopup(lastUrl); };
+
+/* ---------- in-page panel mode (docked beside the chat widget) ---------- */
+var CHAT_W = 420, GAP = 16, EDGE = 24;
+function layoutPanel() {
+  var maxW = window.innerWidth - CHAT_W - GAP - EDGE;
+  var w = Math.min(PANEL.w, maxW > 480 ? maxW : window.innerWidth - 2 * EDGE);
+  var h = Math.min(PANEL.h, window.innerHeight - 2 * EDGE);
+  video.style.width = w + "px"; video.style.height = h + "px";
+  video.style.left = "auto"; video.style.top = "auto";
+  video.style.right = (maxW > 480 ? CHAT_W + GAP : EDGE) + "px";
+  video.style.bottom = EDGE + "px";
+}
+function openPanel(url) {
+  if (!video.classList.contains("open")) layoutPanel();
+  video.classList.add("open"); rejoin.classList.remove("show");
+  if (frame.src !== url) frame.src = url;
+}
+// Clearing src stops camera and microphone; hiding alone would not.
+$("videoclose").onclick = function () {
+  video.classList.remove("open"); frame.src = "about:blank";
+  if (lastUrl) rejoin.classList.add("show");
+};
+rejoin.onclick = function () {
+  if (!lastUrl) return;
+  if (VIDEO_MODE === "panel") openPanel(lastUrl);
+  else if (popupRef && !popupRef.closed) { try { popupRef.focus(); } catch (e) {} }
+  else openPopup(lastUrl);
+};
+
+// Drag by the title bar; resize by the bottom-right corner. While either is in
+// progress the iframe ignores the pointer so the drag is not swallowed.
+function toAbsolute() {
+  var r = video.getBoundingClientRect();
+  video.style.right = "auto"; video.style.bottom = "auto";
+  video.style.left = r.left + "px"; video.style.top = r.top + "px";
+}
+var bar = $("videobar"), dx = 0, dy = 0;
+bar.addEventListener("pointerdown", function (e) {
+  if (e.target.tagName === "BUTTON") return;
+  toAbsolute(); dx = e.clientX - video.offsetLeft; dy = e.clientY - video.offsetTop;
+  video.classList.add("dragging"); bar.setPointerCapture(e.pointerId);
+});
+bar.addEventListener("pointermove", function (e) {
+  if (!bar.hasPointerCapture(e.pointerId)) return;
+  var maxX = window.innerWidth - video.offsetWidth, maxY = window.innerHeight - video.offsetHeight;
+  video.style.left = Math.min(Math.max(0, e.clientX - dx), Math.max(0, maxX)) + "px";
+  video.style.top  = Math.min(Math.max(0, e.clientY - dy), Math.max(0, maxY)) + "px";
+});
+bar.addEventListener("pointerup", function (e) { bar.releasePointerCapture(e.pointerId); video.classList.remove("dragging"); });
+
+var grip = $("videoresize"), rw = 0, rh = 0, rx = 0, ry = 0;
+grip.addEventListener("pointerdown", function (e) {
+  toAbsolute(); rw = video.offsetWidth; rh = video.offsetHeight; rx = e.clientX; ry = e.clientY;
+  video.classList.add("dragging"); grip.setPointerCapture(e.pointerId); e.preventDefault();
+});
+grip.addEventListener("pointermove", function (e) {
+  if (!grip.hasPointerCapture(e.pointerId)) return;
+  var w = Math.max(360, Math.min(rw + (e.clientX - rx), window.innerWidth - video.offsetLeft));
+  var h = Math.max(260, Math.min(rh + (e.clientY - ry), window.innerHeight - video.offsetTop));
+  video.style.width = w + "px"; video.style.height = h + "px";
+});
+grip.addEventListener("pointerup", function (e) { grip.releasePointerCapture(e.pointerId); video.classList.remove("dragging"); });
+
+/* ---- operator strip ---- */
+window.addEventListener("keydown", function (e) { if (e.shiftKey && (e.key === "D" || e.key === "d")) $("ops").classList.toggle("show"); });
+
+/* ---- bootstrap the messaging widget ---- */
+if (!q.has("nochat")) {
+  var s = document.createElement("script");
+  s.src = SF.SITE_URL + "/assets/js/bootstrap.min.js";
+  s.onload = function () {
+    embeddedservice_bootstrap.settings.language = "en_US";
+    embeddedservice_bootstrap.init(SF.ORG_ID, SF.DEV_NAME, SF.SITE_URL, { scrt2URL: SF.SCRT2 });
+    ops("widget", "bootstrap loaded, waiting…");
+  };
+  s.onerror = function () { ops("widget", "bootstrap.min.js failed to load"); console.warn("[ABCFCU] could not load bootstrap.min.js"); };
+  document.body.appendChild(s);
+} else { ops("widget", "disabled (?nochat)"); }
+</script>
+</body>
+</html>

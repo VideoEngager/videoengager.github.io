@@ -1,0 +1,637 @@
+<!doctype html>
+<!--
+  ABC FEDERAL CREDIT UNION — demo prop for VideoEngager shooting script v6.2.2 "The Locked Transfer"
+  Fictional institution. No backend and no data collection. The wire/hold states below are
+  static demo states only — nothing is submitted anywhere.
+
+  NETWORK: this page now loads the Salesforce Embedded Messaging (MIAW) widget, ported from
+  index.html. That is the one outbound call it makes. Disable it with ?nochat.
+
+  Covers rehearsal gates 1.4, 2.10, 2.11, 2.12.
+  Serve from a real hostname before filming — never localhost — and the origin must be
+  allowlisted on the Embedded Service deployment in the SDO org, or the widget will not load.
+
+  URL switches (rehearsal only, never on camera):
+      ?nochat          do not load the Salesforce messaging widget
+      ?video=panel     in-page panel docked beside the chat (draggable, resizable; IS in a screen share)
+      ?video=popup     separate floating browser window (default; NOT in a screen share)
+      ?video=tab       new tab in the same browser window
+      ?connecting      show connecting.html in the panel first — see note in the script, off by default
+  Keys: ` toggles the operator strip · 1-6 jump demo states · R resets
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Send a wire transfer — ABC Federal Credit Union</title>
+<style>
+  :root{
+    --navy:#0d2c4b; --navy2:#16406b; --ink:#16202b; --mut:#5d6b7a;
+    --line:#dde3ea; --bg:#f4f6f9; --card:#ffffff;
+    --red:#c0261f; --redbg:#fdf1f0; --redline:#f0c4c1;
+    --grn:#127a44; --grnbg:#eef8f2; --grnline:#bfe3ce;
+    --amb:#8a5a00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;display:flex;flex-direction:column;font:400 17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .util{background:var(--navy);color:#c9d8e6;font-size:13.5px;padding:7px 0}
+  .util .wrap{display:flex;justify-content:space-between;gap:24px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  header{background:#fff;border-bottom:1px solid var(--line)}
+  .head{display:flex;align-items:center;gap:34px;padding:16px 0}
+  .brand{display:flex;align-items:center;gap:13px}
+  .mark{width:42px;height:42px;border-radius:9px;background:linear-gradient(150deg,var(--navy2),var(--navy));
+        color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;letter-spacing:.5px}
+  .bname{font-weight:800;font-size:18.5px;color:var(--navy);line-height:1.15}
+  .btag{font-size:11.5px;color:var(--mut);letter-spacing:.9px;text-transform:uppercase}
+  nav{display:flex;gap:26px;margin-left:auto;font-size:16px}
+  nav a{color:#33465c;text-decoration:none;padding:7px 2px;border-bottom:3px solid transparent}
+  nav a.on{color:var(--navy);font-weight:700;border-bottom-color:var(--navy)}
+  .who{display:flex;align-items:center;gap:9px;font-size:14.5px;color:var(--mut)}
+  .avi{width:34px;height:34px;border-radius:50%;background:#e4ebf2;color:var(--navy);
+       display:grid;place-items:center;font-weight:700;font-size:14px}
+  main{padding:26px 0 60px;flex:1 0 auto}
+footer{flex:0 0 auto}
+  .crumb{font-size:14px;color:var(--mut);margin-bottom:14px}
+  h1{font-size:31px;letter-spacing:-.4px;margin-bottom:6px}
+  .sub{color:var(--mut);font-size:15.5px;margin-bottom:20px}
+
+  /* ---- alert band ---- */
+  #alert{display:none;background:var(--redbg);border:1px solid var(--redline);border-left:7px solid var(--red);
+         border-radius:10px;padding:19px 22px;margin-bottom:22px}
+  #alert.show{display:block;animation:pop .18s ease-out}
+  @keyframes pop{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+  .atitle{display:flex;align-items:center;gap:11px;font-weight:800;font-size:21px;color:var(--red);
+          letter-spacing:.3px;margin-bottom:7px}
+  .dot{width:15px;height:15px;border-radius:50%;background:var(--red);flex:0 0 auto}
+  #alert p{font-size:16.5px;color:#5a2320;max-width:78ch}
+  .refline{margin-top:11px;font-size:16px;color:#5a2320}
+  .reflink{color:var(--red);font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer;
+           background:none;border:0;font-size:16px;font-family:inherit}
+  .reflink:hover{color:#8e1c17}
+
+  /* ---- reasons ---- */
+  #reasons{display:none;margin-top:17px;background:#fff;border:1px solid var(--redline);border-radius:9px;overflow:hidden}
+  #reasons.show{display:block}
+  .rhead{padding:13px 19px;border-bottom:1px solid var(--line);font-weight:700;font-size:15.5px;color:#5a2320;
+         background:#fff8f7;display:flex;justify-content:space-between;align-items:center}
+  .rhead span{font-weight:500;color:var(--mut);font-size:13.5px}
+  #reasons ul{list-style:none;padding:7px 0}
+  #reasons li{display:flex;gap:13px;align-items:flex-start;padding:11px 19px;font-size:16.5px;border-bottom:1px solid #f2f5f8}
+  #reasons li:last-child{border-bottom:0}
+  .tick{width:21px;height:21px;border-radius:5px;background:var(--redbg);border:1px solid var(--redline);
+        color:var(--red);display:grid;place-items:center;font-size:13px;font-weight:800;flex:0 0 auto;margin-top:1px}
+  .rfoot{padding:15px 19px;background:#fafbfc;border-top:1px solid var(--line);display:flex;
+         align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .rfoot .hint{font-size:14.5px;color:var(--mut)}
+
+  /* ---- verify ---- */
+  #verify{display:none;margin-top:15px;padding:19px;background:#fbfcfd;border:1px solid var(--line);border-radius:9px}
+  #verify.show{display:block}
+  #verify h4{font-size:17px;margin-bottom:5px}
+  #verify p{font-size:15px;color:var(--mut);margin-bottom:14px}
+  .codeRow{display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+  .code{width:190px;padding:12px 14px;font-size:22px;letter-spacing:5px;text-align:center;
+        border:1.5px solid #c3ccd6;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .code:focus{outline:0;border-color:var(--navy2);box-shadow:0 0 0 3px rgba(22,64,107,.13)}
+
+  #cleared{display:none;margin-bottom:22px;background:var(--grnbg);border:1px solid var(--grnline);
+           border-left:7px solid var(--grn);border-radius:10px;padding:17px 22px}
+  #cleared.show{display:block;animation:pop .18s ease-out}
+  #cleared b{color:var(--grn);font-size:19px;display:flex;align-items:center;gap:10px}
+  #cleared p{font-size:15.5px;color:#1d4a33;margin-top:5px}
+
+  /* ---- layout ---- */
+  .cols{display:grid;grid-template-columns:322px 1fr;gap:24px;align-items:start}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:11px}
+  .card h3{font-size:12px;letter-spacing:1.1px;text-transform:uppercase;color:var(--mut);
+           padding:16px 20px 0}
+  .acct{padding:6px 20px 18px;border-bottom:1px solid var(--line)}
+  .acct .nm{font-size:12.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--mut);margin-top:9px}
+  .acct .no{font-size:14px;color:var(--mut)}
+  .bal{font-size:32px;font-weight:750;letter-spacing:-.6px;margin-top:5px}
+  .bal small{display:block;font-size:13px;font-weight:400;color:var(--mut);letter-spacing:0}
+  .kv{display:flex;justify-content:space-between;gap:14px;padding:10px 20px;font-size:15px;border-bottom:1px solid #f1f4f7}
+  .kv:last-child{border-bottom:0}
+  .kv span:first-child{color:var(--mut)}
+  .kv b{font-weight:600}
+  .pill{background:var(--grnbg);color:var(--grn);border:1px solid var(--grnline);
+        border-radius:99px;padding:2px 11px;font-size:13px;font-weight:700}
+
+  .steps{display:flex;gap:9px;padding:17px 22px;border-bottom:1px solid var(--line)}
+  .step{display:flex;align-items:center;gap:9px;font-size:14.5px;color:var(--mut);
+        padding:8px 15px;border-radius:8px;flex:1}
+  .step.on{background:#eef3f9;color:var(--navy);font-weight:700}
+  .num{width:23px;height:23px;border-radius:50%;background:#dbe3ec;color:#54657a;display:grid;
+       place-items:center;font-size:12.5px;font-weight:700;flex:0 0 auto}
+  .step.on .num{background:var(--navy);color:#fff}
+  .sec{padding:20px 22px;border-bottom:1px solid var(--line)}
+  .sec:last-child{border-bottom:0}
+  .sec h4{font-size:16.5px;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:15px 20px}
+  label{display:block;font-size:13.5px;color:var(--mut);margin-bottom:5px}
+  label i{font-style:normal;color:#93a1b0;font-size:12.5px}
+  .in{width:100%;padding:11px 13px;font-size:16.5px;border:1.5px solid #ccd5df;border-radius:8px;
+      background:#fff;color:var(--ink);font-family:inherit}
+  .in[readonly]{background:#fbfcfd}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.6px}
+  .saved{background:#f3f7fb;border:1px solid #dce6f0;border-radius:8px;padding:11px 14px;
+         font-size:14.5px;color:#3c5570;margin-bottom:15px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .saved b{color:var(--navy)}
+  .foot{padding:19px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .btn{padding:12px 26px;border-radius:8px;font-size:16.5px;font-weight:700;cursor:pointer;
+       border:1.5px solid transparent;font-family:inherit}
+  .primary{background:var(--navy);color:#fff}
+  .primary:hover{background:var(--navy2)}
+  .primary:disabled{background:#9fb0c2;cursor:default}
+  .ghost{background:#fff;border-color:#ccd5df;color:#3c5570}
+  .ghost:hover{background:#f6f8fa}
+  .warn{background:var(--red);color:#fff}
+  .warn:hover{background:#9e1f19}
+  .note{font-size:13.5px;color:var(--mut)}
+
+  /* ---- success ---- */
+  #done{display:none}
+  #done.show{display:block}
+  .okwrap{background:#fff;border:1px solid var(--line);border-radius:11px;padding:44px 40px;text-align:center}
+  .okmark{width:70px;height:70px;border-radius:50%;background:var(--grnbg);border:2px solid var(--grnline);
+          color:var(--grn);display:grid;place-items:center;font-size:36px;margin:0 auto 18px}
+  .okwrap h2{font-size:27px;margin-bottom:7px}
+  .okwrap .amt{font-size:38px;font-weight:750;letter-spacing:-.8px;margin:18px 0 4px}
+  .okwrap .to{color:var(--mut);font-size:17px}
+  .conf{display:inline-block;margin-top:22px;background:#f4f6f9;border:1px solid var(--line);
+        border-radius:9px;padding:14px 26px}
+  .conf span{display:block;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
+  .conf b{font-size:23px;letter-spacing:1.4px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  footer{border-top:1px solid var(--line);background:#fff;padding:22px 0;font-size:13.5px;color:var(--mut)}
+  footer .wrap{display:flex;gap:22px;flex-wrap:wrap}
+
+  /* ---- live video surface (ported from index.html) ---- */
+  #video{display:none;position:fixed;z-index:9990;right:0;bottom:0;background:#141B22;border-radius:12px;
+         overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.4);flex-direction:column;border:1px solid #2A3644}
+  #video.open{display:flex}
+  #videobar{display:flex;align-items:center;gap:10px;padding:9px 14px;background:#0E141A;color:#D7E0E8;
+            font-size:13px;flex:none;user-select:none;cursor:move;touch-action:none}
+  #videobar .vdot{width:8px;height:8px;border-radius:50%;background:#E5484D;
+                  box-shadow:0 0 0 3px rgba(229,72,77,.25);animation:vpulse 1.6s ease-in-out infinite}
+  @keyframes vpulse{50%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+  #videobar b{font-weight:600}
+  #videobar .brand{margin-left:auto;font-size:11.5px;color:#8FA0AE;letter-spacing:.3px}
+  #videobar button{font-size:15px;line-height:1;padding:3px 9px;border:0;border-radius:6px;
+                   background:transparent;color:#8FA0AE;cursor:pointer;margin-left:6px;font-family:inherit}
+  #videobar button:hover{background:#2A3644;color:#fff}
+  #videoframe{flex:1;width:100%;border:0;background:#000}
+  #videoresize{position:absolute;right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;z-index:2;
+               background:linear-gradient(135deg,transparent 50%,#5A6B7A 50%,#5A6B7A 60%,transparent 60%,
+                          transparent 75%,#5A6B7A 75%,#5A6B7A 85%,transparent 85%)}
+  #video.dragging #videoframe{pointer-events:none}
+
+  #rejoin{display:none;position:fixed;z-index:9990;right:24px;bottom:110px;padding:10px 16px;border-radius:99px;
+          border:0;background:#1B9AAA;color:#fff;font-weight:700;font-size:15px;cursor:pointer;
+          font-family:inherit;box-shadow:0 6px 18px rgba(27,154,170,.4)}
+  #rejoin.show{display:block}
+
+  #join{display:none;position:fixed;z-index:9991;left:50%;transform:translateX(-50%);top:18px;
+        align-items:center;gap:14px;padding:12px 18px 12px 16px;border-radius:12px;background:#0E141A;
+        color:#D7E0E8;font-size:14px;box-shadow:0 12px 36px rgba(0,0,0,.35)}
+  #join.show{display:flex}
+  #join .vdot{width:9px;height:9px;border-radius:50%;background:#2EBD85;
+              box-shadow:0 0 0 3px rgba(46,189,133,.25);animation:vpulse 1.6s ease-in-out infinite}
+  #join button{padding:9px 16px;border-radius:8px;border:0;background:#1B9AAA;color:#fff;
+               font-weight:700;cursor:pointer;font-family:inherit;font-size:14px}
+  #join button:hover{background:#22A9BA}
+
+  /* ---- operator strip: hidden until ` is pressed ---- */
+  #ops{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;display:none;
+       flex-direction:column;gap:7px;align-items:center;
+       background:rgba(16,26,36,.93);padding:8px 12px;border-radius:18px;z-index:9999;max-width:92vw}
+  #ops.show{display:flex}
+  #opsrow{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:center}
+  #opsinfo{display:flex;gap:16px;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#9FE1CB;
+           max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  #opsinfo i{font-style:normal;color:#6B7B88;margin-right:5px}
+  #ops button{background:rgba(255,255,255,.1);border:0;color:#dbe4ee;padding:5px 12px;border-radius:99px;
+              font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  #ops button:hover{background:rgba(255,255,255,.22);color:#fff}
+  #ops .lbl{color:#7d8fa1;font-size:11px;display:flex;align-items:center;padding-right:5px}
+</style>
+</head>
+<body>
+
+<div class="util"><div class="wrap">
+  <span>Member Services · Mon–Fri 7am–7pm PT · 1-800-555-0142</span>
+  <span>Messages (0) · Settings · Signed in as <b style="color:#fff">Ben</b> · Sign out</span>
+</div></div>
+
+<header><div class="wrap head">
+  <div class="brand">
+    <div class="mark">ABC</div>
+    <div><div class="bname">ABC Federal Credit Union</div><div class="btag">Member banking since 1954</div></div>
+  </div>
+  <nav>
+    <a href="#">Accounts</a><a href="#" class="on">Transfers &amp; Payments</a>
+    <a href="#">Cards</a><a href="#">Loans</a><a href="#">Support</a>
+  </nav>
+  <div class="who"><div class="avi">B</div></div>
+</div></header>
+
+<main><div class="wrap">
+  <div class="crumb">Transfers &amp; Payments &nbsp;›&nbsp; External transfers &nbsp;›&nbsp; Send a wire</div>
+
+  <div id="stage">
+    <h1>Send a wire transfer</h1>
+    <p class="sub">Domestic wires submitted before 2:00 pm PT on a business day are typically received the same day.</p>
+
+    <!-- security hold -->
+    <div id="alert">
+      <div class="atitle"><span class="dot"></span>TRANSFER BLOCKED</div>
+      <p>Additional security verification is required before this payment can continue.
+         Your account remains active and your funds are safe.</p>
+      <div class="refline">Reference <button class="reflink" id="refBtn">RSK-1042</button></div>
+
+      <div id="reasons">
+        <div class="rhead"><span style="font-weight:700;color:#5a2320">Why this payment was held</span>
+          <span>Reference RSK-1042 · recorded 4 Sep 2026, 09:12 PT</span></div>
+        <ul>
+          <li><div class="tick">!</div><div>New device</div></li>
+          <li><div class="tick">!</div><div>First payment to this recipient from this device</div></li>
+          <li><div class="tick">!</div><div>Password changed within 24 hours</div></li>
+          <li><div class="tick">!</div><div>Additional verification required</div></li>
+        </ul>
+        <div class="rfoot">
+          <span class="hint">Verifying this device will clear the hold on this payment.</span>
+          <button class="btn warn" id="verifyBtn">Verify this device</button>
+        </div>
+
+        <div id="verify">
+          <h4>Verify this device</h4>
+          <p>We sent a 6-digit code to the mobile number ending <b>4417</b>.</p>
+          <div class="codeRow">
+            <input class="code" id="codeIn" inputmode="numeric" maxlength="6" placeholder="––––––" aria-label="Verification code">
+            <button class="btn primary" id="codeGo">Verify</button>
+            <span class="note">Didn’t get it? Resend code</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- cleared -->
+    <div id="cleared">
+      <b>✓&nbsp; Device verified — security hold cleared</b>
+      <p>You can now continue with this payment. Reference RSK-1042 closed.</p>
+    </div>
+
+    <div class="cols">
+      <!-- from account -->
+      <div class="card">
+        <h3>From account</h3>
+        <div class="acct">
+          <div class="nm">Everyday checking</div>
+          <div class="no">•••• 2290</div>
+          <div class="bal">$18,642.17<small>Available balance</small></div>
+        </div>
+        <div class="kv"><span>Daily external wire limit</span><b>$25,000.00</b></div>
+        <div class="kv"><span>Used today</span><b>$0.00</b></div>
+        <div class="kv"><span>Holds on account</span><b>None</b></div>
+        <div class="kv"><span>External wires</span><span class="pill">Enabled</span></div>
+      </div>
+
+      <!-- form -->
+      <div class="card">
+        <div class="steps">
+          <div class="step on"><div class="num">1</div>Recipient &amp; amount</div>
+          <div class="step"><div class="num">2</div>Review</div>
+          <div class="step"><div class="num">3</div>Confirmation</div>
+        </div>
+
+        <div class="sec">
+          <h4>Recipient</h4>
+          <div class="saved"><span>Saved recipient: <b>Northgate Construction LLC</b> — loaded from your recipient list</span>
+            <span>Details updated 2 Sep 2026</span></div>
+          <div class="grid">
+            <div><label>Recipient name</label><input class="in" value="Northgate Construction LLC" readonly></div>
+            <div><label>Recipient bank</label><input class="in" value="Cascade Community Bank" readonly></div>
+            <div><label>Bank routing number <i>(ABA)</i></label><input class="in mono" value="121047324" readonly></div>
+            <div><label>Recipient account number</label><input class="in mono" value="8842300176" readonly></div>
+            <div><label>Account type</label><input class="in" value="Business checking" readonly></div>
+            <div><label>Recipient address <i>(optional)</i></label><input class="in" value="2210 Industrial Way, Tacoma, WA" readonly></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h4>Transfer details</h4>
+          <div class="grid">
+            <div><label>Amount <i>(USD)</i></label><input class="in" value="$ 12,450.00" readonly></div>
+            <div><label>Send date</label><input class="in" value="Fri, Sep 4, 2026" readonly></div>
+          </div>
+          <div style="margin-top:15px">
+            <label>Message to recipient <i>(optional, 140 characters)</i></label>
+            <input class="in" value="Invoice NC-2291 — kitchen remodel deposit" readonly>
+          </div>
+          <p class="note" style="margin-top:11px">Wire fee: $25.00, debited separately from the same account.</p>
+        </div>
+
+        <div class="foot">
+          <button class="btn ghost">Cancel</button>
+          <button class="btn primary" id="submitBtn">Review transfer</button>
+          <span class="note">Wires cannot be cancelled once submitted.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- success -->
+  <div id="done">
+    <div class="okwrap">
+      <div class="okmark">✓</div>
+      <h2>Wire submitted successfully</h2>
+      <p class="to">Your payment is on its way.</p>
+      <div class="amt">$12,450.00</div>
+      <div class="to">to Northgate Construction LLC · Cascade Community Bank</div>
+      <div class="conf"><span>Confirmation number</span><b>W26090-44718</b></div>
+      <p class="note" style="margin-top:20px">A receipt has been sent to your secure message centre.</p>
+    </div>
+  </div>
+</div></main>
+
+<footer><div class="wrap">
+  <span>Privacy</span><span>Security</span><span>Accessibility</span><span>Rates &amp; fees</span>
+  <span style="margin-left:auto">© 2026 ABC Federal Credit Union · Member accounts are federally insured · Equal opportunity lender</span>
+</div></footer>
+
+<!-- ---- live video surface (ported from index.html) ---- -->
+<div id="video" role="dialog" aria-label="Live video session">
+  <div id="videobar"><span class="vdot"></span><b>Live video with Member Services</b>
+    <span class="brand">Secure session · this session may be recorded</span>
+    <button id="videoclose" title="Leave session">&#10005;</button></div>
+  <iframe id="videoframe" allow="camera; microphone; fullscreen; autoplay; display-capture"
+          allowfullscreen title="Live video session"></iframe>
+  <div id="videoresize" title="Resize"></div>
+</div>
+<div id="join"><span class="vdot"></span><span>A member services specialist is ready to see you.</span>
+  <button id="joinbtn">Join video session</button></div>
+<button id="rejoin">Return to video session</button>
+
+<div id="ops">
+  <div id="opsrow">
+    <span class="lbl">DEMO</span>
+    <button data-s="1">1 · Ready</button><button data-s="2">2 · Blocked</button>
+    <button data-s="3">3 · Reasons</button><button data-s="4">4 · Verify</button>
+    <button data-s="5">5 · Cleared</button><button data-s="6">6 · Submitted</button>
+    <button data-s="0">↺ Reset</button>
+  </div>
+  <div id="opsinfo"><span><i>widget</i><b id="ops-widget">—</b></span><span><i>video</i><b id="ops-link">—</b></span></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var alertEl=document.getElementById('alert'), reasons=document.getElementById('reasons'),
+      verify=document.getElementById('verify'), cleared=document.getElementById('cleared'),
+      stage=document.getElementById('stage'), done=document.getElementById('done'),
+      submitBtn=document.getElementById('submitBtn'), codeIn=document.getElementById('codeIn'),
+      ops=document.getElementById('ops');
+  var verified=false;
+
+  function show(el,on){ el.classList[on?'add':'remove']('show'); }
+
+  function state(n){
+    verified = (n>=5);
+    show(alertEl, n>=2 && n<5);
+    show(reasons, n>=3 && n<5);
+    show(verify,  n>=4 && n<5);
+    show(cleared, n>=5 && n<6);
+    show(done,    n>=6);
+    stage.style.display = (n>=6) ? 'none' : '';
+    if(n<4) codeIn.value='';
+    if(n===4) setTimeout(function(){codeIn.focus();},60);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  submitBtn.addEventListener('click', function(){ state(verified?6:2); });
+  document.getElementById('refBtn').addEventListener('click', function(){ state(3); });
+  document.getElementById('verifyBtn').addEventListener('click', function(){ state(4); });
+  document.getElementById('codeGo').addEventListener('click', function(){ state(5); });
+  codeIn.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); state(5); } });
+  codeIn.addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,6); });
+
+  // operator controls — hidden until ` is pressed, so nothing is ever in frame by accident
+  document.addEventListener('keydown', function(e){
+    if(e.key==='`'){ ops.classList.toggle('show'); return; }
+    var ae = document.activeElement;
+    if(ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;   // incl. codeIn
+    if(e.key==='0'||e.key.toLowerCase()==='r'){ state(1); }
+    else if('123456'.indexOf(e.key)>-1){ state(parseInt(e.key,10)); }
+  });
+  Array.prototype.forEach.call(ops.querySelectorAll('#opsrow button'), function(b){
+    b.addEventListener('click', function(){ state(parseInt(b.dataset.s,10)||1); });
+  });
+
+  state(1);
+  console.log('ABC FCU demo prop · ` toggles operator strip · keys 1-6 jump states · R resets');
+})();
+</script>
+<!-- =====================================================================
+     SALESFORCE EMBEDDED MESSAGING (MIAW) + VIDEO ESCALATION
+     Ported verbatim in behaviour from index.html. Kept in its own script so
+     the locked v6.2.2 state machine above is untouched.
+
+     Flow: the Agentforce bot posts a VideoEngager link into the chat →
+     onEmbeddedMessageSent fires → we pull the first non-Salesforce URL out of
+     the event and open it (INT-03).
+     ===================================================================== -->
+<script>
+(function () {
+  'use strict';
+
+  /* ---- Salesforce Embedded Service deployment — same one as index.html ---- */
+  var SF = {
+    ORG_ID:   "00Daj000013BTSf",
+    DEV_NAME: "Messaging_for_In_App_Web_Bot",
+    SITE_URL: "https://vi1786923044976.my.site.com/ESWMessagingforInAppW1787590828626",
+    SCRT2:    "https://vi1786923044976.my.salesforce-scrt.com"
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var q = new URLSearchParams(location.search);
+  function ops(k, v) { var el = $("ops-" + k); if (el) el.textContent = v; }
+
+  /* ---- how the call is shown: ?video=panel|popup|tab (default popup) ----
+     panel — docked beside the chat widget; WILL appear in a screen share
+     popup — separate floating window; NOT part of this page, so it is NOT in
+             the share when Ben shares this tab in Phase 7
+     tab   — new tab in the same window                                     */
+  var VIDEO_MODE = (function () {
+    var m = (q.get("video") || "").toLowerCase();
+    if (m === "1" || m === "panel") return "panel";
+    if (m === "2" || m === "popup") return "popup";
+    if (m === "3" || m === "tab")   return "tab";
+    return q.has("panel") ? "panel" : q.has("tab") ? "tab" : "popup";
+  })();
+
+  /* ---- ?connecting — REHEARSAL ONLY, off by default -------------------
+     connecting.html is a holding screen. In the real flow the panel opens and
+     receives the live URL in the same tick, so there is no gap for it to fill;
+     showing it means inserting a delay that does not exist. Left opt-in so it
+     is never on camera by accident. ?connecting=2500 sets the ms.          */
+  var CONNECTING = q.has("connecting");
+  var CONNECT_MS = parseInt(q.get("connecting"), 10) || 1500;
+
+  var POPUP = { w: 1100, h: 760, name: "abcfcu-video" };
+  var PANEL = { w: 960, h: 660 };
+  var CHAT_W = 420, GAP = 16, EDGE = 24;
+
+  var video = $("video"), frame = $("videoframe"), rejoin = $("rejoin"), join = $("join");
+  var lastUrl = "", popupRef = null, swapTimer = null;
+
+  /* ---- messaging events ---- */
+  window.addEventListener("onEmbeddedMessagingReady", function () {
+    ops("widget", "ready");
+    console.log("[ABCFCU] messaging ready");
+  });
+
+  window.addEventListener("onEmbeddedMessageSent", function (e) {
+    console.log("onEmbeddedMessageSent", e.detail);
+    var urls = JSON.stringify(e.detail).match(/https?:\/\/[^\s"\\]+/g) || [];
+    var link = urls.filter(function (u) { return !/salesforce|my\.site\.com/.test(u); })[0];
+    if (link && link !== lastUrl) onVideoLink(link);
+  });
+
+  function onVideoLink(url) {
+    console.log("VIDEO LINK:", url);
+    lastUrl = url;
+    ops("link", url.length > 64 ? url.slice(0, 61) + "…" : url);
+    if (VIDEO_MODE === "panel") openPanel(url); else openPopup(url);
+  }
+
+  /* ---- popup / tab ---- */
+  function popupFeatures() {
+    var w = Math.min(POPUP.w, screen.availWidth - 40),
+        h = Math.min(POPUP.h, screen.availHeight - 80);
+    var left = Math.max(0, screen.availWidth - w - 24), top = Math.max(0, 60);
+    return "popup=yes,width=" + w + ",height=" + h + ",left=" + left + ",top=" + top +
+           ",resizable=yes,scrollbars=no";
+  }
+  function openPopup(url) {
+    var win = null;
+    try { win = window.open(url, POPUP.name, VIDEO_MODE === "popup" ? popupFeatures() : ""); }
+    catch (err) { win = null; }
+    if (!win) {                                  // blocked — needs a real click
+      join.classList.add("show");
+      ops("link", "popup blocked — click Join");
+      console.warn("[ABCFCU] popup blocked; showing Join banner");
+      return;
+    }
+    popupRef = win; join.classList.remove("show"); rejoin.classList.remove("show");
+    try { win.focus(); } catch (err) {}
+    var t = setInterval(function () {
+      if (!popupRef || popupRef.closed) {
+        clearInterval(t); popupRef = null;
+        if (lastUrl) rejoin.classList.add("show");
+      }
+    }, 1000);
+  }
+  $("joinbtn").onclick = function () { if (lastUrl) openPopup(lastUrl); };
+
+  /* ---- in-page panel ---- */
+  function layoutPanel() {
+    var maxW = window.innerWidth - CHAT_W - GAP - EDGE;
+    var w = Math.min(PANEL.w, maxW > 480 ? maxW : window.innerWidth - 2 * EDGE);
+    var h = Math.min(PANEL.h, window.innerHeight - 2 * EDGE);
+    video.style.width = w + "px"; video.style.height = h + "px";
+    video.style.left = "auto"; video.style.top = "auto";
+    video.style.right = (maxW > 480 ? CHAT_W + GAP : EDGE) + "px";
+    video.style.bottom = EDGE + "px";
+  }
+  function openPanel(url) {
+    if (!video.classList.contains("open")) layoutPanel();
+    video.classList.add("open"); rejoin.classList.remove("show");
+    clearTimeout(swapTimer);
+    if (CONNECTING) {
+      frame.src = "connecting.html";
+      swapTimer = setTimeout(function () { frame.src = url; }, CONNECT_MS);
+    } else if (frame.src !== url) {
+      frame.src = url;
+    }
+  }
+  // Clearing src stops camera and microphone; hiding alone would not.
+  $("videoclose").onclick = function () {
+    clearTimeout(swapTimer);
+    video.classList.remove("open"); frame.src = "about:blank";
+    if (lastUrl) rejoin.classList.add("show");
+  };
+  rejoin.onclick = function () {
+    if (!lastUrl) return;
+    if (VIDEO_MODE === "panel") openPanel(lastUrl);
+    else if (popupRef && !popupRef.closed) { try { popupRef.focus(); } catch (e) {} }
+    else openPopup(lastUrl);
+  };
+
+  /* ---- drag by the title bar, resize by the corner ---- */
+  function toAbsolute() {
+    var r = video.getBoundingClientRect();
+    video.style.right = "auto"; video.style.bottom = "auto";
+    video.style.left = r.left + "px"; video.style.top = r.top + "px";
+  }
+  var bar = $("videobar"), dx = 0, dy = 0;
+  bar.addEventListener("pointerdown", function (e) {
+    if (e.target.tagName === "BUTTON") return;
+    toAbsolute(); dx = e.clientX - video.offsetLeft; dy = e.clientY - video.offsetTop;
+    video.classList.add("dragging"); bar.setPointerCapture(e.pointerId);
+  });
+  bar.addEventListener("pointermove", function (e) {
+    if (!bar.hasPointerCapture(e.pointerId)) return;
+    var maxX = window.innerWidth - video.offsetWidth, maxY = window.innerHeight - video.offsetHeight;
+    video.style.left = Math.min(Math.max(0, e.clientX - dx), Math.max(0, maxX)) + "px";
+    video.style.top  = Math.min(Math.max(0, e.clientY - dy), Math.max(0, maxY)) + "px";
+  });
+  bar.addEventListener("pointerup", function (e) {
+    bar.releasePointerCapture(e.pointerId); video.classList.remove("dragging");
+  });
+
+  var grip = $("videoresize"), rw = 0, rh = 0, rx = 0, ry = 0;
+  grip.addEventListener("pointerdown", function (e) {
+    toAbsolute(); rw = video.offsetWidth; rh = video.offsetHeight; rx = e.clientX; ry = e.clientY;
+    video.classList.add("dragging"); grip.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  grip.addEventListener("pointermove", function (e) {
+    if (!grip.hasPointerCapture(e.pointerId)) return;
+    var w = Math.max(360, Math.min(rw + (e.clientX - rx), window.innerWidth - video.offsetLeft));
+    var h = Math.max(260, Math.min(rh + (e.clientY - ry), window.innerHeight - video.offsetTop));
+    video.style.width = w + "px"; video.style.height = h + "px";
+  });
+  grip.addEventListener("pointerup", function (e) {
+    grip.releasePointerCapture(e.pointerId); video.classList.remove("dragging");
+  });
+
+  /* ---- bootstrap the messaging widget ---- */
+  if (!q.has("nochat")) {
+    ops("widget", "loading…");
+    var sc = document.createElement("script");
+    sc.src = SF.SITE_URL + "/assets/js/bootstrap.min.js";
+    sc.onload = function () {
+      try {
+        embeddedservice_bootstrap.settings.language = "en_US";
+        embeddedservice_bootstrap.init(SF.ORG_ID, SF.DEV_NAME, SF.SITE_URL, { scrt2URL: SF.SCRT2 });
+        ops("widget", "bootstrap loaded, waiting…");
+      } catch (err) {
+        ops("widget", "init failed: " + err.message);
+        console.error("[ABCFCU] embeddedservice_bootstrap.init failed", err);
+      }
+    };
+    sc.onerror = function () {
+      ops("widget", "bootstrap.min.js failed");
+      console.warn("[ABCFCU] could not load bootstrap.min.js — is this origin allowlisted on the deployment?");
+    };
+    document.body.appendChild(sc);
+  } else {
+    ops("widget", "disabled (?nochat)");
+  }
+
+  ops("link", "video mode: " + VIDEO_MODE + (CONNECTING ? " · connecting screen ON" : ""));
+  console.log("[ABCFCU] chat plumbed · video mode " + VIDEO_MODE + " · ?nochat to disable");
+})();
+</script>
+</body>
+</html>

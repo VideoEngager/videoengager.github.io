@@ -22,6 +22,9 @@ export class KioskApplication {
     this.isInitialized = false;
     this.systemNotificationElement = null;
     this._preCallMessageHandler = null;
+    this._notificationAnimationTimer = null;
+    this._notificationHideTimer = null;
+    this._boundResetInactivityTimer = this.resetInactivityTimer.bind(this);
     this.wakeLock = null;
     this.timeouts = {
       call: 1000 * 60 * 3, // 3 minutes
@@ -33,6 +36,7 @@ export class KioskApplication {
     this.configManager = new ConfigManager(defaultConfig); // Pass in the default config
 
     // Language configurations
+    /** @type {Record<string, { motto: string; connect: string; loadingText: string; cancelText: string; retryText: string }>} */
     this.languages = {
       en: {
         motto: "SmartVideo Kiosk Demo",
@@ -79,6 +83,11 @@ export class KioskApplication {
       // this.environmentConfig = new EnvironmentConfig();
       // this.config = this.environmentConfig.getConfig();
       this.config = await this.configManager.load();
+
+      // Allow config to override default timeouts
+      if (this.config?.timeouts) {
+        this.timeouts = { ...this.timeouts, ...this.config.timeouts };
+      }
 
       this.log(
         `APP: Environment detected: ${this.config}`
@@ -158,7 +167,7 @@ export class KioskApplication {
 
     // Activity detection for inactivity timer
     ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
-      document.addEventListener(event, this.resetInactivityTimer.bind(this));
+      document.addEventListener(event, this._boundResetInactivityTimer);
     });
 
     this.log("EVENTS: Event listeners setup complete");
@@ -217,42 +226,34 @@ export class KioskApplication {
       });
 
       this.videoEngagerClient.on("GenesysMessenger.conversationStarted", async () => {
-        console.log('[berat]', "useGenesysMessengerChat", this.config?.useGenesysMessengerChat)
         this.timeoutManager.extend("call", this.timeouts.call);
       });
 
       this.videoEngagerClient.on("GenesysMessenger.conversationEnded", async () => {
-        // window.location.reload();
-        /**
-        * @type {HTMLDivElement | null}
-        */
-        const genesysMessengerContainer = document.querySelector('#genesys-messenger');
+        const genesysMessengerContainer = /** @type {HTMLDivElement | null} */ (document.querySelector('#genesys-messenger'));
         if (genesysMessengerContainer) {
           genesysMessengerContainer.style.display = 'none';
         }
         await this.handleVideoCallEnded();
-      })
+      });
 
-      this.videoEngagerClient.on("onMessage", async () => {
-        /**
-        * @type {HTMLDivElement | null}
-        */
-        const genesysMessengerContainer = document.querySelector('#genesys-messenger');
+      // Single onMessage handler — shows genesys container, handles system messages, extends timeout
+      this.videoEngagerClient.on("onMessage", async (/** @type {any} */ data) => {
+        const genesysMessengerContainer = /** @type {HTMLDivElement | null} */ (document.querySelector('#genesys-messenger'));
         if (genesysMessengerContainer) {
           genesysMessengerContainer.style.display = 'block';
         }
-      })
-
-      this.videoEngagerClient.on("VideoEngagerCall.ended", async () => {
-        this.log("VIDEOCLIENT: Video call ended");
-        await this.handleVideoCallEnded();
-      });
-
-      // Listen for system notifications
-      this.videoEngagerClient.on("onMessage", (data) => {
         this.log(`VIDEOCLIENT: Received message: ${JSON.stringify(data)}`);
         this.handleSystemMessage(data);
         this.timeoutManager.extend("call", this.timeouts.call);
+      });
+
+      this.videoEngagerClient.on("VideoEngagerCall.ended", async () => {
+        // Only handle if GenesysMessenger.conversationEnded hasn't already done so
+        if (this.callPhase !== 'idle') {
+          this.log("VIDEOCLIENT: Video call ended");
+          await this.handleVideoCallEnded();
+        }
       });
 
       this.log("VIDEOCLIENT: VideoEngager client initialized successfully");
@@ -270,12 +271,16 @@ export class KioskApplication {
    */
   async handleStartVideoCall(event) {
     event.preventDefault();
+    if (this.callPhase !== 'idle') return;
     this.log("CALL: Start video call requested");
 
     try {
       // Show loading screen
       this.callPhase = 'waiting';
       this.showScreen("loading");
+
+      // Pause inactivity timer for the duration of the call
+      this.timeoutManager.clear("inactivity");
 
       // Set call timeout
       this.timeoutManager.set(
@@ -312,6 +317,7 @@ export class KioskApplication {
       }
     } catch (error) {
       this.log(`CALL: Failed to start video call: ${error.message}`);
+      this.callPhase = 'idle';
       this._releaseWakeLock();
       this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
       this.showScreen("initial");
@@ -420,7 +426,8 @@ export class KioskApplication {
       }
 
       // Add update pulse animation after a brief delay
-      setTimeout(() => {
+      if (this._notificationAnimationTimer) clearTimeout(this._notificationAnimationTimer);
+      this._notificationAnimationTimer = setTimeout(() => {
         if (this.systemNotificationElement) {
           this.systemNotificationElement.classList.add('notification-update');
         }
@@ -441,13 +448,15 @@ export class KioskApplication {
       this.systemNotificationElement.style.transform = 'translateX(-50%) translateY(-20px)';
 
       // Hide completely after animation
-      setTimeout(() => {
+      if (this._notificationHideTimer) clearTimeout(this._notificationHideTimer);
+      this._notificationHideTimer = setTimeout(() => {
         if (this.systemNotificationElement) {
           this.systemNotificationElement.style.display = 'none';
           this.systemNotificationElement.style.opacity = '';
           this.systemNotificationElement.style.transform = '';
           this.systemNotificationElement.classList.remove('notification-update', 'system-notification');
         }
+        this._notificationHideTimer = null;
       }, 300);
 
       this.log('SYSTEM: System notification cleared');
@@ -507,8 +516,10 @@ export class KioskApplication {
     // Add to oncall screen
     oncallScreen.appendChild(this.systemNotificationElement);
 
-    // Add CSS animation class
-    const style = document.createElement('style');
+    // Add CSS animation class (only once)
+    if (!document.getElementById('system-notification-styles')) {
+      const style = document.createElement('style');
+      style.id = 'system-notification-styles';
     style.textContent = `
       .system-notification {
         animation: slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -602,8 +613,9 @@ export class KioskApplication {
           padding: 14px 20px !important;
         }
       }
-    `;
-    document.head.appendChild(style);
+      `;
+      document.head.appendChild(style);
+    }
 
     this.log('SYSTEM NOTIFICATION: System notification element created');
   }
@@ -644,15 +656,17 @@ export class KioskApplication {
         this.log(`CALL: Error ending video call: ${error.message}`);
       });
     }
-    // Return to initial screen
+    // Return to initial screen and restart inactivity timer
     this.showScreen("initial");
+    this.setupInactivityTimer();
   }
 
-  async handleVideoCallError(error) {
+  async handleVideoCallError(/** @type {Error} */ error) {
     this.log(`CALL: Video call error: ${error.message}`);
 
-    // Clear call timeout
+    this.callPhase = 'idle';
     this.timeoutManager.clear("call");
+    this._releaseWakeLock();
 
     // Handle the error
     this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
@@ -748,7 +762,9 @@ export class KioskApplication {
    * @param {MessageEvent} event
    */
   _handlePreCallMessage(event) {
-    const expectedOrigin = `https://${this.config?.videoEngager?.veEnv}`;
+    const veEnv = this.config?.videoEngager?.veEnv;
+    if (!veEnv) return;
+    const expectedOrigin = `https://${veEnv}`;
     if (event.origin !== expectedOrigin) return;
 
     let data = event.data;
@@ -786,7 +802,7 @@ export class KioskApplication {
     return lang && this.languages[lang] ? lang : "en";
   }
 
-  applyLanguageSettings(lang) {
+  applyLanguageSettings(/** @type {string} */ lang) {
     const langConfig = this.languages[lang];
     if (!langConfig) return;
 
@@ -840,7 +856,7 @@ export class KioskApplication {
   }
 
   resetInactivityTimer() {
-    if (this.currentScreen === "initial") {
+    if (this.currentScreen === "initial" && this.callPhase === 'idle') {
       this.setupInactivityTimer();
     }
   }
@@ -863,7 +879,7 @@ export class KioskApplication {
     });
 
     // In development, also log to potential debug element
-    if (this.environmentConfig?.getEnvironment() === "development") {
+    if (this.config?.debug === true) {
       const debugElement = document.getElementById("debug-log");
       if (debugElement) {
         debugElement.textContent += `[${timestamp}] ${message}\n`;
@@ -899,6 +915,8 @@ export class KioskApplication {
 
     // Clear all timeouts
     this.timeoutManager.clearAll();
+    if (this._notificationAnimationTimer) clearTimeout(this._notificationAnimationTimer);
+    if (this._notificationHideTimer) clearTimeout(this._notificationHideTimer);
 
     // Destroy VideoEngager client
     if (this.videoEngagerClient) {
@@ -907,7 +925,7 @@ export class KioskApplication {
 
     // Remove event listeners
     ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
-      document.removeEventListener(event, this.resetInactivityTimer.bind(this));
+      document.removeEventListener(event, this._boundResetInactivityTimer);
     });
 
     if (this._preCallMessageHandler) {

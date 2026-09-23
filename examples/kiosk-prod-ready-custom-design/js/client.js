@@ -241,7 +241,7 @@ export class VideoEngagerClient {
 
         document.head.appendChild(script);
       } catch (error) {
-        reject();
+        reject(error);
       }
     });
   }

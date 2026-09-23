@@ -32,12 +32,19 @@ interface GenesysConfig {
 //   level?: "debug" | "info" | "warn" | "error"; // default: 'info'
 // }
 
+interface TimeoutsConfig {
+  call?: number;
+  inactivity?: number;
+  retry?: number;
+}
+
 interface ClientConfig {
   videoEngager: VideoEngagerConfig;
   genesys: GenesysConfig;
   useGenesysMessengerChat?: boolean; // default: false
   logger?: boolean; // default: false
   debug?: boolean; // default: false
+  timeouts?: TimeoutsConfig;
 }
 
 export { ClientConfig, VideoEngagerConfig, GenesysConfig };

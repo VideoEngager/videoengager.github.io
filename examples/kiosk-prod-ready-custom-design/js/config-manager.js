@@ -43,9 +43,20 @@ export class ConfigManager {
     const p = new URLSearchParams(location.search);
     if (p.get('config')) {
       try {
-        const res = await fetch(p.get('config'), { cache: 'no-store' });
-        const ext = await res.json();
-        this.config = deepMerge(this.config, this.validateCustomerConfig(ext));
+        const configUrl = p.get('config');
+        const parsed = new URL(configUrl, location.href);
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:' && parsed.protocol !== 'blob:') {
+          throw new Error(`Unsafe config URL scheme: ${parsed.protocol}`);
+        }
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 10000);
+        try {
+          const res = await fetch(parsed.href, { cache: 'no-store', signal: controller.signal });
+          const ext = await res.json();
+          this.config = deepMerge(this.config, this.validateCustomerConfig(ext));
+        } finally {
+          clearTimeout(fetchTimeout);
+        }
       } catch (e) {
         console.warn('External config failed:', e);
       }
@@ -108,7 +119,14 @@ export class ConfigManager {
 
   loadFromStorage () {
     const stored = localStorage.getItem('kioskConfig');
-    return stored ? JSON.parse(stored) : {};
+    if (!stored) return {};
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      console.warn('Failed to parse stored config, ignoring:', e);
+      localStorage.removeItem('kioskConfig');
+      return {};
+    }
   }
 
   saveToStorage () {

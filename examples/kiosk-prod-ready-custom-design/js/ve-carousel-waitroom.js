@@ -1,4 +1,5 @@
 // @ts-check
+import { Utils } from './utils.js';
 
 /**
  * @typedef {Object} ThemeConfig
@@ -76,6 +77,12 @@ export class VECarouselWaitroom extends HTMLElement {
 
     /** @type {IntersectionObserver | null} */
     this.mediaObserver = null;
+
+    // Stable bound references for add/removeEventListener symmetry
+    this._boundHandleBotMessage = this.handleBotMessage.bind(this);
+    this._boundHandleSystemInterrupt = this.handleSystemInterrupt.bind(this);
+    this._boundHandleTouchStart = this.handleTouchStart.bind(this);
+    this._boundHandleCancel = this.handleCancel.bind(this);
   }
 
   async init () {
@@ -202,12 +209,12 @@ export class VECarouselWaitroom extends HTMLElement {
                           <div class="slide-content">
                               ${
                                 slide.title
-                                  ? `<h2 class="slide-title">${slide.title}</h2>`
+                                  ? `<h2 class="slide-title">${Utils.sanitizeHTML(slide.title)}</h2>`
                                   : ''
                               }
                               ${
                                 slide.description
-                                  ? `<p class="slide-description">${slide.description}</p>`
+                                  ? `<p class="slide-description">${Utils.sanitizeHTML(slide.description)}</p>`
                                   : ''
                               }
                           </div>
@@ -242,12 +249,12 @@ export class VECarouselWaitroom extends HTMLElement {
                           <div class="slide-content">
                               ${
                                 slide.title
-                                  ? `<h2 class="slide-title">${slide.title}</h2>`
+                                  ? `<h2 class="slide-title">${Utils.sanitizeHTML(slide.title)}</h2>`
                                   : ''
                               }
                               ${
                                 slide.description
-                                  ? `<p class="slide-description">${slide.description}</p>`
+                                  ? `<p class="slide-description">${Utils.sanitizeHTML(slide.description)}</p>`
                                   : ''
                               }
                           </div>
@@ -263,10 +270,8 @@ export class VECarouselWaitroom extends HTMLElement {
                            role="img"
                            aria-label="${slide.title}">
                           <div class="slide-content">
-                              <h2 class="slide-title">${slide.title}</h2>
-                              <p class="slide-description">${
-                                slide.description
-                              }</p>
+                              <h2 class="slide-title">${Utils.sanitizeHTML(slide.title)}</h2>
+                              <p class="slide-description">${Utils.sanitizeHTML(slide.description)}</p>
                           </div>
                       </div>
                   `;
@@ -396,12 +401,18 @@ export class VECarouselWaitroom extends HTMLElement {
   handleMediaError (slideElement, slide, error) {
     const placeholder = slideElement.querySelector('.loading-placeholder');
     if (placeholder) {
-      placeholder.innerHTML = `
-              <div style="text-align: center; color: rgba(255,255,255,0.8);">
-                  <p>Unable to load ${slide.type}</p>
-                  <small>${slide.title || 'Media content'}</small>
-              </div>
-          `;
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'text-align: center; color: rgba(255,255,255,0.8);';
+
+      const p = document.createElement('p');
+      p.textContent = `Unable to load ${Utils.sanitizeText(slide.type)}`;
+
+      const small = document.createElement('small');
+      small.textContent = slide.title || 'Media content';
+
+      wrapper.appendChild(p);
+      wrapper.appendChild(small);
+      placeholder.replaceChildren(wrapper);
     }
   }
 
@@ -410,21 +421,15 @@ export class VECarouselWaitroom extends HTMLElement {
 
     const cancelButton = this.shadowRoot.querySelector('.cancel-button');
     if (cancelButton) {
-      cancelButton.addEventListener('click', this.handleCancel.bind(this));
+      cancelButton.addEventListener('click', this._boundHandleCancel);
     }
 
     // Listen for external events
-    window.addEventListener('botMessage', this.handleBotMessage.bind(this));
-    window.addEventListener(
-      'systemInterrupt',
-      this.handleSystemInterrupt.bind(this)
-    );
+    window.addEventListener('botMessage', this._boundHandleBotMessage);
+    window.addEventListener('systemInterrupt', this._boundHandleSystemInterrupt);
 
     // Touch events for mobile autoplay recovery
-    this.shadowRoot.addEventListener(
-      'touchstart',
-      this.handleTouchStart.bind(this)
-    );
+    this.shadowRoot.addEventListener('touchstart', this._boundHandleTouchStart);
 
     // Intersection Observer for performance
     this.setupIntersectionObserver();
@@ -632,9 +637,11 @@ export class VECarouselWaitroom extends HTMLElement {
    * @param {Partial<ComponentConfig>} newConfig
    */
   updateConfig (newConfig) {
+    this.pauseCarousel();
     this.config = { ...this.config, ...newConfig };
     this.render();
     this.setupEventListeners();
+    this.startCarousel();
   }
 
   // Cleanup
@@ -657,8 +664,8 @@ export class VECarouselWaitroom extends HTMLElement {
       });
     }
 
-    window.removeEventListener('botMessage', this.handleBotMessage);
-    window.removeEventListener('systemInterrupt', this.handleSystemInterrupt);
+    window.removeEventListener('botMessage', this._boundHandleBotMessage);
+    window.removeEventListener('systemInterrupt', this._boundHandleSystemInterrupt);
   }
 }
 

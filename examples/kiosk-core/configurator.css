@@ -1,0 +1,17 @@
+.configurator main { display: block; width: 100%; max-width: 1000px; margin: auto; padding-top: 40px; }
+.configurator h1 { font-size: clamp(32px, 5vw, 52px); margin: 12px 0 20px; }
+.configurator p { line-height: 1.6; }
+.configurator fieldset { min-width: 0; margin: 30px 0; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+.configurator legend { font-size: 20px; font-weight: bold; padding: 0 8px; }
+.configurator label { display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: bold; margin: 16px 0; }
+.configurator input:not([type="checkbox"]), .configurator select { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--muted); border-radius: 6px; color: var(--ink); background: var(--white); font: inherit; font-weight: normal; }
+.configurator input:focus-visible, .configurator select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.configurator .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.configurator .checkbox { flex-direction: row; align-items: flex-start; gap: 12px; font-size: 16px; line-height: 1.5; }
+.configurator input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 auto; margin: 2px 0; accent-color: var(--brand-strong); }
+.configurator .field-help { color: var(--muted); font-size: 14px; margin: 8px 0 18px; }
+.configurator code { overflow-wrap: anywhere; }
+.config-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+#config-error { color: #8b261c; background: #fff0ed; border-left: 4px solid #8b261c; padding: 16px; }
+#config-status { min-height: 24px; }
+@media (max-width: 650px) { .configurator .fields { grid-template-columns: 1fr; } .configurator fieldset { padding: 16px; } .configurator header { align-items: flex-start; } }

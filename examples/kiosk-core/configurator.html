@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>VideoEngager | Kiosk configurator</title>
+  <meta name="theme-color" content="#3398cc">
+  <link rel="icon" href="videoengager-logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="configurator.css">
+  <script defer src="https://cdn.videoengager.com/widget/latest/browser/main.umd.js"></script>
+  <script defer src="config.js"></script>
+  <script defer src="configurator.js"></script>
+</head>
+<body class="configurator">
+  <header>
+    <a class="brand" href="../../"><img src="videoengager-logo.png" width="48" height="48" alt=""><span>VideoEngager<small>Video assistance</small></span></a>
+    <a href="index.html">Open default kiosk</a>
+  </header>
+  <main>
+    <p class="eyebrow">Set up a demo</p>
+    <h1>Kiosk configurator</h1>
+    <p>Choose an environment, adjust the public settings, then launch the kiosk. Its URL keeps these settings so you can bookmark or share it.</p>
+    <form id="configurator">
+      <fieldset>
+        <legend>Connection</legend>
+        <label>Environment
+          <select name="env"><option value="production">Production</option><option value="dev">Development</option><option value="staging">Staging</option><option value="uae">UAE</option></select>
+        </label>
+        <p class="field-help">Changing the environment fills its demo hosts, tenant and deployment. You can override them below.</p>
+        <div class="fields">
+          <label>VideoEngager hostname<input name="veDomain" type="text" required autocomplete="off" placeholder="videome.leadsecure.com"></label>
+          <label>VideoEngager tenant ID<input name="veTenantId" type="text" required autocomplete="off"></label>
+          <label>Genesys hostname<select name="genesysDomain" required aria-describedby="genesys-domain-help"></select></label>
+          <label>Genesys deployment ID<input name="genesysDeploymentId" type="text" required autocomplete="off" aria-describedby="deployment-help"></label>
+        </div>
+        <p id="genesys-domain-help" class="field-help">Choose your Genesys region from the hostnames supported by the loaded VideoEngager SDK.</p>
+        <p id="deployment-help" class="field-help">Use the deployment ID belonging to your Genesys organization and environment.</p>
+        <label>Kiosk ID<input name="kioskId" type="text" required maxlength="100" autocomplete="off"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Visitor experience</legend>
+        <label class="checkbox"><input name="waitingScreen" type="checkbox"> Show the waiting screen while finding an agent</label>
+        <label>Waiting screen layout
+          <select name="waitingScreenMode" aria-describedby="waiting-layout-help"><option value="overlay">Overlay the video area</option><option value="beside">Beside the video</option></select>
+        </label>
+        <p id="waiting-layout-help" class="field-help">The overlay fills the video area while you wait and hides during camera setup. Beside the video keeps tips alongside the video, or above it on smaller screens.</p>
+        <label>When to show chat
+          <select name="chatMode" aria-describedby="chat-mode-help">
+            <option value="hidden">Hide chat</option>
+            <option value="onActivity">After the first message or connected call</option>
+            <option value="always">When Messenger is available</option>
+            <option value="afterStart">After the video request starts successfully</option>
+          </select>
+        </label>
+        <p id="chat-mode-help" class="field-help">Choose when visitors can see Messenger. With authentication enabled, sign-in still waits until they press Start.</p>
+        <label class="checkbox"><input name="chatMinimized" type="checkbox" aria-describedby="chat-minimized-help"> Start chat minimized</label>
+        <p id="chat-minimized-help" class="field-help">This sets the initial chat appearance. Visitors can expand or minimize chat themselves; enable the Messenger launcher in your deployment to reopen minimized chat.</p>
+        <label class="checkbox"><input name="postCallSurvey" type="checkbox"> Keep the video frame open for a post-call survey</label>
+        <p class="field-help">Your VideoEngager tenant must provide the survey. The kiosk shows a Finish / skip survey button and resets after the survey timeout.</p>
+        <label class="checkbox"><input name="cleanupOnUnload" type="checkbox"> Request conversation cleanup when the page closes or leaves</label>
+        <p class="field-help">Page-close cleanup is best effort; browsers do not wait for network requests to finish.</p>
+        <div class="fields">
+          <label>Maximum wait (milliseconds)<input name="maxWaitMs" type="number" min="1000" max="3600000" step="1" required></label>
+          <label>Cleanup timeout (milliseconds)<input name="endTimeoutMs" type="number" min="1000" max="60000" step="1" required></label>
+          <label>Survey timeout (milliseconds)<input name="surveyTimeoutMs" type="number" min="5000" max="3600000" step="1" required></label>
+        </div>
+        <p class="field-help">1,000 milliseconds = 1 second. A cleanup timeout requires reloading before the next visitor.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Messenger authentication</legend>
+        <label class="checkbox"><input name="auth" type="checkbox"> Enable authenticated Genesys Messenger</label>
+        <p class="field-help">Production includes the sibling authenticated demo’s deployment and Okta settings. For other environments, supply your authenticated deployment and identity provider settings.</p>
+        <div id="auth-settings" hidden>
+          <label>Authentication mode
+            <select name="authMode" aria-describedby="auth-mode-help"><option value="perInteraction">Each visitor signs in</option><option value="shared">Shared kiosk account</option></select>
+          </label>
+          <p id="auth-mode-help" class="field-help">Both modes sign in when the first visitor presses Start. <strong>Each visitor signs in</strong> logs out of Messenger after the session and requests a fresh identity provider login for the next visitor. <strong>Shared kiosk account</strong> keeps the same account signed in between visitors.</p>
+          <label>Authorization endpoint<input name="authorizationEndpoint" type="url" required autocomplete="off" placeholder="https://your-idp.example/oauth2/v1/authorize"></label>
+          <div class="fields">
+            <label>Public OIDC client ID<input name="clientId" type="text" required autocomplete="off"></label>
+            <label>Scopes (space separated)<input name="scopes" type="text" required autocomplete="off"></label>
+          </div>
+          <p class="field-help">Register <code id="redirect-uri"></code> as a redirect URI with your identity provider. Do not enter client secrets or access tokens.</p>
+        </div>
+      </fieldset>
+      <p id="config-error" role="alert" hidden></p>
+      <div class="config-actions"><button class="start-button" type="submit">Launch kiosk</button><button id="copy-link" class="secondary" type="button">Copy kiosk link</button></div>
+      <p id="config-status" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+  <footer>Video assistance kiosk <span>Powered by VideoEngager</span></footer>
+  <noscript>This configurator requires JavaScript.</noscript>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>VideoEngager | Video assistance kiosk</title>
+  <meta name="theme-color" content="#3398cc">
+  <link rel="icon" href="videoengager-logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.videoengager.com/widget/latest/browser/main.umd.js"></script>
+  <script defer src="auth.js"></script>
+  <script defer src="config.js"></script>
+  <script defer src="waiting-screen.js"></script>
+  <script defer src="ui.js"></script>
+  <script defer src="chat-ui.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body class="messenger-hidden">
+  <header>
+    <a class="brand" href="../../"><img src="videoengager-logo.png" width="48" height="48" alt=""><span>VideoEngager<small>Video assistance</small></span></a>
+    <p id="status" role="status" aria-live="polite">Getting ready…</p>
+  </header>
+  <main>
+    <section id="welcome" class="panel" aria-labelledby="welcome-title">
+      <p class="eyebrow">A little help, face to face</p>
+      <h1 id="welcome-title">A real person.<br>Right here.</h1>
+      <p class="description">Connect with our team for personal video assistance.</p>
+      <button id="start" class="start-button" disabled>
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3" y="8" width="18" height="16" rx="4" stroke="currentColor" stroke-width="2"/><path d="m21 13 8-4v14l-8-4" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Touch here to begin
+      </button>
+      <p class="hint">Please allow access to the camera and microphone when asked.</p>
+    </section>
+    <section id="session" aria-label="Video assistance session" hidden>
+      <div id="video-stage">
+        <div id="waiting" class="panel" hidden>
+          <div class="waiting-status">
+            <div class="spinner" aria-hidden="true"></div>
+            <p data-waiting-message>Please wait while we connect you with our team.</p>
+          </div>
+          <section data-waiting-carousel role="region" aria-roledescription="carousel" aria-label="While you wait">
+            <article data-waiting-slide role="group" aria-roledescription="slide" aria-label="1 of 3">
+              <svg class="waiting-illustration" viewBox="0 0 240 144" fill="none" aria-hidden="true" focusable="false">
+                <rect x="14" y="14" width="212" height="116" rx="20" fill="white" stroke="currentColor" stroke-width="3"/>
+                <rect x="27" y="27" width="110" height="90" rx="12" fill="#d9eefb"/>
+                <circle cx="82" cy="59" r="16" fill="#3398cc"/>
+                <path d="M52 104c0-21 13-32 30-32s30 11 30 32" fill="#1673a3"/>
+                <rect x="150" y="27" width="62" height="50" rx="10" fill="#f3f9fd"/>
+                <circle cx="181" cy="44" r="9" fill="#3398cc"/>
+                <path d="M163 70c0-12 8-19 18-19s18 7 18 19" fill="#1673a3"/>
+                <rect x="156" y="92" width="22" height="17" rx="5" fill="#3398cc"/>
+                <path d="m178 97 12-6v19l-12-6" fill="#1673a3"/>
+              </svg>
+              <p class="eyebrow">Video assistance</p>
+              <h2>Help, face to face.</h2>
+              <p class="waiting-tip-copy">Talk with our team on video and work through your questions together.</p>
+            </article>
+            <article data-waiting-slide role="group" aria-roledescription="slide" aria-label="2 of 3" hidden>
+              <svg class="waiting-illustration" viewBox="0 0 240 144" fill="none" aria-hidden="true" focusable="false">
+                <circle cx="81" cy="72" r="55" fill="#d9eefb"/>
+                <rect x="43" y="47" width="63" height="50" rx="12" fill="white" stroke="currentColor" stroke-width="3"/>
+                <path d="m106 62 24-12v45l-24-12" fill="#3398cc"/>
+                <rect x="164" y="29" width="30" height="59" rx="15" fill="#3398cc"/>
+                <path d="M153 70v6a26 26 0 0 0 52 0v-6M179 103v16m-17 0h34" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                <path d="m53 113 10 10 22-23" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p class="eyebrow">Get comfortable</p>
+              <h2>Ready for your close-up?</h2>
+              <p class="waiting-tip-copy">Allow camera and microphone access when asked. Position yourself comfortably in view.</p>
+            </article>
+            <article data-waiting-slide role="group" aria-roledescription="slide" aria-label="3 of 3" hidden>
+              <svg class="waiting-illustration" viewBox="0 0 240 144" fill="none" aria-hidden="true" focusable="false">
+                <rect x="29" y="23" width="119" height="104" rx="14" fill="white" stroke="currentColor" stroke-width="3"/>
+                <path d="M50 50h55M50 69h76M50 88h48" stroke="#3398cc" stroke-width="5" stroke-linecap="round"/>
+                <path d="M136 16h55a25 25 0 0 1 25 25v19a25 25 0 0 1-25 25h-22l-20 17V85h-13a25 25 0 0 1-25-25V41a25 25 0 0 1 25-25Z" fill="#d9eefb"/>
+                <path d="M151 40c0-14 27-14 27 0 0 9-13 9-13 18" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                <circle cx="165" cy="70" r="3" fill="#1673a3"/>
+              </svg>
+              <p class="eyebrow">Make the most of your call</p>
+              <h2>What would you like to ask?</h2>
+              <p class="waiting-tip-copy">Take a moment to think about your question and keep any useful details close by.</p>
+            </article>
+            <div class="waiting-controls">
+              <button type="button" data-waiting-previous aria-label="Previous tip">←</button>
+              <span data-waiting-position>1 / 3</span>
+              <button type="button" data-waiting-next aria-label="Next tip">→</button>
+              <button type="button" data-waiting-toggle>Pause tips</button>
+            </div>
+          </section>
+        </div>
+        <div id="video-container" hidden></div>
+      </div>
+      <div class="session-controls">
+        <button id="end" class="secondary">Cancel request</button>
+        <button id="survey-done" class="secondary" hidden>Finish / skip survey</button>
+      </div>
+    </section>
+    <section id="error" class="panel" aria-labelledby="error-title" hidden>
+      <p class="eyebrow">Please try again</p>
+      <h2 id="error-title">We couldn’t complete your request.</h2>
+      <p id="error-message" class="description" role="alert"></p>
+      <button id="retry" class="secondary">Reload kiosk</button>
+    </section>
+  </main>
+  <footer><a href="configurator.html">Configure kiosk</a><span>Powered by VideoEngager</span></footer>
+  <noscript>This kiosk requires JavaScript to connect you with an agent.</noscript>
+</body>
+</html>

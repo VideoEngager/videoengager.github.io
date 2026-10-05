@@ -219,6 +219,20 @@
     "featured": true
   },
   {
+    "title": "VideoEngager Core Kiosk",
+    "href": "/examples/kiosk-core/configurator.html",
+    "desc": "Configure a vanilla JavaScript kiosk with Genesys Messenger, optional authentication, waiting screens, chat and post-call surveys.",
+    "category": "Kiosk",
+    "tags": [
+      "kiosk",
+      "core-sdk",
+      "genesys",
+      "messenger",
+      "authentication",
+      "vanilla"
+    ]
+  },
+  {
     "title": "Standalone Co-browsing",
     "href": "/examples/standaloneCobrowse/index.html",
     "desc": "Independent co-browsing implementation.",

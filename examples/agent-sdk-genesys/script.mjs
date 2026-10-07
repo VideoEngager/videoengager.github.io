@@ -1,9 +1,14 @@
 /**
  * @fileoverview VideoEngager Agent SDK — Genesys Demo
  *
- * Reads configuration from URL params (populated by the form).
- * The floating SmartVideo window is shown on PRE_CALL / CALL_STARTED
- * and hidden on sessionEnded / sessionFailed.
+ * Calls VE.call() immediately after init.
+ *
+ * Sign-in (README "Agent sign-in", option B): the SmartVideo window is shown
+ * as soon as the iframe loads, so the agent can click sign-in. Identity
+ * providers refuse to be framed, so sign-in runs in a pop-up, and a pop-up
+ * opened from a click is allowed even with the pop-up blocker on.
+ * After that the window is never hidden while connected: it is restored on
+ * PRE_CALL / CALL_STARTED and minimised (title bar only) when a call ends.
  */
 
 import * as VE from 'https://cdn.jsdelivr.net/npm/videoengager-agent-sdk@6.0.2/dist/index.mjs';
@@ -327,6 +332,7 @@ function registerSDKEvents(cfg) {
   });
 
   VE.on('cleanup', () => {
+    hideVideoWindow();
     setStatus('', 'Disconnected');
     log('SDK cleaned up', 'warn');
   });

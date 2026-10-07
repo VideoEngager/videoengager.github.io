@@ -239,6 +239,17 @@
     ]
   },
   {
+    "title": "Agent SDK — Genesys Demo",
+    "href": "/examples/agent-sdk-genesys/index.html",
+    "desc": "Minimal Agent SDK demo with Genesys Cloud auth. Incoming SmartVideo calls open a floating video window automatically.",
+    "category": "Agent SDK",
+    "tags": [
+      "agent-sdk",
+      "genesys",
+      "simple"
+    ]
+  },
+  {
     "title": "VideoEngager Agent SDK Demo",
     "href": "/examples/ve-agent-sdk-demo/index.html",
     "desc": "Comprehensive Agent SDK demonstration.",

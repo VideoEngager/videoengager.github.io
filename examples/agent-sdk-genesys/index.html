@@ -29,7 +29,7 @@
     .page {
       max-width: 560px;
       margin: 48px auto;
-      padding: 0 16px;
+      padding: 0 16px 48px;
     }
 
     .card {
@@ -62,7 +62,7 @@
       margin-bottom: 6px;
     }
 
-    select, input[type="text"] {
+    select, input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px 12px;
       border: 2px solid #e2e8f0;
@@ -73,17 +73,154 @@
       appearance: none;
       -webkit-appearance: none;
     }
+    input[type="number"] { appearance: auto; -webkit-appearance: auto; }
     select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
       padding-right: 32px;
     }
-    select:focus, input[type="text"]:focus {
+    select:focus, input[type="text"]:focus, input[type="number"]:focus {
       outline: none;
       border-color: #2c5aa0;
     }
 
+    /* ── toggle / checkbox ────────────────────────────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    .toggle-row label {
+      margin: 0;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+    }
+    .toggle-row .hint {
+      font-size: 0.75em;
+      color: #94a3b8;
+      font-weight: 400;
+      display: block;
+      margin-top: 2px;
+    }
+    .toggle {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: #cbd5e1;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s;
+    }
+    .toggle input:checked + .toggle-track { background: #2c5aa0; }
+    .toggle input:checked + .toggle-track::after { transform: translateX(18px); }
+
+    /* ── dimension row ────────────────────────────────────────────── */
+    .dim-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .dim-row .form-group { margin-bottom: 0; }
+
+    /* ── accordion ────────────────────────────────────────────────── */
+    .accordion {
+      margin-top: 24px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px;
+      cursor: pointer;
+      background: #f8fafc;
+      user-select: none;
+      font-size: 0.87em;
+      font-weight: 600;
+      color: #475569;
+      transition: background .15s;
+    }
+    .accordion-header:hover { background: #f1f5f9; }
+    .accordion-header .chevron {
+      font-size: 11px;
+      color: #94a3b8;
+      transition: transform .2s;
+    }
+    .accordion-body {
+      display: none;
+      padding: 18px 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .accordion.open .accordion-body { display: block; }
+    .accordion.open .chevron { transform: rotate(180deg); }
+
+    .accordion-body .form-group:last-child { margin-bottom: 0; }
+    .accordion-body .toggle-row + .toggle-row {
+      border-top: 1px solid #f1f5f9;
+    }
+    .section-label {
+      font-size: 0.78em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #94a3b8;
+      margin-bottom: 10px;
+      margin-top: 16px;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* ── share URL ────────────────────────────────────────────────── */
+    .share-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .share-row input {
+      flex: 1;
+      font-size: 13px;
+      padding: 9px 10px;
+      background: #f8fafc;
+      color: #475569;
+      cursor: text;
+    }
+    .btn-copy {
+      padding: 9px 14px;
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, color .15s;
+      flex-shrink: 0;
+    }
+    .btn-copy:hover { background: #cbd5e1; color: #334155; }
+    .btn-copy.copied { background: #dcfce7; color: #15803d; }
+
+    /* ── connect button ───────────────────────────────────────────── */
     .btn-confirm {
       width: 100%;
       padding: 13px;
@@ -95,7 +232,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: background .2s, opacity .2s;
-      margin-top: 4px;
+      margin-top: 20px;
     }
     .btn-confirm:hover:not(:disabled) { background: #1e3f73; }
     .btn-confirm:disabled { opacity: .55; cursor: not-allowed; }
@@ -151,8 +288,6 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      width: 480px;
-      height: 360px;
       background: #1e293b;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,.35);
@@ -160,13 +295,11 @@
       flex-direction: column;
       overflow: hidden;
       z-index: 9000;
-      transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .35s;
-    }
-    #video-window.minimized {
-      transform: translateY(calc(100% - 44px));
-      opacity: .95;
+      transition: height .3s cubic-bezier(.4,0,.2,1), opacity .3s;
     }
     #video-window.hidden { display: none; }
+    #video-window.minimized { height: 44px !important; }
+    #video-window.minimized #video-engager-container { visibility: hidden; }
 
     .vw-titlebar {
       display: flex;
@@ -177,7 +310,9 @@
       background: #1e293b;
       flex-shrink: 0;
       user-select: none;
+      cursor: grab;
     }
+    .vw-titlebar:active { cursor: grabbing; }
     .vw-title {
       font-size: 0.85em;
       font-weight: 600;
@@ -185,6 +320,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      pointer-events: none;
     }
     .vw-live-dot {
       width: 8px; height: 8px;
@@ -200,38 +336,24 @@
       cursor: pointer;
       padding: 4px 8px;
       border-radius: 4px;
-      font-size: 14px;
+      font-size: 18px;
       line-height: 1;
       transition: background .15s, color .15s;
     }
     .vw-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
 
     #video-engager-container {
-      flex: 1;
       width: 100%;
+      flex: 1;
       background: #0f172a;
+      min-height: 0;
     }
     #video-engager-container iframe {
       width: 100%;
       height: 100%;
       border: none;
+      display: block;
     }
-
-    /* ── end call button (inside video window titlebar) ──────────── */
-    .vw-btn-danger {
-      background: #dc2626;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 1.4;
-      transition: background .15s;
-      display: none;
-    }
-    .vw-btn-danger:hover { background: #b91c1c; }
 
   </style>
 </head>
@@ -248,6 +370,7 @@
       <div class="card-subtitle">Agent SDK demo &mdash; sign in once in the video window; incoming calls open it automatically</div>
 
       <form id="config-form">
+        <!-- ── required fields ─────────────────────────────────────── -->
         <div class="form-group">
           <label for="ve-env">VideoEngager Environment</label>
           <select id="ve-env">
@@ -259,13 +382,105 @@
 
         <div class="form-group">
           <label for="genesys-env">Genesys Cloud Environment</label>
-          <input
-            type="text"
-            id="genesys-env"
-            placeholder="e.g. mypurecloud.com or mypurecloud.com.au"
-            autocomplete="off"
-            spellcheck="false"
-          />
+          <select id="genesys-env">
+            <option value="mypurecloud.com">mypurecloud.com (US East)</option>
+            <option value="mypurecloud.de">mypurecloud.de (EU Frankfurt)</option>
+            <option value="mypurecloud.ie">mypurecloud.ie (EU Ireland)</option>
+            <option value="mypurecloud.com.au">mypurecloud.com.au (AP Sydney)</option>
+            <option value="mypurecloud.jp">mypurecloud.jp (AP Tokyo)</option>
+            <option value="inindca.com">inindca.com (Dev/Staging)</option>
+            <option value="pure.cloud">pure.cloud (US West)</option>
+            <option value="apne2.pure.cloud">apne2.pure.cloud (AP Seoul)</option>
+            <option value="apne3.pure.cloud">apne3.pure.cloud (AP Osaka)</option>
+            <option value="aps1.pure.cloud">aps1.pure.cloud (AP Mumbai)</option>
+            <option value="cac1.pure.cloud">cac1.pure.cloud (CA Montreal)</option>
+            <option value="euc2.pure.cloud">euc2.pure.cloud (EU Zurich)</option>
+            <option value="euw2.pure.cloud">euw2.pure.cloud (EU London)</option>
+            <option value="mec1.pure.cloud">mec1.pure.cloud (ME UAE)</option>
+            <option value="sae1.pure.cloud">sae1.pure.cloud (SA São Paulo)</option>
+            <option value="usw2.pure.cloud">usw2.pure.cloud (US West 2)</option>
+          </select>
+        </div>
+
+        <!-- ── advanced accordion ─────────────────────────────────── -->
+        <div class="accordion" id="advanced-accordion">
+          <div class="accordion-header" id="accordion-toggle">
+            <span>Advanced configuration</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="accordion-body">
+
+            <div class="section-label">Iframe</div>
+
+            <div class="toggle-row">
+              <label for="initially-hidden">
+                Initially hidden
+                <span class="hint">Show SmartVideo only when active call</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="initially-hidden" />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="dim-row form-group" style="margin-top:14px">
+              <div class="form-group">
+                <label for="iframe-width">Width (px)</label>
+                <input type="number" id="iframe-width" value="800" min="800" placeholder="800" />
+              </div>
+              <div class="form-group">
+                <label for="iframe-height">Height (px)</label>
+                <input type="number" id="iframe-height" value="800" min="800" placeholder="800" />
+              </div>
+            </div>
+
+            <div class="section-label">Language</div>
+
+            <div class="form-group">
+              <label for="lang">SmartVideo Language</label>
+              <select id="lang">
+                <option value="">Browser default</option>
+                <option value="en">English (en)</option>
+                <option value="fr">French (fr)</option>
+                <option value="pt">Portuguese (pt)</option>
+                <option value="es">Spanish (es)</option>
+                <option value="ar">Arabic (ar)</option>
+                <option value="it">Italian (it)</option>
+                <option value="de">German (de)</option>
+              </select>
+            </div>
+
+            <div class="section-label">Parameters</div>
+
+            <div class="toggle-row">
+              <label for="is-popup">
+                Popup Agent Page
+                <span class="hint">Enable Popup Agent Page</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="is-popup" />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <label for="auth-popup">
+                Auth Popup
+                <span class="hint">Enable Auth Popup for SSO</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="auth-popup" checked />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── shareable URL ──────────────────────────────────────── -->
+        <div class="share-row">
+          <input type="text" id="share-url" readonly placeholder="Fill in the fields above to generate a link" />
+          <button type="button" id="copy-btn" class="btn-copy">Copy link</button>
         </div>
 
         <button type="submit" id="confirm-btn" class="btn-confirm">Connect</button>
@@ -285,19 +500,14 @@
 
   <!-- ── Floating SmartVideo window ─────────────────────────────── -->
   <div id="video-window" class="hidden">
-    <div class="vw-titlebar">
-      <div class="vw-title">
-        <span class="vw-live-dot" id="vw-live-dot" style="display:none"></span>
-        <span id="vw-title-text">SmartVideo</span>
-      </div>
+    <div class="vw-titlebar" id="vw-titlebar">
       <div class="vw-controls">
-        <button class="vw-btn-danger" id="end-call-btn">End call</button>
-        <button class="vw-btn" id="vw-toggle-btn" title="Minimise / Restore">&#x2304;</button>
+        <button class="vw-btn" id="vw-toggle-btn" title="Minimise / Restore">&#8211;</button>
       </div>
     </div>
     <div id="video-engager-container"></div>
   </div>
 
-  <script src="script.mjs?v=4" type="module"></script>
+  <script src="script.mjs?v=5" type="module"></script>
 </body>
 </html>

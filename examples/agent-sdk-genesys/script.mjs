@@ -2,8 +2,13 @@
  * @fileoverview VideoEngager Agent SDK — Genesys Demo
  *
  * Calls VE.call() immediately after init.
- * The floating SmartVideo window is shown on PRE_CALL or CALL_STARTED,
- * and hidden on FINISHED or sessionFailed.
+ *
+ * Sign-in (README "Agent sign-in", option B): the SmartVideo window is shown
+ * as soon as the iframe loads, so the agent can click sign-in. Identity
+ * providers refuse to be framed, so sign-in runs in a pop-up, and a pop-up
+ * opened from a click is allowed even with the pop-up blocker on.
+ * After that the window is never hidden while connected: it is restored on
+ * PRE_CALL / CALL_STARTED and minimised (title bar only) when a call ends.
  */
 
 import * as VE from 'https://cdn.jsdelivr.net/npm/videoengager-agent-sdk@6.0.2/dist/index.mjs';
@@ -40,13 +45,37 @@ function setStatus(dotClass, text) {
 }
 
 // ── floating video window ─────────────────────────────────────────────────────
+function setMinimized(min) {
+  $videoWin.classList.toggle('minimized', min);
+  isMinimized = min;
+  $vwToggle.textContent = min ? '\u2303' : '\u2304';
+}
+
+// Before the first call: visible and expanded so the agent can sign in.
+function showSignInWindow() {
+  $videoWin.classList.remove('hidden');
+  $vwTitle.textContent = 'SmartVideo — sign in, then minimise';
+  $liveDot.style.display = 'none';
+  $endCallBtn.style.display = 'none';
+  setMinimized(false);
+}
+
+// Call in progress: expanded, live indicator, End call button.
 function showVideoWindow() {
-  $videoWin.classList.remove('hidden', 'minimized');
+  $videoWin.classList.remove('hidden');
   $vwTitle.textContent = 'SmartVideo — Live';
   $liveDot.style.display = 'inline-block';
   $endCallBtn.style.display = 'block';
-  isMinimized = false;
-  $vwToggle.textContent = '\u2304';
+  setMinimized(false);
+}
+
+// Between calls: minimised to the title bar, never hidden, so the agent can
+// reopen it if SmartVideo ever asks to sign in again.
+function idleVideoWindow() {
+  $vwTitle.textContent = 'SmartVideo — waiting for calls';
+  $liveDot.style.display = 'none';
+  $endCallBtn.style.display = 'none';
+  setMinimized(true);
 }
 
 function hideVideoWindow() {
@@ -55,17 +84,7 @@ function hideVideoWindow() {
   $endCallBtn.style.display = 'none';
 }
 
-$vwToggle.addEventListener('click', () => {
-  if (isMinimized) {
-    $videoWin.classList.remove('minimized');
-    isMinimized = false;
-    $vwToggle.textContent = '\u2304';
-  } else {
-    $videoWin.classList.add('minimized');
-    isMinimized = true;
-    $vwToggle.textContent = '\u2303';
-  }
-});
+$vwToggle.addEventListener('click', () => setMinimized(!isMinimized));
 
 $endCallBtn.addEventListener('click', async () => {
   log('Ending call…', 'info');
@@ -77,8 +96,8 @@ $endCallBtn.addEventListener('click', async () => {
 });
 
 // ── custom UI handlers passed to the SDK ─────────────────────────────────────
-// The iframe is always kept alive in the DOM so the SDK can communicate with it.
-// Visibility of the floating window is driven solely by callStateUpdated / session events.
+// The iframe is always kept alive in the DOM so the SDK can communicate with it
+// and the agent stays signed in between calls.
 const uiHandlers = {
   openIframe: async (url) => {
     const container = document.getElementById('video-engager-container');
@@ -87,7 +106,8 @@ const uiHandlers = {
     iframe.src = url;
     iframe.allow = 'camera; microphone; clipboard-write; display-capture';
     container.appendChild(iframe);
-    log('SmartVideo iframe ready (hidden until call state)', 'info');
+    showSignInWindow();
+    log('SmartVideo loaded — sign in inside the video window, then minimise it', 'info');
   },
 
   closeIframe: async () => {
@@ -129,17 +149,18 @@ function registerSDKEvents() {
 
   VE.on('sessionEnded', (s) => {
     log(`Session ended — status: ${s?.status ?? 'unknown'}`, 'info');
-    hideVideoWindow();
+    idleVideoWindow();
     setStatus('connected', 'Connected — waiting for calls');
   });
 
   VE.on('sessionFailed', (p) => {
     log(`Session failed: ${JSON.stringify(p)}`, 'error');
-    hideVideoWindow();
+    idleVideoWindow();
     setStatus('connected', 'Connected — waiting for calls');
   });
 
   VE.on('cleanup', () => {
+    hideVideoWindow();
     setStatus('', 'Disconnected');
     log('SDK cleaned up', 'warn');
   });

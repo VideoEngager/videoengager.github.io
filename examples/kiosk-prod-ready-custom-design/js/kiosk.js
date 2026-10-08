@@ -19,6 +19,7 @@ export class KioskApplication {
     this.currentScreen = "initial";
     // Phase state machine: 'idle' → 'waiting' → 'precall' → 'active' → 'idle'
     this.callPhase = 'idle';
+    this.starting = false;
     this.isInitialized = false;
     this.systemNotificationElement = null;
     this._preCallMessageHandler = null;
@@ -104,7 +105,9 @@ export class KioskApplication {
       this.setupInactivityTimer();
 
       this.isInitialized = true;
+      /** @type {HTMLButtonElement} */ (document.getElementById('StartVideoCall')).disabled = false;
       this.log("APP: Secure kiosk application initialized successfully");
+      if (this.videoEngagerClient.startAfterLogin) await this.handleStartVideoCall();
     } catch (error) {
       this.log(`APP: Initialization failed: ${error.message}`);
       this.errorHandler.handleError(ErrorTypes.CONFIG_INVALID, error);
@@ -132,6 +135,9 @@ export class KioskApplication {
   }
 
   setupInternalEventListeners() {
+    window.addEventListener('pageshow', event => {
+      if (event.persisted) window.location.reload(); // Do not restore a previous visitor or suspended login.
+    });
     document.addEventListener("networkRestored", () => {
       if (!this.isInitialized) {
         window.location.reload();
@@ -146,8 +152,9 @@ export class KioskApplication {
     this.log("EVENTS: Setting up event listeners");
 
     // Start video call button
-    const startButton = document.getElementById("StartVideoCall");
+    const startButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("StartVideoCall"));
     if (startButton) {
+      startButton.disabled = true;
       startButton.addEventListener(
         "click",
         this.handleStartVideoCall.bind(this)
@@ -220,6 +227,7 @@ export class KioskApplication {
 
       // Set up event listeners
       this.videoEngagerClient.on("VideoEngagerCall.agentJoined", () => {
+        if (!['waiting', 'precall'].includes(this.callPhase)) return;
         this.log("VIDEOCLIENT: Video call agent joined");
         this.callPhase = 'active';
         this.handleVideoCallStarted();
@@ -255,6 +263,7 @@ export class KioskApplication {
           await this.handleVideoCallEnded();
         }
       });
+      this.videoEngagerClient.on('GenesysChat.error', ({ error }) => this.handleVideoCallError(error));
 
       this.log("VIDEOCLIENT: VideoEngager client initialized successfully");
     } catch (error) {
@@ -267,12 +276,17 @@ export class KioskApplication {
   /**
    * Handles the start video call button click event.
    * Shows loading screen, sets call timeout, and starts the video call.
-   * @param {Event} event - The click event.
+   * @param {Event} [event] - The click event; omitted when returning from sign-in.
    */
   async handleStartVideoCall(event) {
-    event.preventDefault();
-    if (this.callPhase !== 'idle') return;
+    event?.preventDefault();
+    if (!this.isInitialized || this.callPhase !== 'idle') return;
     this.log("CALL: Start video call requested");
+    this.starting = true;
+    const startButton = /** @type {HTMLButtonElement} */ (document.getElementById('StartVideoCall'));
+    const cancelButton = /** @type {HTMLButtonElement | null} */ (document.querySelector('ve-carousel-waitroom')?.shadowRoot?.querySelector('.cancel-button'));
+    startButton.disabled = true;
+    if (cancelButton) cancelButton.disabled = true;
 
     try {
       // Show loading screen
@@ -282,45 +296,27 @@ export class KioskApplication {
       // Pause inactivity timer for the duration of the call
       this.timeoutManager.clear("inactivity");
 
-      // Set call timeout
-      this.timeoutManager.set(
-        "call",
-        async () => {
-          this.log("CALL: Call timeout reached");
-          await this.handleCallTimeout();
-        },
-        this.timeouts.call
-      );
-
       await this._acquireWakeLock();
-      await this.videoEngagerClient?.waitForReady();
-      // Start video call
+      // startVideo authenticates first, then waits for Core startup to complete.
       if (this.videoEngagerClient && this.videoEngagerClient.isReady()) {
-        if (this.config?.useGenesysMessengerChat) {
-          await this.videoEngagerClient?.startVideo();
+        await this.videoEngagerClient.startVideo();
+        if (['waiting', 'precall'].includes(this.callPhase)) {
+          this.timeoutManager.set('call', () => this.handleCallTimeout(), this.timeouts.call);
+        }
+        if (this.config?.useGenesysMessengerChat && ['waiting', 'precall'].includes(this.callPhase)) {
           await this.videoEngagerClient.startGenesysChat();
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-          window.Genesys("command", "MessagingService.fetchHistory",
-            {},
-            function () {
-              /*fulfilled callback*/
-            },
-            function () {
-              /*rejected callback*/
-            }
-          );
-        } else {
-          await this.videoEngagerClient?.startVideo();
         }
       } else {
         throw new Error("VideoEngager client not ready");
       }
     } catch (error) {
       this.log(`CALL: Failed to start video call: ${error.message}`);
-      this.callPhase = 'idle';
-      this._releaseWakeLock();
+      await this.handleVideoCallEnded();
       this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
-      this.showScreen("initial");
+    } finally {
+      this.starting = false;
+      startButton.disabled = !this.videoEngagerClient?.isReady();
+      if (cancelButton) cancelButton.disabled = false;
     }
   }
 
@@ -331,30 +327,9 @@ export class KioskApplication {
    */
   async handleCancelCall(event) {
     event.preventDefault();
+    if (this.starting) return; // Core startup must resolve before visitor cancellation.
     this.log("CALL: Cancel call requested");
-
-    // Clear call timeout
-    this.callPhase = 'idle';
-    this.timeoutManager.clear("call");
-    this._releaseWakeLock();
-
-    // Clear system notification
-    this.clearSystemNotification();
-
-    // End video call if active
-    if (this.videoEngagerClient) {
-      this.videoEngagerClient.endVideo().catch((error) => {
-        this.log(`CALL: Error ending video call: ${error.message}`);
-      });
-      if (this.config?.useGenesysMessengerChat) {
-        await this.videoEngagerClient?.endGenesysChat().catch((error) => {
-          this.log(`CALL: Error ending video call: ${error.message}`);
-        });
-      }
-    }
-
-    // Return to initial screen
-    this.showScreen("initial");
+    await this.handleVideoCallEnded();
   }
 
   /**
@@ -642,21 +617,24 @@ export class KioskApplication {
   }
 
   async handleVideoCallEnded() {
+    if (this.callPhase === 'idle' || this.callPhase === 'ending') return;
     this.log("CALL: Video call ended");
 
     // Clear any active timeouts
-    this.callPhase = 'idle';
+    this.callPhase = 'ending';
     this.timeoutManager.clear("call");
     this._releaseWakeLock();
 
     // Clear system notification
     this.clearSystemNotification();
-    if (this.config?.useGenesysMessengerChat) {
-      await this.videoEngagerClient?.endGenesysChat().catch((error) => {
-        this.log(`CALL: Error ending video call: ${error.message}`);
-      });
+    try {
+      await this.videoEngagerClient?.endVideo();
+    } catch (error) {
+      this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
     }
     // Return to initial screen and restart inactivity timer
+    this.callPhase = 'idle';
+    /** @type {HTMLButtonElement} */ (document.getElementById('StartVideoCall')).disabled = !this.videoEngagerClient?.isReady();
     this.showScreen("initial");
     this.setupInactivityTimer();
   }
@@ -664,44 +642,16 @@ export class KioskApplication {
   async handleVideoCallError(/** @type {Error} */ error) {
     this.log(`CALL: Video call error: ${error.message}`);
 
-    this.callPhase = 'idle';
-    this.timeoutManager.clear("call");
-    this._releaseWakeLock();
-
-    // Handle the error
+    await this.handleVideoCallEnded();
     this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
-
-    if (this.config?.useGenesysMessengerChat) {
-      await this.videoEngagerClient?.endGenesysChat().catch((error) => {
-        this.log(`CALL: Error ending video call: ${error.message}`);
-      });
-    }
-
-    // Return to initial screen
-    this.showScreen("initial");
   }
 
   async handleCallTimeout() {
     this.log("CALL: Call timeout - ending call");
-    this._releaseWakeLock();
-
-    // End video call
-    if (this.videoEngagerClient) {
-      this.videoEngagerClient.endVideo().catch((error) => {
-        this.log(`CALL: Error ending timed out call: ${error.message}`);
-      });
-      if (this.config?.useGenesysMessengerChat) {
-        await this.videoEngagerClient.endGenesysChat().catch((error) => {
-          this.log(`CALL: Error ending video call: ${error.message}`);
-        });
-      }
-    }
+    await this.handleVideoCallEnded();
 
     // Show timeout error
     this.errorHandler.handleError(ErrorTypes.CALL_TIMEOUT);
-
-    // Return to initial screen
-    this.showScreen("initial");
   }
 
   /**
@@ -762,6 +712,10 @@ export class KioskApplication {
    * @param {MessageEvent} event
    */
   _handlePreCallMessage(event) {
+    // Experimental iframe event format; replace when Core exposes public precall events.
+    const iframe = document.querySelector('#video-call-ui iframe');
+    if (!['waiting', 'precall'].includes(this.callPhase)) return;
+    if (!this.config?.videoEngager?.isPopup && (!iframe || event.source !== iframe.contentWindow)) return;
     const veEnv = this.config?.videoEngager?.veEnv;
     if (!veEnv) return;
     const expectedOrigin = `https://${veEnv}`;

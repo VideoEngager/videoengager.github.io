@@ -4,9 +4,8 @@ import { KioskApplication } from '../js/kiosk';
 declare global {
   interface Window {
     ENV_CONFIG: any;
-    __VideoEngagerConfigs?: ClientConfig;
-    __VideoEngagerQueue?: Array<any>;
     VideoEngager: any;
+    Genesys: (...args: any[]) => void;
     kioskApp: KioskApplication;
   }
 }
@@ -14,7 +13,7 @@ declare global {
 interface VideoEngagerConfig {
   tenantId: string;
   veEnv: string;
-  deploymentId: string;
+  deploymentId?: string;
   isPopup?: boolean; // default: false
   veHttps?: boolean; // default: true
   debug?: boolean; // default: false
@@ -25,6 +24,14 @@ interface GenesysConfig {
   domain: string;
   hideGenesysLauncher?: boolean; // default: false
   debug?: boolean; // default: false
+}
+
+interface AuthConfig {
+  enabled: boolean;
+  mode?: 'perInteraction' | 'shared'; // default: 'perInteraction'
+  authorizationEndpoint?: string; // required when enabled
+  clientId?: string; // public OIDC client ID; required when enabled
+  scopes?: string[]; // must include 'openid'
 }
 
 // interface MonitoringConfig {
@@ -41,10 +48,11 @@ interface TimeoutsConfig {
 interface ClientConfig {
   videoEngager: VideoEngagerConfig;
   genesys: GenesysConfig;
+  auth?: AuthConfig;
   useGenesysMessengerChat?: boolean; // default: false
   logger?: boolean; // default: false
   debug?: boolean; // default: false
   timeouts?: TimeoutsConfig;
 }
 
-export { ClientConfig, VideoEngagerConfig, GenesysConfig };
+export { ClientConfig, VideoEngagerConfig, GenesysConfig, AuthConfig };

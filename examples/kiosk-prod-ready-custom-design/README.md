@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-A comprehensive, self-service kiosk application demonstrating VideoEngager's video calling capabilities integrated with Genesys Cloud. Built with vanilla JavaScript ES modules, this example provides enterprise-grade patterns for error handling, multi-environment support, and waitroom management.
+A comprehensive, self-service kiosk application demonstrating VideoEngager Core SDK video calling integrated with Genesys Cloud. Built with vanilla JavaScript ES modules, this example provides patterns for error handling, multi-environment support, and waitroom management.
 
 ---
 
@@ -12,6 +12,7 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
 - **Multi-environment support** (development, staging, production) with automatic detection
 - **Comprehensive error handling** with categorized error types and retry mechanisms
 - **Custom waitroom experience** with carousel slides and bot messaging
+- **Optional OIDC sign-in** with PKCE for an authenticated Genesys Messenger deployment
 - **Internationalization** support (English, German, Arabic)
 - **Timeout management** for calls, inactivity, and system operations
 - **Security-focused** architecture with input sanitization and XSS protection
@@ -44,7 +45,9 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
 
 ```
 ├── js/
-│   ├── client.js                    # VideoEngager SDK integration
+│   ├── client.js                    # Core SDK adapter with existing kiosk methods/events
+│   ├── auth.js                      # Optional OIDC sign-in and callback recovery
+│   ├── config-manager.js            # Default, JSON and URL configuration
 │   ├── kiosk.js                     # Main application orchestrator
 │   ├── error-handler.js             # Comprehensive error management
 │   ├── timeout-manager.js           # Centralized timeout handling
@@ -80,7 +83,7 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
    ```bash
    # From VideoEngager examples repository
    git clone https://github.com/VideoEngager/videoengager.github.io
-   cd videoengager.github.io/examples/kiosk-production-ready
+   cd videoengager.github.io/examples/kiosk-prod-ready-custom-design
    ```
 
 2. **Configure your credentials:**
@@ -91,7 +94,6 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
        videoEngager: {
          tenantId: 'your-tenant-id',
          veEnv: 'your-environment.videoengager.com',
-         deploymentId: 'your-deployment-id',
        },
        genesys: {
          deploymentId: 'your-genesys-deployment-id',
@@ -114,7 +116,7 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
    ```
 
 4. **Access the demo:**
-   Open `http://localhost:8080` in your browser
+   Open `http://localhost:8080/index.html` in your browser
 
 ---
 
@@ -140,7 +142,6 @@ const configs = {
     videoEngager: {
       tenantId: "test_tenant",
       veEnv: "dev.videoengager.com",
-      deploymentId: "test_deployment",
       veHttps: true,
       isPopup: false,
     },
@@ -154,6 +155,35 @@ const configs = {
   // staging, production configurations...
 };
 ```
+
+### Optional Authentication
+
+Authentication is disabled by default. Add an `auth` section to the selected environment in `config/conf.js`, or to a complete external JSON configuration loaded with `?config=...`:
+
+```javascript
+auth: {
+  enabled: false, // Set true after configuring the deployment and identity provider.
+  mode: 'perInteraction', // 'shared' reuses one kiosk account.
+  authorizationEndpoint: 'https://your-identity-provider.example/authorize',
+  clientId: 'your-public-oidc-client-id',
+  scopes: ['openid', 'profile', 'email']
+}
+```
+
+Set `genesys.deploymentId` to your **authenticated Messenger deployment** and configure its identity provider connection. Enabling `auth` does not change the deployment ID. Use a public OIDC client with Authorization Code + PKCE; never add a client secret or access token to client configuration or URLs.
+
+The deployment must enable Messenger, Conversations, Markdown/Rich Text and conversation clear. Configure conversation disconnect in **ReadOnly** mode and disable `allowSessionUpgrade` for authenticated Messenger.
+
+The same settings can be overridden with `auth`, `authMode`, `authorizationEndpoint`, `clientId` and `scopes` URL parameters. Use `auth=true` or `auth=false`; `authMode` accepts `perInteraction` or `shared`; scopes are space-separated, for example `scopes=openid%20profile%20email`.
+
+Register the exact deployed `index.html` URL as the redirect URI, with no query string or fragment. For example: `https://videoengager.github.io/examples/kiosk-prod-ready-custom-design/index.html` or `http://localhost:8080/index.html` for the local setup above. Use HTTPS or localhost.
+
+Sign-in starts when the visitor presses **Start**. A valid callback restores the resolved configuration, including external or blob JSON configuration, and automatically resumes that request. Invalid, denied or expired callbacks block startup; reopen the original configured kiosk URL to retry.
+
+- **`perInteraction`**: requires a fresh visitor login, logs out of Messenger after the interaction and reloads the kiosk. Blob preview settings survive this reload; the next visitor signs in again.
+- **`shared`**: reuses the Messenger identity for later interactions on the kiosk.
+
+Messenger logout does not guarantee global logout from your identity provider's SSO session. Configure the identity provider's sign-in and session policy for your kiosk use case.
 
 ### Waitroom Customization
 
@@ -214,11 +244,11 @@ const kiosk = new KioskApplication();
 
 ### VideoEngagerClient (`js/client.js`)
 
-Secure wrapper around the VideoEngager SDK:
-- Dynamic script loading with integrity checks
-- Promise-based API wrapper
-- Event handling and error management
-- Configuration proxy setup
+Adapter around `VideoEngagerCore` and `GenesysIntegration`:
+- Automatically loads `https://cdn.videoengager.com/widget/latest/browser/main.umd.js`
+- Preserves the kiosk's existing public client methods and event names
+- Initializes authenticated Messenger on Start and waits for readiness before starting the interaction
+- Lets the SDK load Genesys dependencies; no additional Genesys script tags are needed
 
 ```javascript
 // Usage example
@@ -513,6 +543,19 @@ console.log(window.kioskApp.currentScreen);
 ---
 
 ## Development
+
+### Syntax Check
+
+From the repository root, run:
+
+```bash
+node --check examples/kiosk-prod-ready-custom-design/js/client.js
+node --check examples/kiosk-prod-ready-custom-design/js/auth.js
+node --check examples/kiosk-prod-ready-custom-design/js/config-manager.js
+node --check examples/kiosk-prod-ready-custom-design/js/kiosk.js
+```
+
+These commands check JavaScript syntax only. Validate your Genesys deployment, identity provider login and video calls separately.
 
 ### Adding New Features
 

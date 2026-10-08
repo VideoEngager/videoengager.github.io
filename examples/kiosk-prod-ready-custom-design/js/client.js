@@ -2,115 +2,106 @@
 /// <reference types="../types/ve-window.d.ts" />
 import { ErrorHandler, ErrorTypes } from './error-handler.js';
 import { Utils } from './utils.js';
+import { createKioskAuthProvider, saveConfigForReload } from './auth.js';
 
+// Core adapter: keep the kiosk's existing methods and event names.
 export class VideoEngagerClient {
-  /**
-   * @param {Object} config - The configuration object for the client.
-   * @param {Object} config.videoEngager - VideoEngager configuration.
-   * @param {string} config.videoEngager.tenantId - The tenant ID for VideoEngager.
-   * @param {string} config.videoEngager.veEnv - The VideoEngager environment (e.g., dev, staging).
-   * @param {string} config.videoEngager.deploymentId - The deployment ID for VideoEngager.
-   * @param {boolean} [config.videoEngager.isPopup=false] - Whether to use popup mode.
-   * @param {boolean} [config.videoEngager.veHttps=true] - Whether to use HTTPS for VideoEngager.
-   * @param {Object} config.genesys - Genesys configuration.
-   * @param {string} config.genesys.deploymentId - The deployment ID for Genesys.
-   * @param {string} config.genesys.domain - The domain for Genesys (e.g., mypurecloud.com).
-   * @param {boolean} [config.genesys.hideGenesysLauncher=false] - Whether to hide the Genesys launcher.
-   * @param {boolean} [config.useGenesysMessengerChat=false] - Whether to use Genesys Messenger Chat.
-   * @param {Object} [config.monitoring] - Monitoring configuration.
-   * @param {boolean} [config.monitoring.enabled=true] - Whether monitoring is enabled.
-   * @param {string} [config.monitoring.level='info'] - The logging level for monitoring.
-   */
   constructor (config) {
     this.config = this.validateAndSanitizeConfig(config);
     this.errorHandler = new ErrorHandler();
     this.eventEmitter = new EventTarget();
     this.connectionState = 'disconnected';
     this.retryCount = 0;
-    this.maxRetries = 3;
-    this.scriptIntegrityCheck = true;
+    this.core = null;
+    this.authProvider = null;
+    this.readyPromise = null;
+    this.integrationReady = false;
+    this.startPromise = null;
+    this.chatCommand = null;
+    this.starting = false;
+    this.sessionActive = false;
+    this.videoActive = false;
   }
 
-  /**
-   * Validates and sanitizes the configuration object.
-   * Throws an error if the configuration is invalid or missing required fields.
-   * @param {Object} config - The configuration object for the client.
-   * @param {Object} config.videoEngager - VideoEngager configuration.
-   * @param {string} config.videoEngager.tenantId - The tenant ID for VideoEngager.
-   * @param {string} config.videoEngager.veEnv - The VideoEngager environment (e.g., dev, staging).
-   * @param {string} config.videoEngager.deploymentId - The deployment ID for VideoEngager.
-   * @param {boolean} [config.videoEngager.isPopup=false] - Whether to use popup mode.
-   * @param {boolean} [config.videoEngager.veHttps=true] - Whether to use HTTPS for VideoEngager.
-   * @param {Object} config.genesys - Genesys configuration.
-   * @param {string} config.genesys.deploymentId - The deployment ID for Genesys.
-   * @param {string} config.genesys.domain - The domain for Genesys (e.g., mypurecloud.com).
-   * @param {boolean} [config.genesys.hideGenesysLauncher=false] - Whether to hide the Genesys launcher.
-   * @param {boolean} [config.useGenesysMessengerChat=false] - Whether to use Genesys Messenger Chat.
-   * @param {Object} [config.monitoring] - Monitoring configuration.
-   * @param {boolean} [config.monitoring.enabled=true] - Whether monitoring is enabled.
-   * @param {string} [config.monitoring.level='info'] - The logging level for monitoring.
-   */
   validateAndSanitizeConfig (config) {
-    if (!config || typeof config !== 'object') {
-      throw new Error('Configuration is required');
+    if (!config || typeof config !== 'object') throw new Error('Configuration is required');
+    for (const [section, fields] of Object.entries({ videoEngager: ['tenantId', 'veEnv'], genesys: ['deploymentId', 'domain'] })) {
+      for (const field of fields) {
+        if (!config[section]?.[field]) throw new Error(`Missing required field: ${section}.${field}`);
+      }
     }
-
-    // Validate required sections
-    const required = ['videoEngager', 'genesys'];
-    const missing = required.filter((section) => !config[section]);
-
-    if (missing.length > 0) {
-      throw new Error(
-        `Missing required configuration sections: ${missing.join(', ')}`
-      );
+    const result = JSON.parse(JSON.stringify(config));
+    if (!/^[\w.-]+$/.test(result.videoEngager.veEnv)) throw new Error('Invalid VideoEngager hostname');
+    if (result.auth !== undefined && (!result.auth || typeof result.auth !== 'object' || Array.isArray(result.auth))) {
+      throw new Error('Authentication configuration must be an object.');
     }
-
-    // Validate required fields
-    const requiredFields = {
-      videoEngager: ['tenantId', 'veEnv'],
-      genesys: ['deploymentId', 'domain']
-    };
-
-    Object.entries(requiredFields).forEach(([section, fields]) => {
-      fields.forEach((field) => {
-        if (!config[section][field]) {
-          throw new Error(`Missing required field: ${section}.${field}`);
-        }
-      });
-    });
-
-    // Sanitize string values
-    const sanitizedConfig = JSON.parse(JSON.stringify(config));
-
-    // Validate URLs if present
-    if (
-      sanitizedConfig.videoEngager.veEnv &&
-      !sanitizedConfig.videoEngager.veEnv.match(/^[\w.-]+$/)
-    ) {
-      throw new Error('Invalid videoEngager environment format');
+    result.auth = { enabled: false, mode: 'perInteraction', scopes: ['openid', 'profile', 'email'], ...result.auth };
+    if (typeof result.auth.enabled !== 'boolean' || !['perInteraction', 'shared'].includes(result.auth.mode)) {
+      throw new Error('Use auth=true/false and authMode=perInteraction/shared.');
     }
-
-    return sanitizedConfig;
+    return result;
   }
 
-  /**
-   * Initializes the client by setting up the configuration proxy,
-   * loading dependencies, and waiting for the VideoEngager library to be ready.
-   * @returns {Promise<boolean>} - Returns true if initialization is successful.
-   * @throws {Error} - Throws an error if initialization fails.
-   */
+  get perVisitor () { return this.config.auth.enabled && this.config.auth.mode === 'perInteraction'; }
+  get startAfterLogin () { return this.authProvider?.startAfterLogin === true; }
+
   async init () {
     try {
       this.connectionState = 'connecting';
-
-      await this.setupConfigProxy();
       await this.loadDependencies();
-      await this.waitForReady();
-
+      const { VideoEngagerCore, GenesysIntegration, gensysPureDomainsMapping } = window.VideoEngager;
+      if (!Object.values(gensysPureDomainsMapping || {}).includes(this.config.genesys.domain)) {
+        throw new Error('Choose a Genesys domain supported by the loaded VideoEngager SDK.');
+      }
+      if (this.config.auth.enabled) {
+        this.authProvider = createKioskAuthProvider({
+          ...this.config.auth,
+          config: this.config,
+          shouldStartAfterLogin: () => this.starting
+        });
+      }
+      this.core = new VideoEngagerCore({
+        ...this.config.videoEngager,
+        logger: this.config.debug === true,
+        // Popup mode does not use the iframe command handshake.
+        enableVeIframeCommands: !this.config.videoEngager.isPopup
+      });
+      this.integration = new GenesysIntegration({
+        ...this.config.genesys,
+        logger: this.config.debug === true,
+        hideUIOnBusyOperation: true,
+        ...(this.authProvider && { authProvider: this.authProvider })
+      });
+      const container = document.getElementById('video-call-ui');
+      if (!container) throw new Error('The video-call-ui container is missing.');
+      this.core.setUiCallbacks({
+        createIframe: src => {
+          const iframe = document.createElement('iframe');
+          iframe.id = 'videoengageriframe';
+          iframe.className = 'videoengager-widget-iframe';
+          iframe.title = 'VideoEngager Chat';
+          iframe.allow = 'camera; microphone; autoplay; fullscreen; display-capture';
+          iframe.style.cssText = 'width:100%;height:100%;border:0;border-radius:8px';
+          iframe.src = src;
+          container.style.height = 'calc(100dvh - 38px)';
+          container.replaceChildren(iframe);
+          return iframe;
+        },
+        getIframeInstance: () => container.querySelector('iframe'),
+        destroyIframe: () => { container.replaceChildren(); container.style.height = '0'; },
+        setIframeVisibility: visible => { container.hidden = !visible; }
+      });
       this.setupEventListeners();
+      // Messenger loads even for video-only kiosks. Preserve the previous chat settings.
+      this.chatStyle = document.createElement('style');
+      this.chatStyle.textContent = !this.config.useGenesysMessengerChat
+        ? '#genesys-messenger, #genesys-mxg-container-frame, #genesys-mxg-frame { display:none !important; }'
+        : this.config.genesys.hideGenesysLauncher ? '.genesys-mxg-launcher-frame { display:none !important; }' : '';
+      document.head.appendChild(this.chatStyle);
+      // Authenticated kiosks stay on welcome until Start is pressed.
+      if (!this.authProvider) await this.waitForReady();
       this.connectionState = 'connected';
       this.retryCount = 0;
-
       this.emit('client:ready', {});
       return true;
     } catch (error) {
@@ -120,283 +111,227 @@ export class VideoEngagerClient {
     }
   }
 
-  /**
-   * Sets up the configuration proxy for VideoEngager.
-   * This method creates a global configuration object and a proxy for VideoEngager methods.
-   * It also initializes a queue for method calls to ensure they can be processed asynchronously.
-   * @returns {Promise<void>} - Resolves when the configuration proxy is set up.
-   * @throws {Error} - Throws an error if the setup fails.
-   */
-  async setupConfigProxy () {
-    // Clean up any existing global variables
-    delete window.__VideoEngagerConfigs;
-    delete window.__VideoEngagerQueue;
-    delete window.VideoEngager;
-
-    // Set up secure configuration
-    window.__VideoEngagerConfigs = {
-      videoEngager: {
-        tenantId: this.config.videoEngager.tenantId,
-        veEnv: this.config.videoEngager.veEnv,
-        deploymentId: this.config.videoEngager.deploymentId,
-        isPopup: Boolean(this.config.videoEngager.isPopup),
-        veHttps: this.config.videoEngager.veHttps !== false,
-        debug: this.config.debug === true
-      },
-      genesys: {
-        deploymentId: this.config.genesys.deploymentId,
-        domain: this.config.genesys.domain,
-        hideGenesysLauncher: Boolean(this.config.genesys.hideGenesysLauncher),
-        debug: this.config.debug === true
-      },
-      useGenesysMessengerChat: Boolean(this.config.useGenesysMessengerChat),
-      logger: this.config.debug === true
-    };
-
-    // Set up secure proxy queue
-    window.__VideoEngagerQueue = [];
-    window.VideoEngager = new Proxy(
-      {},
-      {
-        get:
-          (_, method) =>
-            (...args) => {
-              return new Promise((resolve, reject) => {
-                const timeoutId = setTimeout(() => {
-                  reject(
-                    new Error(`VideoEngager method '${String(method)}' timed out`)
-                  );
-                }, 30000); // 30 second timeout
-
-                window.__VideoEngagerQueue?.push({
-                  m: method,
-                  a: args,
-                  r: (result) => {
-                    clearTimeout(timeoutId);
-                    resolve(result);
-                  },
-                  rj: (error) => {
-                    clearTimeout(timeoutId);
-                    reject(error);
-                  }
-                });
-              });
-            }
-      }
-    );
-  }
-
-  /**
-   * Loads the VideoEngager dependencies by dynamically adding the script to the document.
-   * This method handles script loading with error handling and a timeout.
-   * @returns {Promise<void>} - Resolves when the script is loaded successfully.
-   * @throws {Error} - Throws an error if the script fails to load or times out.
-   */
   async loadDependencies () {
-    return new Promise((resolve, reject) => {
-      try {
-        // Remove any existing script
-        const existingScript = document.querySelector(
-          'script[src*="genesys-hub.umd.js"]'
-        );
-        if (existingScript) {
-          existingScript.remove();
-        }
-
-        const script = document.createElement('script');
-        script.src =
-          'https://cdn.videoengager.com/widget/v3.0.1/browser/genesys-hub.umd.js';
-        script.async = true;
-
-        // Add integrity check if available (you should get the actual hash from VideoEngager)
-        // script.integrity = 'sha384-...';
-
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error('Script load timeout'));
-        }, 15000);
-
-        const cleanup = () => {
-          clearTimeout(timeout);
-          script.onload = null;
-          script.onerror = null;
-        };
-
-        script.onload = () => {
-          cleanup();
-
-          // Verify the script loaded correctly
-          if (typeof window.VideoEngager !== 'object') {
-            reject(new Error('VideoEngager library not properly initialized'));
-            return;
-          }
-
-          resolve();
-        };
-
-        script.onerror = (error) => {
-          cleanup();
-          reject(new Error('Failed to load VideoEngager script'));
-        };
-
-        document.head.appendChild(script);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  /**
-   * Waits for the VideoEngager library to be ready.
-   * This method checks if the `onReady` method is available and resolves when it is called.
-   * @returns {Promise<void>} - Resolves when VideoEngager is ready.
-   * @throws {Error} - Throws an error if VideoEngager is not ready within the timeout.
-   */
-  async waitForReady () {
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('VideoEngager ready timeout'));
-      }, 60000);
-
-      if (
-        window.VideoEngager &&
-        typeof window.VideoEngager.onReady === 'function'
-      ) {
-        window.VideoEngager.onReady(() => {
-          clearTimeout(timeout);
-          resolve();
-        });
-      } else {
+    if (window.VideoEngager?.VideoEngagerCore && window.VideoEngager?.GenesysIntegration) return;
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.videoengager.com/widget/latest/browser/main.umd.js';
+      script.async = true;
+      const timeout = setTimeout(() => finish(new Error('VideoEngager script load timeout')), 15000);
+      const finish = error => {
         clearTimeout(timeout);
-        reject(new Error('VideoEngager onReady method not available'));
-      }
+        script.onload = script.onerror = null;
+        if (error) { script.remove(); reject(error); } else resolve();
+      };
+      script.onload = () => finish(window.VideoEngager?.VideoEngagerCore && window.VideoEngager?.GenesysIntegration
+        ? null : new Error('VideoEngager Core SDK did not load'));
+      script.onerror = () => finish(new Error('Failed to load VideoEngager script'));
+      document.head.appendChild(script);
     });
   }
 
-  /**
-   * Sets up event listeners for VideoEngager events.
-   * This method listens for various events from VideoEngager and emits them using the event emitter.
-   * It also includes error handling for setting up listeners.
-   */
-  setupEventListeners () {
-    // Set up VideoEngager event listeners with error handling
-    const events = [
-      'VideoEngagerCall.started',
-      'VideoEngagerCall.agentJoined',
-      'VideoEngagerCall.ended',
-      'VideoEngagerCall.error',
-      'GenesysMessenger.conversationStarted',
-      'GenesysMessenger.conversationEnded',
-      'GenesysChat.error',
-      'onMessage'
-    ];
-
-    events.forEach((eventName) => {
-      try {
-        window.VideoEngager.on(eventName, (payload) => {
-          this.emit(eventName, payload);
-        });
-      } catch (error) {
-        console.warn(`Failed to set up listener for ${eventName}:`, error);
-      }
-    });
+  async waitForReady () {
+    if (!this.core) throw new Error('Client not ready. Call init() first.');
+    if (!this.readyPromise) this.readyPromise = this.initializeIntegration();
+    await this.readyPromise;
   }
 
-  async startGenesysChat () {
-    await window.VideoEngager.startGenesysChat();
-  }
-
-  hideGenesysChat () {
-    // @ts-ignore
-    window.Genesys('command', 'Messenger.close');
-  }
-
-  async endGenesysChat () {
-    await window.VideoEngager.endGenesysChat();
-  }
-
-  /**
-   * Starts a video chat session using VideoEngager.
-   * This method checks if the client is ready, then calls the VideoEngager API to start a video chat session.
-   * @returns {Promise<Object>} - Resolves with the result of the video chat session.
-   * @throws {Error} - Throws an error if the client is not ready or if the VideoEngager API call fails.
-   */
-  async startVideo () {
-    if (this.connectionState !== 'connected') {
-      throw new Error('Client not ready. Call init() first.');
+  async initializeIntegration () {
+    // Do not send interaction or Messenger commands before this resolves.
+    await this.core.setContactCenterIntegration(this.integration);
+    this.integrationReady = true;
+    // A saved Messenger identity may bypass getAuthCode; require a fresh visitor login.
+    if (this.perVisitor && !this.authProvider.grantConsumed) {
+      await this.core.endVideoEngagerInteraction(false);
+      await this.genesysCommand('MessagingService.clearConversation');
+      await this.genesysCommand('Auth.logout');
+      await this.authProvider.reAuthenticate();
     }
+    if (this.core.contactCenterInActiveInteraction) {
+      await this.core.endVideoEngagerInteraction(false);
+      await this.genesysCommand('MessagingService.clearConversation');
+    }
+  }
 
+  setupEventListeners () {
+    this.core.on('videoEngager:active-ve-instance', active => {
+      if (active) {
+        if (!this.sessionActive) return;
+        this.videoActive = true;
+        this.emit('VideoEngagerCall.started', {});
+      } else this.emitVideoEnded();
+    });
+    this.core.on('videoEngager:call-state-changed', state => {
+      if (state === 'active' && this.sessionActive) {
+        this.videoActive = true;
+        this.emit('VideoEngagerCall.agentJoined', {});
+      }
+      else if (state === 'ended' || state === 'idle') this.emitVideoEnded();
+    });
+    this.core.on('videoEngager:CallEnded', () => this.emitVideoEnded());
+    for (const [source, target] of Object.entries({
+      'integration:sessionStarted': 'GenesysMessenger.conversationStarted',
+      'integration:sessionEnded': 'GenesysMessenger.conversationEnded'
+    })) {
+      this.core.on(source, () => { if (this.sessionActive) this.emit(target, {}); });
+    }
+    this.core.on('integration:raw-message', message => {
+      if (!this.sessionActive) return;
+      const normalized = this.normalizeGenesysMessage(message);
+      if (normalized) this.emit('onMessage', { message: normalized });
+    });
+    this.core.on('error:catchAll', error => {
+      // Recovered SDK timeouts are diagnostics; awaited methods report operation failures.
+      if (this.sessionActive && ['Auth.authError', 'Auth.authProviderError', 'Auth.tokenError', 'Auth.loggedOut'].includes(error?.context?.authEvent)) {
+        this.emit('GenesysChat.error', { error });
+      }
+    });
+  }
+
+  normalizeGenesysMessage (message) {
+    let content;
+    if (message.type === 'event') {
+      const presence = { Join: 'Joined', Disconnect: 'Ended', Clear: 'Ended' }[message.presence?.type];
+      if (message.eventType !== 'Presence' || !presence) return null;
+      content = { type: 'NotificationPresence', presence };
+    } else if (message.type === 'text' || message.type === 'structured') {
+      if (message.files?.length) {
+        content = { type: 'Attachment', attachments: message.files.map(file => ({
+          id: file.id,
+          type: ({ Image: 'image', Video: 'video', Audio: 'audio', File: 'file', Link: 'link' })[file.type] || 'unknown',
+          name: file.name, size: file.size, url: file.downloadUrl, mime: file.mime
+        })) };
+        if (message.text) content.text = message.text;
+      } else if (message.text) {
+        const domain = this.config.videoEngager.veEnv.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const url = message.text.match(new RegExp('https://' + domain + '/ve/\\S+'))?.[0].replace(/[.,;:!?)]+$/, '');
+        content = url ? { type: 'videoEngagerUrl', url, text: message.text.replace(url, '').trim() }
+          : { type: 'Text', text: message.text };
+      } else if (message.type === 'structured') {
+        content = { type: 'Error', text: 'Unsupported message format' };
+      } else return null;
+    } else return null;
+    const from = message.from || {};
+    const name = message.messageType === 'inbound' ? (from.nickname || from.name || 'You')
+      : (from.firstName || from.lastName) ? `${from.firstName || ''} ${from.lastName || ''}`.trim()
+        : from.nickname || from.name || (message.originatingEntity === 'Bot' ? 'Bot' : 'Agent');
+    return {
+      id: message.id,
+      // Genesys outbound means inbound to the visitor in the previous Hub's payload.
+      direction: message.messageType === 'outbound' ? 'Inbound' : 'Outbound',
+      sender: { name, image: from.image ?? from.avatar },
+      timestamp: new Date(message.timestamp || message.time || Date.now()).toISOString(),
+      content
+    };
+  }
+
+  emitVideoEnded () {
+    if (!this.videoActive) return;
+    this.videoActive = false;
+    this.emit('VideoEngagerCall.ended', {});
+  }
+
+  async startVideo () {
+    if (!this.isReady()) throw new Error('Client not ready. Call init() first.');
+    this.starting = true;
     try {
-      const result = await window.VideoEngager.startVideoChatSession();
+      await this.waitForReady();
+      await this.chatCommand;
+      this.sessionActive = true;
+      this.startPromise = this.core.startVideoEngagerInteraction({
+        bindToOrStartContactCenterInteraction: true,
+        callConfigs: { isPopup: Boolean(this.config.videoEngager.isPopup), autoAccept: true }
+      });
+      const result = await this.startPromise;
       this.emit('video:started', result);
       return result;
     } catch (error) {
-      const errorId = this.errorHandler.handleError(
-        ErrorTypes.INTERNAL_ERROR,
-        error
-      );
-      this.emit('video:error', { error, errorId });
+      this.connectionState = 'error';
+      this.emit('VideoEngagerCall.error', { error });
+      this.emit('video:error', { error });
       throw error;
+    } finally {
+      this.starting = false;
+      this.startPromise = null;
     }
   }
 
-  /**
-   * Ends the current video chat session using VideoEngager.
-   * This method calls the VideoEngager API to end the video chat session.
-   * @returns {Promise<Object>} - Resolves with the result of ending the video chat session.
-   * @throws {Error} - Throws an error if the VideoEngager API call fails.
-   */
   async endVideo () {
+    if (!this.integrationReady) return;
     try {
-      const result = await window.VideoEngager.endVideoChatSession();
+      await this.chatCommand?.catch(() => {}); // Appearance failures must not block ending the call.
+      // Clear explicitly because Core can skip contact-center cleanup after agent disconnect.
+      const result = await this.core.endVideoEngagerInteraction(false);
+      await this.genesysCommand('MessagingService.clearConversation');
+      this.sessionActive = false;
+      if (this.perVisitor) {
+        await this.genesysCommand('Auth.logout');
+        this.authProvider.cancel();
+        this.connectionState = 'disconnected';
+        saveConfigForReload(this.config);
+        window.location.reload();
+      } else {
+        this.connectionState = 'connected';
+      }
       this.emit('video:ended', result);
       return result;
     } catch (error) {
+      this.connectionState = 'error';
       this.emit('video:error', { error });
       throw error;
     }
   }
 
-  /**
-   * Starts a Genesys chat session using VideoEngager.
-   * This method checks if the client is ready, then calls the VideoEngager API to start a Genesys chat session.
-   * @returns {Promise<Object>} - Resolves with the result of the Genesys chat session.
-   * @throws {Error} - Throws an error if the client is not ready or if the VideoEngager API call fails.
-   */
-  async startChat () {
-    if (this.connectionState !== 'connected') {
-      throw new Error('Client not ready. Call init() first.');
-    }
-
-    try {
-      const result = await window.VideoEngager.startGenesysChat();
-      this.emit('chat:started', result);
-      return result;
-    } catch (error) {
-      const errorId = this.errorHandler.handleError(
-        ErrorTypes.INTERNAL_ERROR,
-        error
-      );
-      this.emit('chat:error', { error, errorId });
-      throw error;
-    }
+  genesysCommand (name) {
+    // Reuse the integration's public command wrapper and its timeout.
+    return this.integration.genesysJsSdkWrapper.command(name);
   }
 
-  /**
-   * Ends the current Genesys chat session using VideoEngager.
-   * This method calls the VideoEngager API to end the Genesys chat session.
-   * @returns {Promise<Object>} - Resolves with the result of ending the Genesys chat session.
-   * @throws {Error} - Throws an error if the VideoEngager API call fails.
-   */
+  async startGenesysChat () {
+    await this.waitForReady();
+    await this.startPromise;
+    if (this.sessionActive && !this.core.contactCenterInActiveInteraction) return;
+    if (!this.core.contactCenterInActiveInteraction) {
+      this.sessionActive = true;
+      await this.core.startContactCenterInteraction();
+    }
+    await this.chatCommand;
+    this.chatCommand = this.genesysCommand('Messenger.open').catch(error => {
+      if ((error?.message || error) !== 'Messenger is already opened.') console.warn('Could not open Messenger:', error);
+    });
+    return this.chatCommand;
+  }
+
+  async hideGenesysChat () {
+    try {
+      await this.startPromise;
+      if (!this.integrationReady) return;
+      await this.chatCommand;
+      this.chatCommand = this.genesysCommand('Messenger.close').catch(error => {
+        if ((error?.message || error) !== 'Messenger is already closed.') console.warn('Could not minimize Messenger:', error);
+      });
+      await this.chatCommand;
+    } catch (error) { console.warn('Could not minimize Messenger:', error); }
+  }
+
+  async endGenesysChat () {
+    return this.endVideo();
+  }
+
+  async startChat () {
+    try {
+      const result = await this.startGenesysChat();
+      this.emit('chat:started', result);
+      return result;
+    } catch (error) { this.emit('chat:error', { error }); throw error; }
+  }
+
   async endChat () {
     try {
-      const result = await window.VideoEngager.endGenesysChat();
+      const result = await this.endVideo();
       this.emit('chat:ended', result);
       return result;
-    } catch (error) {
-      this.emit('chat:error', { error });
-      throw error;
-    }
+    } catch (error) { this.emit('chat:error', { error }); throw error; }
   }
 
   /**
@@ -483,23 +418,14 @@ export class VideoEngagerClient {
     return this.connectionState === 'connected';
   }
 
-  /**
-   * Destroys the client instance, cleaning up resources and removing global variables.
-   * This method sets the connection state to "disconnected", removes global variables,
-   * and cleans up the script element from the document.
-   */
   destroy () {
     this.connectionState = 'disconnected';
-
-    // Clean up global variables
-    delete window.__VideoEngagerConfigs;
-    delete window.__VideoEngagerQueue;
-    delete window.VideoEngager;
-
-    // Remove script
-    const script = document.querySelector('script[src*="genesys-hub.umd.js"]');
-    if (script) {
-      script.remove();
+    this.authProvider?.cancel();
+    this.chatStyle?.remove();
+    if (this.core) {
+      this.core.endVideoEngagerInteraction(true)
+        .then(() => this.core.destroyInstance())
+        .catch(error => console.warn('Could not clean up VideoEngager:', error));
     }
   }
 }

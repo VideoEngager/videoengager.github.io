@@ -37,6 +37,14 @@ const configs = {
       deploymentId: 'c5d801ae-639d-4e5e-a52f-4963342fa0dc',
       domain: 'mypurecloud.com',
     },
+    // For sign-in, use an authenticated Genesys deployment and your public OIDC settings.
+    auth: {
+      enabled: false,
+      mode: 'perInteraction', // or 'shared' to reuse one kiosk account
+      authorizationEndpoint: '',
+      clientId: '',
+      scopes: ['openid', 'profile', 'email'],
+    },
     useGenesysMessengerChat: false
   },
   uae: {

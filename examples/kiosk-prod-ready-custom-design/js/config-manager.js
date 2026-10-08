@@ -1,4 +1,5 @@
 // js/config-manager.js
+import { restoreAuthConfig, restoreConfigAfterReload } from './auth.js';
 /**
  * Simple deep merge function.
  * @param {object} target - The target object to merge into.
@@ -6,8 +7,11 @@
  * @returns {object} The merged target object.
  */
 function deepMerge (target, source) {
-  for (const key in source) {
-    if (source[key] && typeof source[key] === 'object') {
+  for (const key of Object.keys(source)) {
+    if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Invalid configuration key');
+    if (Array.isArray(source[key])) {
+      target[key] = [...source[key]];
+    } else if (source[key] && typeof source[key] === 'object') {
       if (!target[key]) {
         Object.assign(target, { [key]: {} });
       }
@@ -34,6 +38,8 @@ export class ConfigManager {
   }
 
   async load () {
+    const savedConfig = restoreAuthConfig() || restoreConfigAfterReload();
+    if (savedConfig) return (this.config = this.validateCustomerConfig(savedConfig));
     // 1. Start with the default config
     this.config = { ...this.defaultConfig };
 
@@ -58,7 +64,7 @@ export class ConfigManager {
           clearTimeout(fetchTimeout);
         }
       } catch (e) {
-        console.warn('External config failed:', e);
+        throw new Error(`External config failed: ${e.message}`);
       }
     }
     const urlConfig = this.loadFromUrl();
@@ -80,6 +86,11 @@ export class ConfigManager {
       veTenantId: 'videoEngager.tenantId',
       veEnv: 'videoEngager.veEnv',
       interactive: 'useGenesysMessengerChat',
+      auth: 'auth.enabled',
+      authMode: 'auth.mode',
+      authorizationEndpoint: 'auth.authorizationEndpoint',
+      clientId: 'auth.clientId',
+      scopes: 'auth.scopes',
       debug: 'debug'
     };
 
@@ -104,7 +115,7 @@ export class ConfigManager {
     // Process each mapped parameter that exists in the URL.
     for (const [param, path] of Object.entries(paramMap)) {
       if (params.has(param)) {
-        setValue(urlConfig, path, params.get(param));
+        setValue(urlConfig, path, param === 'scopes' ? params.get(param).trim().split(/\s+/) : params.get(param));
       }
     }
 

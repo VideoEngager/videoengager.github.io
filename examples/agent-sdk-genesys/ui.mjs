@@ -251,7 +251,7 @@ export function mountGenesysPanel(genesysEnv) {
   const iframe = document.createElement('iframe');
   iframe.id    = 'softphone';
   iframe.allow = 'camera *; microphone *; autoplay *; hid *';
-  iframe.src   = `https://apps.${genesysEnv}/crm/embeddableFramework.html?enableFrameworkClientId=true&dedicatedLoginWindow=true&provider=gsuite`;
+  iframe.src   = `https://apps.${genesysEnv}/crm/embeddableFramework.html?dedicatedLoginWindow=true&provider=gsuite`;
   $genesysContainer.appendChild(iframe);
 
   $genesysPanel.classList.remove('hidden');

@@ -355,6 +355,67 @@
       display: block;
     }
 
+    /* ── Genesys Embedded Framework panel ────────────────────────────── */
+    #genesys-panel {
+      position: fixed;
+      bottom: 0;
+      left: 24px;
+      width: 380px;
+      height: 560px;
+      background: #1e293b;
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -4px 24px rgba(0,0,0,.35);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 8900;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    #genesys-panel.open { transform: translateY(0); }
+    #genesys-panel.hidden { display: none; }
+
+    .gp-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      height: 44px;
+      background: #1e293b;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .gp-title {
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #cbd5e1;
+      pointer-events: none;
+    }
+    .gp-controls { display: flex; gap: 6px; }
+    .gp-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 16px;
+      line-height: 1;
+      transition: background .15s, color .15s;
+    }
+    .gp-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+
+    #genesys-iframe-container {
+      flex: 1;
+      min-height: 0;
+    }
+    #genesys-iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
   </style>
 </head>
 <body>
@@ -450,6 +511,19 @@
               </select>
             </div>
 
+            <div class="section-label">Genesys</div>
+
+            <div class="toggle-row">
+              <label for="genesys-embedded">
+                Enable Genesys Embedded Framework
+                <span class="hint">Show Genesys softphone panel (bottom-left)</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="genesys-embedded" />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
             <div class="section-label">Parameters</div>
 
             <div class="toggle-row">
@@ -496,6 +570,17 @@
         <div class="log" id="event-log"></div>
       </div>
     </div>
+  </div>
+
+  <!-- ── Genesys Embedded Framework panel ───────────────────────── -->
+  <div id="genesys-panel" class="hidden">
+    <div class="gp-titlebar">
+      <span class="gp-title">Genesys Softphone</span>
+      <div class="gp-controls">
+        <button class="gp-btn" id="gp-toggle-btn" title="Minimise / Restore">&#8211;</button>
+      </div>
+    </div>
+    <div id="genesys-iframe-container"></div>
   </div>
 
   <!-- ── Floating SmartVideo window ─────────────────────────────── -->

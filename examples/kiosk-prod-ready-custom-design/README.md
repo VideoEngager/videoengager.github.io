@@ -9,7 +9,7 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager Core 
 ## Features
 
 - **Zero-dependency** vanilla JavaScript implementation with ES modules
-- **Multi-environment support** (development, staging, production) with automatic detection
+- **Configuration overrides** through external JSON and URL parameters
 - **Comprehensive error handling** with categorized error types and retry mechanisms
 - **Custom waitroom experience** with carousel slides and bot messaging
 - **Optional OIDC sign-in** with PKCE for an authenticated Genesys Messenger deployment
@@ -122,16 +122,11 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager Core 
 
 ## Configuration
 
-### Environment Detection
+### Configuration Sources
 
-The application automatically detects environments based on:
+The kiosk starts with `configs.production` from `config/conf.js`, then applies external JSON from `?config=...` and individual URL overrides. To connect to another environment, use `veEnv`, `veTenantId`, `genesysDomain` and `genesysDeploymentId` URL parameters, or the corresponding nested `videoEngager` and `genesys` fields in external JSON. The kiosk entry point does not use `env` or hostname-based environment detection.
 
-| Pattern | Environment | Description |
-|---------|-------------|-------------|
-| `?env=dev\|staging\|production` | URL Parameter | Explicit environment override |
-| `localhost`, `127.0.0.1`, `dev.*` | Development | Local development patterns |
-| `staging.*` | Staging | Staging environment patterns |
-| Everything else | Production | Default production environment |
+Optional `timeouts.call`, `timeouts.inactivity` and `timeouts.retry` values must be finite positive numbers in milliseconds, no greater than 2147483647.
 
 ### Configuration Structure
 
@@ -158,7 +153,7 @@ const configs = {
 
 ### Optional Authentication
 
-Authentication is disabled by default. Add an `auth` section to the selected environment in `config/conf.js`, or to a complete external JSON configuration loaded with `?config=...`:
+Authentication is disabled by default. Add an `auth` section to `configs.production` in `config/conf.js`, or to a complete external JSON configuration loaded with `?config=...`:
 
 ```javascript
 auth: {
@@ -238,8 +233,8 @@ Main application orchestrator that manages:
 
 ```javascript
 // Usage example
-const kiosk = new KioskApplication();
-// Automatically initializes on DOM ready
+// After DOMContentLoaded, use the instance created by kiosk.js
+const kiosk = window.kioskApp;
 ```
 
 ### VideoEngagerClient (`js/client.js`)
@@ -275,7 +270,7 @@ Custom web component providing:
 
 Comprehensive error management system:
 - Categorized error types with user-friendly messages
-- Automatic retry logic with exponential backoff
+- Manual Retry for interaction errors; automatic retry for initial SDK loading failures
 - Modal display system
 - Logging and monitoring integration
 
@@ -391,25 +386,14 @@ The application implements a comprehensive error handling strategy:
 | `NETWORK_ERROR` | Check internet connection | No | Connection issues |
 | `CONFIG_INVALID` | Contact support | No | Configuration problems |
 | `LIBRARY_LOAD_FAILED` | Refresh the page | Yes (5s) | CDN/script loading |
-| `CALL_TIMEOUT` | Try again | Yes | Agent connection timeout |
-| `INTERNAL_ERROR` | Service error occurred | Yes (5s) | General errors |
+| `CALL_TIMEOUT` | Try again | Manual Retry | Agent connection timeout |
+| `INTERNAL_ERROR` | Service error occurred | Manual Retry | General errors |
 
 ### Retry Logic
 
-```javascript
-// Automatic retry with exponential backoff
-scheduleRetry(errorType, errorId) {
-  const currentAttempts = parseInt(localStorage.getItem(errorType.code) || "0");
-  
-  if (currentAttempts >= this.maxRetryAttempts) {
-    this.showToast("Maximum retry attempts reached", "error");
-    return;
-  }
-  
-  localStorage.setItem(errorType.code, String(currentAttempts + 1));
-  setTimeout(() => window.location.reload(), errorType.retryDelay);
-}
-```
+SDK loading failures retry after five seconds, up to three attempts. Interaction errors and call timeouts show a **Retry** button without scheduling a page reload. Unexpected background promise rejections are logged; failures reported by awaited client operations still show the appropriate error.
+
+The inactivity timer refreshes only an idle kiosk. It cannot refresh while an interaction is starting, waiting, active or ending.
 
 ---
 
@@ -470,21 +454,9 @@ scheduleRetry(errorType, errorId) {
 - **Backup & Recovery**: Implement appropriate backup strategies
 - **Performance Optimization**: Configure caching and CDN as needed
 
-### Sample Environment Configuration
+### Deployment Configuration
 
-For production deployments, configure via environment variables:
-
-```html
-<script>
-  window.ENV_CONFIG = {
-    VE_TENANT_ID: 'your-tenant-id',
-    VE_ENV: 'your-environment.videoengager.com', 
-    VE_DEPLOYMENT_ID: 'your-deployment-id',
-    GENESYS_DEPLOYMENT_ID: 'your-genesys-deployment',
-    GENESYS_DOMAIN: 'your-genesys-domain.com'
-  };
-</script>
-```
+Set the production defaults in `config/conf.js`, or supply an external JSON configuration through the `config` URL parameter. See [Configuration Sources](#configuration-sources) for the supported overrides.
 
 ---
 
@@ -494,7 +466,7 @@ For production deployments, configure via environment variables:
 
 **"Configuration validation failed"**
 - Verify all required fields in your configuration
-- Check that environment variables are properly set
+- Check the production defaults, external JSON configuration, and URL parameters
 - Ensure no undefined values in production config
 
 **"Failed to load VideoEngager script"**
@@ -517,13 +489,10 @@ For production deployments, configure via environment variables:
 Enable detailed logging:
 ```
 # URL parameter
-?env=dev
+?debug=true
 
 # Or modify configuration
-monitoring: {
-  enabled: true,
-  level: "debug"
-}
+debug: true
 ```
 
 ### Performance Debugging
@@ -543,6 +512,16 @@ console.log(window.kioskApp.currentScreen);
 ---
 
 ## Development
+
+Run the configuration, reload and lifecycle regression checks from the repository root:
+
+```bash
+node examples/kiosk-prod-ready-custom-design/check-config.cjs
+node examples/kiosk-prod-ready-custom-design/check-reload.cjs
+node examples/kiosk-prod-ready-custom-design/check-lifecycle.cjs
+```
+
+These checks use simulated SDK/browser state and timers and do not place live calls.
 
 ### Syntax Check
 
@@ -595,16 +574,13 @@ try {
 ### KioskApplication
 
 ```javascript
+// After DOMContentLoaded, the page has created this instance and started initialization
+const kioskApp = window.kioskApp
+
 // Public methods
-await kioskApp.init()                    // Initialize application
 kioskApp.showScreen('initial')           // Switch screens
 kioskApp.log('message')                  // Application logging
 kioskApp.destroy()                       // Cleanup resources
-
-// Event handling
-kioskApp.on('client:ready', callback)    // Client ready event
-kioskApp.on('video:started', callback)   // Video call started
-kioskApp.on('video:ended', callback)     // Video call ended
 ```
 
 ### VideoEngagerClient
@@ -612,6 +588,9 @@ kioskApp.on('video:ended', callback)     // Video call ended
 ```javascript
 // Client lifecycle
 const client = new VideoEngagerClient(config)
+client.on('client:ready', callback)       // Client initialized
+client.on('video:started', callback)      // Video startup completed
+client.on('video:ended', callback)        // Video cleanup completed
 await client.init()                      // Initialize client
 client.isReady()                         // Check ready state
 
@@ -635,7 +614,7 @@ mediator.on('error', callback)           // Error occured
 
 // Control methods
 mediator.sendBotMessage(message, tier)   // Display bot message
-mediator.controlCarousel('play|pause')   // Control playback
+mediator.controlCarousel('pause')       // Use 'play' to resume
 mediator.goToSlide(index)                // Navigate to slide
 ```
 

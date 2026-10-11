@@ -1,22 +1,22 @@
 // @ts-check
 /// <reference types="../types/ve-window.d.ts" />
 import { configs, metadata } from '../config/conf.js'; // Use 'production' as the base
-import { VideoEngagerClient } from "./client.js";
-import { ErrorHandler, ErrorTypes } from "./error-handler.js";
-import { Utils } from "./utils.js";
-import { TimeoutManager } from "./timeout-manager.js";
-import { WaitroomEventMediator } from "./waitroom-event-mediator.js";
+import { VideoEngagerClient } from './client.js';
+import { ErrorHandler, ErrorTypes } from './error-handler.js';
+import { Utils } from './utils.js';
+import { TimeoutManager } from './timeout-manager.js';
+import { WaitroomEventMediator } from './waitroom-event-mediator.js';
 import { ConfigManager } from './config-manager.js';
 
 export class KioskApplication {
-  constructor() {
+  constructor () {
     /** @type {import('../types/ve-window').ClientConfig|null} */
     this.config = null;
     this.videoEngagerClient = null;
     this.errorHandler = new ErrorHandler();
     this.timeoutManager = new TimeoutManager();
     this.waitroomMediator = new WaitroomEventMediator();
-    this.currentScreen = "initial";
+    this.currentScreen = 'initial';
     // Phase state machine: 'idle' → 'waiting' → 'precall' → 'active' → 'idle'
     this.callPhase = 'idle';
     this.starting = false;
@@ -30,9 +30,9 @@ export class KioskApplication {
     this.timeouts = {
       call: 1000 * 60 * 3, // 3 minutes
       inactivity: 1000 * 60 * 60, // 1 hour
-      retry: 1000 * 5, // 5 seconds
+      retry: 1000 * 5 // 5 seconds
     };
-    const defaultConfig = { ...configs.production, metadata: metadata };
+    const defaultConfig = { ...configs.production, metadata };
 
     this.configManager = new ConfigManager(defaultConfig); // Pass in the default config
 
@@ -40,26 +40,26 @@ export class KioskApplication {
     /** @type {Record<string, { motto: string; connect: string; loadingText: string; cancelText: string; retryText: string }>} */
     this.languages = {
       en: {
-        motto: "SmartVideo Kiosk Demo",
-        connect: "Touch Here To Begin",
-        loadingText: "Connecting to an Agent",
-        cancelText: "Cancel",
-        retryText: "Retry",
+        motto: 'SmartVideo Kiosk Demo',
+        connect: 'Touch Here To Begin',
+        loadingText: 'Connecting to an Agent',
+        cancelText: 'Cancel',
+        retryText: 'Retry'
       },
       de: {
-        motto: "SmartVideo Kiosk Demo",
-        connect: "Verbinden",
-        loadingText: "Verbinde mit einem Agenten",
-        cancelText: "Abbrechen",
-        retryText: "Wiederholen",
+        motto: 'SmartVideo Kiosk Demo',
+        connect: 'Verbinden',
+        loadingText: 'Verbinde mit einem Agenten',
+        cancelText: 'Abbrechen',
+        retryText: 'Wiederholen'
       },
       ar: {
-        motto: "عرض توضيحي لسمارت فيديو كيوسك",
-        connect: "الاتصال",
-        loadingText: "جاري الاتصال بموظف خدمة العملاء",
-        cancelText: "إلغاء",
-        retryText: "إعادة المحاولة",
-      },
+        motto: 'عرض توضيحي لسمارت فيديو كيوسك',
+        connect: 'الاتصال',
+        loadingText: 'جاري الاتصال بموظف خدمة العملاء',
+        cancelText: 'إلغاء',
+        retryText: 'إعادة المحاولة'
+      }
     };
 
     this.init();
@@ -70,15 +70,15 @@ export class KioskApplication {
    * Sets up environment configuration, UI, event listeners, and VideoEngager client.
    * @returns {Promise<void>}
    */
-  async init() {
+  async init () {
     try {
       this.setupInternalEventListeners();
       if (!window.navigator.onLine) {
-        this.log("APP: Initialization blocked due to previous errors");
+        this.log('APP: Initialization blocked due to previous errors');
         this.errorHandler.handleError(ErrorTypes.NETWORK_ERROR);
         return;
       }
-      this.log("APP: Starting secure kiosk application initialization");
+      this.log('APP: Starting secure kiosk application initialization');
 
       // Set up environment configuration
       // this.environmentConfig = new EnvironmentConfig();
@@ -106,7 +106,7 @@ export class KioskApplication {
 
       this.isInitialized = true;
       /** @type {HTMLButtonElement} */ (document.getElementById('StartVideoCall')).disabled = false;
-      this.log("APP: Secure kiosk application initialized successfully");
+      this.log('APP: Secure kiosk application initialized successfully');
       if (this.videoEngagerClient.startAfterLogin) await this.handleStartVideoCall();
     } catch (error) {
       this.log(`APP: Initialization failed: ${error.message}`);
@@ -118,11 +118,11 @@ export class KioskApplication {
    * Sets up the user interface for the kiosk application.
    * Applies language settings and background image.
    */
-  setupUI() {
-    this.log("UI: Setting up user interface");
+  setupUI () {
+    this.log('UI: Setting up user interface');
 
     // Set initial screen
-    this.showScreen("initial");
+    this.showScreen('initial');
 
     // Apply language settings
     const lang = this.getLanguageFromParams();
@@ -131,32 +131,33 @@ export class KioskApplication {
     // Set background image if configured
     this.setupBackgroundImage();
 
-    this.log("UI: User interface setup complete");
+    this.log('UI: User interface setup complete');
   }
 
-  setupInternalEventListeners() {
+  setupInternalEventListeners () {
     window.addEventListener('pageshow', event => {
-      if (event.persisted) window.location.reload(); // Do not restore a previous visitor or suspended login.
+      // if (event.persisted) window.location.reload(); // Do not restore a previous visitor or suspended login.
     });
-    document.addEventListener("networkRestored", () => {
+    document.addEventListener('networkRestored', () => {
       if (!this.isInitialized) {
         window.location.reload();
       }
     });
   }
+
   /**
    * Sets up event listeners for various UI elements and events.
    * Handles start video call button, cancel button, and message events.
    */
-  async setupEventListeners() {
-    this.log("EVENTS: Setting up event listeners");
+  async setupEventListeners () {
+    this.log('EVENTS: Setting up event listeners');
 
     // Start video call button
-    const startButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("StartVideoCall"));
+    const startButton = /** @type {HTMLButtonElement | null} */ (document.getElementById('StartVideoCall'));
     if (startButton) {
       startButton.disabled = true;
       startButton.addEventListener(
-        "click",
+        'click',
         this.handleStartVideoCall.bind(this)
       );
     }
@@ -170,14 +171,14 @@ export class KioskApplication {
 
     // Listen for PreCallStarted from VideoEngager iframe
     this._preCallMessageHandler = this._handlePreCallMessage.bind(this);
-    window.addEventListener("message", this._preCallMessageHandler);
+    window.addEventListener('message', this._preCallMessageHandler);
 
     // Activity detection for inactivity timer
-    ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
+    ['click', 'touchstart', 'mousemove', 'keypress'].forEach((event) => {
       document.addEventListener(event, this._boundResetInactivityTimer);
     });
 
-    this.log("EVENTS: Event listeners setup complete");
+    this.log('EVENTS: Event listeners setup complete');
   }
 
   /**
@@ -185,31 +186,31 @@ export class KioskApplication {
    * @private
    * @returns {void}
    */
-  setupWaitroomEventListeners() {
-    this.log("WAITROOM: Setting up waitroom event listeners");
+  setupWaitroomEventListeners () {
+    this.log('WAITROOM: Setting up waitroom event listeners');
 
     // Listen for user cancellation
-    this.waitroomMediator.on("userCancelled", async (detail) => {
-      this.log("WAITROOM: User cancelled from waitroom");
+    this.waitroomMediator.on('userCancelled', async (detail) => {
+      this.log('WAITROOM: User cancelled from waitroom');
       await this.handleCancelCall.bind(this)(detail);
     });
 
-    this.waitroomMediator.on("error", () => {
-      this.log("WAITROOM: Error in waitroom");
+    this.waitroomMediator.on('error', () => {
+      this.log('WAITROOM: Error in waitroom');
       this.errorHandler.handleError(ErrorTypes.WAITROOM_ERROR);
     });
   }
 
-  async initializeWaitroom() {
+  async initializeWaitroom () {
     /** @type {HTMLElement & { init: () => Promise<void>} | null} */
-    const carouselWaitroom = document.querySelector("ve-carousel-waitroom");
+    const carouselWaitroom = document.querySelector('ve-carousel-waitroom');
 
     if (!carouselWaitroom) {
-      this.log("WAITROOM: Carousel waitroom component not found");
+      this.log('WAITROOM: Carousel waitroom component not found');
       this.errorHandler.handleError(ErrorTypes.WAITROOM_COMPONENT_NOT_FOUND);
       return;
     }
-    this.log("WAITROOM: Initializing carousel waitroom");
+    this.log('WAITROOM: Initializing carousel waitroom');
     await carouselWaitroom.init();
   }
 
@@ -217,8 +218,8 @@ export class KioskApplication {
    * Initializes the VideoEngager client and sets up event listeners.
    * @returns {Promise<void>}
    */
-  async initializeVideoEngager() {
-    this.log("VIDEOCLIENT: Initializing VideoEngager client");
+  async initializeVideoEngager () {
+    this.log('VIDEOCLIENT: Initializing VideoEngager client');
 
     try {
       this.videoEngagerClient = new VideoEngagerClient(this.config);
@@ -226,49 +227,41 @@ export class KioskApplication {
       await this.videoEngagerClient.init();
 
       // Set up event listeners
-      this.videoEngagerClient.on("VideoEngagerCall.agentJoined", () => {
+      this.videoEngagerClient.on('VideoEngagerCall.agentJoined', () => {
         if (!['waiting', 'precall'].includes(this.callPhase)) return;
-        this.log("VIDEOCLIENT: Video call agent joined");
+        this.log('VIDEOCLIENT: Video call agent joined');
         this.callPhase = 'active';
         this.handleVideoCallStarted();
       });
 
-      this.videoEngagerClient.on("GenesysMessenger.conversationStarted", async () => {
-        this.timeoutManager.extend("call", this.timeouts.call);
+      this.videoEngagerClient.on('GenesysMessenger.conversationStarted', async () => {
+        this.timeoutManager.extend('call', this.timeouts.call);
       });
 
-      this.videoEngagerClient.on("GenesysMessenger.conversationEnded", async () => {
+      this.videoEngagerClient.on('GenesysMessenger.conversationEnded', async () => {
         const genesysMessengerContainer = /** @type {HTMLDivElement | null} */ (document.querySelector('#genesys-messenger'));
         if (genesysMessengerContainer) {
           genesysMessengerContainer.style.display = 'none';
         }
-        await this.handleVideoCallEnded();
+        await this.handleSessionEndedUI();
       });
 
       // Single onMessage handler — shows genesys container, handles system messages, extends timeout
-      this.videoEngagerClient.on("onMessage", async (/** @type {any} */ data) => {
+      this.videoEngagerClient.on('onMessage', async (/** @type {any} */ data) => {
         const genesysMessengerContainer = /** @type {HTMLDivElement | null} */ (document.querySelector('#genesys-messenger'));
         if (genesysMessengerContainer) {
           genesysMessengerContainer.style.display = 'block';
         }
         this.log(`VIDEOCLIENT: Received message: ${JSON.stringify(data)}`);
         this.handleSystemMessage(data);
-        this.timeoutManager.extend("call", this.timeouts.call);
+        this.timeoutManager.extend('call', this.timeouts.call);
       });
 
-      this.videoEngagerClient.on("VideoEngagerCall.ended", async () => {
-        // Only handle if GenesysMessenger.conversationEnded hasn't already done so
-        if (this.callPhase !== 'idle') {
-          this.log("VIDEOCLIENT: Video call ended");
-          await this.handleVideoCallEnded();
-        }
-      });
       this.videoEngagerClient.on('GenesysChat.error', ({ error }) => this.handleVideoCallError(error));
 
-      this.log("VIDEOCLIENT: VideoEngager client initialized successfully");
+      this.log('VIDEOCLIENT: VideoEngager client initialized successfully');
     } catch (error) {
       this.log(`VIDEOCLIENT: Failed to initialize: ${error.message}`);
-      this.errorHandler.handleError(ErrorTypes.LIBRARY_LOAD_FAILED, error);
       throw error;
     }
   }
@@ -278,10 +271,10 @@ export class KioskApplication {
    * Shows loading screen, sets call timeout, and starts the video call.
    * @param {Event} [event] - The click event; omitted when returning from sign-in.
    */
-  async handleStartVideoCall(event) {
+  async handleStartVideoCall (event) {
     event?.preventDefault();
     if (!this.isInitialized || this.callPhase !== 'idle') return;
-    this.log("CALL: Start video call requested");
+    this.log('CALL: Start video call requested');
     this.starting = true;
     const startButton = /** @type {HTMLButtonElement} */ (document.getElementById('StartVideoCall'));
     const cancelButton = /** @type {HTMLButtonElement | null} */ (document.querySelector('ve-carousel-waitroom')?.shadowRoot?.querySelector('.cancel-button'));
@@ -291,15 +284,17 @@ export class KioskApplication {
     try {
       // Show loading screen
       this.callPhase = 'waiting';
-      this.showScreen("loading");
+      this.showScreen('loading');
 
       // Pause inactivity timer for the duration of the call
-      this.timeoutManager.clear("inactivity");
+      this.timeoutManager.clear('inactivity');
 
       await this._acquireWakeLock();
       // startVideo authenticates first, then waits for Core startup to complete.
       if (this.videoEngagerClient && this.videoEngagerClient.isReady()) {
         await this.videoEngagerClient.startVideo();
+        this.starting = false;
+        if (cancelButton) cancelButton.disabled = false;
         if (['waiting', 'precall'].includes(this.callPhase)) {
           this.timeoutManager.set('call', () => this.handleCallTimeout(), this.timeouts.call);
         }
@@ -307,11 +302,10 @@ export class KioskApplication {
           await this.videoEngagerClient.startGenesysChat();
         }
       } else {
-        throw new Error("VideoEngager client not ready");
+        throw new Error('VideoEngager client not ready');
       }
     } catch (error) {
       this.log(`CALL: Failed to start video call: ${error.message}`);
-      await this.handleVideoCallEnded();
       this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
     } finally {
       this.starting = false;
@@ -325,11 +319,11 @@ export class KioskApplication {
    * Cancels the call, clears the timeout, and returns to the initial screen.
    * @param {Event} event - The click event.
    */
-  async handleCancelCall(event) {
+  async handleCancelCall (event) {
     event.preventDefault();
     if (this.starting) return; // Core startup must resolve before visitor cancellation.
-    this.log("CALL: Cancel call requested");
-    await this.handleVideoCallEnded();
+    this.log('CALL: Cancel call requested');
+    await this.endSession();
   }
 
   /**
@@ -337,7 +331,7 @@ export class KioskApplication {
    * Processes call started events and updates the UI accordingly.
    * @param {MessageEvent} event - The message event containing data from the VideoEngager client.
    */
-  handleMessage(event) {
+  handleMessage (event) {
     this.log(`MESSAGE: Received message: ${JSON.stringify(event.data)}`);
   }
 
@@ -346,23 +340,23 @@ export class KioskApplication {
    * Processes messages to extract system notifications and display them in the waitroom.
    * @param {object} data - The message data from VideoEngager client.
    */
-  handleSystemMessage(data) {
+  handleSystemMessage (data) {
     const { message } = data;
 
     // Check if this is an inbound system notification
     if (
       message &&
-      message.direction === "Inbound" &&
+      message.direction === 'Inbound' &&
       message.content &&
-      message.content.type === "Text" &&
+      message.content.type === 'Text' &&
       message.content.text &&
-      message.content.text.startsWith("System Notification:")
+      message.content.text.startsWith('System Notification:')
     ) {
       this.log(`SYSTEM: Received system notification: ${message.content.text}`);
 
       // Extract the notification text (remove "System Notification: " prefix)
       const notificationText = message.content.text
-        .replace("System Notification: ", "")
+        .replace('System Notification: ', '')
         .trim();
 
       // Display the notification in the waitroom
@@ -374,11 +368,11 @@ export class KioskApplication {
    * Displays system notification in the waitroom.
    * @param {string} notificationText - The notification text to display.
    */
-  displaySystemNotification(notificationText) {
+  displaySystemNotification (notificationText) {
     this.log(`SYSTEM: Displaying notification: ${notificationText}`);
 
     // Only show notifications when in loading/waitroom screen
-    if (this.currentScreen !== "loading") {
+    if (this.currentScreen !== 'loading') {
       return;
     }
 
@@ -415,7 +409,7 @@ export class KioskApplication {
   /**
    * Clears the system notification display.
    */
-  clearSystemNotification() {
+  clearSystemNotification () {
     if (this.systemNotificationElement && this.systemNotificationElement.style.display !== 'none') {
       // Add fade-out animation
       this.systemNotificationElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
@@ -441,7 +435,7 @@ export class KioskApplication {
   /**
    * Creates the system notification element if it doesn't exist.
    */
-  createSystemNotificationElement() {
+  createSystemNotificationElement () {
     if (this.systemNotificationElement) {
       return; // Already exists
     }
@@ -495,7 +489,7 @@ export class KioskApplication {
     if (!document.getElementById('system-notification-styles')) {
       const style = document.createElement('style');
       style.id = 'system-notification-styles';
-    style.textContent = `
+      style.textContent = `
       .system-notification {
         animation: slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       }
@@ -599,86 +593,84 @@ export class KioskApplication {
    * Handles the video call started event.
    * Updates the UI to show the video call screen and clears the call timeout.
    */
-  handleVideoCallStarted() {
-    this.log("CALL: Video call started successfully");
+  handleVideoCallStarted () {
+    this.log('CALL: Video call started successfully');
 
     // Clear call timeout
-    this.timeoutManager.clear("call");
+    this.timeoutManager.clear('call');
 
     // Clear system notification
     this.clearSystemNotification();
 
     // Show video screen
-    this.showScreen("video");
+    this.showScreen('video');
     // Hide the Genesys chat but only when useGenesysMessengerChat is enabled
     if (this.config?.useGenesysMessengerChat) {
       this.videoEngagerClient?.hideGenesysChat();
     }
   }
 
-  async handleVideoCallEnded() {
+  async handleSessionEndedUI () {
     if (this.callPhase === 'idle' || this.callPhase === 'ending') return;
-    this.log("CALL: Video call ended");
+    this.log('CALL: Video call ended');
 
     // Clear any active timeouts
     this.callPhase = 'ending';
-    this.timeoutManager.clear("call");
+    this.timeoutManager.clear('call');
     this._releaseWakeLock();
 
     // Clear system notification
     this.clearSystemNotification();
-    try {
-      await this.videoEngagerClient?.endVideo();
-    } catch (error) {
-      this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
-    }
+
     // Return to initial screen and restart inactivity timer
     this.callPhase = 'idle';
     /** @type {HTMLButtonElement} */ (document.getElementById('StartVideoCall')).disabled = !this.videoEngagerClient?.isReady();
-    this.showScreen("initial");
+    this.showScreen('initial');
     this.setupInactivityTimer();
   }
 
-  async handleVideoCallError(/** @type {Error} */ error) {
-    this.log(`CALL: Video call error: ${error.message}`);
-
-    await this.handleVideoCallEnded();
-    this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
+  async endSession () {
+    await this.videoEngagerClient?.endVideo();
   }
 
-  async handleCallTimeout() {
-    this.log("CALL: Call timeout - ending call");
-    await this.handleVideoCallEnded();
+  async handleVideoCallError (/** @type {Error} */ error) {
+    this.log(`CALL: Video call error: ${error.message}`);
+    this.errorHandler.handleError(ErrorTypes.INTERNAL_ERROR, error);
+    await this.endSession().catch((e) => { console.error(e); });
+  }
 
+  async handleCallTimeout () {
+    this.log('CALL: Call timeout - ending call');
     // Show timeout error
     this.errorHandler.handleError(ErrorTypes.CALL_TIMEOUT);
+    await this.endSession().catch((e) => { console.error(e); });
   }
 
   /**
    * Switches the visible screen based on the provided screen name.
    * @param {"initial" | "loading" | "video"} screenName - The name of the screen to show ("initial", "loading", "video").
    */
-  showScreen(screenName) {
+  showScreen (screenName) {
     this.log(`SCREEN: Switching to ${screenName} screen`);
 
     // Hide all screens
-    const screens = ["initial-screen", "oncall-screen"];
+    const screens = ['initial-screen', 'oncall-screen'];
     screens.forEach((screenId) => {
       const screen = document.getElementById(screenId);
       if (screen) {
-        screen.style.display = "none";
+        screen.style.display = 'none';
       }
     });
 
     // Show requested screen
     switch (screenName) {
-      case "initial":
+      case 'initial':
         this.showInitialScreen();
         break;
-      case "loading":
+      case 'loading':
         this.showLoadingScreen();
         break;
-      case "video":
+      case 'video':
         this.showVideoScreen();
         break;
     }
@@ -686,24 +678,24 @@ export class KioskApplication {
     this.currentScreen = screenName;
   }
 
-  showInitialScreen() {
-    const screen = document.getElementById("initial-screen");
+  showInitialScreen () {
+    const screen = document.getElementById('initial-screen');
     if (screen) {
-      screen.style.display = "flex";
+      screen.style.display = 'flex';
     }
 
     // Reset inactivity timer
     this.setupInactivityTimer();
   }
 
-  showLoadingScreen() {
-    const oncallScreen = document.getElementById("oncall-screen");
-    if (oncallScreen) oncallScreen.style.display = "block";
+  showLoadingScreen () {
+    const oncallScreen = document.getElementById('oncall-screen');
+    if (oncallScreen) oncallScreen.style.display = 'block';
   }
 
-  hideLoadingScreen() {
-    const oncallScreen = document.getElementById("oncall-screen");
-    if (oncallScreen) oncallScreen.style.display = "none";
+  hideLoadingScreen () {
+    const oncallScreen = document.getElementById('oncall-screen');
+    if (oncallScreen) oncallScreen.style.display = 'none';
   }
 
   /**
@@ -711,31 +703,31 @@ export class KioskApplication {
    * Validates the origin against the configured veEnv before acting.
    * @param {MessageEvent} event
    */
-  _handlePreCallMessage(event) {
+  _handlePreCallMessage (event) {
     // Experimental iframe event format; replace when Core exposes public precall events.
     const iframe = document.querySelector('#video-call-ui iframe');
     if (!['waiting', 'precall'].includes(this.callPhase)) return;
-    if (!this.config?.videoEngager?.isPopup && (!iframe || event.source !== iframe.contentWindow)) return;
+    if (!iframe || event.source !== iframe.contentWindow) return;
     const veEnv = this.config?.videoEngager?.veEnv;
     if (!veEnv) return;
     const expectedOrigin = `https://${veEnv}`;
     if (event.origin !== expectedOrigin) return;
 
     let data = event.data;
-    if (typeof data === "string") {
+    if (typeof data === 'string') {
       try { data = JSON.parse(data); } catch (_) { return; }
     }
-    if (data?.__postRobot__?.name === "VideoEngager.event:PreCallStarted") {
-      this.log("CALL: PreCall started - hiding waitroom");
+    if (data?.__postRobot__?.name === 'VideoEngager.event:PreCallStarted') {
+      this.log('CALL: PreCall started - hiding waitroom');
       this.callPhase = 'precall';
-      this.showScreen("video");
+      this.showScreen('video');
     }
-    if (data?.__postRobot__?.name === "VideoEngager.event:PreCallFinished") {
+    if (data?.__postRobot__?.name === 'VideoEngager.event:PreCallFinished') {
       this.log(`CALL: PreCall finished - callPhase is '${this.callPhase}'`);
       if (this.callPhase === 'precall') {
         // Agent hasn't joined yet — revert to waitroom
         this.callPhase = 'waiting';
-        this.showScreen("loading");
+        this.showScreen('loading');
       }
       // If 'active', agent already joined — stay on video screen
     }
@@ -744,19 +736,19 @@ export class KioskApplication {
   /**
    * Shows the video call screen.
    */
-  showVideoScreen() {
-    const videoUI = document.getElementById("video-call-ui");
-    if (videoUI) videoUI.style.height = "calc(100dvh - 38px)"; // Remove 38px for header height
+  showVideoScreen () {
+    const videoUI = document.getElementById('video-call-ui');
+    if (videoUI) videoUI.style.height = 'calc(100dvh - 38px)'; // Remove 38px for header height
   }
 
   // Configuration and Setup
-  getLanguageFromParams() {
+  getLanguageFromParams () {
     const urlParams = new URLSearchParams(window.location.search);
-    const lang = urlParams.get("lang");
-    return lang && this.languages[lang] ? lang : "en";
+    const lang = urlParams.get('lang');
+    return lang && this.languages[lang] ? lang : 'en';
   }
 
-  applyLanguageSettings(/** @type {string} */ lang) {
+  applyLanguageSettings (/** @type {string} */ lang) {
     const langConfig = this.languages[lang];
     if (!langConfig) return;
 
@@ -764,9 +756,9 @@ export class KioskApplication {
 
     // Apply language strings with XSS protection
     const elements = {
-      ".secondery-text": langConfig.motto,
-      "#connectButton": langConfig.connect,
-      "#loadingText": langConfig.loadingText,
+      '.secondery-text': langConfig.motto,
+      '#connectButton': langConfig.connect,
+      '#loadingText': langConfig.loadingText
     };
 
     Object.entries(elements).forEach(([selector, text]) => {
@@ -777,40 +769,41 @@ export class KioskApplication {
     });
   }
 
-  setupBackgroundImage() {
+  setupBackgroundImage () {
     if (!this.config?.metadata.backgroundImage) return;
 
     // Validate URL
     if (
       !Utils.validateURL(this.config?.metadata.backgroundImage) &&
-      !this.config?.metadata.backgroundImage.startsWith("img/")
+      !this.config?.metadata.backgroundImage.startsWith('img/')
     ) {
-      this.log("BACKGROUND: Invalid background image URL");
+      this.log('BACKGROUND: Invalid background image URL');
       return;
     }
 
-    const elem = document.getElementById("initial-screen");
+    const elem = document.getElementById('initial-screen');
     if (elem) {
       elem.style.backgroundImage = `url(${this.config?.metadata.backgroundImage})`;
-      this.log("BACKGROUND: Background image applied");
+      this.log('BACKGROUND: Background image applied');
     }
   }
 
   // Timer Management
-  setupInactivityTimer() {
-    this.timeoutManager.clear("inactivity");
+  setupInactivityTimer () {
+    this.timeoutManager.clear('inactivity');
     this.timeoutManager.set(
-      "inactivity",
+      'inactivity',
       () => {
-        this.log("INACTIVITY: Inactivity timeout reached - reloading");
+        if (this.callPhase !== 'idle' || this.starting) return;
+        this.log('INACTIVITY: Inactivity timeout reached - reloading');
         window.location.reload();
       },
       this.timeouts.inactivity
     );
   }
 
-  resetInactivityTimer() {
-    if (this.currentScreen === "initial" && this.callPhase === 'idle') {
+  resetInactivityTimer () {
+    if (this.currentScreen === 'initial' && this.callPhase === 'idle') {
       this.setupInactivityTimer();
     }
   }
@@ -824,17 +817,17 @@ export class KioskApplication {
    * kioskApp.log("Error loading configuration");
    * kioskApp.log("User clicked the start button");
    */
-  log(message) {
+  log (message) {
     const timestamp = new Date().toISOString();
     const stackTrace = new Error().stack;
-    const stackTraceLine = stackTrace ? (stackTrace.split("\n")[2]?.trim() ?? "unknown source") : "unknown source";
+    const stackTraceLine = stackTrace ? (stackTrace.split('\n')[2]?.trim() ?? 'unknown source') : 'unknown source';
     console.log(`[${timestamp}] ${message}`, {
       source: stackTraceLine
     });
 
     // In development, also log to potential debug element
     if (this.config?.debug === true) {
-      const debugElement = document.getElementById("debug-log");
+      const debugElement = document.getElementById('debug-log');
       if (debugElement) {
         debugElement.textContent += `[${timestamp}] ${message}\n`;
         debugElement.scrollTop = debugElement.scrollHeight;
@@ -843,7 +836,7 @@ export class KioskApplication {
   }
 
   // ── Wake lock ────────────────────────────────────────────────────────────────
-  async _acquireWakeLock() {
+  async _acquireWakeLock () {
     if (!('wakeLock' in navigator)) return;
     try {
       this.wakeLock = await navigator.wakeLock.request('screen');
@@ -853,7 +846,7 @@ export class KioskApplication {
     }
   }
 
-  _releaseWakeLock() {
+  _releaseWakeLock () {
     if (this.wakeLock) {
       this.wakeLock.release();
       this.wakeLock = null;
@@ -864,8 +857,8 @@ export class KioskApplication {
    * Destroys the application instance, cleaning up resources and event listeners.
    * @returns {void}
    */
-  destroy() {
-    this.log("APP: Destroying application");
+  destroy () {
+    this.log('APP: Destroying application');
 
     // Clear all timeouts
     this.timeoutManager.clearAll();
@@ -878,12 +871,12 @@ export class KioskApplication {
     }
 
     // Remove event listeners
-    ["click", "touchstart", "mousemove", "keypress"].forEach((event) => {
+    ['click', 'touchstart', 'mousemove', 'keypress'].forEach((event) => {
       document.removeEventListener(event, this._boundResetInactivityTimer);
     });
 
     if (this._preCallMessageHandler) {
-      window.removeEventListener("message", this._preCallMessageHandler);
+      window.removeEventListener('message', this._preCallMessageHandler);
       this._preCallMessageHandler = null;
     }
 
@@ -892,6 +885,6 @@ export class KioskApplication {
 }
 
 // Initialize application when DOM is ready
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
   window.kioskApp = new KioskApplication();
 });

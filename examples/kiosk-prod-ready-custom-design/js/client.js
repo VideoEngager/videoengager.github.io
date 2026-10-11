@@ -18,6 +18,7 @@ export class VideoEngagerClient {
     this.integrationReady = false;
     this.startPromise = null;
     this.chatCommand = null;
+    this.chatOpen = false;
     this.starting = false;
     this.sessionActive = false;
     this.videoActive = false;
@@ -64,7 +65,7 @@ export class VideoEngagerClient {
         ...this.config.videoEngager,
         logger: this.config.debug === true,
         // Popup mode does not use the iframe command handshake.
-        enableVeIframeCommands: !this.config.videoEngager.isPopup
+        enableVeIframeCommands: true
       });
       this.integration = new GenesysIntegration({
         ...this.config.genesys,
@@ -72,10 +73,11 @@ export class VideoEngagerClient {
         hideUIOnBusyOperation: true,
         ...(this.authProvider && { authProvider: this.authProvider })
       });
+      this.config.debug === true && (this.integration.genesysJsSdkWrapper.debugGenesysMonitor = true);
       const container = document.getElementById('video-call-ui');
       if (!container) throw new Error('The video-call-ui container is missing.');
       this.core.setUiCallbacks({
-        createIframe: src => {
+        createIframe: (src) => {
           const iframe = document.createElement('iframe');
           iframe.id = 'videoengageriframe';
           iframe.className = 'videoengager-widget-iframe';
@@ -88,8 +90,7 @@ export class VideoEngagerClient {
           return iframe;
         },
         getIframeInstance: () => container.querySelector('iframe'),
-        destroyIframe: () => { container.replaceChildren(); container.style.height = '0'; },
-        setIframeVisibility: visible => { container.hidden = !visible; }
+        destroyIframe: () => { container.replaceChildren(); container.style.height = '0'; }
       });
       this.setupEventListeners();
       // Messenger loads even for video-only kiosks. Preserve the previous chat settings.
@@ -118,13 +119,14 @@ export class VideoEngagerClient {
       script.src = 'https://cdn.videoengager.com/widget/latest/browser/main.umd.js';
       script.async = true;
       const timeout = setTimeout(() => finish(new Error('VideoEngager script load timeout')), 15000);
-      const finish = error => {
+      const finish = (error) => {
         clearTimeout(timeout);
         script.onload = script.onerror = null;
         if (error) { script.remove(); reject(error); } else resolve();
       };
       script.onload = () => finish(window.VideoEngager?.VideoEngagerCore && window.VideoEngager?.GenesysIntegration
-        ? null : new Error('VideoEngager Core SDK did not load'));
+        ? null
+        : new Error('VideoEngager Core SDK did not load'));
       script.onerror = () => finish(new Error('Failed to load VideoEngager script'));
       document.head.appendChild(script);
     });
@@ -139,42 +141,61 @@ export class VideoEngagerClient {
   async initializeIntegration () {
     // Do not send interaction or Messenger commands before this resolves.
     await this.core.setContactCenterIntegration(this.integration);
+    if (this.integration.restoredSession) {
+      await this.core.endContactCenterInteraction(true).catch(console.error);
+    }
     this.integrationReady = true;
     // A saved Messenger identity may bypass getAuthCode; require a fresh visitor login.
     if (this.perVisitor && !this.authProvider.grantConsumed) {
       await this.core.endVideoEngagerInteraction(false);
-      await this.genesysCommand('MessagingService.clearConversation');
       await this.genesysCommand('Auth.logout');
       await this.authProvider.reAuthenticate();
-    }
-    if (this.core.contactCenterInActiveInteraction) {
-      await this.core.endVideoEngagerInteraction(false);
-      await this.genesysCommand('MessagingService.clearConversation');
     }
   }
 
   setupEventListeners () {
-    this.core.on('videoEngager:active-ve-instance', active => {
+    this.integration.genesysJsSdkWrapper.on('messenger.opened', () => { this.chatOpen = true; });
+    this.integration.genesysJsSdkWrapper.on('messenger.closed', () => { this.chatOpen = false; });
+    this.core.on('videoEngager:active-ve-instance', (active) => {
       if (active) {
         if (!this.sessionActive) return;
         this.videoActive = true;
         this.emit('VideoEngagerCall.started', {});
-      } else this.emitVideoEnded();
+      } else {
+        this.emitVideoEnded();
+        setTimeout(() => {
+          if (this.core.contactCenterInActiveInteraction) {
+            this.core.endContactCenterInteraction(true);
+          }
+        }, 1000);
+      }
     });
     this.core.on('videoEngager:call-state-changed', state => {
       if (state === 'active' && this.sessionActive) {
         this.videoActive = true;
         this.emit('VideoEngagerCall.agentJoined', {});
-      }
-      else if (state === 'ended' || state === 'idle') this.emitVideoEnded();
+      } else if (state === 'ended' || state === 'idle') this.emitVideoEnded();
     });
     this.core.on('videoEngager:CallEnded', () => this.emitVideoEnded());
-    for (const [source, target] of Object.entries({
-      'integration:sessionStarted': 'GenesysMessenger.conversationStarted',
-      'integration:sessionEnded': 'GenesysMessenger.conversationEnded'
-    })) {
-      this.core.on(source, () => { if (this.sessionActive) this.emit(target, {}); });
-    }
+
+    this.core.on('integration:sessionStarted', () => {
+      this.emit('GenesysMessenger.conversationStarted', {});
+    });
+    this.core.on('integration:sessionEnded', async () => {
+      this.sessionActive = false;
+      if (this.perVisitor) {
+        await this.genesysCommand('Auth.logout');
+        this.authProvider?.cancel();
+        this.connectionState = 'disconnected';
+        saveConfigForReload(this.config);
+        window.location.reload();
+      } else {
+        this.connectionState = 'connected';
+      }
+      // await this.genesysCommand('MessagingService.clearConversation');
+
+      this.emit('GenesysMessenger.conversationEnded', {});
+    });
     this.core.on('integration:raw-message', message => {
       if (!this.sessionActive) return;
       const normalized = this.normalizeGenesysMessage(message);
@@ -196,25 +217,34 @@ export class VideoEngagerClient {
       content = { type: 'NotificationPresence', presence };
     } else if (message.type === 'text' || message.type === 'structured') {
       if (message.files?.length) {
-        content = { type: 'Attachment', attachments: message.files.map(file => ({
-          id: file.id,
-          type: ({ Image: 'image', Video: 'video', Audio: 'audio', File: 'file', Link: 'link' })[file.type] || 'unknown',
-          name: file.name, size: file.size, url: file.downloadUrl, mime: file.mime
-        })) };
+        content = {
+          type: 'Attachment',
+          attachments: message.files.map(file => ({
+            id: file.id,
+            type: ({ Image: 'image', Video: 'video', Audio: 'audio', File: 'file', Link: 'link' })[file.type] || 'unknown',
+            name: file.name,
+            size: file.size,
+            url: file.downloadUrl,
+            mime: file.mime
+          }))
+        };
         if (message.text) content.text = message.text;
       } else if (message.text) {
         const domain = this.config.videoEngager.veEnv.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const url = message.text.match(new RegExp('https://' + domain + '/ve/\\S+'))?.[0].replace(/[.,;:!?)]+$/, '');
-        content = url ? { type: 'videoEngagerUrl', url, text: message.text.replace(url, '').trim() }
+        content = url
+          ? { type: 'videoEngagerUrl', url, text: message.text.replace(url, '').trim() }
           : { type: 'Text', text: message.text };
       } else if (message.type === 'structured') {
         content = { type: 'Error', text: 'Unsupported message format' };
       } else return null;
     } else return null;
     const from = message.from || {};
-    const name = message.messageType === 'inbound' ? (from.nickname || from.name || 'You')
-      : (from.firstName || from.lastName) ? `${from.firstName || ''} ${from.lastName || ''}`.trim()
-        : from.nickname || from.name || (message.originatingEntity === 'Bot' ? 'Bot' : 'Agent');
+    const name = message.messageType === 'inbound'
+      ? (from.nickname || from.name || 'You')
+      : (from.firstName || from.lastName)
+          ? `${from.firstName || ''} ${from.lastName || ''}`.trim()
+          : from.nickname || from.name || (message.originatingEntity === 'Bot' ? 'Bot' : 'Agent');
     return {
       id: message.id,
       // Genesys outbound means inbound to the visitor in the previous Hub's payload.
@@ -236,11 +266,12 @@ export class VideoEngagerClient {
     this.starting = true;
     try {
       await this.waitForReady();
+      console.log('START_VIDEO_SESSION_CHECK', this.integration.restoredSession, this.core.contactCenterInActiveInteraction);
       await this.chatCommand;
       this.sessionActive = true;
       this.startPromise = this.core.startVideoEngagerInteraction({
         bindToOrStartContactCenterInteraction: true,
-        callConfigs: { isPopup: Boolean(this.config.videoEngager.isPopup), autoAccept: true }
+        callConfigs: { autoAccept: true }
       });
       const result = await this.startPromise;
       this.emit('video:started', result);
@@ -259,21 +290,13 @@ export class VideoEngagerClient {
   async endVideo () {
     if (!this.integrationReady) return;
     try {
+      if (!this.core.isCallOngoing || !this.core.contactCenterInActiveInteraction) {
+        console.error('already closing');
+        return;
+      }
       await this.chatCommand?.catch(() => {}); // Appearance failures must not block ending the call.
       // Clear explicitly because Core can skip contact-center cleanup after agent disconnect.
-      const result = await this.core.endVideoEngagerInteraction(false);
-      await this.genesysCommand('MessagingService.clearConversation');
-      this.sessionActive = false;
-      if (this.perVisitor) {
-        await this.genesysCommand('Auth.logout');
-        this.authProvider.cancel();
-        this.connectionState = 'disconnected';
-        saveConfigForReload(this.config);
-        window.location.reload();
-      } else {
-        this.connectionState = 'connected';
-      }
-      this.emit('video:ended', result);
+      const result = await this.core.endVideoEngagerInteraction(true);
       return result;
     } catch (error) {
       this.connectionState = 'error';
@@ -284,7 +307,10 @@ export class VideoEngagerClient {
 
   genesysCommand (name) {
     // Reuse the integration's public command wrapper and its timeout.
-    return this.integration.genesysJsSdkWrapper.command(name);
+    return this.integration.genesysJsSdkWrapper.command(name).catch(error => {
+      if (name === 'MessagingService.clearConversation' && (error?.message || error) === 'There is no active conversation found to clear') return;
+      throw error;
+    });
   }
 
   async startGenesysChat () {
@@ -296,6 +322,8 @@ export class VideoEngagerClient {
       await this.core.startContactCenterInteraction();
     }
     await this.chatCommand;
+    // Core may already have opened Messenger; avoid a redundant appearance command.
+    if (this.chatOpen) return;
     this.chatCommand = this.genesysCommand('Messenger.open').catch(error => {
       if ((error?.message || error) !== 'Messenger is already opened.') console.warn('Could not open Messenger:', error);
     });
@@ -307,6 +335,7 @@ export class VideoEngagerClient {
       await this.startPromise;
       if (!this.integrationReady) return;
       await this.chatCommand;
+      if (!this.chatOpen) return;
       this.chatCommand = this.genesysCommand('Messenger.close').catch(error => {
         if ((error?.message || error) !== 'Messenger is already closed.') console.warn('Could not minimize Messenger:', error);
       });

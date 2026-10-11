@@ -40,8 +40,8 @@ export class TimeoutManager {
   extend(name, additionalDelay) {
     const timeout = this.timeouts.get(name);
     if (timeout) {
-      this.clear(name);
-      return this.set(name, timeout.callback, timeout.delay + additionalDelay);
+      const remaining = this.getRemainingTime(name);
+      return this.set(name, timeout.callback, Math.min(2147483647, remaining + additionalDelay));
     }
     return null;
   }

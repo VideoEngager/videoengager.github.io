@@ -34,6 +34,17 @@ export class ConfigManager {
     for (const [a, b] of need) {
       if (!cfg?.[a]?.[b]) throw new Error(`Missing ${a}.${b}`);
     }
+    if (cfg.timeouts !== undefined) {
+      if (!cfg.timeouts || typeof cfg.timeouts !== 'object' || Array.isArray(cfg.timeouts)) {
+        throw new Error('Timeouts configuration must be an object.');
+      }
+      for (const field of ['call', 'inactivity', 'retry']) {
+        const delay = cfg.timeouts[field];
+        if (Object.hasOwn(cfg.timeouts, field) && (!Number.isFinite(delay) || delay <= 0 || delay > 2147483647)) {
+          throw new Error(`timeouts.${field} must be a positive number of milliseconds no greater than 2147483647.`);
+        }
+      }
+    }
     return cfg;
   }
 
@@ -72,7 +83,7 @@ export class ConfigManager {
 
     // @TODO Validate need for local torage, it creates issues. 4. Save the merged config back to localStorage for persistence.
 
-    return this.config;
+    return this.validateCustomerConfig(this.config);
   }
 
   loadFromUrl () {

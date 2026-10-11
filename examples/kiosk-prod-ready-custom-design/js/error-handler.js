@@ -6,7 +6,7 @@
  * @property {string} type
  * @property {string} userMessage
  * @property {boolean} shouldRetry
- * @property {number} [retryDelay]
+ * @property {number} [retryDelay] - Automatic reload delay; omit for manual Retry.
  */
 
 /**
@@ -50,9 +50,8 @@ export const ErrorTypes = {
     code: "INTERNAL_ERROR",
     type: "Service Error",
     userMessage:
-      "A service error occurred. The page will automatically refresh.",
+      "A service error occurred. Select Retry to restart the kiosk.",
     shouldRetry: true,
-    retryDelay: 5000,
   },
   CALL_TIMEOUT: {
     code: "CALL_TIMEOUT",
@@ -98,12 +97,12 @@ export class ErrorHandler {
       this.handleError(ErrorTypes.INTERNAL_ERROR);
 
     window.addEventListener("unhandledrejection", (event) => {
+      // Awaited client operations handle failures; background rejections must not interrupt calls.
       this.logError("Unhandled Promise Rejection", event.reason);
-      this.handleError(ErrorTypes.INTERNAL_ERROR, event.reason);
     });
 
     window.addEventListener("online", () => {
-      this.hideError();
+      if (document.getElementById("errorModal")?.dataset.errorCode === ErrorTypes.NETWORK_ERROR.code) this.hideError();
       this.showToast("Connection restored", "success");
       document.dispatchEvent(this.networkRestoreEvent);
     });
@@ -176,6 +175,9 @@ export class ErrorHandler {
   showError(errorType) {
     const modal = document.getElementById("errorModal");
     if (!modal) return;
+    if (errorType.code === ErrorTypes.NETWORK_ERROR.code && modal.style.display === 'block' &&
+      modal.dataset.errorCode !== ErrorTypes.NETWORK_ERROR.code) return;
+    modal.dataset.errorCode = errorType.code;
 
     const sanitizedMessage = this.sanitizeHTML(errorType.userMessage);
     const sanitizedType = this.sanitizeHTML(errorType.type);
@@ -266,11 +268,12 @@ export class ErrorHandler {
   }
 
   /**
-   * Schedules a retry for the given error type.
+   * Schedules automatic retry only when the error type specifies a reload delay.
    * @param {ErrorType} errorType
    * @param {string} errorId
    */
   scheduleRetry(errorType, errorId) {
+    if (!errorType.retryDelay) return;
     // Read current attempts from localStorage
     const code = localStorage.getItem(errorType.code);
     const currentAttempts = parseInt(code || "0");

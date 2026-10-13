@@ -116,7 +116,7 @@ export class VideoEngagerClient {
     if (window.VideoEngager?.VideoEngagerCore && window.VideoEngager?.GenesysIntegration) return;
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'https://cdn.videoengager.com/widget/latest/browser/main.umd.js';
+      script.src = 'https://cdn.videoengager.com/widget/v6.2.2/browser/main.umd.js';
       script.async = true;
       const timeout = setTimeout(() => finish(new Error('VideoEngager script load timeout')), 15000);
       const finish = (error) => {

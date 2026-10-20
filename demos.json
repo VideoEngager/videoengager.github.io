@@ -233,6 +233,14 @@
     ]
   },
   {
+    "title": "Core SDK Quick Start — Genesys Cloud",
+    "href": "/examples/core-sdk-genesys-quickstart/index.html?env=production",
+    "desc": "Single-page quick start: start a video call with a Genesys Cloud agent and follow every SDK event in a live log. Configure any tenant and Messenger deployment through the URL.",
+    "category": "Integrations: Genesys",
+    "tags": ["core-sdk", "genesys", "messenger", "pure-socket", "vanilla", "quick-start"],
+    "featured": true
+  },
+  {
     "title": "Standalone Co-browsing",
     "href": "/examples/standaloneCobrowse/index.html",
     "desc": "Independent co-browsing implementation.",

@@ -1,0 +1,241 @@
+<!doctype html>
+<!--
+  VideoEngager Core SDK — Quick Start for Genesys Cloud
+  =====================================================
+  Open the page, click "Start video call", talk to a Genesys Cloud agent, and
+  watch every SDK event appear in the log below the video.
+
+  The <script> at the bottom is the whole integration (steps 1–6). Copy it.
+  config.js / configurator.html only supply the four connection values; your
+  app replaces them with a literal.
+
+  Needs a local web server (not file://): ES-module-free, but Genesys Messenger
+  must see a real origin. From this folder:   python3 -m http.server 8080
+  then open  http://localhost:8080/
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VideoEngager | Core SDK Quick Start</title>
+  <style>
+    body { max-width: 760px; margin: 40px auto; padding: 0 24px; font: 15px/1.5 system-ui, sans-serif; color: #1f2933; }
+    h1 { font-size: 22px; } h2 { font-size: 16px; margin: 28px 0 8px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+    input { padding: 8px 10px; font: inherit; border: 1px solid #c5ccd3; border-radius: 6px; min-width: 240px; }
+    button { padding: 9px 16px; font: inherit; border: 0; border-radius: 6px; background: #1d4ed8; color: #fff; cursor: pointer; }
+    button.secondary { background: #e5e9ee; color: #1f2933; }
+    button:disabled { background: #e5e9ee; color: #8a94a0; cursor: not-allowed; }
+    #status { font-weight: 600; }
+    /* You decide where the call lives and how big it is. */
+    #video-container iframe { display: block; width: 100%; height: min(65vh, 560px); border: 0; border-radius: 10px; }
+    #log { width: 100%; border-collapse: collapse; font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #log td { padding: 3px 8px; border-top: 1px solid #eef1f4; vertical-align: top; }
+    #log td:first-child { color: #8a94a0; white-space: nowrap; }
+    #log td:nth-child(2) { white-space: nowrap; font-weight: 600; }
+    #log tr.out td:nth-child(2) { color: #1d4ed8; }
+    #log td:last-child { color: #52606d; word-break: break-all; }
+    small { color: #52606d; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0 14px; margin-bottom: 20px; border-bottom: 1px solid #e3e8ee; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: #1f2933; text-decoration: none; font-weight: 700; font-size: 17px; }
+    .brand img { width: 36px; height: 36px; border-radius: 8px; }
+    .brand small { display: block; margin-top: 2px; color: #52606d; font-size: 11px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; }
+    nav a { margin-left: 16px; color: #1d4ed8; text-decoration: none; font-size: 14px; } nav a:hover { text-decoration: underline; }
+    .config-line { margin: -6px 0 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="../../"><img src="videoengager-logo.png" alt=""><span>VideoEngager<small>Core SDK Quick Start</small></span></a>
+    <nav><a href="../../">Examples</a><a id="nav-configure" href="configurator.html">Configure</a><a href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/core-sdk-genesys-quickstart" target="_blank" rel="noopener">Sources</a></nav>
+  </header>
+  <h1>Core SDK Quick Start — video call with a Genesys Cloud agent</h1>
+  <p><small>Configure → Start → an agent accepts in Genesys Cloud → video. Every SDK event is logged below; in Messenger mode, refresh during a call to see the session restore. The integration is the numbered script at the bottom of this file.</small></p>
+
+  <p class="config-line"><small>Connection: <code id="config-summary"></code> · <a id="config-change" href="configurator.html">change</a> · defaults in <code>config.js</code></small></p>
+
+  <div class="row">
+    <input id="reference" placeholder="Reference sent to the agent (optional)" value="order-12345">
+    <button id="start" disabled>Start video call</button>
+    <button id="end" class="secondary" disabled>End call</button>
+  </div>
+  <p id="status">Loading…</p>
+
+  <div id="video-container" hidden></div>
+
+  <h2>Event log <small>— SDK events, and in blue the calls this page makes</small></h2>
+  <table id="log"><tbody></tbody></table>
+
+  <!-- The SDK. Pinned version: never use /latest/ in an integration. -->
+  <script src="https://cdn.videoengager.com/widget/v6.2.2/browser/main.umd.js"></script>
+  <!-- Demo settings: presets, URL parameters, validation → window.DEMO_CONFIG. Not part of the integration. -->
+  <script src="config.js"></script>
+
+  <script>
+  // ───────────────────────────── CONFIG ─────────────────────────────────────
+  // config.js builds this from the page URL (or its defaults) and validates it.
+  // In your own app it is a plain literal with your four values:
+  //   { videoEngager: { veEnv, tenantId, enableVeIframeCommands: true, veHttps: true },
+  //     genesys:      { domain, deploymentId, enableVideoEngagerRestoringSession: true },
+  //     genesysIntegration: 'messenger' | 'pure-socket', hideMessengerUi: true }
+  const CONFIG = window.DEMO_CONFIG;
+
+  // ───────────────────────────── page plumbing (not SDK) ────────────────────
+  const $ = (id) => document.getElementById(id);
+  const say = (t) => { $('status').textContent = t; };
+  const log = (event, payload, outbound = false) => {
+    const tr = document.createElement('tr');
+    if (outbound) tr.className = 'out';
+    const time = new Date().toLocaleTimeString(undefined, { hour12: false }) + '.' + String(Date.now() % 1000).padStart(3, '0');
+    let text = ''; try { text = payload === undefined ? '' : JSON.stringify(payload); } catch { text = String(payload); }
+    tr.innerHTML = `<td>${time}</td><td></td><td></td>`;
+    tr.children[1].textContent = event;
+    const cell = tr.children[2];
+    if (text.length > 300) {                                       // long payloads: click the row to expand / collapse
+      cell.textContent = text.slice(0, 300) + '…';
+      tr.title = 'Click to expand'; tr.style.cursor = 'pointer';
+      tr.onclick = () => { const full = cell.dataset.full === '1'; cell.textContent = full ? text.slice(0, 300) + '…' : text; cell.dataset.full = full ? '' : '1'; cell.style.whiteSpace = full ? '' : 'pre-wrap'; };
+      cell.dataset.text = '';
+    } else cell.textContent = text;
+    $('log').tBodies[0].prepend(tr);
+  };
+  if (location.protocol === 'file:') { say('Open this page through a local web server (e.g. python3 -m http.server 8080 → http://localhost:8080/), not from file://.'); throw new Error('file:// not supported'); }
+  if (!window.VideoEngager) { say('The SDK script did not load — check the network tab for main.umd.js.'); throw new Error('SDK missing'); }
+  // Links back to the configurator carry the current settings, so editing starts from them.
+  for (const id of ['config-change', 'nav-configure']) $(id).href = 'configurator.html' + location.search;
+  if (window.DEMO_CONFIG_ERROR) {
+    say(window.DEMO_CONFIG_ERROR === 'Not configured.' ? 'Not configured. Open the configurator to enter your tenant and Messenger deployment.' : 'Configuration error: ' + window.DEMO_CONFIG_ERROR + ' Open the configurator to correct it.');
+    throw new Error(window.DEMO_CONFIG_ERROR);
+  }
+  $('config-summary').textContent = `${(window.DemoConfig.veHosts.find((h) => h.value === CONFIG.videoEngager.veEnv) || { label: CONFIG.videoEngager.veEnv }).label} · tenant ${CONFIG.videoEngager.tenantId} · ${CONFIG.genesys.domain} · ${CONFIG.genesys.deploymentId} · ${CONFIG.genesysIntegration}`;
+  if (CONFIG.genesysIntegration === 'messenger' && CONFIG.hideMessengerUi) {
+    // Hide Messenger's own UI with CSS only. Messenger must keep running: it owns the
+    // Genesys conversation the video is bound to. Never fight it with timers or observers.
+    document.head.insertAdjacentHTML('beforeend', '<style>#genesys-messenger,#genesys-mxg-container-frame,#genesys-mxg-frame{display:none !important}</style>');
+  }
+
+  // ───────────────────────────── THE INTEGRATION ────────────────────────────
+  (async () => {
+    const { VideoEngagerCore, GenesysIntegration, GenesysIntegrationPureSocket } = window.VideoEngager;
+
+    // 1. Construct. Nothing loads yet. Do this ONCE per page — Genesys Messenger
+    //    can be loaded only once per document. Both Genesys classes take the same
+    //    { domain, deploymentId }; everything after this line is identical.
+    const core = new VideoEngagerCore(CONFIG.videoEngager);
+    const genesys = CONFIG.genesysIntegration === 'pure-socket'
+      ? new GenesysIntegrationPureSocket(CONFIG.genesys)
+      : new GenesysIntegration(CONFIG.genesys);
+
+    // 2. Your page owns the video iframe; the SDK tells you when to create / show /
+    //    hide / destroy it. Must be set before step 4. The `allow` list is mandatory,
+    //    or the browser never asks for camera and microphone.
+    const container = $('video-container');
+    core.setUiCallbacks({
+      createIframe (src) {
+        const iframe = document.createElement('iframe');
+        iframe.allow = 'camera; microphone; autoplay; encrypted-media; fullscreen; picture-in-picture; display-capture';
+        iframe.src = src;
+        container.replaceChildren(iframe);
+        container.hidden = false;
+      },
+      getIframeInstance: () => container.querySelector('iframe'),
+      setIframeVisibility (visible) { container.hidden = !visible; },
+      destroyIframe () { container.replaceChildren(); container.hidden = true; }
+    });
+
+    // 3. Subscribe. Must happen before step 4 (restore events fire inside it).
+    //    core.on() returns an unsubscribe function. '*' receives every event — this
+    //    page logs them all; your app listens to the few it needs:
+    core.on('*', log);
+    core.on('integration:sessionStarted', () => say('Genesys conversation open — waiting for an agent…'));
+    core.on('videoEngager:CallStarted', () => say('Agent joined. Call in progress.'));   // ← "connected"
+    core.on('videoEngager:call-state-changed', (s) => { if (s === 'ended') say('Call ended.'); });
+    core.on('videoEngager:active-ve-instance', async (open) => {                 // false = video window gone
+      if (open || unloading) return;                                             // (on a refresh the iframe reports closed first — not a hang-up)
+      say('Video closed. You can start another call.');
+      $('start').disabled = false; $('end').disabled = true;
+      // The SDK leaves the Genesys conversation open after the video (chat may continue
+      // elsewhere). This page has no chat, so end it — unless the End button already is.
+      if (!endingFromPage && core.contactCenterInActiveInteraction) {
+        log('→ endContactCenterInteraction', { stopVideoIfBound: false }, true);
+        await core.endContactCenterInteraction(false).catch((e) => log('(note)', 'conversation not ended: ' + (e?.message || e)));
+      }
+    });
+    core.on('integration:sessionEnded', () => log('(note)', 'Genesys conversation closed'));
+    core.on('error:catchAll', (e) => say('SDK error: ' + (e?.message || e)));
+    let endingFromPage = false, unloading = false;
+    const onUnload = () => { unloading = true; };                                // the page is going away; see README "Refresh and tab close"
+    window.addEventListener('pagehide', onUnload);
+    window.addEventListener('beforeunload', onUnload);
+
+    // 4. Load Genesys Messenger and restore a conversation left by a refresh.
+    //    Rejects if the deployment is misconfigured (wrong region/ID, origin not
+    //    in allowed domains, Messenger disabled) — the message says which.
+    try {
+      await core.setContactCenterIntegration(genesys);
+    } catch (e) {
+      say('Could not initialise: ' + (e?.message || e)); return;
+    }
+
+    // 5. Refresh handling ('messenger' mode). restoredSession is false, or
+    //    { veInteractionID } where the ID is null when no video was bound.
+    //    In 'pure-socket' mode restoredSession is undefined: no restore, straight to Ready.
+    const restored = genesys.restoredSession;
+    try {
+      if (restored && restored.veInteractionID) {
+        say('Re-attaching to your call…');
+        const payload = { bindToOrStartContactCenterInteraction: true, callConfigs: { interactionId: restored.veInteractionID, isPopup: false } };
+        log('→ startVideoEngagerInteraction', payload, true);
+        await core.startVideoEngagerInteraction(payload);
+        $('end').disabled = false;
+      } else {
+        if (restored) { log('→ endVideoEngagerInteraction', { endInteractionInContactCenter: true }, true); await core.endVideoEngagerInteraction(true); }   // conversation without video → close it, start clean
+        $('start').disabled = false;
+        say('Ready.');
+      }
+    } catch (e) {
+      say('Could not resume the previous session: ' + (e?.message || e) + '. You can start a new call.');
+      $('start').disabled = false;
+    }
+
+    // 6. Start on user action. Resolves when the iframe is loaded and the visitor
+    //    is in the queue — NOT when the agent joins (that is 'videoEngager:CallStarted').
+    $('start').onclick = async () => {
+      $('start').disabled = true;
+      try {
+        if (core.contactCenterInActiveInteraction) {                                   // safety net: a conversation the close handler could not end
+          log('→ endVideoEngagerInteraction', { endInteractionInContactCenter: true }, true);
+          await core.endVideoEngagerInteraction(true);
+        }
+        const payload = {
+          bindToOrStartContactCenterInteraction: true,     // start a Genesys conversation and bind the video to it
+          callConfigs: { isPopup: false },                 // iframe (via the callbacks above); true = popup window
+          customAttributes: {                              // → Genesys participant data: routing, agent script, reporting
+            reference: $('reference').value,
+            source: 'core-sdk-quickstart'
+          }
+        };
+        log('→ startVideoEngagerInteraction', payload, true);
+        await core.startVideoEngagerInteraction(payload);
+        say('Connecting…');                                // in the queue; cancel is possible from here on
+        $('end').disabled = false;
+      } catch (e) {
+        say('Could not start: ' + (e?.message || e));
+        $('start').disabled = false;
+      }
+    };
+
+    // Ending from your side: video and Genesys conversation together.
+    $('end').onclick = async () => {
+      $('end').disabled = true; endingFromPage = true;
+      log('→ endVideoEngagerInteraction', { endInteractionInContactCenter: true }, true);
+      try { await core.endVideoEngagerInteraction(true); }
+      catch (e) { say('Could not end the call cleanly: ' + (e?.message || e)); $('end').disabled = false; }
+      finally { endingFromPage = false; }
+    };
+
+    window.ve = { core, genesys };   // poke at it in the console: ve.core.isCallOngoing, ve.core.contactCenterInActiveInteraction
+  })();
+  </script>
+</body>
+</html>

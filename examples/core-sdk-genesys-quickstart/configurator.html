@@ -1,0 +1,93 @@
+<!doctype html>
+<!--
+  configurator.html — enter connection settings and open index.html with them in its URL.
+  Nothing is stored; the URL is the configuration and can be shared as-is.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VideoEngager | Core SDK Quick Start — Configuration</title>
+  <style>
+    body { max-width: 640px; margin: 40px auto; padding: 0 24px; font: 15px/1.5 system-ui, sans-serif; color: #1f2933; }
+    h1 { font-size: 22px; }
+    label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #52606d; margin: 10px 0; }
+    label.check { flex-direction: row; align-items: center; }
+    input, select { padding: 8px 10px; font: inherit; border: 1px solid #c5ccd3; border-radius: 6px; }
+    button { padding: 9px 16px; font: inherit; border: 0; border-radius: 6px; background: #1d4ed8; color: #fff; cursor: pointer; }
+    button.secondary { background: #e5e9ee; color: #1f2933; }
+    .row { display: flex; gap: 10px; align-items: center; margin: 16px 0; }
+    #error { color: #b42318; } small { color: #52606d; }
+    pre { padding: 12px; background: #f1f4f2; border-radius: 6px; font-size: 12.5px; overflow: auto; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0 14px; margin-bottom: 20px; border-bottom: 1px solid #e3e8ee; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: #1f2933; text-decoration: none; font-weight: 700; font-size: 17px; }
+    .brand img { width: 36px; height: 36px; border-radius: 8px; }
+    .brand small { display: block; margin-top: 2px; color: #52606d; font-size: 11px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; }
+    nav a { margin-left: 16px; color: #1d4ed8; text-decoration: none; font-size: 14px; } nav a:hover { text-decoration: underline; }
+  </style>
+  <script src="https://cdn.videoengager.com/widget/v6.2.2/browser/main.umd.js"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <a class="brand" href="../../"><img src="videoengager-logo.png" alt=""><span>VideoEngager<small>Core SDK Quick Start</small></span></a>
+    <nav><a href="../../">Examples</a><a id="nav-example" href="index.html">Quick start</a><a href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/core-sdk-genesys-quickstart" target="_blank" rel="noopener">Sources</a></nav>
+  </header>
+  <h1>Configuration</h1>
+  <p><small>Enter your VideoEngager tenant and Genesys Messenger deployment. <strong>Open quick start</strong> loads the page with these values in its URL; <strong>Copy link</strong> copies that URL to share or bookmark; <strong>Copy SDK config</strong> copies the configuration literal for your application.</small></p>
+  <form id="form">
+    <label>VideoEngager host
+      <select name="veHost"></select>
+      <input name="veEnv" placeholder="your.videoengager.host" hidden>
+    </label>
+    <label>VideoEngager tenant ID <small>Genesys Cloud → SmartVideo Settings → SmartVideo</small><input name="tenantId" required></label>
+    <label>Genesys region host <small>from the loaded SDK's region list</small><select name="domain" required></select></label>
+    <label>Messenger deployment ID <small>Admin → Message → Messenger Deployments; its allowed domains must include the example's origin</small><input name="deploymentId" required placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></label>
+    <label>Integration
+      <select name="mode"><option value="messenger">Genesys Messenger — loads Messenger, restore on refresh (deployment auto-start OFF)</option><option value="pure-socket">Pure WebSocket — no Messenger script, no restore (deployment auto-start ON)</option></select>
+    </label>
+    <label class="check"><input type="checkbox" name="hideMessengerUi"> Hide Messenger's own UI (Messenger mode)</label>
+    <label class="check"><input type="checkbox" name="debug"> Verbose SDK logs in the console</label>
+    <p id="error" role="alert" hidden></p>
+    <div class="row"><button type="submit">Open quick start</button><button type="button" id="copy" class="secondary">Copy link</button><button type="button" id="copy-config" class="secondary">Copy SDK config</button><span id="status"></span></div>
+    <pre id="sdk-config" hidden></pre>
+    <p><small>Public values only. Never enter a PAK, an OAuth secret or a token.</small></p>
+  </form>
+  <script>
+  (function () {
+    const C = window.DemoConfig, form = document.getElementById('form'), f = form.elements;
+    const err = document.getElementById('error'), status = document.getElementById('status'), out = document.getElementById('sdk-config');
+    const show = (m) => { err.textContent = m || ''; err.hidden = !m; };
+    for (const h of C.veHosts) f.veHost.add(new Option(`${h.label} — ${h.value}`, h.value));
+    f.veHost.add(new Option('Other host…', 'other'));
+    for (const d of C.genesysDomains) f.domain.add(new Option(d, d));
+
+    // Host select ↔ free-text host. Known host: select it; unknown: 'Other' + text box.
+    const setHost = (host) => {
+      const known = C.veHosts.some((h) => h.value === host);
+      f.veHost.value = known ? host : 'other';
+      f.veEnv.hidden = known; f.veEnv.value = host;
+    };
+    const host = () => (f.veHost.value === 'other' ? f.veEnv.value.trim() : f.veHost.value);
+    f.veHost.onchange = () => { f.veEnv.hidden = f.veHost.value !== 'other'; if (f.veHost.value === 'other') { f.veEnv.value = ''; f.veEnv.focus(); } };
+
+    // Start from the settings in the URL (editing an existing link) or from the initial hosts with empty IDs.
+    const current = window.DEMO_SETTINGS || { ...C.initial, tenantId: '', deploymentId: '' };
+    if (current.domain && !C.genesysDomains.includes(current.domain)) f.domain.add(new Option(current.domain, current.domain));
+    setHost(current.veEnv); f.tenantId.value = current.tenantId; f.domain.value = current.domain; f.deploymentId.value = current.deploymentId;
+    f.mode.value = current.mode; f.hideMessengerUi.checked = current.hideMessengerUi; f.debug.checked = current.debug;
+    document.getElementById('nav-example').href = 'index.html' + location.search;   // back to the quick start as configured
+    if (window.DEMO_CONFIG_ERROR && location.search) show(window.DEMO_CONFIG_ERROR);
+
+    const settings = () => C.validate({ veEnv: host(), tenantId: f.tenantId.value.trim(), domain: f.domain.value, deploymentId: f.deploymentId.value.trim(), mode: f.mode.value, hideMessengerUi: f.hideMessengerUi.checked, debug: f.debug.checked });
+    const url = () => { const u = new URL('index.html', location.href); u.search = C.toSearch(settings()); return u.href; };
+    const copy = async (text, done) => { show(); status.textContent = ''; try { await navigator.clipboard.writeText(text); status.textContent = done; } catch (x) { show(x.message); } };
+    form.onsubmit = (e) => { e.preventDefault(); show(); try { location.assign(url()); } catch (x) { show(x.message); } };
+    document.getElementById('copy').onclick = () => { try { copy(url(), 'Link copied.'); } catch (x) { show(x.message); } };
+    document.getElementById('copy-config').onclick = () => {
+      try { const text = C.toSdkLiteral(settings()); out.textContent = text; out.hidden = false; copy(text, 'SDK config copied — paste it as CONFIG in your application.'); } catch (x) { show(x.message); }
+    };
+  }());
+  </script>
+</body>
+</html>

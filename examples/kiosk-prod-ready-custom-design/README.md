@@ -2,16 +2,17 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-A comprehensive, self-service kiosk application demonstrating VideoEngager's video calling capabilities integrated with Genesys Cloud. Built with vanilla JavaScript ES modules, this example provides enterprise-grade patterns for error handling, multi-environment support, and waitroom management.
+A comprehensive, self-service kiosk application demonstrating VideoEngager Core SDK video calling integrated with Genesys Cloud. Built with vanilla JavaScript ES modules, this example provides patterns for error handling, multi-environment support, and waitroom management.
 
 ---
 
 ## Features
 
 - **Zero-dependency** vanilla JavaScript implementation with ES modules
-- **Multi-environment support** (development, staging, production) with automatic detection
+- **Configuration overrides** through external JSON and URL parameters
 - **Comprehensive error handling** with categorized error types and retry mechanisms
 - **Custom waitroom experience** with carousel slides and bot messaging
+- **Optional OIDC sign-in** with PKCE for an authenticated Genesys Messenger deployment
 - **Internationalization** support (English, German, Arabic)
 - **Timeout management** for calls, inactivity, and system operations
 - **Security-focused** architecture with input sanitization and XSS protection
@@ -44,7 +45,9 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
 
 ```
 ├── js/
-│   ├── client.js                    # VideoEngager SDK integration
+│   ├── client.js                    # Core SDK adapter with existing kiosk methods/events
+│   ├── auth.js                      # Optional OIDC sign-in and callback recovery
+│   ├── config-manager.js            # Default, JSON and URL configuration
 │   ├── kiosk.js                     # Main application orchestrator
 │   ├── error-handler.js             # Comprehensive error management
 │   ├── timeout-manager.js           # Centralized timeout handling
@@ -80,7 +83,7 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
    ```bash
    # From VideoEngager examples repository
    git clone https://github.com/VideoEngager/videoengager.github.io
-   cd videoengager.github.io/examples/kiosk-production-ready
+   cd videoengager.github.io/examples/kiosk-prod-ready-custom-design
    ```
 
 2. **Configure your credentials:**
@@ -91,7 +94,6 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
        videoEngager: {
          tenantId: 'your-tenant-id',
          veEnv: 'your-environment.videoengager.com',
-         deploymentId: 'your-deployment-id',
        },
        genesys: {
          deploymentId: 'your-genesys-deployment-id',
@@ -114,22 +116,17 @@ A comprehensive, self-service kiosk application demonstrating VideoEngager's vid
    ```
 
 4. **Access the demo:**
-   Open `http://localhost:8080` in your browser
+   Open `http://localhost:8080/index.html` in your browser
 
 ---
 
 ## Configuration
 
-### Environment Detection
+### Configuration Sources
 
-The application automatically detects environments based on:
+The kiosk starts with `configs.production` from `config/conf.js`, then applies external JSON from `?config=...` and individual URL overrides. To connect to another environment, use `veEnv`, `veTenantId`, `genesysDomain` and `genesysDeploymentId` URL parameters, or the corresponding nested `videoEngager` and `genesys` fields in external JSON. The kiosk entry point does not use `env` or hostname-based environment detection.
 
-| Pattern | Environment | Description |
-|---------|-------------|-------------|
-| `?env=dev\|staging\|production` | URL Parameter | Explicit environment override |
-| `localhost`, `127.0.0.1`, `dev.*` | Development | Local development patterns |
-| `staging.*` | Staging | Staging environment patterns |
-| Everything else | Production | Default production environment |
+Optional `timeouts.call`, `timeouts.inactivity` and `timeouts.retry` values must be finite positive numbers in milliseconds, no greater than 2147483647.
 
 ### Configuration Structure
 
@@ -140,7 +137,6 @@ const configs = {
     videoEngager: {
       tenantId: "test_tenant",
       veEnv: "dev.videoengager.com",
-      deploymentId: "test_deployment",
       veHttps: true,
       isPopup: false,
     },
@@ -154,6 +150,35 @@ const configs = {
   // staging, production configurations...
 };
 ```
+
+### Optional Authentication
+
+Authentication is disabled by default. Add an `auth` section to `configs.production` in `config/conf.js`, or to a complete external JSON configuration loaded with `?config=...`:
+
+```javascript
+auth: {
+  enabled: false, // Set true after configuring the deployment and identity provider.
+  mode: 'perInteraction', // 'shared' reuses one kiosk account.
+  authorizationEndpoint: 'https://your-identity-provider.example/authorize',
+  clientId: 'your-public-oidc-client-id',
+  scopes: ['openid', 'profile', 'email']
+}
+```
+
+Set `genesys.deploymentId` to your **authenticated Messenger deployment** and configure its identity provider connection. Enabling `auth` does not change the deployment ID. Use a public OIDC client with Authorization Code + PKCE; never add a client secret or access token to client configuration or URLs.
+
+The deployment must enable Messenger, Conversations, Markdown/Rich Text and conversation clear. Configure conversation disconnect in **ReadOnly** mode and disable `allowSessionUpgrade` for authenticated Messenger.
+
+The same settings can be overridden with `auth`, `authMode`, `authorizationEndpoint`, `clientId` and `scopes` URL parameters. Use `auth=true` or `auth=false`; `authMode` accepts `perInteraction` or `shared`; scopes are space-separated, for example `scopes=openid%20profile%20email`.
+
+Register the exact deployed `index.html` URL as the redirect URI, with no query string or fragment. For example: `https://videoengager.github.io/examples/kiosk-prod-ready-custom-design/index.html` or `http://localhost:8080/index.html` for the local setup above. Use HTTPS or localhost.
+
+Sign-in starts when the visitor presses **Start**. A valid callback restores the resolved configuration, including external or blob JSON configuration, and automatically resumes that request. Invalid, denied or expired callbacks block startup; reopen the original configured kiosk URL to retry.
+
+- **`perInteraction`**: requires a fresh visitor login, logs out of Messenger after the interaction and reloads the kiosk. Blob preview settings survive this reload; the next visitor signs in again.
+- **`shared`**: reuses the Messenger identity for later interactions on the kiosk.
+
+Messenger logout does not guarantee global logout from your identity provider's SSO session. Configure the identity provider's sign-in and session policy for your kiosk use case.
 
 ### Waitroom Customization
 
@@ -208,17 +233,17 @@ Main application orchestrator that manages:
 
 ```javascript
 // Usage example
-const kiosk = new KioskApplication();
-// Automatically initializes on DOM ready
+// After DOMContentLoaded, use the instance created by kiosk.js
+const kiosk = window.kioskApp;
 ```
 
 ### VideoEngagerClient (`js/client.js`)
 
-Secure wrapper around the VideoEngager SDK:
-- Dynamic script loading with integrity checks
-- Promise-based API wrapper
-- Event handling and error management
-- Configuration proxy setup
+Adapter around `VideoEngagerCore` and `GenesysIntegration`:
+- Automatically loads `https://cdn.videoengager.com/widget/latest/browser/main.umd.js`
+- Preserves the kiosk's existing public client methods and event names
+- Initializes authenticated Messenger on Start and waits for readiness before starting the interaction
+- Lets the SDK load Genesys dependencies; no additional Genesys script tags are needed
 
 ```javascript
 // Usage example
@@ -245,7 +270,7 @@ Custom web component providing:
 
 Comprehensive error management system:
 - Categorized error types with user-friendly messages
-- Automatic retry logic with exponential backoff
+- Manual Retry for interaction errors; automatic retry for initial SDK loading failures
 - Modal display system
 - Logging and monitoring integration
 
@@ -361,25 +386,14 @@ The application implements a comprehensive error handling strategy:
 | `NETWORK_ERROR` | Check internet connection | No | Connection issues |
 | `CONFIG_INVALID` | Contact support | No | Configuration problems |
 | `LIBRARY_LOAD_FAILED` | Refresh the page | Yes (5s) | CDN/script loading |
-| `CALL_TIMEOUT` | Try again | Yes | Agent connection timeout |
-| `INTERNAL_ERROR` | Service error occurred | Yes (5s) | General errors |
+| `CALL_TIMEOUT` | Try again | Manual Retry | Agent connection timeout |
+| `INTERNAL_ERROR` | Service error occurred | Manual Retry | General errors |
 
 ### Retry Logic
 
-```javascript
-// Automatic retry with exponential backoff
-scheduleRetry(errorType, errorId) {
-  const currentAttempts = parseInt(localStorage.getItem(errorType.code) || "0");
-  
-  if (currentAttempts >= this.maxRetryAttempts) {
-    this.showToast("Maximum retry attempts reached", "error");
-    return;
-  }
-  
-  localStorage.setItem(errorType.code, String(currentAttempts + 1));
-  setTimeout(() => window.location.reload(), errorType.retryDelay);
-}
-```
+SDK loading failures retry after five seconds, up to three attempts. Interaction errors and call timeouts show a **Retry** button without scheduling a page reload. Unexpected background promise rejections are logged; failures reported by awaited client operations still show the appropriate error.
+
+The inactivity timer refreshes only an idle kiosk. It cannot refresh while an interaction is starting, waiting, active or ending.
 
 ---
 
@@ -440,21 +454,9 @@ scheduleRetry(errorType, errorId) {
 - **Backup & Recovery**: Implement appropriate backup strategies
 - **Performance Optimization**: Configure caching and CDN as needed
 
-### Sample Environment Configuration
+### Deployment Configuration
 
-For production deployments, configure via environment variables:
-
-```html
-<script>
-  window.ENV_CONFIG = {
-    VE_TENANT_ID: 'your-tenant-id',
-    VE_ENV: 'your-environment.videoengager.com', 
-    VE_DEPLOYMENT_ID: 'your-deployment-id',
-    GENESYS_DEPLOYMENT_ID: 'your-genesys-deployment',
-    GENESYS_DOMAIN: 'your-genesys-domain.com'
-  };
-</script>
-```
+Set the production defaults in `config/conf.js`, or supply an external JSON configuration through the `config` URL parameter. See [Configuration Sources](#configuration-sources) for the supported overrides.
 
 ---
 
@@ -464,7 +466,7 @@ For production deployments, configure via environment variables:
 
 **"Configuration validation failed"**
 - Verify all required fields in your configuration
-- Check that environment variables are properly set
+- Check the production defaults, external JSON configuration, and URL parameters
 - Ensure no undefined values in production config
 
 **"Failed to load VideoEngager script"**
@@ -487,13 +489,10 @@ For production deployments, configure via environment variables:
 Enable detailed logging:
 ```
 # URL parameter
-?env=dev
+?debug=true
 
 # Or modify configuration
-monitoring: {
-  enabled: true,
-  level: "debug"
-}
+debug: true
 ```
 
 ### Performance Debugging
@@ -513,6 +512,29 @@ console.log(window.kioskApp.currentScreen);
 ---
 
 ## Development
+
+Run the configuration, reload and lifecycle regression checks from the repository root:
+
+```bash
+node examples/kiosk-prod-ready-custom-design/check-config.cjs
+node examples/kiosk-prod-ready-custom-design/check-reload.cjs
+node examples/kiosk-prod-ready-custom-design/check-lifecycle.cjs
+```
+
+These checks use simulated SDK/browser state and timers and do not place live calls.
+
+### Syntax Check
+
+From the repository root, run:
+
+```bash
+node --check examples/kiosk-prod-ready-custom-design/js/client.js
+node --check examples/kiosk-prod-ready-custom-design/js/auth.js
+node --check examples/kiosk-prod-ready-custom-design/js/config-manager.js
+node --check examples/kiosk-prod-ready-custom-design/js/kiosk.js
+```
+
+These commands check JavaScript syntax only. Validate your Genesys deployment, identity provider login and video calls separately.
 
 ### Adding New Features
 
@@ -552,16 +574,13 @@ try {
 ### KioskApplication
 
 ```javascript
+// After DOMContentLoaded, the page has created this instance and started initialization
+const kioskApp = window.kioskApp
+
 // Public methods
-await kioskApp.init()                    // Initialize application
 kioskApp.showScreen('initial')           // Switch screens
 kioskApp.log('message')                  // Application logging
 kioskApp.destroy()                       // Cleanup resources
-
-// Event handling
-kioskApp.on('client:ready', callback)    // Client ready event
-kioskApp.on('video:started', callback)   // Video call started
-kioskApp.on('video:ended', callback)     // Video call ended
 ```
 
 ### VideoEngagerClient
@@ -569,6 +588,9 @@ kioskApp.on('video:ended', callback)     // Video call ended
 ```javascript
 // Client lifecycle
 const client = new VideoEngagerClient(config)
+client.on('client:ready', callback)       // Client initialized
+client.on('video:started', callback)      // Video startup completed
+client.on('video:ended', callback)        // Video cleanup completed
 await client.init()                      // Initialize client
 client.isReady()                         // Check ready state
 
@@ -592,7 +614,7 @@ mediator.on('error', callback)           // Error occured
 
 // Control methods
 mediator.sendBotMessage(message, tier)   // Display bot message
-mediator.controlCarousel('play|pause')   // Control playback
+mediator.controlCarousel('pause')       // Use 'play' to resume
 mediator.goToSlide(index)                // Navigate to slide
 ```
 

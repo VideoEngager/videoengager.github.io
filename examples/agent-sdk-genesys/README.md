@@ -260,8 +260,10 @@ This folder is a working reference of the same integration, using a floating win
 
 | File | Contents |
 |---|---|
-| `index.html` | Config form, status, event log and the floating video window (`#video-engager-container`) |
-| `script.mjs` | The SDK integration, equivalent to `videoengager.js` above |
+| `index.html` | Config form, status badge, event log and the floating SmartVideo window (`#video-engager-container`) |
+| `script.mjs` | Entry point — reads the form, calls `connect()`, handles connect/error UI |
+| `ve.mjs` | VideoEngager SDK layer — `VE.init()`, `VE.call()`, SDK event listeners and `uiHandlers` |
+| `ui.mjs` | UI layer — DOM refs, status indicator, event log, draggable floating window, Genesys panel, URL sharing |
 
 ```bash
 cd examples/agent-sdk-genesys
@@ -269,6 +271,8 @@ npx http-server . -p 8080        # or: python3 -m http.server 8080
 ```
 
 Open <http://localhost:8080/>, choose the VideoEngager environment, enter your Genesys region (for example `mypurecloud.com`) and click **Connect**.
+
+> **SDK version:** the demo imports `videoengager-agent-sdk@6.0.2` from the CDN. If you upgrade, update the version pin in `ve.mjs` line 7 and verify the API surface matches the examples in this README.
 
 ---
 

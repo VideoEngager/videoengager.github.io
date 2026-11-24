@@ -42,7 +42,7 @@ Without parameters the page reports *Not configured* and links to the configurat
 | VideoEngager tenant ID (`tenantId`) | Genesys Cloud → SmartVideo Settings → SmartVideo |
 | Genesys region host (`domain`) | the list is read from the loaded SDK; e.g. `mypurecloud.de`, `mypurecloud.ie`, `mypurecloud.com` |
 | Messenger deployment ID (`deploymentId`) | Genesys Cloud → Admin → Message → Messenger Deployments. Its **allowed domains** must include this page's origin. |
-| Integration (`mode`) | `messenger` — Genesys' Messenger script is loaded (UI hidden if selected); refresh-restore available (see *Refresh and tab close*). `pure-socket` — Web Messaging over a WebSocket, no Messenger script, no restore; deployment auto-start **on** (SDK 6.2.2). |
+| Integration (`mode`) | `messenger` — Genesys' Messenger script is loaded (UI hidden if selected); refresh-restore available (see *Refresh and tab close*). `pure-socket` — Web Messaging over a WebSocket, no Messenger script, no restore; deployment auto-start **on** (SDK 6.2.5). |
 
 Only public values go in the URL: a tenant ID and a deployment ID. Never a PAK,
 an OAuth client secret or a token.
@@ -50,7 +50,7 @@ an OAuth client secret or a token.
 Messenger configuration used by the deployment: Messenger and conversations
 on, **Clear Conversation on**, an inbound message flow routing to a queue with
 SmartVideo-enabled agents. *Automatically Start Conversations*: **off** for
-`messenger` mode if you want refresh-restore (SDK 6.2.2 persists the video
+`messenger` mode if you want refresh-restore (SDK 6.2.5 persists the video
 interaction ID in the visitor's first message, which it does not send when the
 conversation was auto-started); **on** for `pure-socket` mode.
 
@@ -131,7 +131,7 @@ the running call and the agent sees the visitor reconnect. The page ignores
 the video window closing while it is unloading — on a refresh the iframe
 reports itself closed first, which is not the visitor ending the call.
 Requires *Automatically Start Conversations* **off** on the deployment in
-SDK 6.2.2 (see *Configuration*). `pure-socket` mode has no restore: each page
+SDK 6.2.5 (see *Configuration*). `pure-socket` mode has no restore: each page
 load is a new session.
 
 On a real close, the conversation ends through Genesys' inactivity timeout or

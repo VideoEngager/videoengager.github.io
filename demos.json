@@ -243,7 +243,7 @@
   {
     "title": "Core SDK Multilingual — Genesys Cloud",
     "href": "/examples/core-sdk-multilingual/index.html?env=production",
-    "desc": "The Core SDK Quick Start with a language picker: the visitor's video UI opens in the chosen language. Languages come from the localization CSV; the locale is passed per call through the SDK's popup URL builder hook.",
+    "desc": "The Core SDK Quick Start with a language picker: the visitor's video UI opens in the chosen language. Languages come from the localization CSV; the language is passed per call as callConfigs.lang (Core SDK 6.2.7).",
     "category": "Integrations: Genesys",
     "tags": ["core-sdk", "genesys", "messenger", "vanilla", "localization", "multilingual"]
   },

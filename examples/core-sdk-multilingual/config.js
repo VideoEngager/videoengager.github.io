@@ -83,7 +83,7 @@
     return {
       videoEngager: { veEnv: s.veEnv, tenantId: s.tenantId, enableVeIframeCommands: true, veHttps: true, debug: s.debug },
       genesys: { domain: s.domain, deploymentId: s.deploymentId, enableVideoEngagerRestoringSession: true, debug: s.debug },
-      genesysIntegration: s.mode,          // 'messenger' (deployment auto-start OFF) | 'pure-socket' (auto-start ON, SDK 6.2.5)
+      genesysIntegration: s.mode,          // 'messenger' (deployment auto-start OFF) | 'pure-socket' (auto-start ON)
       hideMessengerUi: s.hideMessengerUi,  // page behaviour
       locale: s.locale || null             // page behaviour: preselected visitor UI language (null = browser language)
     };

@@ -8,7 +8,7 @@ start; see its [README](../core-sdk-genesys-quickstart/README.md).
 
 | File | Role |
 | --- | --- |
-| `index.html` | The example page. The integration is the numbered script at the bottom; the language part is step 2b and `callConfigs.locale` in steps 5 and 6. |
+| `index.html` | The example page. The integration is the numbered script at the bottom; the language is `callConfigs.lang` in steps 5 and 6. |
 | `locales.js` | The languages offered in the picker → `window.VE_LOCALES`. **Generated** — do not edit. |
 | `build-locales.js` | Regenerates `locales.js` from the master localization CSV. |
 | `config.js` | Page settings from the URL, as in the quick start, plus the optional `locale`. |
@@ -26,31 +26,30 @@ browser language when it is in the list, otherwise **Default language**.
 
 ## How the language reaches the video UI
 
-`VideoEngagerCore` has no locale option (6.2.x). It does let the application
-replace the function that builds the URL of the video page
-(`core.setPreparePopupHtmlUrlFn`). Step 2b registers the SDK's own default
-builder (`defaultPreparePopupHtmlUrl`, identical in 6.2.2–6.2.5) with one
-addition: `locale` in the page's `params`. The video page reads it as its UI
-language.
-
-The language is passed per call as `callConfigs.locale`:
+Core SDK **6.2.7** accepts visitor page options in the call configs. The
+language is `lang`; the SDK writes it into the video page URL (`params.locale`)
+and leaves the URL unchanged when it is not set:
 
 ```js
 await core.startVideoEngagerInteraction({
   bindToOrStartContactCenterInteraction: true,
-  callConfigs: { isPopup: false, locale: 'bg' },   // omit locale for the default
+  callConfigs: { isPopup: false, lang: 'bg' },   // omit lang for the default
   customAttributes: { … }
 });
 ```
 
-The SDK copies every `callConfigs` key into the call configuration it passes to
-the builder, so no other SDK change is needed. The picker's value is kept in
-the page URL, so a refresh re-attaches to the call in the same language.
+The page passes the picker's value on every start and on the re-attach after a
+refresh (step 5). The picker's value is kept in the page URL, so a refresh
+re-attaches in the same language. Two-letter codes work: the video UI matches
+`bg` to its `bg_BG` pack. For a fixed language on every call, set it once
+instead: `new VideoEngagerCore({ …, defaultCallConfigs: { lang: 'bg' } })`.
+See *Visitor Page Options* in the Core SDK README for the other options
+(`precall`, `visitorName`, `fileTransfer`, …).
 
 Language precedence in the video UI:
 
 1. a language set on the **tenant** (it overrides everything below),
-2. `locale` from this page,
+2. `lang` from the call configs (this page's picker),
 3. the browser language,
 4. English.
 

@@ -5,10 +5,9 @@
   The Core SDK Quick Start plus a language picker: the visitor's video UI
   opens in the language chosen before "Start video call".
 
-  The SDK has no locale option (6.2.x). Step 2b replaces the function that
-  builds the video page URL (core.setPreparePopupHtmlUrlFn, a public SDK hook)
-  with the SDK's default builder plus `locale`, taken from callConfigs.locale.
-  The language list is generated from the localization CSV (locales.js).
+  The language is one call option: callConfigs.lang (Core SDK 6.2.7+), which
+  the SDK writes into the video page URL. The language list is generated from
+  the localization CSV (locales.js).
 
   The <script> at the bottom is the whole integration (steps 1–6). Copy it.
   config.js / configurator.html only supply the four connection values; your
@@ -56,7 +55,7 @@
     <nav><a href="../../">Examples</a><a id="nav-configure" href="configurator.html">Configure</a><a href="https://github.com/VideoEngager/videoengager.github.io/tree/master/examples/core-sdk-multilingual" target="_blank" rel="noopener">Sources</a></nav>
   </header>
   <h1>Core SDK Multilingual — video call in the visitor's language</h1>
-  <p><small>Pick a language → Start → an agent accepts in Genesys Cloud → the visitor's video UI is in that language. Every SDK event is logged below. The integration is the numbered script at the bottom of this file; the language part is step 2b and the <code>locale</code> in steps 5 and 6.</small></p>
+  <p><small>Pick a language → Start → an agent accepts in Genesys Cloud → the visitor's video UI is in that language. Every SDK event is logged below. The integration is the numbered script at the bottom of this file; the language is <code>callConfigs.lang</code> in steps 5 and 6.</small></p>
 
   <p class="config-line"><small>Connection: <code id="config-summary"></code> · <a id="config-change" href="configurator.html">change</a> · defaults in <code>config.js</code></small></p>
 
@@ -74,7 +73,7 @@
   <table id="log"><tbody></tbody></table>
 
   <!-- The SDK. Pinned version: never use /latest/ in an integration. -->
-  <script src="https://cdn.videoengager.com/widget/v6.2.5/browser/main.umd.js"></script>
+  <script src="https://cdn.videoengager.com/widget/v6.2.7/browser/main.umd.js"></script>
   <!-- Demo settings: presets, URL parameters, validation → window.DEMO_CONFIG. Not part of the integration. -->
   <!-- Languages from the localization CSV (build-locales.js) → window.VE_LOCALES. -->
   <script src="locales.js"></script>
@@ -119,7 +118,7 @@
   }
   $('config-summary').textContent = `${(window.DemoConfig.veHosts.find((h) => h.value === CONFIG.videoEngager.veEnv) || { label: CONFIG.videoEngager.veEnv }).label} · tenant ${CONFIG.videoEngager.tenantId} · ${CONFIG.genesys.domain} · ${CONFIG.genesys.deploymentId} · ${CONFIG.genesysIntegration}`;
   // Language picker: the CSV's languages. Preselect ?locale=, else the browser language if listed,
-  // else Default (no locale sent: the video page uses the tenant setting, then the browser language).
+  // else Default (no lang sent: the video page uses the tenant setting, then the browser language).
   // The choice is kept in the page URL, so a refresh re-attaches in the same language.
   const picker = $('locale');
   picker.add(new Option('Default language', ''));
@@ -166,21 +165,6 @@
       destroyIframe () { container.replaceChildren(); container.hidden = true; }
     });
 
-    // 2b. Language. VideoEngagerCore has no locale option (6.2.x), but it lets you replace the
-    //     function that builds the video page URL. This is the SDK's default builder
-    //     (defaultPreparePopupHtmlUrl, identical in 6.2.2–6.2.5) plus `locale`, which the
-    //     video page uses as its UI language. The SDK copies any callConfigs key into `call`,
-    //     so the language is passed per call as callConfigs.locale (steps 5 and 6).
-    //     Precedence in the video page: a language set on the tenant > this > browser language.
-    core.setPreparePopupHtmlUrlFn((call, connection) => {
-      const params = {
-        sessionId: call.interactionId, hideChat: true, type: 'initial', defaultGroup: 'floor',
-        view_widget: '4', offline: true, aa: call.autoAccept, skip_private: true, inichat: 'false'
-      };
-      if (call.audioOnly) params.video_on = 'false';
-      if (call.locale) params.locale = call.locale;
-      return `popup.html?tennantId=${encodeURIComponent(btoa(connection.tenantId))}&params=${encodeURIComponent(btoa(JSON.stringify(params)))}`;
-    });
 
     // 3. Subscribe. Must happen before step 4 (restore events fire inside it).
     //    core.on() returns an unsubscribe function. '*' receives every event — this
@@ -223,7 +207,7 @@
     try {
       if (restored && restored.veInteractionID) {
         say('Re-attaching to your call…');
-        const payload = { bindToOrStartContactCenterInteraction: true, callConfigs: { interactionId: restored.veInteractionID, isPopup: false, locale: picker.value || undefined } };
+        const payload = { bindToOrStartContactCenterInteraction: true, callConfigs: { interactionId: restored.veInteractionID, isPopup: false, lang: picker.value || undefined } };
         picker.disabled = true;
         log('→ startVideoEngagerInteraction', payload, true);
         await core.startVideoEngagerInteraction(payload);
@@ -251,7 +235,7 @@
           bindToOrStartContactCenterInteraction: true,     // start a Genesys conversation and bind the video to it
           callConfigs: {
             isPopup: false,                                // iframe (via the callbacks above); true = popup window
-            locale: picker.value || undefined              // visitor UI language (step 2b); omit = default
+            lang: picker.value || undefined                // visitor UI language (SDK 6.2.7+); omit = tenant / browser default
           },
           customAttributes: {                              // → Genesys participant data: routing, agent script, reporting
             reference: $('reference').value,

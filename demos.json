@@ -241,6 +241,13 @@
     "featured": true
   },
   {
+    "title": "Core SDK Multilingual — Genesys Cloud",
+    "href": "/examples/core-sdk-multilingual/index.html?env=production",
+    "desc": "The Core SDK Quick Start with a language picker: the visitor's video UI opens in the chosen language. Languages come from the localization CSV; the locale is passed per call through the SDK's popup URL builder hook.",
+    "category": "Integrations: Genesys",
+    "tags": ["core-sdk", "genesys", "messenger", "vanilla", "localization", "multilingual"]
+  },
+  {
     "title": "Standalone Co-browsing",
     "href": "/examples/standaloneCobrowse/index.html",
     "desc": "Independent co-browsing implementation.",
